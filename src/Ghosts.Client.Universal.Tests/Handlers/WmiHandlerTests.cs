@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading;
-using System.Threading.Tasks;
 using Ghosts.Client.Universal.Handlers;
 using Ghosts.Client.Universal.TimelineManager;
 using Ghosts.Domain;
@@ -85,7 +84,7 @@ public class WmiHandlerTests
     }
 
     [Fact]
-    public async Task Wmi_Run_WithNoCredentials_CompletesGracefully()
+    public void Wmi_Run_WithNoCredentials_CompletesGracefully()
     {
         // When no credentials are supplied, handler should log error and return gracefully
         var timeline = CreateTimeline();
@@ -94,11 +93,11 @@ public class WmiHandlerTests
 
         var wmiHandler = new Wmi(timeline, handler, cts.Token);
 
-        await wmiHandler.Run(); // Should complete without throwing
+        wmiHandler.Run(); // Should complete without throwing
     }
 
     [Fact]
-    public async Task Wmi_Run_OnLinux_SkipsGracefully()
+    public void Wmi_Run_OnLinux_SkipsGracefully()
     {
         // On Linux: WMI is not available. Handler should gracefully skip with a log message.
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
@@ -111,11 +110,11 @@ public class WmiHandlerTests
         var wmiHandler = new Wmi(timeline, handler, cts.Token);
 
         // Should complete gracefully on Linux without throwing
-        await wmiHandler.Run();
+        wmiHandler.Run();
     }
 
     [Fact]
-    public async Task Wmi_Run_OnWindows_WithCredentials_CompletesGracefully()
+    public void Wmi_Run_OnWindows_WithCredentials_CompletesGracefully()
     {
         // On Windows: should attempt WMI command execution via wmic process
         // and handle connection/execution failure gracefully
@@ -129,7 +128,7 @@ public class WmiHandlerTests
         var wmiHandler = new Wmi(timeline, handler, cts.Token);
 
         // Should complete without throwing (wmic failure is handled internally)
-        await wmiHandler.Run();
+        wmiHandler.Run();
     }
 
     [Fact]

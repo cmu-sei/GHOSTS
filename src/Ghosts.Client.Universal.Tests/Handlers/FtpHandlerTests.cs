@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 using Ghosts.Client.Universal.Handlers;
 using Ghosts.Domain;
 using Newtonsoft.Json;
@@ -59,7 +58,7 @@ public class FtpHandlerTests
     }
 
     [Fact]
-    public async Task Ftp_Run_WithNoCredentials_CompletesWithoutException()
+    public void Ftp_Run_WithNoCredentials_CompletesWithoutException()
     {
         // When no credentials are supplied, the handler logs an error and returns
         var timeline = CreateTimeline();
@@ -68,7 +67,7 @@ public class FtpHandlerTests
 
         var ftpHandler = new Ftp(timeline, handler, cts.Token);
 
-        await ftpHandler.Run();
+        ftpHandler.Run();
     }
 
     [Fact]
@@ -94,7 +93,7 @@ public class FtpHandlerTests
     }
 
     [Fact]
-    public async Task Ftp_Run_WithProbabilities_ParsesCorrectly()
+    public void Ftp_Run_WithProbabilities_ParsesCorrectly()
     {
         // Verify that the handler parses probability args without error
         var timeline = CreateTimeline();
@@ -110,6 +109,6 @@ public class FtpHandlerTests
 
         // No credentials so the handler exits early after parsing probabilities
         // The important thing is it doesn't throw during probability parsing
-        await ftpHandler.Run();
+        ftpHandler.Run();
     }
 }

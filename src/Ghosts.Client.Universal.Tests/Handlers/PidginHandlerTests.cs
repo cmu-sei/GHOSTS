@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 using Ghosts.Client.Universal.Handlers;
 using Ghosts.Client.Universal.TimelineManager;
 using Ghosts.Domain;
@@ -93,7 +92,7 @@ public class PidginHandlerTests
     }
 
     [Fact]
-    public async Task Pidgin_Run_WithNoXmppConfig_CompletesGracefully()
+    public void Pidgin_Run_WithNoXmppConfig_CompletesGracefully()
     {
         // With no XMPP config, the handler should log an error and return without throwing
         var timeline = CreateTimeline();
@@ -102,11 +101,11 @@ public class PidginHandlerTests
 
         var pidginHandler = new Pidgin(timeline, handler, cts.Token);
 
-        await pidginHandler.Run(); // Should complete without exception
+        pidginHandler.Run(); // Should complete without exception
     }
 
     [Fact]
-    public async Task Pidgin_Run_WithXmppConfig_HandlesConnectionFailureGracefully()
+    public void Pidgin_Run_WithXmppConfig_HandlesConnectionFailureGracefully()
     {
         // With XMPP config but no real server, the handler should catch connection failure and complete
         var timeline = CreateTimeline();
@@ -115,11 +114,11 @@ public class PidginHandlerTests
 
         var pidginHandler = new Pidgin(timeline, handler, cts.Token);
 
-        await pidginHandler.Run(); // Should complete without exception (connection error is caught internally)
+        pidginHandler.Run(); // Should complete without exception (connection error is caught internally)
     }
 
     [Fact]
-    public async Task Pidgin_Run_SendsMessagesViaXmpp_AndReports()
+    public void Pidgin_Run_SendsMessagesViaXmpp_AndReports()
     {
         // Acceptance: messages sent via XMPP protocol and reported
         // Without a real XMPP server, the handler catches connection errors per-message
@@ -130,7 +129,7 @@ public class PidginHandlerTests
 
         var pidginHandler = new Pidgin(timeline, handler, cts.Token);
 
-        await pidginHandler.Run(); // Completes gracefully; connection errors are logged internally
+        pidginHandler.Run(); // Completes gracefully; connection errors are logged internally
     }
 
     [Fact]

@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 using Ghosts.Client.Universal.Handlers;
 using Ghosts.Client.Universal.TimelineManager;
 using Ghosts.Domain;
@@ -92,7 +91,7 @@ public class NotepadHandlerTests
     }
 
     [Fact]
-    public async Task Notepad_Run_CompletesSuccessfully()
+    public void Notepad_Run_CompletesSuccessfully()
     {
         var timeline = CreateTimeline();
         var handler = CreateHandler();
@@ -100,11 +99,11 @@ public class NotepadHandlerTests
 
         var notepadHandler = new Notepad(timeline, handler, cts.Token);
 
-        await notepadHandler.Run();
+        notepadHandler.Run();
     }
 
     [Fact]
-    public async Task Notepad_Run_CreatesTextFile_InOutputDirectory()
+    public void Notepad_Run_CreatesTextFile_InOutputDirectory()
     {
         // Acceptance: files created and reported
         var outputDir = Path.Combine(Path.GetTempPath(), $"ghosts_notepad_test_{Guid.NewGuid():N}");
@@ -126,7 +125,7 @@ public class NotepadHandlerTests
 
             var notepadHandler = new Notepad(timeline, handler, cts.Token);
 
-            await notepadHandler.Run();
+            notepadHandler.Run();
 
             var files = Directory.GetFiles(outputDir, "*.txt");
             Assert.NotEmpty(files);

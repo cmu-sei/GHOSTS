@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 using Ghosts.Client.Universal.Handlers;
 using Ghosts.Client.Universal.TimelineManager;
 using Ghosts.Domain;
@@ -77,7 +76,7 @@ public class LightHandlersTests
     }
 
     [Fact]
-    public async Task LightWordHandler_Run_CompletesWithoutException()
+    public void LightWordHandler_Run_CompletesWithoutException()
     {
         // Acceptance: Word files created via OpenXML or similar (no COM needed)
         // Note: GetSavePath uses Windows-style path separator internally,
@@ -94,7 +93,7 @@ public class LightHandlersTests
             var wordHandler = new LightHandlers.LightWordHandler(timeline, handler, cts.Token);
 
             // Should complete without throwing (errors are caught internally)
-            await wordHandler.Run();
+            wordHandler.Run();
         }
         finally
         {
@@ -104,7 +103,7 @@ public class LightHandlersTests
     }
 
     [Fact]
-    public async Task LightExcelHandler_Run_CompletesWithoutException()
+    public void LightExcelHandler_Run_CompletesWithoutException()
     {
         // Acceptance: Excel files created via OpenXML or similar (no COM needed)
         // Note: GetSavePath uses Windows-style path separator internally,
@@ -121,7 +120,7 @@ public class LightHandlersTests
             var excelHandler = new LightHandlers.LightExcelHandler(timeline, handler, cts.Token);
 
             // Should complete without throwing (errors are caught internally)
-            await excelHandler.Run();
+            excelHandler.Run();
         }
         finally
         {
@@ -131,7 +130,7 @@ public class LightHandlersTests
     }
 
     [Fact]
-    public async Task LightPowerPointHandler_Run_CompletesWithoutException()
+    public void LightPowerPointHandler_Run_CompletesWithoutException()
     {
         // Creates .pptx files via OpenXML in a ZipArchive (no COM needed)
         // Note: GetSavePath uses Windows-style path separator internally,
@@ -148,7 +147,7 @@ public class LightHandlersTests
             var pptHandler = new LightHandlers.LightPowerPointHandler(timeline, handler, cts.Token);
 
             // Should complete without throwing (errors are caught internally)
-            await pptHandler.Run();
+            pptHandler.Run();
         }
         finally
         {
