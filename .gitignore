@@ -356,3 +356,6 @@ site/
 .venv/*
 
 .devcontainer/devcontainer-lock.json
+
+reference/
+reference/*

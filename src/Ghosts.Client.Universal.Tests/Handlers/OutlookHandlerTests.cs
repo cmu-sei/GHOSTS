@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 using Ghosts.Client.Universal.Handlers;
 using Ghosts.Domain;
 using Xunit;
@@ -44,7 +43,7 @@ public class OutlookHandlerTests
     }
 
     [Fact]
-    public async Task Outlook_Run_WithNoSmtpHost_CompletesWithoutThrowing()
+    public void Outlook_Run_WithNoSmtpHost_CompletesWithoutThrowing()
     {
         var timeline = CreateTimeline();
         var handler = CreateHandler(new Dictionary<string, object>());
@@ -53,11 +52,11 @@ public class OutlookHandlerTests
         var outlookHandler = new Outlook(timeline, handler, cts.Token);
 
         // Without smtp-host, the handler logs an error and returns
-        await outlookHandler.Run();
+        outlookHandler.Run();
     }
 
     [Fact]
-    public async Task Outlook_Run_WithSmtpHost_FailsOnConnectionGracefully()
+    public void Outlook_Run_WithSmtpHost_FailsOnConnectionGracefully()
     {
         var timeline = CreateTimeline();
         var handler = CreateHandler(new Dictionary<string, object>
@@ -93,12 +92,12 @@ public class OutlookHandlerTests
         var outlookHandler = new Outlook(timeline, handler, cts.Token);
 
         // Connection will fail but handler should not crash
-        var ex = await Record.ExceptionAsync(() => outlookHandler.Run());
+        var ex = Record.Exception(() => outlookHandler.Run());
         Assert.Null(ex);
     }
 
     [Fact]
-    public async Task Outlook_Run_RespectsCanc()
+    public void Outlook_Run_RespectsCanc()
     {
         var timeline = CreateTimeline();
         var handler = CreateHandler(new Dictionary<string, object>
@@ -112,7 +111,7 @@ public class OutlookHandlerTests
 
         // Cancel immediately
         cts.Cancel();
-        var ex = await Record.ExceptionAsync(() => outlookHandler.Run());
+        var ex = Record.Exception(() => outlookHandler.Run());
 
         // Should get OperationCanceledException (wrapped or direct)
         Assert.True(ex == null || ex is OperationCanceledException);

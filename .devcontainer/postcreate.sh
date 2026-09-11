@@ -252,6 +252,18 @@ if [ ! -f "$HOME/.claude/claude.json" ]; then
 fi
 ln -sf "$HOME/.claude/claude.json" "$HOME/.claude.json"
 
+# --- Claude Code status line ---
+# Install the repo-tracked status line script and point settings.json at it, so
+# every container gets it rather than relying on the machine-local data volume.
+install -m 755 "$WORKSPACE_DIR/.devcontainer/statusline.sh" "$HOME/.claude/statusline.sh"
+CLAUDE_SETTINGS="$HOME/.claude/settings.json"
+if [ ! -f "$CLAUDE_SETTINGS" ]; then
+    echo '{}' > "$CLAUDE_SETTINGS"
+fi
+jq '.statusLine = {"type": "command", "command": "~/.claude/statusline.sh"}' \
+    "$CLAUDE_SETTINGS" > "$CLAUDE_SETTINGS.tmp"
+mv "$CLAUDE_SETTINGS.tmp" "$CLAUDE_SETTINGS"
+
 # Show git dirty status in zsh prompt
 git config devcontainers-theme.show-dirty 1
 

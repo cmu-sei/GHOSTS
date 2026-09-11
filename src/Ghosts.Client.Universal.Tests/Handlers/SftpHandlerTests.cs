@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 using Ghosts.Client.Universal.Handlers;
 using Ghosts.Domain;
 using Newtonsoft.Json;
@@ -59,7 +58,7 @@ public class SftpHandlerTests
     }
 
     [Fact]
-    public async Task Sftp_Run_WithNoCredentials_CompletesWithoutException()
+    public void Sftp_Run_WithNoCredentials_CompletesWithoutException()
     {
         // When no credentials are supplied, the handler logs an error and returns
         var timeline = CreateTimeline();
@@ -68,11 +67,11 @@ public class SftpHandlerTests
 
         var sftpHandler = new Sftp(timeline, handler, cts.Token);
 
-        await sftpHandler.Run();
+        sftpHandler.Run();
     }
 
     [Fact]
-    public async Task Sftp_Run_WithCredentials_FailsOnConnection()
+    public void Sftp_Run_WithCredentials_FailsOnConnection()
     {
         // When credentials are supplied but the host is unreachable,
         // the handler catches the connection exception and continues
@@ -82,6 +81,6 @@ public class SftpHandlerTests
 
         var sftpHandler = new Sftp(timeline, handler, cts.Token);
 
-        await sftpHandler.Run();
+        sftpHandler.Run();
     }
 }

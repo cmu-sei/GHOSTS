@@ -45,7 +45,7 @@ public class Outlookv2HandlerTests
     }
 
     [Fact]
-    public async Task Outlookv2_Run_WithNoSmtpHost_CompletesWithoutThrowing()
+    public void Outlookv2_Run_WithNoSmtpHost_CompletesWithoutThrowing()
     {
         var timeline = CreateTimeline();
         var handler = CreateHandler(new Dictionary<string, object>());
@@ -54,11 +54,11 @@ public class Outlookv2HandlerTests
         var v2Handler = new Outlookv2(timeline, handler, cts.Token);
 
         // Without smtp-host, the handler logs an error and returns
-        await v2Handler.Run();
+        v2Handler.Run();
     }
 
     [Fact]
-    public async Task Outlookv2_Run_WithInvalidProbabilities_UsesDefaults()
+    public void Outlookv2_Run_WithInvalidProbabilities_UsesDefaults()
     {
         var timeline = CreateTimeline();
         var handler = CreateHandler(new Dictionary<string, object>
@@ -97,12 +97,12 @@ public class Outlookv2HandlerTests
         var v2Handler = new Outlookv2(timeline, handler, cts.Token);
 
         // Probabilities sum > 100 so defaults are used; connection will fail but handler won't crash
-        var ex = await Record.ExceptionAsync(() => v2Handler.Run());
+        var ex = Record.Exception(() => v2Handler.Run());
         Assert.Null(ex);
     }
 
     [Fact]
-    public async Task Outlookv2_Run_CancellationIsRespected()
+    public void Outlookv2_Run_CancellationIsRespected()
     {
         var timeline = CreateTimeline();
         var handler = CreateHandler(new Dictionary<string, object>
@@ -118,7 +118,7 @@ public class Outlookv2HandlerTests
 
         // Cancel immediately
         cts.Cancel();
-        var ex = await Record.ExceptionAsync(() => v2Handler.Run());
+        var ex = Record.Exception(() => v2Handler.Run());
         Assert.True(ex == null || ex is OperationCanceledException || ex is TaskCanceledException);
     }
 

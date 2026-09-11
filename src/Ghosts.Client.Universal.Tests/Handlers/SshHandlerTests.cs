@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 using Ghosts.Client.Universal.Handlers;
 using Ghosts.Domain;
 using Newtonsoft.Json;
@@ -59,7 +58,7 @@ public class SshHandlerTests
     }
 
     [Fact]
-    public async Task Ssh_Run_WithNoCredentials_CompletesWithoutException()
+    public void Ssh_Run_WithNoCredentials_CompletesWithoutException()
     {
         // When no credentials are supplied, the handler logs an error and returns
         var timeline = CreateTimeline();
@@ -69,11 +68,11 @@ public class SshHandlerTests
         var sshHandler = new Ssh(timeline, handler, cts.Token);
 
         // Should complete without throwing - the handler logs the missing credentials error
-        await sshHandler.Run();
+        sshHandler.Run();
     }
 
     [Fact]
-    public async Task Ssh_Run_WithCredentials_FailsOnConnection()
+    public void Ssh_Run_WithCredentials_FailsOnConnection()
     {
         // When credentials are supplied but the host is unreachable,
         // the handler catches the connection exception and continues
@@ -84,6 +83,6 @@ public class SshHandlerTests
         var sshHandler = new Ssh(timeline, handler, cts.Token);
 
         // Should complete - the handler catches connection failures internally
-        await sshHandler.Run();
+        sshHandler.Run();
     }
 }

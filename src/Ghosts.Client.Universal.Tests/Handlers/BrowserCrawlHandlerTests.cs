@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 using Ghosts.Client.Universal.Handlers;
 using Ghosts.Client.Universal.TimelineManager;
 using Ghosts.Domain;
@@ -63,7 +62,7 @@ public class BrowserCrawlHandlerTests
     }
 
     [Fact]
-    public async Task BrowserCrawl_RunOnce_IteratesEventsAndHandlesErrors()
+    public void BrowserCrawl_RunOnce_IteratesEventsAndHandlesErrors()
     {
         // RunOnce iterates timeline events and calls Crawl for each.
         // Without a real browser driver, Crawl will throw, which RunOnce catches gracefully.
@@ -74,7 +73,7 @@ public class BrowserCrawlHandlerTests
         var crawlHandler = new BrowserCrawl(timeline, handler, cts.Token);
 
         // Should not throw NotImplementedException; errors from missing driver are caught internally
-        var exception = await Record.ExceptionAsync(() => crawlHandler.Run());
+        var exception = Record.Exception(() => crawlHandler.Run());
         Assert.Null(exception);
     }
 

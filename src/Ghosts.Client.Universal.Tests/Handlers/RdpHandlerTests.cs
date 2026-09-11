@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading;
-using System.Threading.Tasks;
 using Ghosts.Client.Universal.Handlers;
 using Ghosts.Client.Universal.TimelineManager;
 using Ghosts.Domain;
@@ -85,7 +84,7 @@ public class RdpHandlerTests
     }
 
     [Fact]
-    public async Task Rdp_Run_WithNoCredentials_CompletesGracefully()
+    public void Rdp_Run_WithNoCredentials_CompletesGracefully()
     {
         // When no credentials are supplied, handler should log error and return gracefully
         var timeline = CreateTimeline();
@@ -94,11 +93,11 @@ public class RdpHandlerTests
 
         var rdpHandler = new Rdp(timeline, handler, cts.Token);
 
-        await rdpHandler.Run(); // Should complete without throwing
+        rdpHandler.Run(); // Should complete without throwing
     }
 
     [Fact]
-    public async Task Rdp_Run_WithCredentials_OnLinux_CompletesGracefully()
+    public void Rdp_Run_WithCredentials_OnLinux_CompletesGracefully()
     {
         // On Linux: should attempt to spawn xfreerdp or rdesktop
         // and complete gracefully when tools are not found or connection fails
@@ -112,11 +111,11 @@ public class RdpHandlerTests
         var rdpHandler = new Rdp(timeline, handler, cts.Token);
 
         // Should complete without throwing (missing tools/connection failure handled internally)
-        await rdpHandler.Run();
+        rdpHandler.Run();
     }
 
     [Fact]
-    public async Task Rdp_Run_WithCredentials_OnWindows_CompletesGracefully()
+    public void Rdp_Run_WithCredentials_OnWindows_CompletesGracefully()
     {
         // On Windows: should attempt mstsc connection
         // and complete gracefully when target is unreachable
@@ -130,11 +129,11 @@ public class RdpHandlerTests
         var rdpHandler = new Rdp(timeline, handler, cts.Token);
 
         // Should complete without throwing (connection failure handled internally)
-        await rdpHandler.Run();
+        rdpHandler.Run();
     }
 
     [Fact]
-    public async Task Rdp_Run_RespectsCancellation()
+    public void Rdp_Run_RespectsCancellation()
     {
         var timeline = CreateTimeline();
         var handler = CreateHandler();
@@ -146,7 +145,7 @@ public class RdpHandlerTests
 
         // With Loop=true and already-cancelled token, Run should exit without looping
         // BaseHandler.Run checks cancellation before calling RunOnce, so no exception thrown
-        await rdpHandler.Run();
+        rdpHandler.Run();
     }
 
     [Fact]
