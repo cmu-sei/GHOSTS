@@ -15,9 +15,9 @@
     "esbuild": "0.28.1"
   },
   "dependencies": {
-    "@angular/common": "22.0.4",
-    "@angular/compiler": "22.0.4",
-    "@angular/core": "22.0.4",
+    "@angular/common": "22.1.1",
+    "@angular/compiler": "22.1.6",
+    "@angular/core": "22.1.0",
     "@angular/forms": "22.0.4",
     "@angular/platform-browser": "22.0.4",
     "@angular/router": "22.0.4",
