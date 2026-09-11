@@ -95,22 +95,67 @@ namespace Ghosts.Domain
             }
         }
 
+        /// <summary>
+        /// The address the client is reachable on. Deliberately not resolved from the hostname:
+        /// Linux hosts commonly map their own name to a loopback address in /etc/hosts (the
+        /// Debian/Ubuntu default is 127.0.1.1) or do not resolve it at all, so a hostname lookup
+        /// reports loopback or nothing instead of the real address.
+        /// </summary>
         private static string GetLocalIPAddress()
+        {
+            return GetRoutedAddress() ?? GetInterfaceAddress() ?? "-9";
+        }
+
+        private static string GetRoutedAddress()
         {
             try
             {
-                if (NetworkInterface.GetIsNetworkAvailable())
+                // connecting a datagram socket sends no traffic, it only asks the OS which local
+                // address it would route from - the one the API sees the client arrive on
+                using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
                 {
-                    var host = Dns.GetHostEntry(Dns.GetHostName());
-                    return host.AddressList.FirstOrDefault(x => x.AddressFamily == AddressFamily.InterNetwork)?.ToString();
+                    socket.Connect("8.8.8.8", 65530);
+                    var address = (socket.LocalEndPoint as IPEndPoint)?.Address;
+                    return IsReportable(address) ? address.ToString() : null;
                 }
             }
             catch
             {
-                // ignore
+                // no route off this host, fall back to the interface list
+                return null;
             }
+        }
 
-            return "-9";
+        private static string GetInterfaceAddress()
+        {
+            try
+            {
+                return NetworkInterface.GetAllNetworkInterfaces()
+                    .Where(x => x.OperationalStatus == OperationalStatus.Up &&
+                                x.NetworkInterfaceType != NetworkInterfaceType.Loopback)
+                    .Select(x => x.GetIPProperties())
+                    // an interface with a gateway is the one carrying real traffic - virtual
+                    // bridges such as docker0 and virbr0 generally have none
+                    .OrderByDescending(x => x.GatewayAddresses.Any(g =>
+                        g.Address.AddressFamily == AddressFamily.InterNetwork && !g.Address.Equals(IPAddress.Any)))
+                    .SelectMany(x => x.UnicastAddresses)
+                    .Select(x => x.Address)
+                    .FirstOrDefault(IsReportable)?.ToString();
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static bool IsReportable(IPAddress address)
+        {
+            if (address == null || address.AddressFamily != AddressFamily.InterNetwork || IPAddress.IsLoopback(address))
+                return false;
+
+            // a link-local (failed DHCP) address tells the API nothing about how to reach the client
+            var bytes = address.GetAddressBytes();
+            return !(bytes[0] == 169 && bytes[1] == 254);
         }
     }
 }
