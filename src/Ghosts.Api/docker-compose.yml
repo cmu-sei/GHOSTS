@@ -112,7 +112,28 @@ services:
       - ../../configuration/grafana/datasources:/etc/grafana/provisioning/datasources
       - ../../configuration/grafana/dashboards:/etc/grafana/provisioning/dashboards
 
+  # Baserow: low-code database that n8n workflows read/write via its REST API. The
+  # all-in-one image bundles its own Postgres/Redis, so it needs no shared-postgres wiring.
+  # Published on 8090, not 80, and BASEROW_PUBLIC_URL must match whatever URL the browser
+  # actually uses or Baserow builds broken signup/API links against the wrong host:port.
+  ghosts-baserow:
+    image: baserow/baserow:2.3.3
+    container_name: ghosts-baserow
+    ports:
+      - "8090:80"
+    environment:
+      - BASEROW_PUBLIC_URL=${BASEROW_PUBLIC_URL:-http://localhost:8090}
+      # n8n reaches Baserow by container name on the compose network (http://ghosts-baserow,
+      # port 80 internally). Without this, Caddy's host matcher and Django's ALLOWED_HOSTS only
+      # recognize BASEROW_PUBLIC_URL's host (localhost:8090), so /api/* requests with
+      # Host: ghosts-baserow fall through to the frontend and 404 instead of hitting the backend.
+      - BASEROW_EXTRA_PUBLIC_URLS=http://ghosts-baserow
+    volumes:
+      - ghosts-baserow-data:/baserow/data
+    restart: unless-stopped
+
 volumes:
   ghosts-postgres-data:
   ghosts-n8n-data:
   ghosts-grafana-data:
+  ghosts-baserow-data:
