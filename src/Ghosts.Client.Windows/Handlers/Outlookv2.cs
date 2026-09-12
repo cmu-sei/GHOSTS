@@ -987,7 +987,9 @@ public class Outlookv2 : BaseHandler
                     folderItem = item as MailItem;
                     if (folderItem == null) continue;
                     bool reject = false;
-                    var targetEmail = folderItem.SenderEmailAddress.ToLower();
+                    // read the sender via Redemption to avoid Outlook's security prompt
+                    var safeFolderItem = new SafeMailItem { Item = folderItem };
+                    var targetEmail = safeFolderItem.SenderEmailAddress.ToLower();
                     if (EmailNoReply != null && EmailNoReply.Length > 0)
                     {
                         foreach (string target in EmailNoReply)
@@ -1014,7 +1016,7 @@ public class Outlookv2 : BaseHandler
                         quoted.WriteLine(emailReply.Reply);
                         quoted.WriteLine("");
                         quoted.WriteLine("");
-                        quoted.WriteLine($"On {folderItem.SentOn:f}, {folderItem.SenderEmailAddress} wrote:");
+                        quoted.WriteLine($"On {folderItem.SentOn:f}, {safeFolderItem.SenderEmailAddress} wrote:");
                         using (var reader = new StringReader(folderItem.Body))
                         {
                             string line;
@@ -1035,7 +1037,7 @@ public class Outlookv2 : BaseHandler
                         Item = replyMail
                     };
 
-                    var r = rdoMail.Recipients.AddEx(folderItem.SenderEmailAddress);
+                    var r = rdoMail.Recipients.AddEx(safeFolderItem.SenderEmailAddress);
                     r.Resolve();
                     rdoMail.Recipients.ResolveAll();
                     rdoMail.Send();
