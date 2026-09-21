@@ -29,11 +29,10 @@ public class CleanupService(ILogger logger, IServiceProvider serviceProvider, Ap
         if (!Directory.Exists(imagesPath)) return;
 
         var removedCount = 0;
-        foreach (var file in Directory.EnumerateFiles(imagesPath, "*", SearchOption.AllDirectories))
+        foreach (var file in Directory
+            .EnumerateFiles(imagesPath, "*", SearchOption.AllDirectories)
+            .Where(file => ActiveContentExtensions.Contains(Path.GetExtension(file), StringComparer.OrdinalIgnoreCase)))
         {
-            if (!ActiveContentExtensions.Contains(Path.GetExtension(file), StringComparer.OrdinalIgnoreCase))
-                continue;
-
             try
             {
                 File.Delete(file);
