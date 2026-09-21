@@ -1,4 +1,5 @@
 using System.Buffers.Binary;
+using System.Collections.Generic;
 using System.IO.Compression;
 using System.Text;
 using Ghosts.Pandora.Controllers;
@@ -19,6 +20,7 @@ public class FileUploadTests : IDisposable
 
     private readonly string _root;
     private readonly string _originalDirectory;
+    private readonly List<MemoryStream> _uploadStreams = [];
 
     public FileUploadTests()
     {
@@ -30,6 +32,12 @@ public class FileUploadTests : IDisposable
 
     public void Dispose()
     {
+        foreach (var stream in _uploadStreams)
+        {
+            stream.Dispose();
+        }
+        _uploadStreams.Clear();
+
         Directory.SetCurrentDirectory(_originalDirectory);
         try
         {
@@ -41,14 +49,19 @@ public class FileUploadTests : IDisposable
         }
     }
 
-    private static FilesController.FileInputModel Upload(byte[] content, string fileName) =>
-        new()
+    private FilesController.FileInputModel Upload(byte[] content, string fileName)
+    {
+        var stream = new MemoryStream(content);
+        _uploadStreams.Add(stream);
+
+        return new FilesController.FileInputModel
         {
-            File = new FormFile(new MemoryStream(content), 0, content.Length, "File", fileName)
+            File = new FormFile(stream, 0, content.Length, "File", fileName)
             {
                 Headers = new HeaderDictionary()
             }
         };
+    }
 
     private string UploadsRoot => Path.Combine(_root, "uploads");
     private string ImagesRoot => Path.Combine(_root, "wwwroot", "images");
