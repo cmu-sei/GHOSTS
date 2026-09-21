@@ -33,7 +33,11 @@ public class FilesController(ILogger logger) : BaseController(logger)
     [HttpGet("/files/{id:guid}")]
     public IActionResult DownloadFile(Guid id)
     {
-        var uploadDir = Path.Combine(FileInputModel.UploadsRoot, id.ToString());
+        var idSegment = id.ToString();
+        if (Path.IsPathRooted(idSegment))
+            return BadRequest();
+
+        var uploadDir = Path.Combine(FileInputModel.UploadsRoot, idSegment);
         var contentPath = Path.Combine(uploadDir, FileInputModel.ContentFileName);
         if (!System.IO.File.Exists(contentPath))
             return NotFound();
