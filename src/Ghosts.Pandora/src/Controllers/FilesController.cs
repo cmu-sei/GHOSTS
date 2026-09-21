@@ -105,6 +105,9 @@ public class FilesController(ILogger logger) : BaseController(logger)
 
             var format = bitmap.Info.IsOpaque ? SKEncodedImageFormat.Jpeg : SKEncodedImageFormat.Png;
             var storedName = bitmap.Info.IsOpaque ? "image.jpg" : "image.png";
+            storedName = Path.GetFileName(storedName);
+            if (Path.IsPathRooted(storedName))
+                throw new InvalidOperationException("Stored image name must be a relative file name.");
 
             var guid = Guid.NewGuid().ToString();
             var uploadDir = Path.Combine(ImagesRoot, guid);
