@@ -77,26 +77,9 @@ public class PostsController(ILogger logger, IHubContext<PostsHub> hubContext, I
         var imagePath = string.Empty;
         if (model.File != null)
         {
-            var guid = Guid.NewGuid().ToString();
-            var savePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
-            if (!Directory.Exists(savePath))
-                Directory.CreateDirectory(savePath);
-            savePath = Path.Combine(savePath, guid);
-            if (!Directory.Exists(savePath))
-                Directory.CreateDirectory(savePath);
-
-            savePath = Path.Combine(savePath, model.File.FileName);
-
             try
             {
-                // Process the file and save it to storage
-                // Note: You may want to validate the file size, content type, etc. before saving it
-                await using (var stream = new FileStream(savePath, FileMode.Create))
-                {
-                    await model.File.CopyToAsync(stream);
-                }
-
-                imagePath = $"/images/{guid}/{model.File.FileName}";
+                imagePath = await model.SaveImageAsync();
             }
             catch (Exception e)
             {

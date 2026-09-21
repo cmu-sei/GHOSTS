@@ -307,3 +307,6 @@ g_data
 
 */wwwroot/images
 */wwwroot/images/*
+
+*/uploads
+*/uploads/*

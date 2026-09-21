@@ -1,10 +1,56 @@
 namespace Ghosts.Pandora.Infrastructure.Services;
 public class CleanupService(ILogger logger, IServiceProvider serviceProvider, ApplicationConfiguration applicationConfiguration) : IHostedService
 {
+    // Extensions a browser renders as active content when served inline from wwwroot. Uploads are
+    // now decoded and re-encoded so these can no longer be stored, but files left by earlier
+    // versions are still publicly served, so they are removed on startup. Aliases matter here:
+    // FileExtensionContentTypeProvider serves .xht and .hxt as documents just like .xhtml and .html.
+    private static readonly string[] ActiveContentExtensions =
+    [
+        ".htm", ".html", ".hxt", ".htt", ".shtml",  // text/html
+        ".xhtml", ".xht",                           // application/xhtml+xml
+        ".svg", ".svgz",                            // image/svg+xml
+        ".xml", ".xsl", ".xslt",                    // text/xml, can style itself into scripted html
+        ".mht", ".mhtml",                           // message/rfc822
+        ".js", ".mjs",
+        ".cshtml", ".razor", ".swf", ".htc"
+    ];
+
     public Task StartAsync(CancellationToken cancellationToken)
     {
+        RemoveLegacyActiveContent();
         Run();
         return Task.CompletedTask;
+    }
+
+    private void RemoveLegacyActiveContent()
+    {
+        var imagesPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
+        if (!Directory.Exists(imagesPath)) return;
+
+        var removedCount = 0;
+        foreach (var file in Directory
+            .EnumerateFiles(imagesPath, "*", SearchOption.AllDirectories)
+            .Where(file => ActiveContentExtensions.Contains(Path.GetExtension(file), StringComparer.OrdinalIgnoreCase)))
+        {
+            try
+            {
+                File.Delete(file);
+                removedCount++;
+                logger.LogWarning($"Removed previously uploaded active content: {file}");
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                logger.LogError($"Could not remove previously uploaded active content {file}: {ex.Message}");
+            }
+            catch (IOException ex)
+            {
+                logger.LogError($"Could not remove previously uploaded active content {file}: {ex.Message}");
+            }
+        }
+
+        if (removedCount > 0)
+            logger.LogWarning($"Cleanup service removed {removedCount} previously uploaded file(s) that a browser would render as active content");
     }
 
     private async void Run()
