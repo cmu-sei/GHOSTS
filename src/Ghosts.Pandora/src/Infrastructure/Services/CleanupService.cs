@@ -39,7 +39,11 @@ public class CleanupService(ILogger logger, IServiceProvider serviceProvider, Ap
                 removedCount++;
                 logger.LogWarning($"Removed previously uploaded active content: {file}");
             }
-            catch (Exception ex)
+            catch (UnauthorizedAccessException ex)
+            {
+                logger.LogError($"Could not remove previously uploaded active content {file}: {ex.Message}");
+            }
+            catch (IOException ex)
             {
                 logger.LogError($"Could not remove previously uploaded active content {file}: {ex.Message}");
             }
