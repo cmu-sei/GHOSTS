@@ -51,6 +51,7 @@ jobs:
           dotnet build src/Ghosts.Client.Universal/Ghosts.Client.Universal.csproj
           dotnet build src/Ghosts.Client.Lite/src/Ghosts.Client.Lite.csproj
           dotnet build src/Ghosts.Animator/Ghosts.Animator.csproj
+          dotnet build src/Ghosts.Pandora/src/Ghosts.Pandora.csproj
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3

@@ -10,8 +10,25 @@ on:
   workflow_dispatch:
 
 jobs:
+  test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Test
+        run: dotnet test src/Ghosts.Pandora.Tests/Ghosts.Pandora.Tests.csproj
+        env:
+          GHOSTS_SKIA_AVAILABLE: '1'
+
   docker:
     name: Docker Build & Push
+    needs: test
     runs-on: ubuntu-latest
     permissions:
       contents: read
