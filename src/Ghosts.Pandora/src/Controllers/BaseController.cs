@@ -59,9 +59,33 @@ public class BaseController : Controller
             form = string.Join(",", Request.Form);
         }
 
+        var requestMethod = SafeHttpMethod(Request.Method);
+
         Logger.LogTrace("{RequestScheme}://{RequestHost}{RequestPath}{RequestQueryString}|{RequestMethod}|{Join}",
             ForLog(Request.Scheme), ForLog(Request.Host.Value), ForLog(Request.Path.Value),
-            ForLog(Request.QueryString.Value), ForLog(Request.Method), ForLog(form));
+            ForLog(Request.QueryString.Value), requestMethod, ForLog(form));
+    }
+
+    internal static string SafeHttpMethod(string method)
+    {
+        if (string.IsNullOrWhiteSpace(method))
+        {
+            return "UNKNOWN";
+        }
+
+        return method.ToUpperInvariant() switch
+        {
+            "GET" => "GET",
+            "POST" => "POST",
+            "PUT" => "PUT",
+            "DELETE" => "DELETE",
+            "PATCH" => "PATCH",
+            "HEAD" => "HEAD",
+            "OPTIONS" => "OPTIONS",
+            "TRACE" => "TRACE",
+            "CONNECT" => "CONNECT",
+            _ => "UNKNOWN"
+        };
     }
 
     /// <summary>
