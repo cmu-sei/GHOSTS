@@ -65,12 +65,12 @@ public class BaseController : Controller
     }
 
     /// <summary>
-    /// Strips line breaks from a request-supplied value so it stays on a single log line.
+    /// Strips control characters from a request-supplied value so it stays on a single, safe log line.
     /// </summary>
     internal static string ForLog(string value) =>
         string.IsNullOrEmpty(value)
             ? value
-            : value.Replace("\r", string.Empty).Replace("\n", string.Empty);
+            : new string(System.Linq.Enumerable.Where(value, c => !char.IsControl(c)).ToArray());
 
     internal void CookieWrite(string key, string value)
     {
