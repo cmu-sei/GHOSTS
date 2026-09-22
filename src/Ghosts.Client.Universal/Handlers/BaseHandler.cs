@@ -7,7 +7,6 @@ using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Newtonsoft.Json;
 using NLog;
-using OpenQA.Selenium.DevTools.V135.SystemInfo;
 
 namespace Ghosts.Client.Universal.Handlers;
 

@@ -28,15 +28,7 @@ public class BaseController : Controller
 
     public override void OnActionExecuted(ActionExecutedContext filterContext)
     {
-        var form = string.Empty;
-        if (Request.HasFormContentType && Request.Form.Count != 0)
-        {
-            form = string.Join(",", Request.Form);
-        }
-
-        Logger.LogTrace("{RequestScheme}://{RequestHost}{RequestPath}{RequestQueryString}|{RequestMethod}|{Join}",
-            Request.Scheme, Request.Host, Request.Path, Request.QueryString, Request.Method,
-            form);
+        LogRequest();
 
         ViewBag.Username = GetOrCreateUsernameCookie(filterContext.HttpContext);
 
@@ -55,9 +47,34 @@ public class BaseController : Controller
         Logger = logger;
     }
 
+    /// <summary>
+    /// Traces the current request. Every value is run through <see cref="ForLog"/> first, so a
+    /// crafted path, query string or form value cannot forge extra lines into the log.
+    /// </summary>
+    internal void LogRequest()
+    {
+        var form = string.Empty;
+        if (Request.HasFormContentType && Request.Form.Count != 0)
+        {
+            form = string.Join(",", Request.Form);
+        }
+
+        Logger.LogTrace("{RequestScheme}://{RequestHost}{RequestPath}{RequestQueryString}|{RequestMethod}|{Join}",
+            ForLog(Request.Scheme), ForLog(Request.Host.Value), ForLog(Request.Path.Value),
+            ForLog(Request.QueryString.Value), ForLog(Request.Method), ForLog(form));
+    }
+
+    /// <summary>
+    /// Strips line breaks from a request-supplied value so it stays on a single log line.
+    /// </summary>
+    internal static string ForLog(string value) =>
+        string.IsNullOrEmpty(value)
+            ? value
+            : value.Replace("\r", string.Empty).Replace("\n", string.Empty);
+
     internal void CookieWrite(string key, string value)
     {
-        var option = new CookieOptions { Expires = DateTime.Now.AddMonths(1) };
+        var option = new CookieOptions { Expires = DateTime.Now.AddMonths(1), HttpOnly = true };
         Response.Cookies.Append(key, value, option);
     }
 

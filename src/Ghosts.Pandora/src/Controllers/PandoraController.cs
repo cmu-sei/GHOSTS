@@ -386,14 +386,18 @@ public class PandoraController : BaseController
         var format = "mp4";
         if (!string.IsNullOrEmpty(path))
         {
-            var ext = Path.GetExtension(path).TrimStart('.').ToLower();
-            if (new[] { "mp4", "avi", "mov", "mkv", "webm" }.Contains(ext))
+            // map onto a literal, so no part of the request path reaches the generator or the log
+            format = Path.GetExtension(path).TrimStart('.').ToLower() switch
             {
-                format = ext;
-            }
+                "avi" => "avi",
+                "mov" => "mov",
+                "mkv" => "mkv",
+                "webm" => "webm",
+                _ => "mp4"
+            };
         }
 
-        Logger.LogTrace("Video request: {Path} (format: {Format})", path ?? "video.mp4", format);
+        Logger.LogTrace("Video request: {Path} (format: {Format})", ForLog(path) ?? "video.mp4", format);
 
         var content = _videoService.GenerateVideo(format);
 
