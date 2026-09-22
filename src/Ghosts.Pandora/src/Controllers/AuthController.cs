@@ -13,9 +13,16 @@ public class AuthController(ILogger logger, IUserService userService, IThemeServ
     {
         ViewBag.Themes = themeService.GetAvailableThemes();
         ViewBag.SelectedTheme = string.IsNullOrWhiteSpace(ThemeRead()) ? "default" : ThemeRead();
-        ViewBag.ReturnUrl = string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl;
+        ViewBag.ReturnUrl = LocalReturnUrl(returnUrl);
         return View("~/Views/Auth/Login.cshtml");
     }
+
+    /// <summary>
+    /// Keeps a login bounce on this site, so a crafted returnUrl cannot hand the user off to
+    /// an external origin.
+    /// </summary>
+    private string LocalReturnUrl(string returnUrl) =>
+        !string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl) ? returnUrl : "/";
 
     [HttpPost]
     public async Task<IActionResult> Login([FromForm] LoginInputModel model)
@@ -25,7 +32,7 @@ public class AuthController(ILogger logger, IUserService userService, IThemeServ
             ViewBag.Error = "Username is required.";
             ViewBag.Themes = themeService.GetAvailableThemes();
             ViewBag.SelectedTheme = string.IsNullOrWhiteSpace(ThemeRead()) ? "default" : ThemeRead();
-            ViewBag.ReturnUrl = string.IsNullOrWhiteSpace(model?.ReturnUrl) ? "/" : model!.ReturnUrl;
+            ViewBag.ReturnUrl = LocalReturnUrl(model?.ReturnUrl);
             return View("~/Views/Auth/Login.cshtml");
         }
 
@@ -43,7 +50,7 @@ public class AuthController(ILogger logger, IUserService userService, IThemeServ
 
         UserWrite(username);
 
-        return Redirect(string.IsNullOrWhiteSpace(model.ReturnUrl) ? "/" : model.ReturnUrl);
+        return Redirect(LocalReturnUrl(model.ReturnUrl));
     }
 
     public class LoginInputModel

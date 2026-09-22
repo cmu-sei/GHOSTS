@@ -43,7 +43,7 @@ namespace Ghosts.Client.Universal.Infrastructure
 
         internal class HandlerJob : IJob
         {
-            public async Task Execute(IJobExecutionContext context)
+            public async ValueTask Execute(IJobExecutionContext context, CancellationToken cancellationToken)
             {
                 _log.Trace("Cron handler job firing");
 

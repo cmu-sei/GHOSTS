@@ -15,7 +15,6 @@ using Ghosts.Domain.Code;
 using Ghosts.Domain.Models;
 using NLog;
 using Quartz;
-using Quartz.Impl;
 
 namespace Ghosts.Client.Universal;
 
@@ -77,8 +76,7 @@ internal static class Program
             return;
         }
 
-        var factory = new StdSchedulerFactory();
-        Scheduler = await factory.GetScheduler();
+        Scheduler = await QuartzSchedulerBuilder.Create().BuildScheduler();
         await Scheduler.Start();
 
         if (Configuration.Sockets.IsEnabled)

@@ -28,15 +28,7 @@ public class BaseController : Controller
 
     public override void OnActionExecuted(ActionExecutedContext filterContext)
     {
-        var form = string.Empty;
-        if (Request.HasFormContentType && Request.Form.Count != 0)
-        {
-            form = string.Join(",", Request.Form);
-        }
-
-        Logger.LogTrace("{RequestScheme}://{RequestHost}{RequestPath}{RequestQueryString}|{RequestMethod}|{Join}",
-            Request.Scheme, Request.Host, Request.Path, Request.QueryString, Request.Method,
-            form);
+        LogRequest();
 
         ViewBag.Username = GetOrCreateUsernameCookie(filterContext.HttpContext);
 
@@ -55,9 +47,58 @@ public class BaseController : Controller
         Logger = logger;
     }
 
+    /// <summary>
+    /// Traces the current request. Every value is run through <see cref="ForLog"/> first, so a
+    /// crafted path, query string or form value cannot forge extra lines into the log.
+    /// </summary>
+    internal void LogRequest()
+    {
+        var form = string.Empty;
+        if (Request.HasFormContentType && Request.Form.Count != 0)
+        {
+            form = string.Join(",", Request.Form);
+        }
+
+        var requestMethod = SafeHttpMethod(Request.Method);
+
+        Logger.LogTrace("{RequestScheme}://{RequestHost}{RequestPath}{RequestQueryString}|{RequestMethod}|{Join}",
+            ForLog(Request.Scheme), ForLog(Request.Host.Value), ForLog(Request.Path.Value),
+            ForLog(Request.QueryString.Value), requestMethod, ForLog(form));
+    }
+
+    internal static string SafeHttpMethod(string method)
+    {
+        if (string.IsNullOrWhiteSpace(method))
+        {
+            return "UNKNOWN";
+        }
+
+        return method.ToUpperInvariant() switch
+        {
+            "GET" => "GET",
+            "POST" => "POST",
+            "PUT" => "PUT",
+            "DELETE" => "DELETE",
+            "PATCH" => "PATCH",
+            "HEAD" => "HEAD",
+            "OPTIONS" => "OPTIONS",
+            "TRACE" => "TRACE",
+            "CONNECT" => "CONNECT",
+            _ => "UNKNOWN"
+        };
+    }
+
+    /// <summary>
+    /// Strips control characters from a request-supplied value so it stays on a single, safe log line.
+    /// </summary>
+    internal static string ForLog(string value) =>
+        string.IsNullOrEmpty(value)
+            ? value
+            : new string(System.Linq.Enumerable.Where(value, c => !char.IsControl(c)).ToArray());
+
     internal void CookieWrite(string key, string value)
     {
-        var option = new CookieOptions { Expires = DateTime.Now.AddMonths(1) };
+        var option = new CookieOptions { Expires = DateTime.Now.AddMonths(1), HttpOnly = true };
         Response.Cookies.Append(key, value, option);
     }
 

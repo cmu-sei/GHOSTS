@@ -18,7 +18,7 @@ public class FilesController(ILogger logger) : BaseController(logger)
     [RequestSizeLimit(FileInputModel.MaxFileBytes)]
     public async Task<IActionResult> UploadFile([FromForm] FileInputModel model)
     {
-        Logger.LogTrace("{RequestScheme}://{RequestHost}{RequestPath}{RequestQueryString}|{RequestMethod}|{Join}", Request.Scheme, Request.Host, Request.Path, Request.QueryString, Request.Method, string.Join(",", Request.Form));
+        LogRequest();
 
         try
         {

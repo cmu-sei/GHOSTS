@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Ghosts.Pandora.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,6 +17,11 @@ public class UsersController(
     IFollowService followService)
     : BaseController(logger)
 {
+    // An avatar directory is named after the requested username, so it has to be a single safe
+    // path segment: no separators or colons, and a non-dot first character rules out "." and ".."
+    private static readonly Regex SafeUsername =
+        new("^[A-Za-z0-9_-][A-Za-z0-9._-]{0,63}$", RegexOptions.Compiled);
+
     [HttpGet]
     [HttpGet("{username}")]
     public async Task<IActionResult> GetUser(string username = null)
@@ -81,10 +87,9 @@ public class UsersController(
     [HttpGet("{username}/avatar")]
     public IActionResult GetUserAvatar(string username)
     {
-        Logger.LogTrace("{RequestScheme}://{RequestHost}{RequestPath}{RequestQueryString}|{RequestMethod}|",
-            Request.Scheme, Request.Host, Request.Path, Request.QueryString, Request.Method);
+        LogRequest();
 
-        if (string.IsNullOrEmpty(username))
+        if (!SafeUsername.IsMatch(username ?? string.Empty))
         {
             return PhysicalFile(Path.Combine(env.WebRootPath, "img", "avatar1.webp"), "image/webp");
         }
