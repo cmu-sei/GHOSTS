@@ -1,0 +1,93 @@
+{
+  "model_list": [
+    {
+      "model_name": "aws/fable-5.1",
+      "litellm_params": {
+        "model": "bedrock/us.anthropic.claude-fable-5-1",
+        "aws_region_name": "us-east-1",
+        "max_tokens": 32768,
+        "drop_params": true
+      }
+    },
+    {
+      "model_name": "aws/opus-5",
+      "litellm_params": {
+        "model": "bedrock/us.anthropic.claude-opus-5",
+        "aws_region_name": "us-east-1",
+        "max_tokens": 32768,
+        "drop_params": true
+      }
+    },
+    {
+      "model_name": "aws/sonnet-5",
+      "litellm_params": {
+        "model": "bedrock/us.anthropic.claude-sonnet-5",
+        "aws_region_name": "us-east-1",
+        "max_tokens": 32768,
+        "drop_params": true
+      }
+    },
+    {
+      "model_name": "aws/gpt-6-astra",
+      "litellm_params": {
+        "model": "bedrock_mantle/openai.gpt-6-astra",
+        "aws_region_name": "us-west-2",
+        "api_base": "https://bedrock-mantle.us-west-2.api.aws",
+        "max_tokens": 32768,
+        "reasoning_effort": "low",
+        "drop_params": true,
+        "additional_drop_params": ["temperature", "top_p"]
+      },
+      "model_info": {
+        "mode": "responses",
+        "use_openai_responses_path": true
+      }
+    },
+    {
+      "model_name": "aws/gpt-5.6-terra",
+      "litellm_params": {
+        "model": "bedrock_mantle/openai.gpt-5.6-terra",
+        "aws_region_name": "us-east-1",
+        "api_base": "https://bedrock-mantle.us-east-1.api.aws",
+        "max_tokens": 32768,
+        "drop_params": true,
+        "additional_drop_params": ["temperature", "top_p"]
+      },
+      "model_info": {
+        "mode": "responses",
+        "use_openai_responses_path": true
+      }
+    },
+    {
+      "model_name": "aws/gpt-5.6-sol",
+      "litellm_params": {
+        "model": "bedrock_mantle/openai.gpt-5.6-sol",
+        "aws_region_name": "us-east-1",
+        "api_base": "https://bedrock-mantle.us-east-1.api.aws",
+        "max_tokens": 32768,
+        "drop_params": true,
+        "additional_drop_params": ["temperature", "top_p"]
+      },
+      "model_info": {
+        "mode": "responses",
+        "use_openai_responses_path": true
+      }
+    },
+    {
+      "model_name": "aws/grok-4.6",
+      "litellm_params": {
+        "model": "bedrock_mantle/xai.grok-4.6",
+        "aws_region_name": "us-west-2",
+        "api_base": "https://bedrock-mantle.us-west-2.api.aws",
+        "max_tokens": 32768,
+        "reasoning_effort": "low",
+        "drop_params": true,
+        "additional_drop_params": ["temperature", "top_p"]
+      },
+      "model_info": {
+        "mode": "responses",
+        "use_openai_responses_path": true
+      }
+    }
+  ]
+}

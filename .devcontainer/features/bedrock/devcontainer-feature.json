@@ -1,0 +1,10 @@
+{
+    "id": "bedrock",
+    "version": "0.1.0",
+    "name": "Amazon Bedrock account access",
+    "description": "Clears the Bedrock account-level access gates at create time: the invoking Region's data retention mode, and (GovCloud) the per-Region Anthropic model entitlement",
+    "dependsOn": {
+        "ghcr.io/devcontainers/features/aws-cli:1": {}
+    },
+    "postCreateCommand": "bash -l .devcontainer/features/bedrock/postcreate.sh"
+}

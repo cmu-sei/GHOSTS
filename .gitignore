@@ -359,3 +359,4 @@ site/
 
 reference/
 reference/*
+.devcontainer/features/sei-certs/*

@@ -1,14 +1,42 @@
 # Codex CLI configuration for Amazon Bedrock (commercial AWS Regions).
 # Authentication uses the AWS SDK credential chain — the
 # AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY credentials exported by this
-# profile's profile.env are picked up automatically.
-model_provider = "amazon-bedrock"
-model = "openai.gpt-5.5"
+# profile's profile.env are picked up automatically, and so is its
+# AWS_REGION (us-east-1), so no [model_providers.*] table is needed.
+#
+# The provider is amazon-bedrock-runtime, not amazon-bedrock (Bedrock
+# Mantle). The Runtime route is the regional OpenAI-compatible endpoint
+# https://bedrock-runtime.<region>.amazonaws.com/openai/v1, and it accepts
+# the `global.`/`us.` cross-region inference-profile ids — so gpt-6-astra
+# and the gpt-5.6 family are both reachable from one Region. Mantle serves
+# different models in different Regions (astra in us-west-2 only, gpt-5.6-*
+# in us-east-1/us-east-2 only), which forced an either/or choice.
+# Requires Codex >= 0.153.3, the first release carrying gpt-6-astra in the
+# Bedrock Runtime catalog (verified on 0.153.3 and 0.155.0; on 0.153.0 it
+# runs but falls back to generic model metadata).
+#
+# Mantle fallback, if the Runtime route ever regresses: set
+# model_provider = "amazon-bedrock", model = "openai.gpt-6-astra", and add
+# [model_providers.amazon-bedrock] with aws = { region = "us-west-2" } —
+# which again makes gpt-5.6-* unreachable.
+#
+# The model id carries the `us.` prefix, not `global.`, to match the
+# us-only model catalog postcreate.sh generates (it strips the duplicate
+# `global.` entries from the picker). The default MUST stay in that
+# catalog: an id the catalog does not list falls back to generic metadata,
+# which re-breaks model_reasoning_summary below.
+model_provider = "amazon-bedrock-runtime"
+model = "us.openai.gpt-6-astra"
+model_reasoning_effort = "medium"
 sandbox_mode = "danger-full-access"
 
-# OpenAI models on Bedrock are region-specific and are not in us-east-1
-# (the AWS_REGION this profile uses for the Anthropic Claude models). Pin
-# Codex to us-east-2 here so only Codex targets the OpenAI Bedrock region,
-# leaving Claude Code / OpenCode / Pi on us-east-1.
-[model_providers.amazon-bedrock.aws]
-region = "us-east-2"
+# Bedrock's OpenAI models reject the Responses `reasoning.summary`
+# parameter outright — "Unsupported parameter: 'reasoning.summary' is not
+# supported with the '<model>' model" — for every id on both routes
+# (verified 0.155.0 on astra and gpt-5.6-sol). Codex's Bedrock catalog
+# entries say default_reasoning_summary = "none" and `codex exec` honours
+# that, but the TUI resolves "detailed" regardless, so every interactive
+# session failed on its first turn while exec worked. Pinning it here is
+# the fix and it must stay pinned; "auto" also happens to work today
+# (Codex omits the parameter) but "concise"/"detailed" both 400.
+model_reasoning_summary = "none"

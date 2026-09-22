@@ -1,0 +1,9 @@
+{
+    "id": "oh-my-logo",
+    "version": "0.1.0",
+    "name": "Oh My Logo",
+    "description": "Installs the oh-my-logo npm package globally",
+    "installsAfter": [
+        "ghcr.io/devcontainers/features/node"
+    ]
+}

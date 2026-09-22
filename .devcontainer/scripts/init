@@ -1,0 +1,11 @@
+#!/bin/bash
+# Dev container initializeCommand dispatcher (POSIX hosts)
+# Paired with init.cmd — see devcontainer.json's initializeCommand.
+
+# --ensure, not a devcontainer.env existence test: only setup can tell a spawned
+# project (env file present, every question already answered on the host) from one
+# where `.devcontainer/` was copied in by hand (no env file, CUI/profiles/keys still
+# owed). Duplicating that judgement here would mean keeping two gates in step, so
+# setup decides what is missing — and stays silent when nothing is, which is every
+# re-open of every spawned project.
+bash .devcontainer/scripts/setup.sh --ensure

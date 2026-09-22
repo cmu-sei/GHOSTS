@@ -1,21 +1,6 @@
-FROM mcr.microsoft.com/devcontainers/dotnet:10.0
+# The base Python 3.14 is reused by LiteLLM, Open Terminal, SearXNG, and supervisor
+FROM mcr.microsoft.com/devcontainers/python:3.14-trixie
 
-ARG TARGETARCH
-USER root
-
-# Custom Cert Support
-COPY ./certs /usr/local/share/ca-certificates/custom/
-RUN find /usr/local/share/ca-certificates/custom -type f ! -name '*.crt' -delete \
-    && if find /usr/local/share/ca-certificates/custom -type f -name '*.crt' -print -quit | grep -q .; then \
-    update-ca-certificates; \
-    fi
-
-ENV NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt \
-    AWS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt \
-    REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt \
-    PIP_CERT=/etc/ssl/certs/ca-certificates.crt
-
-# Remove the flotsam around Yarn
-RUN rm -f /etc/apt/sources.list.d/yarn.list /etc/apt/sources.list.d/yarn*.list
-
-USER vscode
+# Custom certificate support.
+COPY ./features/sei-certs/*.crt /usr/local/share/ca-certificates/custom/
+RUN update-ca-certificates
