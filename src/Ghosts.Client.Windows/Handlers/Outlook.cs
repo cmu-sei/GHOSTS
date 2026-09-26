@@ -191,11 +191,12 @@ public class Outlook : BaseHandler
                 folderItems.Add(folderItem);
             }
 
-            var filteredEmails = folderItems.Where(x => x.BodyFormat == OlBodyFormat.olFormatHTML && x.HTMLBody.Contains("<a href="));
+            // read HTMLBody via Redemption to avoid Outlook's security prompt
+            var filteredEmails = folderItems.Where(x => x.BodyFormat == OlBodyFormat.olFormatHTML && new SafeMailItem { Item = x }.HTMLBody.Contains("<a href="));
             var mailItem = filteredEmails.PickRandom();
                 
             //check deny list
-            var list = DenyListManager.RemoveDeniedFromList(mailItem.HTMLBody.GetHrefUrls());
+            var list = DenyListManager.RemoveDeniedFromList(new SafeMailItem { Item = mailItem }.HTMLBody.GetHrefUrls());
             if (list.Any())
             {
                 list.PickRandom().OpenUrl();
@@ -312,6 +313,8 @@ public class Outlook : BaseHandler
             {
                 if (!folderItem.UnRead) continue;
 
+                // read sender/body via Redemption to avoid Outlook's security prompt
+                var safeFolderItem = new SafeMailItem { Item = folderItem };
                 var emailReply = new EmailReplyManager();
                         
                 var replyMail = folderItem.Reply();
@@ -321,8 +324,8 @@ public class Outlook : BaseHandler
                     quoted.WriteLine(emailReply.Reply);
                     quoted.WriteLine("");
                     quoted.WriteLine("");
-                    quoted.WriteLine($"On {folderItem.SentOn:f}, {folderItem.SenderEmailAddress} wrote:");
-                    using (var reader = new StringReader(folderItem.Body))
+                    quoted.WriteLine($"On {folderItem.SentOn:f}, {safeFolderItem.SenderEmailAddress} wrote:");
+                    using (var reader = new StringReader(safeFolderItem.Body))
                     {
                         string line;
                         while ((line = reader.ReadLine()) != null)
@@ -342,7 +345,7 @@ public class Outlook : BaseHandler
                     Item = replyMail
                 };
 
-                var r = rdoMail.Recipients.AddEx(folderItem.SenderEmailAddress);
+                var r = rdoMail.Recipients.AddEx(safeFolderItem.SenderEmailAddress);
                 r.Resolve();
                 rdoMail.Recipients.ResolveAll();
                 rdoMail.Send();
