@@ -14,34 +14,24 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
-    name: Build Lite Client
-    if: github.event_name != 'release'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
-
-      - name: Build
-        run: dotnet build src/Ghosts.Client.Lite/src/Ghosts.Client.Lite.csproj --configuration Release
-
-  release:
-    name: Publish ${{ matrix.runtime }}
-    if: github.event_name == 'release'
+    name: Build ${{ matrix.runtime }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
     strategy:
+      fail-fast: false
       matrix:
         runtime: [linux-x64, linux-arm64, win-x64, win-x86]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '8.0.x'
 
@@ -52,9 +42,11 @@ jobs:
             -o publish/${{ matrix.runtime }}
 
       - name: Package
+        if: github.event_name == 'release'
         run: zip -r ghosts-client-lite-${{ matrix.runtime }}.zip publish/${{ matrix.runtime }}/
 
       - name: Upload release asset
+        if: github.event_name == 'release'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release upload "${{ github.event.release.tag_name }}" ghosts-client-lite-${{ matrix.runtime }}.zip
