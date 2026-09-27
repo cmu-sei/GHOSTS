@@ -95,6 +95,9 @@
     <Content Include="nlog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Update="kill-ghosts.sh">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <Content Update="config\Aws.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
