@@ -252,6 +252,8 @@ HandlersIsEnabled: true
 DisableStartup: false
 ```
 
+`ResourceControl.ManageProcesses` (default `true`) lets GHOSTS close the applications its timeline handlers run, such as browsers and their drivers, Office apps, `cmd`, and `powershell`. This happens at startup, at shutdown, when a timeline is stopped, and when a handler goes idle outside its `UtcTimeOn`/`UtcTimeOff` window (Outlook is left open then). Processes are matched by name, so this also closes copies of those applications that GHOSTS did not start. Set it to `false` on machines where people work alongside GHOSTS. `ResourceControl.ManageBrowserProcesses` (default `false`) additionally lets the universal client close excess browser processes while running.
+
 ---
 
 ### Timeline configuration

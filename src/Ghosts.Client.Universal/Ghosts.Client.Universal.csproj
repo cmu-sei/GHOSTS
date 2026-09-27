@@ -37,6 +37,7 @@
     <PackageReference Include="SSH.NET" Version="2026.0.0"/>
     <PackageReference Include="MailKit" Version="4.18.0"/>
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.12"/>
+    <PackageReference Include="System.Management" Version="10.0.12"/>
   </ItemGroup>
 
   <ItemGroup>

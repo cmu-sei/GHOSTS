@@ -47,6 +47,11 @@ namespace Ghosts.Client.Universal.Handlers;
                     {
                         while (true)
                         {
+                            if (Driver.CurrentWindowHandle == null)
+                            {
+                                throw new Exception("Chrome window handle not available");
+                            }
+
                             ExecuteEvents(this.Handler);
                             Token.ThrowIfCancellationRequested();
                         }

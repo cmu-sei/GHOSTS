@@ -6,9 +6,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Windows.Forms;
 using Ghosts.Client.Infrastructure.Email;
-using Ghosts.Domain;
 using Ghosts.Domain.Code;
-using Ghosts.Domain.Code.Helpers;
 using NLog;
 using Microsoft.Win32;
 
@@ -47,40 +45,15 @@ public static class StartupTasks
             var timeline = TimelineBuilder.GetTimeline();
             foreach (var handler in timeline.TimeLineHandlers)
             {
-                switch (handler.HandlerType)
-                {
-                    case HandlerType.BrowserChrome:
-                        cleanupList.Add(ProcessManager.ProcessNames.Chrome);
-                        cleanupList.Add(ProcessManager.ProcessNames.ChromeDriver);
-                        break;
-                    case HandlerType.BrowserFirefox:
-                        cleanupList.Add(ProcessManager.ProcessNames.Firefox);
-                        cleanupList.Add(ProcessManager.ProcessNames.GeckoDriver);
-                        break;
-                    case HandlerType.Command:
-                        cleanupList.Add(ProcessManager.ProcessNames.Command);
-                        break;
-                    case HandlerType.Outlook:
-                        cleanupList.Add(ProcessManager.ProcessNames.Outlook);
-                        break;
-                    case HandlerType.Outlookv2:
-                        cleanupList.Add(ProcessManager.ProcessNames.Outlook);
-                        break;
-                    case HandlerType.Word:
-                        cleanupList.Add(ProcessManager.ProcessNames.Word);
-                        break;
-                    case HandlerType.Excel:
-                        cleanupList.Add(ProcessManager.ProcessNames.Excel);
-                        break;
-                    case HandlerType.PowerPoint:
-                        cleanupList.Add(ProcessManager.ProcessNames.PowerPoint);
-                        break;
-                }
+                cleanupList.AddRange(ProcessManager.GetProcessNames(handler.HandlerType));
             }
             
             //need to kill any other instance of ghosts already running
             var ghosts = Process.GetCurrentProcess();
-            cleanupList.Add(ghosts.ProcessName);
+            if (!Program.Configuration.AllowMultipleInstances)
+            {
+                cleanupList.Add(ghosts.ProcessName);
+            }
 
             _log.Trace($"Found ghosts pid: {ghosts.Id}");
 
@@ -91,17 +64,7 @@ public static class StartupTasks
                     new Thread(() =>
                     {
                         Thread.CurrentThread.IsBackground = true;
-                        foreach (var process in Process.GetProcessesByName(cleanupItem))
-                        {
-                            if (process.Id != ghosts.Id) //don't kill thyself
-                            {
-                                if (process.ProcessName == ApplicationDetails.Name &&
-                                    Program.Configuration.AllowMultipleInstances == false)
-                                {
-                                    process.SafeKill();
-                                }
-                            }
-                        }
+                        ProcessManager.KillProcessAndChildrenByName(cleanupItem);
                     }).Start();
                     _log.Trace($"Killing {cleanupItem}");
                 }
