@@ -2,13 +2,16 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using Ghosts.Api.Infrastructure.Models;
+using Ghosts.Api.Infrastructure.ScenarioDocuments;
 using Ghosts.Api.Infrastructure.Services;
 using Microsoft.Extensions.Logging;
 using Swashbuckle.AspNetCore.Annotations;
@@ -79,6 +82,98 @@ public class ScenariosController : ControllerBase
         {
             _logger.LogError(ex, "Error creating scenario");
             return StatusCode(500, new { error = "Error creating scenario" });
+        }
+    }
+
+    /// <summary>
+    /// The scenario as a canonical scenario document (schema v1) — the authored specification, with
+    /// no database ids, no timestamps and no run state. Two exports of an unchanged scenario are
+    /// byte-identical, and POST api/scenarios/import accepts what this emits.
+    /// </summary>
+    // GET: api/scenarios/5/document
+    [HttpGet("{id}/document")]
+    [Produces("application/json")]
+    public async Task<IActionResult> GetScenarioDocument(int id, CancellationToken ct)
+    {
+        try
+        {
+            return Content(await _scenarioService.ExportDocumentAsync(id, ct), "application/json");
+        }
+        catch (InvalidOperationException)
+        {
+            return NotFound();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error exporting scenario {ScenarioId}", id);
+            return StatusCode(500, new { error = "Error exporting scenario document" });
+        }
+    }
+
+    /// <summary>
+    /// Creates a scenario from a scenario document (schema v1). The document is rejected, and
+    /// nothing is written, unless its schemaVersion is 1.0.0 and it validates against the schema.
+    /// </summary>
+    // POST: api/scenarios/import
+    [HttpPost("import")]
+    [Consumes("application/json")]
+    public async Task<ActionResult<ScenarioDto>> ImportScenarioDocument(CancellationToken ct)
+    {
+        string text;
+        using (var reader = new StreamReader(Request.Body))
+        {
+            text = await reader.ReadToEndAsync(ct);
+        }
+
+        JsonObject document;
+        try
+        {
+            document = JsonNode.Parse(text) as JsonObject;
+        }
+        catch (JsonException ex)
+        {
+            return BadRequest(new { error = "Document is not valid JSON", findings = new[] { ex.Message } });
+        }
+
+        if (document == null)
+        {
+            return BadRequest(new { error = "Document is not a JSON object" });
+        }
+
+        var version = document["schemaVersion"]?.GetValue<string>();
+        if (version != ScenarioDocumentMapper.SchemaVersion)
+        {
+            return BadRequest(new
+            {
+                error = $"Unsupported schemaVersion '{version}'; this API reads {ScenarioDocumentMapper.SchemaVersion}"
+            });
+        }
+
+        IReadOnlyList<string> findings;
+        try
+        {
+            findings = await ScenarioDocumentValidator.ValidateAsync(text, ct);
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogError(ex, "Scenario document validator unavailable");
+            return StatusCode(500, new { error = ex.Message });
+        }
+
+        if (findings.Count > 0)
+        {
+            return BadRequest(new { error = "Document does not validate against schema v1", findings });
+        }
+
+        try
+        {
+            var scenario = await _scenarioService.CreateAsync(ScenarioDocumentMapper.FromDocument(document), ct);
+            return CreatedAtAction(nameof(GetScenario), new { id = scenario.Id }, MapToDto(scenario));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error importing scenario document");
+            return StatusCode(500, new { error = "Error importing scenario document" });
         }
     }
 

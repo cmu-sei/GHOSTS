@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Infrastructure.Models;
+using Ghosts.Api.Infrastructure.ScenarioDocuments;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 
@@ -18,6 +19,7 @@ namespace Ghosts.Api.Infrastructure.Services
         Task<List<Scenario>> GetAllAsync(CancellationToken ct);
         Task<Scenario> GetByIdAsync(int id, CancellationToken ct);
         Task<Scenario> CreateAsync(CreateScenarioDto dto, CancellationToken ct);
+        Task<string> ExportDocumentAsync(int id, CancellationToken ct);
         Task<Scenario> UpdateAsync(int id, UpdateScenarioDto dto, CancellationToken ct);
         Task DeleteAsync(int id, CancellationToken ct);
     }
@@ -78,6 +80,21 @@ namespace Ghosts.Api.Infrastructure.Services
             return scenario;
         }
 
+        /// <summary>
+        /// The scenario as canonical scenario-document text. The graph and the objectives are read
+        /// here because the scenario read path does not include them.
+        /// </summary>
+        public async Task<string> ExportDocumentAsync(int id, CancellationToken ct)
+        {
+            var scenario = await GetByIdAsync(id, ct);
+            var entities = await _context.ScenarioEntities.Where(e => e.ScenarioId == id).ToListAsync(ct);
+            var edges = await _context.ScenarioEdges.Where(e => e.ScenarioId == id).ToListAsync(ct);
+            var objectives = await _context.Objectives.Where(o => o.ScenarioId == id).ToListAsync(ct);
+
+            return ScenarioDocumentMapper.Serialize(
+                ScenarioDocumentMapper.ToDocument(scenario, entities, edges, objectives));
+        }
+
         public async Task<Scenario> CreateAsync(CreateScenarioDto dto, CancellationToken ct)
         {
             var scenario = new Scenario
@@ -108,7 +125,21 @@ namespace Ghosts.Api.Infrastructure.Services
                 scenario.ScenarioTimeline = MapTimeline(dto.Timeline);
             }
 
+            if (dto.Objectives != null)
+            {
+                scenario.Objectives = MapObjectives(dto.Objectives);
+            }
+
+            if (dto.Entities != null)
+            {
+                MapGraph(dto, scenario);
+            }
+
             _context.Scenarios.Add(scenario);
+
+            // One transaction: an objective's database id is only known after the first save, and
+            // the parent and event references that point at it are rewritten in the second.
+            await using var transaction = await _context.Database.BeginTransactionAsync(ct);
 
             var operation = await _context.SaveChangesAsync(ct);
             if (operation < 1)
@@ -116,6 +147,14 @@ namespace Ghosts.Api.Infrastructure.Services
                 _log.Error($"Could not create scenario: {operation}");
                 throw new InvalidOperationException("Could not create Scenario");
             }
+
+            if (scenario.Objectives.Count > 0)
+            {
+                RemapObjectiveIds(dto.Objectives, scenario);
+                await _context.SaveChangesAsync(ct);
+            }
+
+            await transaction.CommitAsync(ct);
 
             _log.Info($"Created scenario: {scenario.Id} - {scenario.Name}");
 
@@ -399,6 +438,108 @@ namespace Ghosts.Api.Infrastructure.Services
                 CollectChat = dto.Telemetry.CollectChat,
                 PerformanceMetrics = dto.PerformanceMetrics
             };
+        }
+
+        private static List<Objective> MapObjectives(List<ScenarioObjectiveImportDto> dtos)
+        {
+            var now = DateTime.UtcNow;
+            return dtos.Select(o => new Objective
+            {
+                Name = o.Name,
+                Description = o.Description,
+                Type = string.IsNullOrEmpty(o.Type) ? "MET" : o.Type,
+                Priority = o.Priority > 0 ? o.Priority : 1,
+                SuccessCriteria = o.SuccessCriteria,
+                Assigned = o.Assigned,
+                SortOrder = o.SortOrder,
+                CreatedAt = now,
+                UpdatedAt = now
+            }).ToList();
+        }
+
+        /// <summary>
+        /// Entities and edges created with the scenario. Edges name their endpoints by the caller's
+        /// local entity id, resolved here to the GUIDs assigned to the new entities. CreatedAt is
+        /// stepped so the tables keep the order they were given in, which is all they can express.
+        /// </summary>
+        private static void MapGraph(CreateScenarioDto dto, Scenario scenario)
+        {
+            var now = DateTime.UtcNow;
+            var byLocalId = new Dictionary<string, ScenarioEntity>();
+
+            scenario.Entities = dto.Entities.Select((e, i) =>
+            {
+                var entity = new ScenarioEntity
+                {
+                    Name = e.Name,
+                    EntityType = string.IsNullOrEmpty(e.Type) ? "Custom" : e.Type,
+                    Description = e.Description,
+                    Properties = string.IsNullOrEmpty(e.Properties) ? "{}" : e.Properties,
+                    Confidence = e.Confidence,
+                    Origin = string.IsNullOrEmpty(e.Origin) ? "Operator" : e.Origin,
+                    ExternalId = e.ExternalId,
+                    IsReviewed = e.IsReviewed,
+                    CreatedAt = now.AddMilliseconds(i),
+                    UpdatedAt = now.AddMilliseconds(i)
+                };
+                if (!string.IsNullOrEmpty(e.Id)) byLocalId[e.Id] = entity;
+                return entity;
+            }).ToList();
+
+            if (dto.Edges == null) return;
+
+            var edges = new List<ScenarioEdge>();
+            foreach (var (e, i) in dto.Edges.Select((e, i) => (e, i)))
+            {
+                if (!byLocalId.TryGetValue(e.From ?? string.Empty, out var source) ||
+                    !byLocalId.TryGetValue(e.To ?? string.Empty, out var target))
+                {
+                    _log.Warn($"Edge {e.From} -> {e.To} skipped: unknown entity");
+                    continue;
+                }
+
+                edges.Add(new ScenarioEdge
+                {
+                    SourceEntityId = source.Id,
+                    TargetEntityId = target.Id,
+                    EdgeType = string.IsNullOrEmpty(e.Type) ? "Custom" : e.Type,
+                    Label = e.Label,
+                    Weight = e.Weight,
+                    Confidence = e.Confidence,
+                    Origin = string.IsNullOrEmpty(e.Origin) ? "Operator" : e.Origin,
+                    Properties = string.IsNullOrEmpty(e.Properties) ? "{}" : e.Properties,
+                    IsReviewed = e.IsReviewed,
+                    CreatedAt = now.AddMilliseconds(i)
+                });
+            }
+            scenario.Edges = edges;
+        }
+
+        /// <summary>
+        /// Rewrites the caller's local objective ids — in objective parents and in the timeline
+        /// events that refer to them — to the database ids assigned by the first save.
+        /// </summary>
+        private static void RemapObjectiveIds(List<ScenarioObjectiveImportDto> dtos, Scenario scenario)
+        {
+            var objectives = scenario.Objectives.ToList();
+            var ids = new Dictionary<int, int>();
+            for (var i = 0; i < objectives.Count; i++) ids[dtos[i].Id] = objectives[i].Id;
+
+            for (var i = 0; i < objectives.Count; i++)
+            {
+                if (dtos[i].ParentId is int parent && ids.TryGetValue(parent, out var parentId))
+                {
+                    objectives[i].ParentId = parentId;
+                }
+            }
+
+            foreach (var e in scenario.ScenarioTimeline?.ScenarioTimelineEvents ?? [])
+            {
+                if (string.IsNullOrEmpty(e.ObjectiveIds)) continue;
+                var mapped = JsonSerializer.Deserialize<List<int>>(e.ObjectiveIds)
+                    .Where(ids.ContainsKey).Select(id => ids[id]).ToList();
+                e.ObjectiveIds = mapped.Count > 0 ? JsonSerializer.Serialize(mapped) : null;
+            }
         }
 
         private static ScenarioTimeline MapTimeline(TimelineDto dto)

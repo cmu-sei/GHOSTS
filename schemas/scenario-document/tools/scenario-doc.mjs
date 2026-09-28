@@ -6,6 +6,7 @@
 //   node scenario-doc.mjs canonicalize <doc.json>            (rewrites the file in canonical form)
 //   node scenario-doc.mjs convert <fixture.json> <out.json>  (either fixture shape → document)
 //   node scenario-doc.mjs coverage <fixture.json> <doc.json> (every source value appears in the doc)
+//   node scenario-doc.mjs diff <a.json> <b.json>             (path-level differences)
 //
 // Needs ajv and ajv-formats on the module path.
 
@@ -280,6 +281,32 @@ function coverage(fixtureFile, docFile) {
 
 // ─────────────────────────── main ───────────────────────────
 
+// Path-level differences between two documents: what the first has and the second does not,
+// what the second added, and where both hold a value but not the same one. The loss report of
+// a round trip, where a byte diff of two 300-line documents says little.
+
+const flatten = (v, path, out) => {
+  if (Array.isArray(v)) { v.forEach((x, i) => flatten(x, `${path}[${i}]`, out)); return out; }
+  if (v && typeof v === 'object') { for (const [k, x] of Object.entries(v)) flatten(x, path ? `${path}.${k}` : k, out); return out; }
+  out.set(path, v);
+  return out;
+};
+
+const short = v => { const s = String(v); return s.length > 72 ? s.slice(0, 69) + '...' : s; };
+
+function docDiff(aFile, bFile) {
+  const a = flatten(JSON.parse(readFileSync(aFile, 'utf8')), '', new Map());
+  const b = flatten(JSON.parse(readFileSync(bFile, 'utf8')), '', new Map());
+  const lines = [];
+  for (const [k, v] of a) if (!b.has(k)) lines.push(`- ${k} = ${short(v)}`);
+  for (const [k, v] of b) if (!a.has(k)) lines.push(`+ ${k} = ${short(v)}`);
+  for (const [k, v] of a) if (b.has(k) && String(v) !== String(b.get(k))) lines.push(`~ ${k}: ${short(v)} -> ${short(b.get(k))}`);
+  for (const l of lines) console.log(l);
+  return lines.length;
+}
+
+// ─────────────────────────── main ───────────────────────────
+
 const [cmd, ...args] = process.argv.slice(2);
 let rc = 0;
 switch (cmd) {
@@ -300,7 +327,9 @@ switch (cmd) {
   }
   case 'coverage':
     rc = coverage(args[0], args[1]) ? 1 : 0; break;
+  case 'diff':
+    rc = docDiff(args[0], args[1]) ? 1 : 0; break;
   default:
-    console.error('usage: scenario-doc.mjs validate|canonicalize|convert|coverage ...'); rc = 2;
+    console.error('usage: scenario-doc.mjs validate|canonicalize|convert|coverage|diff ...'); rc = 2;
 }
 process.exit(rc);
