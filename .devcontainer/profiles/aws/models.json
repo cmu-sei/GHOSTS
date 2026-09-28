@@ -27,8 +27,8 @@
           }
         },
         {
-          "id": "us.anthropic.claude-opus-5",
-          "name": "Claude Opus 5",
+          "id": "us.anthropic.claude-opus-5-5",
+          "name": "Claude Opus 5.5",
           "reasoning": true,
           "input": [
             "text",
