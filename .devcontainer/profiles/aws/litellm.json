@@ -10,9 +10,9 @@
       }
     },
     {
-      "model_name": "aws/opus-5",
+      "model_name": "aws/opus-5.5",
       "litellm_params": {
-        "model": "bedrock/us.anthropic.claude-opus-5",
+        "model": "bedrock/us.anthropic.claude-opus-5-5",
         "aws_region_name": "us-east-1",
         "max_tokens": 32768,
         "drop_params": true
@@ -36,7 +36,10 @@
         "max_tokens": 32768,
         "reasoning_effort": "low",
         "drop_params": true,
-        "additional_drop_params": ["temperature", "top_p"]
+        "additional_drop_params": [
+          "temperature",
+          "top_p"
+        ]
       },
       "model_info": {
         "mode": "responses",
@@ -51,7 +54,10 @@
         "api_base": "https://bedrock-mantle.us-east-1.api.aws",
         "max_tokens": 32768,
         "drop_params": true,
-        "additional_drop_params": ["temperature", "top_p"]
+        "additional_drop_params": [
+          "temperature",
+          "top_p"
+        ]
       },
       "model_info": {
         "mode": "responses",
@@ -66,7 +72,10 @@
         "api_base": "https://bedrock-mantle.us-east-1.api.aws",
         "max_tokens": 32768,
         "drop_params": true,
-        "additional_drop_params": ["temperature", "top_p"]
+        "additional_drop_params": [
+          "temperature",
+          "top_p"
+        ]
       },
       "model_info": {
         "mode": "responses",
@@ -82,7 +91,10 @@
         "max_tokens": 32768,
         "reasoning_effort": "low",
         "drop_params": true,
-        "additional_drop_params": ["temperature", "top_p"]
+        "additional_drop_params": [
+          "temperature",
+          "top_p"
+        ]
       },
       "model_info": {
         "mode": "responses",
