@@ -1,21 +1,10 @@
-FROM mcr.microsoft.com/devcontainers/dotnet:10.0
+# The base Python 3.14 is reused by LiteLLM, Open Terminal, SearXNG, and supervisor
+FROM mcr.microsoft.com/devcontainers/python:3.14-trixie
 
-ARG TARGETARCH
-USER root
-
-# Custom Cert Support
-COPY ./certs /usr/local/share/ca-certificates/custom/
-RUN find /usr/local/share/ca-certificates/custom -type f ! -name '*.crt' -delete \
-    && if find /usr/local/share/ca-certificates/custom -type f -name '*.crt' -print -quit | grep -q .; then \
-    update-ca-certificates; \
-    fi
-
-ENV NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt \
-    AWS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt \
-    REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt \
-    PIP_CERT=/etc/ssl/certs/ca-certificates.crt
-
-# Remove the flotsam around Yarn
-RUN rm -f /etc/apt/sources.list.d/yarn.list /etc/apt/sources.list.d/yarn*.list
-
-USER vscode
+# Custom certificate support. Copy the folder, not a *.crt glob: COPY fails the build
+# when a glob matches nothing, and a clone outside a TLS-inspecting network has no certs.
+COPY ./features/sei-certs/ /tmp/sei-certs/
+RUN mkdir -p /usr/local/share/ca-certificates/custom \
+    && find /tmp/sei-certs -maxdepth 1 -name '*.crt' -exec cp {} /usr/local/share/ca-certificates/custom/ \; \
+    && rm -rf /tmp/sei-certs \
+    && update-ca-certificates

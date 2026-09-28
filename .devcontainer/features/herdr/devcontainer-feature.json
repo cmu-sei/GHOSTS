@@ -1,0 +1,10 @@
+{
+    "id": "herdr",
+    "version": "0.1.0",
+    "name": "Herdr",
+    "description": "Installs the Herdr terminal workspace manager via the official installer script",
+    "installsAfter": [
+        "ghcr.io/devcontainers/features/common-utils"
+    ],
+    "postCreateCommand": "bash -l .devcontainer/features/herdr/postcreate.sh"
+}

@@ -1,0 +1,12 @@
+{
+    "id": "tmux",
+    "version": "0.1.0",
+    "name": "tmux Configuration",
+    "description": "Installs the dev container's ~/.tmux.conf (256-color/UTF-8, CSI u extended keys, scrollback, mouse, zsh as the default shell)",
+    "dependsOn": {
+        "ghcr.io/devcontainers-extra/features/tmux-apt-get:1": {}
+    },
+    "installsAfter": [
+        "ghcr.io/devcontainers/features/common-utils"
+    ]
+}

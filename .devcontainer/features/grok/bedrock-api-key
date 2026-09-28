@@ -1,0 +1,27 @@
+#!/bin/bash
+# Print a short-lived Amazon Bedrock API key (bearer token) for the Grok CLI.
+#
+# Grok CLI reaches Bedrock only through the Mantle OpenAI-compatible endpoint,
+# which authenticates with a Bedrock API key as `Authorization: Bearer`, not
+# SigV4. A `[auth_provider.<name>] command` in its config runs this script and
+# reads the token from stdout. The key is minted from the AWS SDK credential
+# chain (the profile's AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY env vars) with
+# aws-bedrock-token-generator; it is region-scoped, so the Region is passed as
+# the first argument (falling back to AWS_REGION). Nothing is written to disk.
+set -euo pipefail
+
+REGION="${1:-${AWS_REGION:-${AWS_DEFAULT_REGION:-}}}"
+if [ -z "$REGION" ]; then
+    echo "bedrock-api-key: no Region given and AWS_REGION is unset" >&2
+    exit 1
+fi
+
+VENV="${BEDROCK_TOKEN_VENV:-$HOME/.local/bedrock-token-venv}"
+exec "$VENV/bin/python" - "$REGION" <<'EOF'
+import sys
+from datetime import timedelta
+from aws_bedrock_token_generator import provide_token
+# One hour: comfortably above Grok's token_ttl_secs so a cached token never
+# outlives the key, and short enough that a rotated AWS key takes effect soon.
+print(provide_token(region=sys.argv[1], expiry=timedelta(hours=1)))
+EOF

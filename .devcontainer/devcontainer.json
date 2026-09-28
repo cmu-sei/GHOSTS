@@ -8,35 +8,30 @@
             "type": "volume",
             "source": "${localWorkspaceFolderBasename}-data",
             "target": "/home/vscode/.data"
-        },
-        {
-            "type": "volume",
-            "source": "${localWorkspaceFolderBasename}-microsoft",
-            "target": "/home/vscode/.microsoft"
         }
     ],
     "features": {
         "ghcr.io/devcontainers/features/common-utils:2": {
-            "configureZshAsDefaultShell": true
+            "configureZshAsDefaultShell": true,
+            "upgradePackages": false
         },
-        "ghcr.io/devcontainers/features/node:1": {},
+        "ghcr.io/devcontainers/features/node:2": {},
+        "ghcr.io/devcontainers-extra/features/uv:1": {},
+        "ghcr.io/devcontainers-extra/features/ripgrep:1": {},
+        "ghcr.io/jsburckhardt/devcontainer-features/fd:1": {},
+        "./features/sei-certs": {},
+        "./features/bedrock": {},
         "./features/claude": {},
         "./features/opencode": {},
         "./features/pi": {},
         "./features/codex": {},
-        "ghcr.io/devcontainers/features/python:1": {
-            "version": "3.12"
-        },
-        "ghcr.io/devcontainers/features/docker-in-docker:2.16": {
-            "version": "29.4.1",
-            "moby": false
-        }
-    },
-    "containerEnv": {
-        "NODE_EXTRA_CA_CERTS": "/etc/ssl/certs/ca-certificates.crt",
-        "REQUESTS_CA_BUNDLE": "/etc/ssl/certs/ca-certificates.crt",
-        "PIP_CERT": "/etc/ssl/certs/ca-certificates.crt",
-        "SSL_CERT_FILE": "/etc/ssl/certs/ca-certificates.crt"
+        "./features/grok": {},
+        "./features/herdr": {},
+        // "./features/chat": {},
+        "./features/oh-my-logo": {},
+        "./features/pure-prompt": {},
+        "./features/tmux": {}
+        // "./features/_template_": {}
     },
     "remoteEnv": {
         "LANG": "C.UTF-8",
@@ -53,42 +48,13 @@
         "--env",
         "SSH_AUTH_SOCK=/run/host-services/ssh-auth.sock"
     ],
-    "initializeCommand": [
-        ".devcontainer/init"
-    ],
-    "postCreateCommand": "bash -l .devcontainer/postcreate.sh",
-    "postStartCommand": "bash -l .devcontainer/poststart.sh",
+    "initializeCommand": [".devcontainer/scripts/init"],
+    "postCreateCommand": "bash -l .devcontainer/scripts/postcreate.sh",
+    "postStartCommand": "bash -l .devcontainer/scripts/poststart.sh",
     "customizations": {
         "vscode": {
-            "extensions": [
-                "anthropic.claude-code",
-                "ms-dotnettools.csdevkit",
-                "ms-azuretools.vscode-docker",
-                "dbaeumer.vscode-eslint",
-                "esbenp.prettier-vscode",
-                "angular.ng-template",
-                "continue.continue",
-                "microsoft-aspire.aspire-vscode",
-                "pflannery.vscode-versionlens"
-            ],
             "settings": {
-                "chat.disableAIFeatures": true,
-                "editor.formatOnSave": true,
-                "files.insertFinalNewline": true,
-                "files.eol": "\n",
-                "files.trimTrailingWhitespace": true,
-                "npm.packageManager": "npm",
-                "dotnet.defaultSolution": "GHOSTS.sln",
-                "remote.portsAttributes": {
-                    "11434": {
-                        "label": "ollama (host — do not forward)",
-                        "onAutoForward": "ignore"
-                    },
-                    "11435": {
-                        "label": "ollama (host — do not forward)",
-                        "onAutoForward": "ignore"
-                    }
-                }
+                "chat.disableAIFeatures": true
             }
         }
     }

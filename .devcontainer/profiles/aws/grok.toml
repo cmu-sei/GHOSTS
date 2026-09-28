@@ -1,0 +1,30 @@
+# Grok CLI models for Amazon Bedrock (commercial AWS Regions).
+#
+# This fragment is concatenated into /etc/grok/managed_config.toml by
+# postcreate.sh, which also emits the [models] table (default + allowed_models
+# from the [model."..."] keys below) — so keep this file to [auth_provider.*]
+# and [model."aws/..."] tables only, and list the preferred default first.
+#
+# Grok CLI has no native Bedrock (SigV4) provider; it reaches Bedrock through
+# the Mantle OpenAI-compatible endpoint with a Bedrock API key as the bearer
+# token. `bedrock-api-key <region>` (installed by features/grok) mints one from
+# the profile's AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY on each refresh; the key
+# is Region-scoped, hence one auth provider per Region. Mantle serves
+# xai.grok-4.6 in us-west-2 only in the commercial partition (us-east-1 returns
+# "The model 'xai.grok-4.6' does not exist"), so the Region here deliberately
+# differs from profile.env's AWS_REGION=us-east-1 — same split as gpt-6-astra.
+# Mantle rejects `reasoning.summary`, hence reasoning_summary = "none".
+
+[auth_provider.bedrock-us-west-2]
+command = "bedrock-api-key us-west-2"
+token_ttl_secs = 1800
+
+[model."aws/grok-4.6"]
+model = "xai.grok-4.6"
+base_url = "https://bedrock-mantle.us-west-2.api.aws/openai/v1"
+name = "Grok 4.6 (Bedrock US)"
+description = "xAI Grok 4.6 via Amazon Bedrock Mantle, us-west-2"
+api_backend = "responses"
+reasoning_summary = "none"
+auth_provider = "bedrock-us-west-2"
+context_window = 500000

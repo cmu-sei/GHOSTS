@@ -1,0 +1,9 @@
+{
+    "id": "_template_",
+    "version": "0.1.0",
+    "name": "Template-repository maintenance tooling",
+    "description": "Installs nothing itself. It exists to pull in the tooling that maintaining agent-dev needs but a project built from it does not - currently PowerShell, for running setup.ps1/spawn.ps1 in the container. setup comments it out whenever the root .template-container marker is absent, so only a template checkout builds it",
+    "dependsOn": {
+        "ghcr.io/devcontainers/features/powershell:2": {}
+    }
+}

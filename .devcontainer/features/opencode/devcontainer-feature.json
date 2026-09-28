@@ -5,5 +5,6 @@
     "description": "Installs the OpenCode CLI via the official installer script",
     "installsAfter": [
         "ghcr.io/devcontainers/features/common-utils"
-    ]
+    ],
+    "postCreateCommand": "bash -l .devcontainer/features/opencode/postcreate.sh"
 }

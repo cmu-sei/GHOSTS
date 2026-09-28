@@ -1,0 +1,12 @@
+{
+    "id": "sei-certs",
+    "version": "0.1.0",
+    "name": "Custom root certificates",
+    "description": "Installs any root CA certificates (*.crt) placed in this folder, such as SEI or Zscaler roots. With none present it does nothing.",
+    "containerEnv": {
+        "NODE_EXTRA_CA_CERTS": "/etc/ssl/certs/ca-certificates.crt",
+        "REQUESTS_CA_BUNDLE": "/etc/ssl/certs/ca-certificates.crt",
+        "PIP_CERT": "/etc/ssl/certs/ca-certificates.crt",
+        "SSL_CERT_FILE": "/etc/ssl/certs/ca-certificates.crt"
+    }
+}

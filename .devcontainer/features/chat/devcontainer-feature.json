@@ -1,0 +1,39 @@
+{
+    "id": "chat",
+    "version": "0.1.0",
+    "name": "Browser Chat Stack",
+    "description": "Installs the browser-chat stack (LiteLLM proxy, Open WebUI, Open Terminal, SearXNG, supervisord) in one pinned bundle via uv",
+    "dependsOn": {
+        "ghcr.io/devcontainers-extra/features/uv:1": {}
+    },
+    "postCreateCommand": "bash -l .devcontainer/features/chat/postcreate.sh",
+    "postStartCommand": "bash -l .devcontainer/features/chat/poststart.sh",
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "remote.portsAttributes": {
+                    "7000": {
+                        "label": "Open WebUI",
+                        "onAutoForward": "openBrowserOnce"
+                    },
+                    "7010": {
+                        "label": "LiteLLM proxy",
+                        "onAutoForward": "silent"
+                    },
+                    "7020": {
+                        "label": "SearXNG",
+                        "onAutoForward": "silent"
+                    },
+                    "7030": {
+                        "label": "Open Terminal",
+                        "onAutoForward": "silent"
+                    },
+                    "6090": {
+                        "label": "supervisord control",
+                        "onAutoForward": "ignore"
+                    }
+                }
+            }
+        }
+    }
+}

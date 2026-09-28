@@ -1,1 +1,6 @@
 devcontainer.env
+
+# Personal, untracked work area (Open Terminal's working directory).
+# The directory and its README are tracked; everything you create inside is not.
+work/*
+!work/README.md

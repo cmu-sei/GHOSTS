@@ -1,0 +1,11 @@
+{
+    "id": "grok",
+    "version": "0.1.0",
+    "name": "Grok CLI",
+    "description": "Installs xAI's Grok CLI (Grok Build) via the official installer script, plus the Bedrock API key helper it needs to reach Amazon Bedrock",
+    "installsAfter": [
+        "ghcr.io/devcontainers/features/common-utils",
+        "ghcr.io/devcontainers-extra/features/uv"
+    ],
+    "postCreateCommand": "bash -l .devcontainer/features/grok/postcreate.sh"
+}

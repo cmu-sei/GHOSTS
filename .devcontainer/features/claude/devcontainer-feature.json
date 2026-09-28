@@ -5,5 +5,17 @@
     "description": "Installs the Claude Code CLI via the official installer script",
     "installsAfter": [
         "ghcr.io/devcontainers/features/common-utils"
-    ]
+    ],
+    "postCreateCommand": "bash -l .devcontainer/features/claude/postcreate.sh",
+    "postStartCommand": "bash -l .devcontainer/features/claude/poststart.sh",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "anthropic.claude-code"
+            ],
+            "settings": {
+                "chat.disableAIFeatures": true
+            }
+        }
+    }
 }

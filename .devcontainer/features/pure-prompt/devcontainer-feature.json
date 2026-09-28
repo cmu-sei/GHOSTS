@@ -1,0 +1,10 @@
+{
+    "id": "pure-prompt",
+    "version": "0.1.0",
+    "name": "Pure Prompt (Zsh)",
+    "description": "Installs the Pure Zsh prompt in place of the oh-my-zsh theme, and enables the shell prompt's git dirty indicator",
+    "installsAfter": [
+        "ghcr.io/devcontainers/features/common-utils"
+    ],
+    "postStartCommand": "bash -l .devcontainer/features/pure-prompt/poststart.sh"
+}
