@@ -1,0 +1,15 @@
+{
+  "name": "ghosts-scenario-document-tools",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Validate, canonicalize and convert GHOSTS scenario documents (schema v1).",
+  "type": "module",
+  "bin": { "scenario-doc": "./scenario-doc.mjs" },
+  "scripts": {
+    "test": "bash test.sh"
+  },
+  "dependencies": {
+    "ajv": "^8.17.0",
+    "ajv-formats": "^3.0.1"
+  }
+}

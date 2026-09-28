@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "1.0.0",
+  "slug": "Bad Slug",
+  "name": "Invalid on purpose",
+  "description": "Exercises the schema's rejections.",
+  "adversaries": [{ "id": "x", "name": "X", "techniques": ["T105", "T1566.002"], "capability": 9 }],
+  "timeline": { "events": [{ "id": "e1", "owner": "Blue Team", "at": "day 2 09:40" }, { "id": "e2", "owner": "white-cell" }] },
+  "rulesOfPlay": { "duration": "11 days" },
+  "unknownKey": true
+}
