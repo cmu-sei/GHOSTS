@@ -66,7 +66,8 @@ That is how the developer checks you read it.
 sentence** of reasoning, and write it to `decisions.md` as `proposed`. Do not ask a follow-up to a "you
 decide" — that converts the courtesy into an interrogation.
 
-`decisions.md` format, one row per value that was not in the intent:
+`decisions.md` format. Every value the developer did not state gets a row; so do the ones they did, which
+is what makes the two counts at step e meaningful:
 
 ```markdown
 | # | Decision | Value | Who | Why |

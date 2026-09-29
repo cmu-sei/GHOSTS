@@ -557,21 +557,26 @@ function render(docFile, ledgerFile) {
         o.priority, o.metWhen ? `\`${o.metWhen}\`` : o.successCriteria, o.assigned]));
   }
 
-  table(out, ['Automation', 'Bound to'], list(doc.workflows).map(w => [w.name || w.id, w.ref]));
+  table(out, ['Automation', 'Bound to'], list(doc.workflows).map(w => [w.displayName || w.ref, w.ref]));
 
   const refs = list(doc.references);
   if (refs.length) {
     heading(out, 2, 'References');
     para(out, 'Every `[ref:id]` in the prose above points at one of these.');
-    table(out, ['Id', 'Title', 'Where'], refs.map(x => [x.id, x.title, x.url || x.citation]));
+    table(out, ['Id', 'Title', 'Where'],
+      refs.map(x => [x.id, x.title, commas([x.uri, x.locator].filter(Boolean))]));
   }
 
   // The ledger is the other half of the review: which mission judgments a person made and which a
   // model proposed. It is a separate file because it is not part of the document, and it is included
-  // verbatim because paraphrasing a record of who decided what would defeat its purpose.
+  // verbatim — paraphrasing a record of who decided what would defeat its purpose. Only its headings
+  // move: every one drops two levels, so the ledger's own sections nest under this one instead of
+  // becoming peers of the plan's.
   if (ledgerFile) {
     heading(out, 2, 'Decisions ledger');
-    out.push(readFileSync(ledgerFile, 'utf8').replace(/^#\s+/m, '### ').trimEnd(), '');
+    const ledger = readFileSync(ledgerFile, 'utf8')
+      .replace(/^(#{1,4})\s+/gm, (_, hashes) => '#'.repeat(hashes.length + 2) + ' ');
+    out.push(ledger.trimEnd(), '');
   }
 
   return out.join('\n').replace(/\n{3,}/g, '\n\n') + '\n';

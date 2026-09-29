@@ -272,3 +272,23 @@ being told is better than being imported wrong — and because no document of th
     `mitre-attack/attack-stix-data` commit it was built from. It is a committed artefact with no
     refresh job, so a technique revoked after that commit still validates. How often, and by what,
     should it be rebuilt?
+
+11. **A round trip can turn a valid document into an invalid one.** Prose anywhere may cite a
+    reference as `[ref:<id>]`, and tier 2 errors (`REF_UNKNOWN_REFERENCE`) when the citation names an
+    id the `references[]` list does not declare. But `references[]` has no column, so an import keeps
+    the prose and drops the list, and the export then cites a reference that is not there. Step 4's
+    agent run hit this: a document with one cited reference imported clean and its export failed tier
+    2 with one error. `roundtrip.sh` reports it as a failed `import` check on that scenario, and none
+    of the four examples cites a reference, which is why nothing saw it before — its `valid` check is
+    tier 1 only, so only the re-import catches it. Three ways out — give citations a column, have the
+    export strip a citation it cannot support, or have the validator downgrade the finding when the
+    document declares no references at all — and only the first keeps the citation. Which?
+
+12. **Do `population.pools` or `Person` entities generate NPCs?** The schema documents pools as the
+    simulated population GHOSTS animates, and `ELICITATION.md` calls the field the NPC binding, but
+    `ScenarioCompilerService` generates one NPC per `Person` entity and ignores pool counts entirely:
+    `phishing-drill` compiles to 1 NPC from its single `Person` entity while declaring pools of 12 and
+    1, and `operation-overlord` declares five pools and compiles to 0. Step 4's agent run tripped
+    `DRYRUN_NO_NPCS` on a document with three populated pools. Either pools should drive generation, or
+    they are a sizing note and a document needs a `Person` entity per NPC — which does not scale to a
+    twelve-clerk pool. Related to question 9: both are places the compile path ignores authored content.
