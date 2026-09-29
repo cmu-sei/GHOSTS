@@ -115,7 +115,8 @@ public static class ScenarioDocumentValidator
             var keyword = string.IsNullOrEmpty(error.Key) ? LastKeyword(node) : error.Key;
             if (Structural.Contains(keyword) && !string.IsNullOrEmpty(error.Key)) continue;
             if (Branching.Contains(keyword)) continue; // reported below, with the alternatives named
-            yield return ScenarioFinding.Err(1, Code(keyword), Pointer(node), Message(keyword, error.Value));
+            yield return ScenarioFinding.Err(
+                1, Code(keyword), Pointer(node), Message(keyword, error.Value), Hint(node, keyword));
         }
 
         foreach (var group in (node.Details ?? []).GroupBy(child => Relative(node, child)))
@@ -169,6 +170,46 @@ public static class ScenarioDocumentValidator
             sb.Append(char.ToUpperInvariant(c));
         }
         return sb.ToString().Replace("$", string.Empty);
+    }
+
+    /// <summary>
+    /// What the schema actually asks for: the pattern or the allowed values, and the schema's own
+    /// description of the field. "must match the indicated regular expression" without the expression
+    /// leaves an author guessing, which is the opposite of the point.
+    /// </summary>
+    private static string Hint(EvaluationResults node, string keyword)
+    {
+        var schema = Subschema(node);
+        var asked = keyword switch
+        {
+            "pattern" when schema?["pattern"] is JsonValue p => $"Must match {p.GetValue<string>()}.",
+            "enum" when schema?["enum"] is JsonArray e => $"Allowed: {string.Join(", ", e.Select(v => v?.ToJsonString()))}.",
+            _ => null
+        };
+        var described = (schema?["description"] as JsonValue)?.GetValue<string>();
+        var hint = string.Join(" ", new[] { asked, described }.Where(s => !string.IsNullOrEmpty(s)));
+        return hint.Length > 0 ? hint : null;
+    }
+
+    /// <summary>The subschema a result came from, through the JSON pointer in its schema location.</summary>
+    private static JsonObject Subschema(EvaluationResults node)
+    {
+        var fragment = node.SchemaLocation?.Fragment;
+        if (string.IsNullOrEmpty(fragment)) return null;
+
+        JsonNode at = ScenarioDocumentSchema.Node;
+        foreach (var raw in fragment.TrimStart('#').Split('/', StringSplitOptions.RemoveEmptyEntries))
+        {
+            var token = Uri.UnescapeDataString(raw).Replace("~1", "/").Replace("~0", "~");
+            at = at switch
+            {
+                JsonObject o => o[token],
+                JsonArray a when int.TryParse(token, out var i) && i >= 0 && i < a.Count => a[i],
+                _ => null
+            };
+            if (at == null) return null;
+        }
+        return at as JsonObject;
     }
 
     /// <summary>The library's message, except where the keyword deserves a sentence of its own.</summary>
