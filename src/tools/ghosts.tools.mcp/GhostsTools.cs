@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
 using ModelContextProtocol.Server;
 
@@ -91,6 +92,51 @@ public sealed class GhostsTools
         return await GetJsonAsync("/api/scenarios", take, ct);
     }
 
+    // ───────────── scenario documents: the authoring agent's only tools that reach the API ─────────────
+    //
+    // A scenario document is one exercise as a single versioned JSON file (schemas/scenario-document).
+    // Validate writes nothing, ever, so it is safe to call on a half-finished draft; import is the only
+    // one of the four that writes, and it refuses on any error-severity finding. There is deliberately
+    // no tool here that edits a scenario row: an authoring agent changes the document and imports it.
+
+    [McpServerTool(Name = "scenario_document_validate", ReadOnly = true, OpenWorld = true)]
+    [Description("Validates a GHOSTS scenario document and returns the findings. Writes nothing, ever, so it is safe on a draft. With dryRun it also loads and compiles the document inside a transaction that is always rolled back, adding tier-4 findings. Call this before import and after every edit.")]
+    public static async Task<string> ValidateScenarioDocumentAsync(
+        [Description("The scenario document as a JSON object (schema 1.1.0).")] string document,
+        [Description("When true, also load and compile the document in a rolled-back transaction and report what that found.")] bool dryRun = false,
+        CancellationToken ct = default)
+    {
+        return await PostDocumentAsync($"/api/scenarios/validate?dryRun={(dryRun ? "true" : "false")}", document, ct);
+    }
+
+    [McpServerTool(Name = "scenario_document_import", Destructive = false, Idempotent = false, OpenWorld = true)]
+    [Description("Creates a GHOSTS scenario from a scenario document. Runs the same validator as scenario_document_validate and refuses, writing nothing, on any finding of severity error. On success returns the new scenario id; on refusal returns the findings and no id.")]
+    public static async Task<string> ImportScenarioDocumentAsync(
+        [Description("The scenario document as a JSON object (schema 1.1.0).")] string document,
+        CancellationToken ct = default)
+    {
+        return await PostDocumentAsync("/api/scenarios/import", document, ct);
+    }
+
+    [McpServerTool(Name = "scenario_document_export", ReadOnly = true, OpenWorld = true)]
+    [Description("Fetches one GHOSTS scenario as a canonical scenario document: no database ids, no timestamps, no run state. Two exports of an unchanged scenario are byte-identical, and the output is valid input to scenario_document_import.")]
+    public static async Task<string> ExportScenarioDocumentAsync(
+        [Description("GHOSTS scenario id.")] int scenarioId,
+        CancellationToken ct = default)
+    {
+        return await GetJsonAsync($"/api/scenarios/{scenarioId}/document", null, ct);
+    }
+
+    [McpServerTool(Name = "attack_technique_lookup", ReadOnly = true, OpenWorld = false)]
+    [Description("Resolves MITRE ATT&CK techniques by id or by a fragment of a name, from the index GHOSTS validates against. Returns id, name, domains, and whether MITRE revoked or deprecated it. Use this for every technique id that goes into a document; never write one from memory.")]
+    public static async Task<string> LookupAttackTechniqueAsync(
+        [Description("An ATT&CK technique id such as T1566.002, an id prefix, or part of a technique name such as \"spearphishing\".")] string query,
+        [Description("Maximum number of matches to return.")] int take = 25,
+        CancellationToken ct = default)
+    {
+        return await GetJsonAsync($"/api/attack/techniques?q={Uri.EscapeDataString(query ?? string.Empty)}&take={take}", null, ct);
+    }
+
     [McpServerTool(Name = "browser_timeline_build", ReadOnly = true, OpenWorld = false)]
     [Description("Builds a browser timeline JSON payload without sending it to GHOSTS.")]
     public static string BuildBrowserTimelineJson(
@@ -141,6 +187,45 @@ public sealed class GhostsTools
         catch (HttpRequestException ex)
         {
             return ApiError("send_browser_timeline", ex);
+        }
+    }
+
+    /// <summary>
+    /// Posts a scenario document as-is and returns the API's answer. The document goes through as raw
+    /// JSON rather than being deserialized and re-serialized here: a canonical document is a byte
+    /// sequence its author is entitled to, and a round trip through this tool must not reorder it. A
+    /// document that is not JSON is reported here instead of being sent.
+    /// </summary>
+    private static async Task<string> PostDocumentAsync(string path, string document, CancellationToken ct)
+    {
+        if (TryParseJson(document) is not JsonElement { ValueKind: JsonValueKind.Object })
+        {
+            return JsonSerializer.Serialize(new
+            {
+                ok = false,
+                operation = path,
+                error = "The document must be a JSON object. Nothing was sent to the API."
+            }, JsonOptions);
+        }
+
+        try
+        {
+            using var client = GhostsApiClient.Create();
+            using var content = new StringContent(document, Encoding.UTF8, "application/json");
+            using var response = await client.PostAsync(path, content, ct);
+            var body = await response.Content.ReadAsStringAsync(ct);
+
+            return JsonSerializer.Serialize(new
+            {
+                ok = response.IsSuccessStatusCode,
+                status = (int)response.StatusCode,
+                reason = response.ReasonPhrase,
+                data = TryParseJson(body)
+            }, JsonOptions);
+        }
+        catch (HttpRequestException ex)
+        {
+            return ApiError(path, ex);
         }
     }
 

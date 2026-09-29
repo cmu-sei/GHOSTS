@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 
 namespace Ghosts.Api.Infrastructure.ScenarioDocuments;
@@ -25,6 +26,33 @@ public static class AttackIndex
     /// <summary>The technique, or null when no such id exists in any domain.</summary>
     public static Technique Find(string id) =>
         id != null && Index.Value.Techniques.TryGetValue(id, out var t) ? t : null;
+
+    /// <summary>
+    /// Techniques matching an id or a fragment of a name, so an author can find one without recalling
+    /// it. An exact id first, then ids that start with the query, then names that contain it; revoked
+    /// and deprecated techniques are returned rather than hidden, because the caller needs to be told
+    /// the id it was about to use is dead.
+    /// </summary>
+    public static IReadOnlyList<Technique> Search(string query, int take)
+    {
+        if (string.IsNullOrWhiteSpace(query)) return [];
+        var q = query.Trim();
+
+        return Index.Value.Techniques.Values
+            .Select(t => (t, rank: Rank(t, q)))
+            .Where(x => x.rank > 0)
+            .OrderBy(x => x.rank)
+            .ThenBy(x => x.t.Id, StringComparer.Ordinal)
+            .Take(Math.Clamp(take, 1, 100))
+            .Select(x => x.t)
+            .ToList();
+    }
+
+    private static int Rank(Technique t, string q) =>
+        string.Equals(t.Id, q, StringComparison.OrdinalIgnoreCase) ? 1
+        : t.Id.StartsWith(q, StringComparison.OrdinalIgnoreCase) ? 2
+        : t.Name.Contains(q, StringComparison.OrdinalIgnoreCase) ? 3
+        : 0;
 
     /// <summary>The bundle commit the index was built from, for the log and the info finding.</summary>
     public static string Provenance =>
