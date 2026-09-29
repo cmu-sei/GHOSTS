@@ -23,8 +23,21 @@ done
 out=$(node tools/scenario-doc.mjs validate tests/invalid.scenario.json 2>&1) && { echo "FAIL  invalid document passed"; fail=1; }
 for want in '/slug must match pattern' '/adversaries/0/techniques/0 must match pattern' '/adversaries/0/capability must be <= 5' \
             '/timeline/events/0/owner must be equal to one of the allowed values' '/timeline/events/0/at must match pattern' \
-            '/timeline/events/1 must match a schema in anyOf' '/rulesOfPlay/duration must match pattern' 'must NOT have additional properties'; do
+            '/timeline/events/1 must match a schema in anyOf' '/rulesOfPlay/duration must match pattern' 'must NOT have additional properties' \
+            "/timeline/events/2 must have property description when property when is present"; do
   grep -qF -- "$want" <<<"$out" || { echo "FAIL  expected error not reported: $want"; fail=1; }
 done
-[ $fail -eq 0 ] && echo "ok    invalid document rejected for all 8 planted defects"
+[ $fail -eq 0 ] && echo "ok    invalid document rejected for all 9 planted defects"
+# Tier 1 of the API's validator is cross-checked against ajv, the reference implementation, through
+# tests/crosscheck-expected.json: ajv's verdict and failing paths for these five documents. The .NET
+# test reads the fixture, so regenerate it here and fail if it drifts — neither implementation can
+# change its mind about a document without the other one noticing.
+node tools/scenario-doc.mjs crosscheck examples/*.scenario.json tests/invalid.scenario.json > /tmp/crosscheck-actual.json
+if cmp -s tests/crosscheck-expected.json /tmp/crosscheck-actual.json; then
+  echo "ok    crosscheck fixture matches ajv"
+else
+  echo "FAIL  tests/crosscheck-expected.json is stale:"
+  diff tests/crosscheck-expected.json /tmp/crosscheck-actual.json || true
+  fail=1
+fi
 exit $fail

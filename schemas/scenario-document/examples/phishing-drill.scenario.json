@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.0.0",
+  "schemaVersion": "1.1.0",
   "slug": "phishing-drill",
   "name": "Phishing Drill: First Contact",
   "description": "A small SOC-defense rehearsal. You are the on-shift Blue Team analyst at Meridian Logistics. An adversary opens with a spear-phishing campaign against the finance team. How fast you detect and contain it decides whether the intrusion stops at the inbox or turns into hands-on-keyboard lateral movement.",
@@ -76,8 +76,7 @@
     "telemetry": {
       "logs": true,
       "network": true,
-      "endpoint": true,
-      "chat": false
+      "endpoint": true
     },
     "escalationLadder": {
       "summary": "Inbox -> Endpoint -> Identity -> Lateral"
@@ -95,8 +94,6 @@
         "id": 1,
         "name": "Detect the phishing campaign",
         "description": "Recognize the inbound spear-phishing campaign from the SIEM alert and triage it as a real threat rather than noise.",
-        "type": "MET",
-        "priority": 1,
         "successCriteria": "Player investigates the alert / lookalike domain before acting blindly.",
         "assigned": "blue-team"
       },
@@ -104,8 +101,6 @@
         "id": 2,
         "name": "Contain before lateral movement",
         "description": "Quarantine the email and/or block the malicious domain before the adversary obtains valid credentials and pivots to a second host.",
-        "type": "MET",
-        "priority": 1,
         "successCriteria": "The 'contained' flag is set at step 4, steering the timeline onto the blocked-retry branch.",
         "assigned": "blue-team"
       }
@@ -123,19 +118,13 @@
         "id": "event-1",
         "at": "T+0m",
         "owner": "white-cell",
-        "description": "Exercise start. It is a quiet Tuesday morning shift. The SIEM dashboard is green. You hold the on-shift SOC analyst seat at Meridian Logistics, responsible for the finance VLAN.",
-        "execution": {
-          "mode": "manual"
-        }
+        "description": "Exercise start. It is a quiet Tuesday morning shift. The SIEM dashboard is green. You hold the on-shift SOC analyst seat at Meridian Logistics, responsible for the finance VLAN."
       },
       {
         "id": "event-2",
         "at": "T+5m",
         "owner": "red-team",
-        "description": "Crimson Tide sends a spear-phishing email to twelve finance staff. It impersonates the company's payroll provider and carries a link to a credential-harvesting page styled like the Microsoft 365 login.",
-        "execution": {
-          "mode": "manual"
-        }
+        "description": "Crimson Tide sends a spear-phishing email to twelve finance staff. It impersonates the company's payroll provider and carries a link to a credential-harvesting page styled like the Microsoft 365 login."
       },
       {
         "id": "event-3",
@@ -144,10 +133,7 @@
         "description": "The email gateway fires a low-confidence alert into your SOC queue: 'Possible credential phishing - external sender, lookalike domain payroll-meridian[.]com, 12 recipients.' Two recipients have already opened the message.",
         "objectives": [
           1
-        ],
-        "execution": {
-          "mode": "manual"
-        }
+        ]
       },
       {
         "id": "event-4",
@@ -157,10 +143,7 @@
         "objectives": [
           1,
           2
-        ],
-        "execution": {
-          "mode": "manual"
-        }
+        ]
       },
       {
         "id": "event-5",
@@ -170,20 +153,14 @@
         "description": "Containment held. By the time Crimson Tide's harvesting page would have collected a password, the email is gone from every inbox and the domain is blocked. The adversary probes for another way in and finds the door shut. The campaign stalls at the inbox.",
         "objectives": [
           2
-        ],
-        "execution": {
-          "mode": "manual"
-        }
+        ]
       },
       {
         "id": "event-6",
         "at": "T+15m",
         "when": "!contained",
         "owner": "red-team",
-        "description": "No containment came. A finance clerk on FIN-WS-04 enters their M365 password into the harvesting page. Crimson Tide now holds valid credentials (T1078) and authenticates to the file server FS01 over SMB, moving laterally off the first host. The intrusion is now hands-on-keyboard.",
-        "execution": {
-          "mode": "manual"
-        }
+        "description": "No containment came. A finance clerk on FIN-WS-04 enters their M365 password into the harvesting page. Crimson Tide now holds valid credentials (T1078) and authenticates to the file server FS01 over SMB, moving laterally off the first host. The intrusion is now hands-on-keyboard."
       },
       {
         "id": "event-7",
@@ -192,19 +169,13 @@
         "description": "Situation update. Either you stopped this at the inbox or you are now chasing an adversary on the network. Assess what you know and decide your next action: confirm scope, isolate the affected host, reset exposed credentials, or stand the team down.",
         "objectives": [
           2
-        ],
-        "execution": {
-          "mode": "manual"
-        }
+        ]
       },
       {
         "id": "event-8",
         "at": "T+30m",
         "owner": "white-cell",
-        "description": "Exercise complete. The white cell calls end-of-scenario and begins the after-action review.",
-        "execution": {
-          "mode": "manual"
-        }
+        "description": "Exercise complete. The white cell calls end-of-scenario and begins the after-action review."
       }
     ]
   },
@@ -220,8 +191,6 @@
       },
       "externalId": "G-CRIMSON",
       "provenance": {
-        "origin": "operator",
-        "confidence": 1,
         "reviewed": true
       }
     },
@@ -234,8 +203,6 @@
         "role": "Finance Staff"
       },
       "provenance": {
-        "origin": "operator",
-        "confidence": 1,
         "reviewed": true
       }
     },
@@ -248,8 +215,6 @@
         "os": "Windows 11"
       },
       "provenance": {
-        "origin": "operator",
-        "confidence": 1,
         "reviewed": true
       }
     },
@@ -262,8 +227,6 @@
         "os": "Windows Server 2019"
       },
       "provenance": {
-        "origin": "operator",
-        "confidence": 1,
         "reviewed": true
       }
     }
@@ -274,10 +237,7 @@
       "to": "dana-okafor",
       "type": "Targets",
       "label": "spear-phishes",
-      "weight": 1,
       "provenance": {
-        "origin": "operator",
-        "confidence": 1,
         "reviewed": true
       }
     },
@@ -286,10 +246,7 @@
       "to": "fin-ws-04",
       "type": "Accesses",
       "label": "works on",
-      "weight": 1,
       "provenance": {
-        "origin": "operator",
-        "confidence": 1,
         "reviewed": true
       }
     },
@@ -298,10 +255,7 @@
       "to": "fs01",
       "type": "CommunicatesWith",
       "label": "SMB to",
-      "weight": 1,
       "provenance": {
-        "origin": "operator",
-        "confidence": 1,
         "reviewed": true
       }
     }

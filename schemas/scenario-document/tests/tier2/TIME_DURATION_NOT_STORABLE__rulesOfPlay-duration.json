@@ -1,0 +1,7 @@
+{
+  "schemaVersion": "1.1.0",
+  "slug": "time-duration-not-storable",
+  "name": "Duration that is not a whole number of hours",
+  "description": "GHOSTS keeps the duration in whole hours, so the thirty minutes would be lost without a word.",
+  "rulesOfPlay": { "duration": "1h30m" }
+}

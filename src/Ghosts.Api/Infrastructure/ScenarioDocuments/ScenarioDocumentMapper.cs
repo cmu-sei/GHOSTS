@@ -16,12 +16,12 @@ namespace Ghosts.Api.Infrastructure.ScenarioDocuments;
 /// Maps a scenario between the database and a scenario document (schema v1). The document carries the
 /// authored specification only: no database ids, no timestamps, no run state. schemas/scenario-document/
 /// tools/scenario-doc.mjs is the reference for canonical form — keys in schema order, free-key objects
-/// sorted, set-like arrays sorted, empty optional values omitted, two-space indent, trailing newline —
-/// so two exports of an unchanged scenario are byte-identical.
+/// sorted, set-like arrays sorted, empty optional values omitted, values equal to their schema default
+/// omitted, two-space indent, trailing newline — so two exports of an unchanged scenario are byte-identical.
 /// </summary>
 public static class ScenarioDocumentMapper
 {
-    public const string SchemaVersion = "1.0.0";
+    public const string SchemaVersion = ScenarioDocumentSchema.Version;
 
     private static readonly JsonSerializerOptions Canonical = new()
     {
@@ -269,8 +269,50 @@ public static class ScenarioDocumentMapper
         return doc;
     }
 
-    /// <summary>Canonical text: two-space indent, one trailing newline.</summary>
-    public static string Serialize(JsonNode doc) => doc.ToJsonString(Canonical) + "\n";
+    /// <summary>Canonical text: schema defaults omitted, two-space indent, one trailing newline.</summary>
+    public static string Serialize(JsonNode doc) =>
+        (DropDefaults(doc, ScenarioDocumentSchema.Node) ?? doc).ToJsonString(Canonical) + "\n";
+
+    /// <summary>
+    /// A value equal to its schema default says nothing the default does not, so the document that
+    /// states it and the document that omits it are the same document, and only one of them is
+    /// canonical. Mirrors the default rule in scenario-doc.mjs. A required key stays whatever it says.
+    /// </summary>
+    private static JsonNode DropDefaults(JsonNode value, JsonObject node)
+    {
+        node = ScenarioDocumentSchema.Resolve(node);
+        switch (value)
+        {
+            case JsonArray a:
+            {
+                var items = node?["items"] as JsonObject;
+                var outArray = new JsonArray();
+                foreach (var item in a) outArray.Add(DropDefaults(item, items));
+                return outArray;
+            }
+            case JsonObject o:
+            {
+                var props = node?["properties"] as JsonObject;
+                var extra = node?["additionalProperties"] as JsonObject;
+                var requiredKeys = (node?["required"] as JsonArray)?.Select(r => r.GetValue<string>()).ToHashSet(StringComparer.Ordinal) ?? [];
+                var outObject = new JsonObject();
+                foreach (var kv in o)
+                {
+                    var child = ScenarioDocumentSchema.Resolve(props?[kv.Key] ?? extra);
+                    var isRequired = requiredKeys.Contains(kv.Key);
+                    if (!isRequired && child?["default"] is { } fallback && JsonNode.DeepEquals(kv.Value, fallback)) continue;
+                    var pruned = DropDefaults(kv.Value, child);
+                    // An object whose every key was a default is the same as no object at all, and
+                    // the schema says so: execution has minProperties 1, so {} would not validate.
+                    if (!isRequired && pruned is JsonObject { Count: 0 }) continue;
+                    outObject[kv.Key] = pruned;
+                }
+                return outObject;
+            }
+            default:
+                return value?.DeepClone();
+        }
+    }
 
     // ───────────────────────── import ─────────────────────────
 
@@ -355,9 +397,15 @@ public static class ScenarioDocumentMapper
                 string.IsNullOrEmpty(Str(v, "cve")) ? Str(v, "description") : Str(v, "cve"),
                 Str(v, "severity"))).ToList());
 
-        // One duration in the document, two columns in the database: both are written in hours
-        // from it so they cannot disagree. Sub-hour and non-integral durations do not survive.
-        var hours = DurationToHours(Str(rop, "duration"));
+        // One duration in the document, two columns in the database: both are written in hours from
+        // it so they cannot disagree. A duration the columns cannot hold exactly is refused by the
+        // validator before this runs; if it were not, minutes would vanish without a word.
+        var stated = Str(rop, "duration");
+        if (!TryDurationHours(stated, out var hours) && !string.IsNullOrEmpty(stated))
+        {
+            throw new InvalidOperationException(
+                $"Duration \"{stated}\" is not a whole number of hours and cannot be stored; validate the document first.");
+        }
         var telemetry = Obj(rop, "telemetry");
         var mechanics = new GameMechanicsDto(
             Str(rop, "pacing"),
@@ -463,17 +511,40 @@ public static class ScenarioDocumentMapper
                (m > 0 || (d == 0 && h == 0) ? $"{m}m" : string.Empty);
     }
 
-    /// <summary>A document duration in hours, rounded, never rounding a real duration down to none.</summary>
-    private static int DurationToHours(string duration)
+    /// <summary>A duration in minutes, or false if it is not one. "1d2h30m" is 1590.</summary>
+    public static bool TryDurationMinutes(string duration, out int minutes)
     {
-        if (string.IsNullOrEmpty(duration) || !Duration.IsMatch(duration)) return 0;
+        minutes = 0;
+        if (string.IsNullOrEmpty(duration) || !Duration.IsMatch(duration)) return false;
         var m = Duration.Match(duration);
-        var minutes = Part(m.Groups[1], 1440) + Part(m.Groups[2], 60) + Part(m.Groups[3], 1);
-        var hours = (int)Math.Round(minutes / 60.0, MidpointRounding.AwayFromZero);
-        return hours == 0 && minutes > 0 ? 1 : hours;
+        minutes = Part(m.Groups[1], 1440) + Part(m.Groups[2], 60) + Part(m.Groups[3], 1);
+        return true;
+    }
 
-        static int Part(System.Text.RegularExpressions.Group g, int scale) =>
-            g.Success ? int.Parse(g.Value[..^1], CultureInfo.InvariantCulture) * scale : 0;
+    /// <summary>An offset in minutes from T+0, or false if it is not one. "T+3h" is 180.</summary>
+    public static bool TryOffsetMinutes(string offset, out int minutes)
+    {
+        minutes = 0;
+        if (string.IsNullOrEmpty(offset) || !Offset.IsMatch(offset)) return false;
+        var m = Offset.Match(offset);
+        minutes = Part(m.Groups[1], 1440) + Part(m.Groups[2], 60) + Part(m.Groups[3], 1);
+        return true;
+    }
+
+    private static int Part(System.Text.RegularExpressions.Group g, int scale) =>
+        g.Success ? int.Parse(g.Value[..^1], CultureInfo.InvariantCulture) * scale : 0;
+
+    /// <summary>
+    /// A document duration in whole hours, which is all the two integer columns can hold. Nothing is
+    /// rounded: a duration that is not a whole number of hours is a finding the validator raises
+    /// (TIME_DURATION_NOT_STORABLE) and an import that reached here anyway would have lost minutes.
+    /// </summary>
+    public static bool TryDurationHours(string duration, out int hours)
+    {
+        hours = 0;
+        if (!TryDurationMinutes(duration, out var minutes) || minutes % 60 != 0) return false;
+        hours = minutes / 60;
+        return true;
     }
 
     // ───────────────────────── helpers ─────────────────────────

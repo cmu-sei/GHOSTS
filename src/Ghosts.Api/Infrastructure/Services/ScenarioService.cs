@@ -138,8 +138,11 @@ namespace Ghosts.Api.Infrastructure.Services
             _context.Scenarios.Add(scenario);
 
             // One transaction: an objective's database id is only known after the first save, and
-            // the parent and event references that point at it are rewritten in the second.
-            await using var transaction = await _context.Database.BeginTransactionAsync(ct);
+            // the parent and event references that point at it are rewritten in the second. A caller
+            // that already opened one owns it — that is how the validator's dry run creates a
+            // scenario and then rolls the whole thing back.
+            var ambient = _context.Database.CurrentTransaction;
+            await using var transaction = ambient == null ? await _context.Database.BeginTransactionAsync(ct) : null;
 
             var operation = await _context.SaveChangesAsync(ct);
             if (operation < 1)
@@ -154,7 +157,7 @@ namespace Ghosts.Api.Infrastructure.Services
                 await _context.SaveChangesAsync(ct);
             }
 
-            await transaction.CommitAsync(ct);
+            if (transaction != null) await transaction.CommitAsync(ct);
 
             _log.Info($"Created scenario: {scenario.Id} - {scenario.Name}");
 

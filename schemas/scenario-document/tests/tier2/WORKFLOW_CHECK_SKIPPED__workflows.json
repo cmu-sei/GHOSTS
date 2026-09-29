@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "1.1.0",
+  "slug": "workflow-check-skipped",
+  "name": "Workflow declared with no n8n to check it against",
+  "description": "The document binds a workflow, so the registration check applies and has to say it did not run.",
+  "workflows": [
+    { "ref": "ghosts-mailer", "cron": "0 9 * * *", "enabled": true }
+  ]
+}

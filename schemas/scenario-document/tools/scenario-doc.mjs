@@ -3,6 +3,7 @@
 // and check that a conversion kept every value from its source.
 //
 //   node scenario-doc.mjs validate <doc.json>...
+//   node scenario-doc.mjs crosscheck <doc.json>...        (ajv's verdict and failing paths, as JSON)
 //   node scenario-doc.mjs canonicalize <doc.json>            (rewrites the file in canonical form)
 //   node scenario-doc.mjs convert <fixture.json> <out.json>  (either fixture shape → document)
 //   node scenario-doc.mjs coverage <fixture.json> <doc.json> (every source value appears in the doc)
@@ -48,9 +49,38 @@ function validate(files) {
   return failed;
 }
 
+// ─────────────────────── crosscheck ─────────────────────────
+// The failing instance locations ajv reports, per file, as a fixture the .NET tier-1 validator is
+// held to. The API image has no node, so the .NET validator is the one that runs in production and
+// this is the only thing that keeps the two from drifting apart.
+//
+// One normalization: ajv reports an additionalProperties error at the *parent* and names the
+// offending key in params; the pointer to the offending value is the parent plus that key, which is
+// what a finding should carry and what the .NET validator reports.
+
+const pointer = e =>
+  (e.keyword === 'additionalProperties'
+    ? `${e.instancePath}/${e.params.additionalProperty}`
+    : e.instancePath) || '/';
+
+function crosscheck(files) {
+  const check = compile();
+  const out = {};
+  for (const f of files) {
+    const valid = check(JSON.parse(readFileSync(f, 'utf8')));
+    out[basename(f)] = {
+      valid,
+      paths: valid ? [] : [...new Set(check.errors.map(pointer))].sort(),
+    };
+  }
+  console.log(JSON.stringify(out, null, 2));
+  return 0;
+}
+
 // ─────────────────────── canonicalize ───────────────────────
 // One serialization per scenario: keys in schema order, free-key objects sorted,
-// set-like arrays sorted, empty optional values omitted, 2-space indent, trailing newline.
+// set-like arrays sorted, empty optional values omitted, values equal to their schema
+// default omitted, 2-space indent, trailing newline.
 
 const SET_ARRAYS = new Set(['flags', 'setFlags', 'techniques', 'objectives']);
 
@@ -78,9 +108,13 @@ function canonical(value, node, key) {
     const free = Object.keys(value).filter(k => !(k in props)).sort();
     const out = {};
     for (const k of [...ordered, ...free]) {
-      const v = canonical(value[k], props[k] || node?.additionalProperties, k);
+      const child = resolve(props[k] || node?.additionalProperties);
+      const v = canonical(value[k], child, k);
       const required = (node?.required || []).includes(k);
       if (!required && isEmpty(v)) continue;
+      // A value equal to its schema default says nothing the default does not, so the
+      // document that omits it and the document that states it are the same document.
+      if (!required && child && 'default' in child && v === child.default) continue;
       out[k] = v;
     }
     return out;
@@ -116,6 +150,18 @@ function minutesToDuration(min) {
 const notes = [];
 const note = s => notes.push(s);
 
+// GHOSTS stores one duration and stores it in whole hours (game_mechanics.duration_hours is an
+// integer), so the document cannot carry a fraction of an hour and be importable. A source measured
+// in fractions is rounded up here, at authoring time and out loud, rather than losing the minutes
+// silently on import; rounding up never puts an event outside the exercise.
+function storableDuration(minutes, slug, source) {
+  const hours = Math.ceil(minutes / 60);
+  if (hours * 60 !== minutes) {
+    note(`${slug}: ${source} is ${minutes} minutes, which GHOSTS cannot store (it keeps whole hours); the document says ${hours}h`);
+  }
+  return minutesToDuration(hours * 60);
+}
+
 function convert(fixture, slug) {
   const s = fixture.scenario;
   return s.scenarioParameters ? convertApiShape(fixture, slug) : convertKriegspielShape(fixture, slug);
@@ -124,7 +170,7 @@ function convert(fixture, slug) {
 // Shape A: the three-GETs export of the live API (scenario + graph + objectives).
 function convertApiShape(fx, slug) {
   const s = fx.scenario, p = s.scenarioParameters, te = s.technicalEnvironment, gm = s.gameMechanics, tl = s.timeline;
-  const doc = { schemaVersion: '1.0.0', slug, name: s.name, description: s.description };
+  const doc = { schemaVersion: '1.1.0', slug, name: s.name, description: s.description };
   if (fx.catalog) doc.catalog = fx.catalog;
   doc.context = { political: p.politicalContext };
   doc.audience = { role: p.playerRole, rulesOfEngagement: p.rulesOfEngagement };
@@ -145,7 +191,7 @@ function convertApiShape(fx, slug) {
   doc.population = { pools: p.userPools.map(u => ({ role: u.role, count: u.count })) };
   const rop = {
     pacing: gm.timelineType,
-    duration: minutesToDuration(gm.durationHours * 60),
+    duration: storableDuration(Math.round(gm.durationHours * 60), slug, `gameMechanics.durationHours=${gm.durationHours}`),
     adjudication: gm.adjudicationType,
     telemetry: gm.telemetry && { logs: gm.telemetry.collectLogs, network: gm.telemetry.collectNetwork, endpoint: gm.telemetry.collectEndpoint, chat: gm.telemetry.collectChat },
     escalationLadder: { summary: gm.escalationLadder },
@@ -207,7 +253,7 @@ function convertApiShape(fx, slug) {
 // Shape B: the current kriegspiel bundle (situation, player, opfor, world, triggers, clock, fog).
 function convertKriegspielShape(fx, slug) {
   const s = fx.scenario;
-  const doc = { schemaVersion: '1.0.0', slug, name: s.name, description: s.description };
+  const doc = { schemaVersion: '1.1.0', slug, name: s.name, description: s.description };
   if (fx.catalog) doc.catalog = fx.catalog;
   doc.context = { situation: s.situation };
   doc.audience = { role: s.player?.role, mandate: s.player?.mandate, rulesOfEngagement: s.player?.roe };
@@ -227,7 +273,7 @@ function convertKriegspielShape(fx, slug) {
   };
   doc.startingConditions = { flags: w.flags, facts: w.facts };
   doc.rulesOfPlay = {
-    duration: s.clock ? minutesToDuration(s.clock.windowMinutes) : undefined,
+    duration: s.clock ? storableDuration(s.clock.windowMinutes, slug, `clock.windowMinutes=${s.clock.windowMinutes}`) : undefined,
     clock: s.clock && { tickMinutes: s.clock.tickMinutes, label: s.clock.label },
     fog: s.fog?.default,
   };
@@ -268,10 +314,26 @@ function leaves(v, key, out) {
   out.push({ key, value: String(v) });
 }
 
+// Canonical form omits a value equal to its schema default, so coverage reads the document
+// the way any reader must: with the declared defaults filled in on the objects that are present.
+function withDefaults(value, node) {
+  node = resolve(node);
+  if (Array.isArray(value)) return value.map(v => withDefaults(v, node?.items));
+  if (!value || typeof value !== 'object') return value;
+  const props = node?.properties || {};
+  const out = {};
+  for (const [k, v] of Object.entries(value)) out[k] = withDefaults(v, props[k] || node?.additionalProperties);
+  for (const [k, p] of Object.entries(props)) {
+    const child = resolve(p);
+    if (!(k in out) && child && 'default' in child) out[k] = child.default;
+  }
+  return out;
+}
+
 function coverage(fixtureFile, docFile) {
   const fx = JSON.parse(readFileSync(fixtureFile, 'utf8'));
   const text = readFileSync(docFile, 'utf8');
-  const hay = JSON.stringify(JSON.parse(text)); // escaped the same way as the values will be
+  const hay = JSON.stringify(withDefaults(JSON.parse(text), schema)); // escaped the same way as the values will be
   const want = []; leaves(fx, null, want);
   const missing = want.filter(({ value }) => !hay.includes(JSON.stringify(value).slice(1, -1)) && !hay.includes(value));
   for (const m of missing) console.log(`MISSING ${m.key}: ${m.value.slice(0, 80)}`);
@@ -325,11 +387,13 @@ switch (cmd) {
     console.log(`wrote ${outFile}`);
     break;
   }
+  case 'crosscheck':
+    rc = crosscheck(args); break;
   case 'coverage':
     rc = coverage(args[0], args[1]) ? 1 : 0; break;
   case 'diff':
     rc = docDiff(args[0], args[1]) ? 1 : 0; break;
   default:
-    console.error('usage: scenario-doc.mjs validate|canonicalize|convert|coverage|diff ...'); rc = 2;
+    console.error('usage: scenario-doc.mjs validate|crosscheck|canonicalize|convert|coverage|diff ...'); rc = 2;
 }
 process.exit(rc);

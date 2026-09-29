@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.0.0",
+  "schemaVersion": "1.1.0",
   "slug": "soc-morning",
   "name": "SOC Morning: Clear the Queue by Lunch",
   "description": "You are the on-shift Blue Team analyst at Meridian Logistics. It's Monday and three tickets are already stacked in your queue: a phishing report, an EDR ransomware alert, and a VPN account lockout from a traveling exec. They're all open at once — you decide the order. The ransomware alert is the one that bites if you dawdle. Clear the queue before it turns into a bad day, and try to make lunch.",
@@ -86,7 +86,7 @@
   },
   "rulesOfPlay": {
     "pacing": "turn-based",
-    "duration": "45m",
+    "duration": "1h",
     "deadline": {
       "at": "T+30m"
     },
@@ -94,8 +94,7 @@
     "telemetry": {
       "logs": true,
       "network": true,
-      "endpoint": true,
-      "chat": false
+      "endpoint": true
     },
     "escalationLadder": {
       "summary": "Inbox -> Endpoint -> Identity -> Lateral"
@@ -113,7 +112,6 @@
         "id": 1,
         "name": "Triage the morning queue",
         "description": "Investigate the open tickets and identify which is the real, spreading threat rather than noise.",
-        "type": "MET",
         "priority": 2,
         "successCriteria": "Player investigates the tickets before acting blindly.",
         "assigned": "blue-team"
@@ -122,8 +120,6 @@
         "id": 2,
         "name": "Contain the ransomware before it spreads",
         "description": "Kill the shadow-copy deletion and isolate FIN-WS-04 before Cinder Wolf's payload encrypts the file share.",
-        "type": "MET",
-        "priority": 1,
         "successCriteria": "The 'ransomware-contained' flag is set on ticket #2, steering the timeline onto the stalled branch.",
         "assigned": "blue-team"
       }
@@ -141,19 +137,13 @@
         "id": "event-1",
         "at": "T+0m",
         "owner": "white-cell",
-        "description": "Exercise start. Monday, 08:30. You take the on-shift SOC analyst seat at Meridian Logistics. The queue is not empty — three tickets are already waiting, and the clock to lunch is running.",
-        "execution": {
-          "mode": "manual"
-        }
+        "description": "Exercise start. Monday, 08:30. You take the on-shift SOC analyst seat at Meridian Logistics. The queue is not empty — three tickets are already waiting, and the clock to lunch is running."
       },
       {
         "id": "event-2",
         "at": "T+2m",
         "owner": "white-cell",
-        "description": "Your queue populates. Ticket #1: a finance clerk reports a suspicious payroll email. Ticket #2: EDR flagged a possible ransomware precursor on FIN-WS-04 (a service creating shadow-copy deletions). Ticket #3: a traveling exec is locked out of the VPN. All three are yours.",
-        "execution": {
-          "mode": "manual"
-        }
+        "description": "Your queue populates. Ticket #1: a finance clerk reports a suspicious payroll email. Ticket #2: EDR flagged a possible ransomware precursor on FIN-WS-04 (a service creating shadow-copy deletions). Ticket #3: a traveling exec is locked out of the VPN. All three are yours."
       },
       {
         "id": "event-3",
@@ -162,10 +152,7 @@
         "description": "TICKET #1 — Phishing report. A finance clerk forwarded an email impersonating the payroll provider, carrying a link to a lookalike Microsoft 365 login. Twelve staff received it; two have opened it. What do you do about this one?",
         "objectives": [
           1
-        ],
-        "execution": {
-          "mode": "manual"
-        }
+        ]
       },
       {
         "id": "event-4",
@@ -175,19 +162,13 @@
         "objectives": [
           1,
           2
-        ],
-        "execution": {
-          "mode": "manual"
-        }
+        ]
       },
       {
         "id": "event-5",
         "at": "T+5m",
         "owner": "blue-team",
-        "description": "TICKET #3 — VPN lockout. A traveling executive is locked out of the VPN after repeated MFA prompts. Could be a fat-fingered password on the road, could be someone spraying their account. What do you do about this one?",
-        "execution": {
-          "mode": "manual"
-        }
+        "description": "TICKET #3 — VPN lockout. A traveling executive is locked out of the VPN after repeated MFA prompts. Could be a fat-fingered password on the road, could be someone spraying their account. What do you do about this one?"
       },
       {
         "id": "event-6",
@@ -197,20 +178,14 @@
         "description": "The shadow-copy deletion was killed and FIN-WS-04 isolated before encryption began. Cinder Wolf's payload never detonates on the share. The precursor stalls out on a single quarantined host.",
         "objectives": [
           2
-        ],
-        "execution": {
-          "mode": "manual"
-        }
+        ]
       },
       {
         "id": "event-7",
         "at": "T+40m",
         "when": "!ransomware-contained",
         "owner": "red-team",
-        "description": "The precursor ran unchecked. Cinder Wolf's payload detonates on FIN-WS-04, reaches FS01 over SMB, and begins encrypting the finance file share (T1486). The morning just became an incident.",
-        "execution": {
-          "mode": "manual"
-        }
+        "description": "The precursor ran unchecked. Cinder Wolf's payload detonates on FIN-WS-04, reaches FS01 over SMB, and begins encrypting the finance file share (T1486). The morning just became an incident."
       },
       {
         "id": "event-8",
@@ -219,19 +194,13 @@
         "description": "Situation update, late morning. Either the queue is clear and you're eyeing lunch, or you're chasing an encrypting host. Decide your last action of the morning: confirm scope, isolate the affected host, or stand the team down.",
         "objectives": [
           2
-        ],
-        "execution": {
-          "mode": "manual"
-        }
+        ]
       },
       {
         "id": "event-9",
         "at": "T+60m",
         "owner": "white-cell",
-        "description": "The white cell calls end-of-morning and begins the after-action review. Lunch is on the table — the question is whether you got to it.",
-        "execution": {
-          "mode": "manual"
-        }
+        "description": "The white cell calls end-of-morning and begins the after-action review. Lunch is on the table — the question is whether you got to it."
       }
     ]
   },

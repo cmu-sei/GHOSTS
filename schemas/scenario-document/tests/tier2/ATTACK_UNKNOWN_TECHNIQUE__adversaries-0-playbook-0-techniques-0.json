@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "1.1.0",
+  "slug": "attack-unknown-move-technique",
+  "name": "Move using a technique id ATT&CK does not have",
+  "description": "The move cites T1566.999, a sub-technique of spearphishing that does not exist.",
+  "adversaries": [
+    {
+      "id": "kestrel",
+      "name": "Kestrel",
+      "playbook": [
+        { "id": "phish-the-desk", "description": "Phish the service desk.", "techniques": ["T1566.999"] }
+      ]
+    }
+  ]
+}

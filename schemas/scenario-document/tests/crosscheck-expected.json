@@ -1,0 +1,32 @@
+{
+  "meridian-hybrid.scenario.json": {
+    "valid": true,
+    "paths": []
+  },
+  "operation-overlord.scenario.json": {
+    "valid": true,
+    "paths": []
+  },
+  "phishing-drill.scenario.json": {
+    "valid": true,
+    "paths": []
+  },
+  "soc-morning.scenario.json": {
+    "valid": true,
+    "paths": []
+  },
+  "invalid.scenario.json": {
+    "valid": false,
+    "paths": [
+      "/adversaries/0/capability",
+      "/adversaries/0/techniques/0",
+      "/rulesOfPlay/duration",
+      "/slug",
+      "/timeline/events/0/at",
+      "/timeline/events/0/owner",
+      "/timeline/events/1",
+      "/timeline/events/2",
+      "/unknownKey"
+    ]
+  }
+}

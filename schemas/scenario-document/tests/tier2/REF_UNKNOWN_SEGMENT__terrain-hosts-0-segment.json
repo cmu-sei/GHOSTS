@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "1.1.0",
+  "slug": "ref-unknown-segment",
+  "name": "Host on a segment that is not declared",
+  "description": "MER-WEB-01 sits on dmz, and the document declares no segments.",
+  "terrain": {
+    "hosts": [
+      { "name": "MER-WEB-01", "segment": "dmz" }
+    ]
+  }
+}

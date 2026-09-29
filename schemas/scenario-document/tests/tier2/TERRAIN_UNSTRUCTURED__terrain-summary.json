@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "1.1.0",
+  "slug": "terrain-unstructured",
+  "name": "Terrain given as prose",
+  "description": "The terrain is a paragraph, so there are no host or segment names to check.",
+  "terrain": {
+    "summary": {
+      "topology": "A flat office network behind a single firewall, with the file server in the same broadcast domain as the workstations."
+    }
+  }
+}

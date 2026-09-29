@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "1.1.0",
+  "slug": "time-outside-duration-event",
+  "name": "Event past the end of the exercise",
+  "description": "The exercise lasts a week and the event is on day nine, so it never happens. This is the defect the first agent run left behind.",
+  "rulesOfPlay": { "duration": "168h" },
+  "timeline": {
+    "events": [
+      { "id": "day-nine", "at": "T+9d", "owner": "white-cell", "description": "The regulator asks for a written account." }
+    ]
+  }
+}

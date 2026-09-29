@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.0.0",
+  "schemaVersion": "1.1.0",
   "slug": "meridian-hybrid",
   "name": "Meridian Under Pressure: Hybrid Intrusion",
   "description": "You are the incident commander at Meridian Logistics. An adversary is inside your network AND running an influence campaign to break your board's nerve. Deny them their objective before the clock — and the narrative — runs away from you.",
@@ -139,7 +139,7 @@
     }
   },
   "rulesOfPlay": {
-    "duration": "1h30m",
+    "duration": "2h",
     "clock": {
       "tickMinutes": 12,
       "label": "to the board meeting"
@@ -159,7 +159,6 @@
         "id": 2,
         "name": "Deny the intrusion",
         "description": "Stop the adversary reaching and staging ransomware on the finance file share.",
-        "priority": 1,
         "successCriteria": "The foothold is cut (credentials reset AND the affected host isolated) before the encryptor is staged on FS01.",
         "metWhen": "flag:creds-reset && flag:host-isolated"
       },
@@ -167,7 +166,6 @@
         "id": 3,
         "name": "Deny the narrative",
         "description": "Prevent the influence campaign from convincing the board and public that Meridian has lost control of customer data.",
-        "priority": 1,
         "successCriteria": "Player counters the narrative truthfully (prebunk/debunk + coordinated statement) before the leak lure lands.",
         "metWhen": "flag:narrative-countered"
       }

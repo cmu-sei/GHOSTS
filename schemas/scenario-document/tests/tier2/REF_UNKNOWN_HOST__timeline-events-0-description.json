@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "1.1.0",
+  "slug": "ref-unknown-host-description",
+  "name": "Event describing a host that looks declared and is not",
+  "description": "The event names MER-WEB-07, which is shaped exactly like the one host this document declares.",
+  "rulesOfPlay": { "duration": "8h" },
+  "terrain": {
+    "hosts": [
+      { "name": "MER-WEB-01" }
+    ]
+  },
+  "timeline": {
+    "events": [
+      { "id": "beaconing", "at": "T+2h", "owner": "blue-team", "description": "Outbound beaconing from MER-WEB-07 every five minutes." }
+    ]
+  }
+}

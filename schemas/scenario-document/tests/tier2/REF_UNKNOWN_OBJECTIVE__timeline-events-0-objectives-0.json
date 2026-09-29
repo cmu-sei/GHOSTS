@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "1.1.0",
+  "slug": "ref-unknown-objective-event",
+  "name": "Event exercising an objective that is not declared",
+  "description": "The event exercises objective 2; the document declares only objective 1.",
+  "rulesOfPlay": { "duration": "8h" },
+  "assessment": {
+    "objectives": [
+      { "id": 1, "name": "Contain the intrusion" }
+    ]
+  },
+  "timeline": {
+    "events": [
+      { "id": "first-alert", "at": "T+1h", "owner": "blue-team", "description": "The first alert lands.", "objectives": [2] }
+    ]
+  }
+}

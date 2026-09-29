@@ -1,0 +1,73 @@
+{
+  "_comment": "One document per tier-2 check, each with exactly one planted defect. This sidecar says what each must produce: the code, the JSON pointer it must be reported at, and its severity. The test asserts the finding is there and that nothing else in the document is an error. The file names repeat the code and the pointer on purpose, so a mis-filed fixture is visible in a directory listing.",
+
+  "ATTACK_DEPRECATED_TECHNIQUE__adversaries-0-techniques-0.json": {
+    "code": "ATTACK_DEPRECATED_TECHNIQUE", "path": "/adversaries/0/techniques/0", "severity": "warning"
+  },
+  "ATTACK_REVOKED_TECHNIQUE__adversaries-0-techniques-0.json": {
+    "code": "ATTACK_REVOKED_TECHNIQUE", "path": "/adversaries/0/techniques/0", "severity": "error"
+  },
+  "ATTACK_UNKNOWN_TECHNIQUE__adversaries-0-playbook-0-techniques-0.json": {
+    "code": "ATTACK_UNKNOWN_TECHNIQUE", "path": "/adversaries/0/playbook/0/techniques/0", "severity": "error"
+  },
+  "ATTACK_UNKNOWN_TECHNIQUE__adversaries-0-techniques-0.json": {
+    "code": "ATTACK_UNKNOWN_TECHNIQUE", "path": "/adversaries/0/techniques/0", "severity": "error"
+  },
+  "FLAG_NEVER_READ__startingConditions-flags-0.json": {
+    "code": "FLAG_NEVER_READ", "path": "/startingConditions/flags/0", "severity": "warning"
+  },
+  "ID_DUPLICATE__timeline-events-1-id.json": {
+    "code": "ID_DUPLICATE", "path": "/timeline/events/1/id", "severity": "error"
+  },
+  "REF_UNKNOWN_ENTITY__edges-0-to.json": {
+    "code": "REF_UNKNOWN_ENTITY", "path": "/edges/0/to", "severity": "error"
+  },
+  "REF_UNKNOWN_HOST__terrain-defenses-0-covers-0.json": {
+    "code": "REF_UNKNOWN_HOST", "path": "/terrain/defenses/0/covers/0", "severity": "error"
+  },
+  "REF_UNKNOWN_HOST__terrain-vulnerabilities-0-asset.json": {
+    "code": "REF_UNKNOWN_HOST", "path": "/terrain/vulnerabilities/0/asset", "severity": "error"
+  },
+  "REF_UNKNOWN_HOST__timeline-events-0-description.json": {
+    "code": "REF_UNKNOWN_HOST", "path": "/timeline/events/0/description", "severity": "warning"
+  },
+  "REF_UNKNOWN_OBJECTIVE__assessment-objectives-0-metWhen.json": {
+    "code": "REF_UNKNOWN_OBJECTIVE", "path": "/assessment/objectives/0/metWhen", "severity": "error"
+  },
+  "REF_UNKNOWN_OBJECTIVE__assessment-objectives-0-parentId.json": {
+    "code": "REF_UNKNOWN_OBJECTIVE", "path": "/assessment/objectives/0/parentId", "severity": "error"
+  },
+  "REF_UNKNOWN_OBJECTIVE__timeline-events-0-objectives-0.json": {
+    "code": "REF_UNKNOWN_OBJECTIVE", "path": "/timeline/events/0/objectives/0", "severity": "error"
+  },
+  "REF_UNKNOWN_REFERENCE__assessment-purpose.json": {
+    "code": "REF_UNKNOWN_REFERENCE", "path": "/assessment/purpose", "severity": "error"
+  },
+  "REF_UNKNOWN_SEGMENT__terrain-hosts-0-segment.json": {
+    "code": "REF_UNKNOWN_SEGMENT", "path": "/terrain/hosts/0/segment", "severity": "error"
+  },
+  "REF_UNKNOWN_WORKFLOW__timeline-events-0-execution-workflowRef.json": {
+    "code": "REF_UNKNOWN_WORKFLOW", "path": "/timeline/events/0/execution/workflowRef", "severity": "error"
+  },
+  "REF_UNSET_FLAG__timeline-events-0-when.json": {
+    "code": "REF_UNSET_FLAG", "path": "/timeline/events/0/when", "severity": "warning"
+  },
+  "TERRAIN_UNSTRUCTURED__terrain-summary.json": {
+    "code": "TERRAIN_UNSTRUCTURED", "path": "/terrain/summary", "severity": "info"
+  },
+  "TIME_DURATION_NOT_POSITIVE__rulesOfPlay-duration.json": {
+    "code": "TIME_DURATION_NOT_POSITIVE", "path": "/rulesOfPlay/duration", "severity": "error"
+  },
+  "TIME_DURATION_NOT_STORABLE__rulesOfPlay-duration.json": {
+    "code": "TIME_DURATION_NOT_STORABLE", "path": "/rulesOfPlay/duration", "severity": "error"
+  },
+  "TIME_OUTSIDE_DURATION__timeline-events-0-at.json": {
+    "code": "TIME_OUTSIDE_DURATION", "path": "/timeline/events/0/at", "severity": "error"
+  },
+  "TIME_OUTSIDE_DURATION__timeline-events-0-when.json": {
+    "code": "TIME_OUTSIDE_DURATION", "path": "/timeline/events/0/when", "severity": "error"
+  },
+  "WORKFLOW_CHECK_SKIPPED__workflows.json": {
+    "code": "WORKFLOW_CHECK_SKIPPED", "path": "/workflows", "severity": "info"
+  }
+}

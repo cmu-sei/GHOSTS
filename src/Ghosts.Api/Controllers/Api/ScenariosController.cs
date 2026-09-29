@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Threading;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
@@ -24,12 +25,21 @@ public class ScenariosController : ControllerBase
 {
     private readonly IScenarioService _scenarioService;
     private readonly INpcService _npcService;
+    private readonly IScenarioDryRunService _dryRun;
+    private readonly IHttpClientFactory _clients;
     private readonly ILogger<ScenariosController> _logger;
 
-    public ScenariosController(IScenarioService scenarioService, INpcService npcService, ILogger<ScenariosController> logger)
+    public ScenariosController(
+        IScenarioService scenarioService,
+        INpcService npcService,
+        IScenarioDryRunService dryRun,
+        IHttpClientFactory clients,
+        ILogger<ScenariosController> logger)
     {
         _scenarioService = scenarioService;
         _npcService = npcService;
+        _dryRun = dryRun;
+        _clients = clients;
         _logger = logger;
     }
 
@@ -111,59 +121,49 @@ public class ScenariosController : ControllerBase
     }
 
     /// <summary>
-    /// Creates a scenario from a scenario document (schema v1). The document is rejected, and
-    /// nothing is written, unless its schemaVersion is 1.0.0 and it validates against the schema.
+    /// Validates a scenario document and returns the findings. Writes nothing, ever: this is the
+    /// endpoint an authoring agent calls, and it has to be safe to call on a draft. With
+    /// ?dryRun=true it also loads and compiles the document inside a transaction that is always
+    /// rolled back, so the findings include what loading it would actually do.
+    /// </summary>
+    // POST: api/scenarios/validate
+    [HttpPost("validate")]
+    [Consumes("application/json")]
+    public async Task<IActionResult> ValidateScenarioDocument([FromQuery] bool dryRun, CancellationToken ct)
+    {
+        var (document, parseFailure) = await ReadDocument(ct);
+        if (parseFailure != null) return Ok(Findings([parseFailure]));
+
+        var result = await ScenarioDocumentValidator.ValidateAsync(document, _clients, ct);
+        var findings = result.Findings.ToList();
+
+        if (dryRun && result.IsValid)
+        {
+            findings.AddRange(await _dryRun.RunAsync(document, ct));
+        }
+        else if (dryRun)
+        {
+            findings.Add(ScenarioFinding.Note(4, "DRYRUN_SKIPPED", string.Empty,
+                "The dry run did not run: the document has errors, and loading a document that cannot be imported says nothing."));
+        }
+
+        return Ok(Findings(findings));
+    }
+
+    /// <summary>
+    /// Creates a scenario from a scenario document (schema v1). It runs the same validator as POST
+    /// validate and refuses, writing nothing, on any finding of severity "error".
     /// </summary>
     // POST: api/scenarios/import
     [HttpPost("import")]
     [Consumes("application/json")]
     public async Task<ActionResult<ScenarioDto>> ImportScenarioDocument(CancellationToken ct)
     {
-        string text;
-        using (var reader = new StreamReader(Request.Body))
-        {
-            text = await reader.ReadToEndAsync(ct);
-        }
+        var (document, parseFailure) = await ReadDocument(ct);
+        if (parseFailure != null) return BadRequest(Findings([parseFailure]));
 
-        JsonObject document;
-        try
-        {
-            document = JsonNode.Parse(text) as JsonObject;
-        }
-        catch (JsonException ex)
-        {
-            return BadRequest(new { error = "Document is not valid JSON", findings = new[] { ex.Message } });
-        }
-
-        if (document == null)
-        {
-            return BadRequest(new { error = "Document is not a JSON object" });
-        }
-
-        var version = document["schemaVersion"]?.GetValue<string>();
-        if (version != ScenarioDocumentMapper.SchemaVersion)
-        {
-            return BadRequest(new
-            {
-                error = $"Unsupported schemaVersion '{version}'; this API reads {ScenarioDocumentMapper.SchemaVersion}"
-            });
-        }
-
-        IReadOnlyList<string> findings;
-        try
-        {
-            findings = await ScenarioDocumentValidator.ValidateAsync(text, ct);
-        }
-        catch (InvalidOperationException ex)
-        {
-            _logger.LogError(ex, "Scenario document validator unavailable");
-            return StatusCode(500, new { error = ex.Message });
-        }
-
-        if (findings.Count > 0)
-        {
-            return BadRequest(new { error = "Document does not validate against schema v1", findings });
-        }
+        var result = await ScenarioDocumentValidator.ValidateAsync(document, _clients, ct);
+        if (!result.IsValid) return BadRequest(Findings(result.Findings));
 
         try
         {
@@ -176,6 +176,33 @@ public class ScenariosController : ControllerBase
             return StatusCode(500, new { error = "Error importing scenario document" });
         }
     }
+
+    /// <summary>The request body as a document, or the tier-1 finding that says why it is not one.</summary>
+    private async Task<(JsonObject Document, ScenarioFinding Failure)> ReadDocument(CancellationToken ct)
+    {
+        using var reader = new StreamReader(Request.Body);
+        var text = await reader.ReadToEndAsync(ct);
+
+        try
+        {
+            return JsonNode.Parse(text) is JsonObject document
+                ? (document, null)
+                : (null, ScenarioFinding.Err(1, "SCHEMA_NOT_AN_OBJECT", string.Empty,
+                    "A scenario document must be a JSON object."));
+        }
+        catch (JsonException ex)
+        {
+            return (null, ScenarioFinding.Err(1, "SCHEMA_NOT_JSON", string.Empty, ex.Message));
+        }
+    }
+
+    private static object Findings(IReadOnlyList<ScenarioFinding> findings) => new
+    {
+        valid = findings.All(f => f.Severity != ScenarioFinding.Error),
+        errors = findings.Count(f => f.Severity == ScenarioFinding.Error),
+        warnings = findings.Count(f => f.Severity == ScenarioFinding.Warning),
+        findings = ScenarioDocumentValidator.Ordered(findings)
+    };
 
     // PUT: api/scenarios/5
     [HttpPut("{id}")]

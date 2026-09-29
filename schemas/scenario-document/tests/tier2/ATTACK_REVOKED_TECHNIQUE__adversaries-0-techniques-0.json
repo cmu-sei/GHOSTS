@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "1.1.0",
+  "slug": "attack-revoked-technique",
+  "name": "Adversary using a technique MITRE revoked",
+  "description": "T1002 (Data Compressed) was revoked and replaced; an exercise written against it trains against something ATT&CK no longer says.",
+  "adversaries": [
+    { "id": "kestrel", "name": "Kestrel", "capability": 3, "techniques": ["T1002"] }
+  ]
+}

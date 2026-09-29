@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "1.1.0",
+  "slug": "ref-unknown-objective-condition",
+  "name": "Condition waiting on an objective that is not declared",
+  "description": "Objective 1 is met when objective 3 is met, and there is no objective 3.",
+  "assessment": {
+    "objectives": [
+      { "id": 1, "name": "Contain the intrusion", "metWhen": "objective:3" }
+    ]
+  }
+}

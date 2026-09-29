@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "1.1.0",
+  "slug": "id-duplicate",
+  "name": "Two events with the same id",
+  "description": "Both events are called shift-change, so neither can be referred to.",
+  "rulesOfPlay": { "duration": "8h" },
+  "timeline": {
+    "events": [
+      { "id": "shift-change", "at": "T+0m", "owner": "white-cell" },
+      { "id": "shift-change", "at": "T+4h", "owner": "white-cell" }
+    ]
+  }
+}

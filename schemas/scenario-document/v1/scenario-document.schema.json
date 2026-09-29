@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://cmu-sei.github.io/GHOSTS/schemas/scenario-document/1.0.0/scenario-document.schema.json",
+  "$id": "https://cmu-sei.github.io/GHOSTS/schemas/scenario-document/1.1.0/scenario-document.schema.json",
   "title": "GHOSTS scenario document",
   "description": "One exercise scenario as a single, versioned, diffable file: what the exercise is for, who plays, who the adversary is and what it can do, the terrain, the rules of play, the timeline, the assessment standard, and the entity graph. It carries the authored specification only, never run state or database identity. Names use the exercise developer's vocabulary; standards (ATT&CK, CVE, cron) sit at the leaves.",
   "type": "object",
@@ -8,9 +8,9 @@
   "required": ["schemaVersion", "slug", "name", "description"],
   "properties": {
     "schemaVersion": {
-      "description": "Version of this schema the document was written against. Semantic versioning; a major bump means an older reader must refuse the file.",
+      "description": "Version of this schema the document was written against. Semantic versioning; a major bump means an older reader must refuse the file. 1.1.0 declares the defaults canonical form omits; a 1.0.0 document is read unchanged.",
       "type": "string",
-      "const": "1.0.0"
+      "enum": ["1.0.0", "1.1.0"]
     },
     "slug": {
       "$ref": "#/$defs/slug",
@@ -296,10 +296,10 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "logs": { "type": "boolean" },
-            "network": { "type": "boolean" },
-            "endpoint": { "type": "boolean" },
-            "chat": { "type": "boolean" }
+            "logs": { "type": "boolean", "default": false },
+            "network": { "type": "boolean", "default": false },
+            "endpoint": { "type": "boolean", "default": false },
+            "chat": { "type": "boolean", "default": false }
           }
         },
         "escalationLadder": {
@@ -351,8 +351,8 @@
               "parentId": { "type": "integer", "minimum": 1 },
               "name": { "type": "string", "minLength": 1 },
               "description": { "type": "string" },
-              "type": { "type": "string", "enum": ["MET", "JMET", "Rehearsal", "Onboarding", "ToolTraining"] },
-              "priority": { "type": "integer", "minimum": 1 },
+              "type": { "type": "string", "enum": ["MET", "JMET", "Rehearsal", "Onboarding", "ToolTraining"], "default": "MET" },
+              "priority": { "type": "integer", "minimum": 1, "default": 1 },
               "successCriteria": { "type": "string" },
               "metWhen": { "$ref": "#/$defs/condition", "description": "When this holds, the objective is achieved without a judge. Empty means only the judge can complete it." },
               "assigned": { "$ref": "#/$defs/owner" }
@@ -425,7 +425,7 @@
             "examples": ["MemberOf", "Targets", "Exploits", "Uses", "LocatedAt", "CommunicatesWith", "DependsOn", "Accesses", "Owns", "ReportsTo", "AffiliatedWith", "DefendedBy", "Defends", "Enables", "PlansFor", "CommandsAndControl", "Custom"]
           },
           "label": { "type": "string" },
-          "weight": { "type": "number", "minimum": 0, "maximum": 1 },
+          "weight": { "type": "number", "minimum": 0, "maximum": 1, "default": 1 },
           "properties": { "type": "object" },
           "provenance": { "$ref": "#/$defs/provenance" }
         }
@@ -543,6 +543,12 @@
         { "required": ["schedule"] },
         { "required": ["displayTime"] }
       ],
+      "dependentRequired": {
+        "when": ["description"],
+        "schedule": ["description"],
+        "objectives": ["description"],
+        "execution": ["description"]
+      },
       "properties": {
         "id": { "$ref": "#/$defs/slug" },
         "at": { "$ref": "#/$defs/offset", "description": "When the event fires, from the start of play." },
@@ -551,7 +557,7 @@
         "when": { "$ref": "#/$defs/condition", "description": "The event fires when this holds. Combine with 'at' to mean 'at this time, if this holds'." },
         "owner": { "$ref": "#/$defs/owner" },
         "title": { "type": "string" },
-        "description": { "type": "string" },
+        "description": { "type": "string", "minLength": 1, "description": "What happens. An event carrying 'when', 'schedule', 'objectives' or 'execution' must have one: the API keeps a title-only event as an inject row, which holds a trigger and a title and nothing else, so those four fields would be dropped without a word." },
         "objectives": { "type": "array", "items": { "type": "integer", "minimum": 1 }, "uniqueItems": true, "description": "Objective ids this event exercises." },
         "expectedResponse": { "type": "string", "description": "What the audience is expected to do in reply. Control grades against this." },
         "effects": { "$ref": "#/$defs/effects" },
@@ -559,9 +565,9 @@
         "execution": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["mode"],
+          "minProperties": 1,
           "properties": {
-            "mode": { "type": "string", "enum": ["manual", "workflow"] },
+            "mode": { "type": "string", "enum": ["manual", "workflow"], "default": "manual" },
             "workflowRef": { "type": "string", "description": "A ref in this document's workflows list." }
           }
         }
@@ -572,10 +578,10 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "origin": { "type": "string", "enum": ["operator", "extracted", "enriched", "generated"] },
+        "origin": { "type": "string", "enum": ["operator", "extracted", "enriched", "generated"], "default": "operator" },
         "source": { "$ref": "#/$defs/slug", "description": "Id of a source in this document." },
-        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
-        "reviewed": { "type": "boolean" }
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1, "default": 1 },
+        "reviewed": { "type": "boolean", "default": false }
       }
     }
   }
