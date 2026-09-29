@@ -139,7 +139,7 @@
     }
   },
   "rulesOfPlay": {
-    "duration": "2h",
+    "duration": "1h30m",
     "clock": {
       "tickMinutes": 12,
       "label": "to the board meeting"

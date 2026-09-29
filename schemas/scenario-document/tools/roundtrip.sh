@@ -28,6 +28,17 @@ WORK=$(mktemp -d)
 FAILED=0
 LOSSY=()
 UNREP=()
+REFUSED=()
+
+# Documents the validator is expected to refuse, and the code it must refuse them with. Both of these
+# declare a sub-hour exercise, which GHOSTS cannot store (duration_hours is an integer), and the
+# examples say what their fixtures say rather than rounding to fit the column. So the refusal is the
+# correct behaviour and it is what this script checks: refused for exactly that reason, nothing
+# written. When the column holds minutes, these two entries go away and both documents round-trip.
+declare -A EXPECT_REFUSED=(
+  [soc-morning]=TIME_DURATION_NOT_STORABLE
+  [meridian-hybrid]=TIME_DURATION_NOT_STORABLE
+)
 
 pass() { printf 'ok    %-28s %s\n' "$1" "$2"; }
 fail() { printf 'FAIL  %-28s %s\n' "$1" "$2"; FAILED=$((FAILED + 1)); }
@@ -60,7 +71,14 @@ roundtrip() {
   local name=$1 doc=$2 id first second reimport_id third
 
   if ! id=$(import "$doc" "$WORK/$name.import.json" 2>"$WORK/$name.err"); then
-    fail "$name import" "$(cat "$WORK/$name.err")"
+    local want=${EXPECT_REFUSED[$name]:-}
+    if [ -n "$want" ] && jq -e --arg c "$want" \
+        'any(.findings[]; .code == $c and .severity == "error")' "$WORK/$name.import.json" >/dev/null 2>&1; then
+      pass "$name refused" "$want, as expected; nothing written"
+      REFUSED+=("$name")
+    else
+      fail "$name import" "$(cat "$WORK/$name.err")"
+    fi
     return
   fi
   pass "$name import" "scenario $id"
@@ -142,6 +160,9 @@ if [ ${#LOSSY[@]} -gt 0 ]; then
 fi
 if [ ${#UNREP[@]} -gt 0 ]; then
   echo "scenarios whose stored data schema v1 rejects: ${UNREP[*]}"
+fi
+if [ ${#REFUSED[@]} -gt 0 ]; then
+  echo "documents the validator refused, as expected: ${REFUSED[*]}"
 fi
 if [ "$FAILED" -gt 0 ]; then
   echo "$FAILED check(s) failed"

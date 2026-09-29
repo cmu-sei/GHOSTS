@@ -86,7 +86,7 @@
   },
   "rulesOfPlay": {
     "pacing": "turn-based",
-    "duration": "1h",
+    "duration": "45m",
     "deadline": {
       "at": "T+30m"
     },

@@ -150,16 +150,17 @@ function minutesToDuration(min) {
 const notes = [];
 const note = s => notes.push(s);
 
-// GHOSTS stores one duration and stores it in whole hours (game_mechanics.duration_hours is an
-// integer), so the document cannot carry a fraction of an hour and be importable. A source measured
-// in fractions is rounded up here, at authoring time and out loud, rather than losing the minutes
-// silently on import; rounding up never puts an event outside the exercise.
-function storableDuration(minutes, slug, source) {
-  const hours = Math.ceil(minutes / 60);
-  if (hours * 60 !== minutes) {
-    note(`${slug}: ${source} is ${minutes} minutes, which GHOSTS cannot store (it keeps whole hours); the document says ${hours}h`);
+// The document says what the fixture says. GHOSTS stores one duration and stores it in whole hours
+// (game_mechanics.duration_hours is an integer), so a sub-hour exercise cannot be imported until that
+// column holds minutes — but bending the document to the column would make the example an argument
+// that integer hours is enough. So the minutes survive here and the note is a refusal, not a change:
+// an import of this document reports TIME_DURATION_NOT_STORABLE and writes nothing.
+function faithfulDuration(minutes, slug, source) {
+  if (minutes % 60 !== 0) {
+    note(`${slug}: ${source} is ${minutes} minutes; the document says so, and GHOSTS cannot store it ` +
+      `(duration_hours is an integer), so an import refuses with TIME_DURATION_NOT_STORABLE`);
   }
-  return minutesToDuration(hours * 60);
+  return minutesToDuration(minutes);
 }
 
 function convert(fixture, slug) {
@@ -191,7 +192,7 @@ function convertApiShape(fx, slug) {
   doc.population = { pools: p.userPools.map(u => ({ role: u.role, count: u.count })) };
   const rop = {
     pacing: gm.timelineType,
-    duration: storableDuration(Math.round(gm.durationHours * 60), slug, `gameMechanics.durationHours=${gm.durationHours}`),
+    duration: faithfulDuration(Math.round(gm.durationHours * 60), slug, `gameMechanics.durationHours=${gm.durationHours}`),
     adjudication: gm.adjudicationType,
     telemetry: gm.telemetry && { logs: gm.telemetry.collectLogs, network: gm.telemetry.collectNetwork, endpoint: gm.telemetry.collectEndpoint, chat: gm.telemetry.collectChat },
     escalationLadder: { summary: gm.escalationLadder },
@@ -273,7 +274,7 @@ function convertKriegspielShape(fx, slug) {
   };
   doc.startingConditions = { flags: w.flags, facts: w.facts };
   doc.rulesOfPlay = {
-    duration: s.clock ? storableDuration(s.clock.windowMinutes, slug, `clock.windowMinutes=${s.clock.windowMinutes}`) : undefined,
+    duration: s.clock ? faithfulDuration(s.clock.windowMinutes, slug, `clock.windowMinutes=${s.clock.windowMinutes}`) : undefined,
     clock: s.clock && { tickMinutes: s.clock.tickMinutes, label: s.clock.label },
     fog: s.fog?.default,
   };
