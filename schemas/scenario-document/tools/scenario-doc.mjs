@@ -368,6 +368,215 @@ function docDiff(aFile, bFile) {
   return lines.length;
 }
 
+// ─────────────────────────── render ───────────────────────────
+// The document as an exercise plan a reviewer works through section by section. This is the review
+// only a person can perform: whether the consequences of the intent are a faithful reading of the
+// intent, which is the call left once tiers 1 to 4 have run. The register to aim for is the design's
+// §4a — a beat is "fires on the clock; sets foothold-billing; observable in the mail gateway logs;
+// expected blue response: a user report and a gateway block", not a field dump.
+//
+// It is a view and never a source. It is regenerated from the document, so it cannot drift from what
+// the loader will read, and nothing here is authored by hand.
+
+const cell = v => String(v ?? '').replace(/\|/g, '\\|').replace(/\n+/g, ' ').trim() || '—';
+const list = v => (Array.isArray(v) ? v : v == null ? [] : [v]);
+const commas = v => list(v).map(String).join(', ');
+const em = v => (v ? `*${v}*` : '');
+
+// A table, or nothing at all when there are no rows: an empty table is a question a reviewer has to
+// stop and answer ("is this blank because there is nothing, or because something failed?").
+function table(out, headers, rows) {
+  if (!rows.length) return;
+  out.push(`| ${headers.join(' | ')} |`, `|${headers.map(() => '---|').join('')}`);
+  for (const r of rows) out.push(`| ${r.map(cell).join(' | ')} |`);
+  out.push('');
+}
+
+function heading(out, level, text) { out.push(`${'#'.repeat(level)} ${text}`, ''); }
+function para(out, text) { if (text) out.push(String(text), ''); }
+
+// When an event happens, in the words the document used. A condition is not a time and must not be
+// printed as one — "when the foothold is held" is a different claim from "at 09:40".
+function timing(e) {
+  const parts = [];
+  if (e.displayTime) parts.push(e.displayTime + (e.at ? ` (${e.at})` : ''));
+  else if (e.at) parts.push(e.at);
+  if (e.schedule) parts.push(`on schedule \`${e.schedule}\``);
+  if (e.when) parts.push(`when \`${e.when}\``);
+  return parts.join(', ') || 'unscheduled';
+}
+
+function renderTimeline(out, doc) {
+  const events = list(doc.timeline?.events);
+  if (!events.length) return;
+  heading(out, 2, 'The timeline');
+  para(out, `${events.length} beat${events.length === 1 ? '' : 's'}. Every one names who owns it, what the ` +
+    'audience is expected to do, and what they would have to see in order to do it.');
+
+  table(out, ['#', 'When', 'Owner', 'Beat', 'Expected response', 'Indicators'],
+    events.map((e, i) => [i + 1, timing(e), e.owner || 'unassigned',
+      e.title || e.description || e.id, e.expectedResponse, commas(e.indicators)]));
+
+  // Then each beat in prose, because the fields a table cannot hold are the ones that decide whether
+  // the beat is a faithful reading of the intent: what it sets, what it is graded against, and how it
+  // is executed.
+  heading(out, 3, 'Beat by beat');
+  const sentence = s => String(s).trim().replace(/\.$/, '');
+  events.forEach((e, i) => {
+    // The mechanics read as one semicolon-joined clause, which is §4a's register: "Fires on the clock;
+    // sets foothold-billing; observable in the mail gateway logs and one workstation process tree."
+    const how = [];
+    if (e.when) how.push(`fires when \`${e.when}\` holds`);
+    else if (e.schedule) how.push(`fires on the schedule \`${e.schedule}\``);
+    else how.push('fires on the clock');
+    if (e.effects?.setFlags?.length) how.push(`sets ${list(e.effects.setFlags).map(em).join(', ')}`);
+    if (e.effects?.setFacts) how.push(`records ${Object.entries(e.effects.setFacts).map(([k, v]) => `${k} = ${v}`).join(', ')}`);
+    if (e.indicators?.length) how.push(`observable in ${commas(e.indicators)}`);
+    if (e.objectives?.length) how.push(`graded against objective ${commas(e.objectives)}`);
+    if (e.execution?.mode === 'workflow') how.push(`run by workflow \`${e.execution.workflowRef}\``);
+
+    const parts = [`**${i + 1}. ${e.title || e.id} — ${timing(e)}**, ${e.owner || 'unassigned'}.`];
+    if (e.description) parts.push(`${sentence(e.description)}.`);
+    const mechanics = how.map(sentence).join('; ');
+    parts.push(`${mechanics[0].toUpperCase()}${mechanics.slice(1)}.`);
+    if (e.expectedResponse) parts.push(`**Expected response:** ${sentence(e.expectedResponse)}.`);
+    out.push(parts.join(' '), '');
+  });
+}
+
+function renderAdversaries(out, doc) {
+  const adversaries = list(doc.adversaries);
+  if (!adversaries.length) return;
+  heading(out, 2, 'The adversary');
+  for (const a of adversaries) {
+    heading(out, 3, `${a.name || a.id} — ${a.type || 'unspecified'}, capability ${a.capability ?? '?'}/5`);
+    para(out, a.objective && `**What it is trying to do.** ${a.objective}`);
+    para(out, a.winThreshold != null && `**It wins at** progress ${a.winThreshold}.`);
+    if (a.techniques?.length) para(out, `**Techniques.** ${commas(a.techniques)} (ATT&CK ids; the validator resolves each one).`);
+    if (a.capabilities?.length) para(out, `**Capabilities in plain words.** ${commas(a.capabilities)}`);
+    table(out, ['Move', 'Domain', 'Techniques', 'Available when', 'Sets', 'Progress', 'Indicators'],
+      list(a.playbook).map(m => [m.description || m.id, m.domain, commas(m.techniques),
+        m.preconditions ? `\`${m.preconditions}\`` : 'always', commas(m.effects?.setFlags), m.progress,
+        commas(m.indicators)]));
+  }
+}
+
+function renderTerrain(out, doc) {
+  const t = doc.terrain;
+  if (!t) return;
+  heading(out, 2, 'The terrain');
+  if (t.reference) para(out, `**Base.** The \`${t.reference.slice}\` slice from ${t.reference.provider}. ` +
+    'Everything below is what this exercise adds to it or relies on from it.');
+  if (t.summary?.topology) para(out, `**Topology.** ${t.summary.topology}`);
+  if (t.summary?.assets) para(out, `**Assets.** ${t.summary.assets}`);
+  if (t.summary?.services) para(out, `**Services.** ${t.summary.services}`);
+  table(out, ['Segment', 'CIDR', 'What it is'], list(t.segments).map(s => [s.name, s.cidr, s.description]));
+  table(out, ['Host', 'Segment', 'OS', 'Role', 'What it is'],
+    list(t.hosts).map(h => [h.name, h.segment, h.os, h.role, h.description]));
+  table(out, ['Service', 'On', 'What it is'], list(t.services).map(s => [s.name, commas(s.hosts), s.description]));
+  table(out, ['Defense', 'Covers', 'What it does'],
+    list(t.defenses).map(d => [d.name, commas(d.covers), d.description]));
+  table(out, ['Weakness', 'On', 'Severity', 'What it is'],
+    list(t.vulnerabilities).map(v => [v.cve || v.description, v.asset, v.severity, v.cve ? v.description : '']));
+  if (t.informationEnvironment) {
+    para(out, `**Information environment.** ${commas(t.informationEnvironment.platforms)}` +
+      (t.informationEnvironment.audience ? ` — ${t.informationEnvironment.audience}` : ''));
+  }
+  const pools = list(doc.population?.pools);
+  if (pools.length) {
+    heading(out, 3, 'Who GHOSTS simulates');
+    para(out, `${pools.reduce((n, p) => n + (p.count || 0), 0)} simulated people. Everyone else in the ` +
+      'exercise is a person playing.');
+    table(out, ['Pool', 'Count', 'Who they are'], pools.map(p => [p.role, p.count, p.description]));
+  }
+}
+
+function render(docFile, ledgerFile) {
+  const doc = JSON.parse(readFileSync(docFile, 'utf8'));
+  const out = [];
+
+  heading(out, 1, `${doc.name || doc.slug} — exercise plan`);
+  para(out, `*Rendered from \`${basename(docFile)}\` (schema ${doc.schemaVersion}). A view, not a source: ` +
+    'regenerate it after every edit. What gets signed is the plan; what gets loaded is the document.*');
+  para(out, doc.description);
+
+  if (doc.intent) { heading(out, 2, 'Intent'); para(out, doc.intent); }
+  if (doc.context?.situation) { heading(out, 2, 'The situation the audience is given'); para(out, doc.context.situation); }
+  if (doc.context?.political) { heading(out, 2, 'Background (White Cell)'); para(out, doc.context.political); }
+
+  const a = doc.audience;
+  if (a || doc.sides) {
+    heading(out, 2, 'The audience');
+    para(out, a?.role && `**Who.** ${a.role}${a.size ? `, ${a.size} of them` : ''}.`);
+    para(out, a?.proficiency && `**Where they are starting from.** ${a.proficiency}`);
+    para(out, a?.mandate && `**What they are responsible for.** ${a.mandate}`);
+    para(out, a?.rulesOfEngagement && `**What they may and may not do.** ${a.rulesOfEngagement}`);
+    table(out, ['Side', 'Alignment'], list(doc.sides).map(s => [s.name, s.alignment]));
+  }
+
+  const r = doc.rulesOfPlay;
+  if (r) {
+    heading(out, 2, 'How it is played');
+    const rows = [
+      ['Runs for', r.duration], ['Pacing', r.pacing], ['Adjudication', r.adjudication],
+      ['Clock tick', r.clock?.tickMinutes && `${r.clock.tickMinutes} minutes${r.clock.label ? ` (${r.clock.label})` : ''}`],
+      ['Deadline', r.deadline?.at && `${r.deadline.at}${r.deadline.label ? ` — ${r.deadline.label}` : ''}`],
+      ['Fog of war', r.fog],
+      ['Telemetry', Object.entries(r.telemetry || {}).filter(([, v]) => v).map(([k]) => k).join(', ')],
+    ].filter(([, v]) => v);
+    table(out, ['Rule of play', ''], rows);
+    if (r.escalationLadder) {
+      heading(out, 3, 'How far it can go');
+      para(out, r.escalationLadder.summary);
+      table(out, ['Rung', 'What has happened', 'Still recoverable'],
+        list(r.escalationLadder.rungs).map(g => [g.name, g.description, g.recoverable ? 'yes' : '**no**']));
+    }
+    if (r.branching?.summary) { heading(out, 3, 'If play diverges'); para(out, r.branching.summary); }
+  }
+
+  const flags = list(doc.startingConditions?.flags);
+  const facts = Object.entries(doc.startingConditions?.facts || {});
+  if (flags.length || facts.length) {
+    heading(out, 2, 'What is true when it starts');
+    if (flags.length) para(out, flags.map(em).join(', '));
+    table(out, ['Fact', 'Value'], facts.map(([k, v]) => [k, v]));
+  }
+
+  renderAdversaries(out, doc);
+  renderTerrain(out, doc);
+  renderTimeline(out, doc);
+
+  const s = doc.assessment;
+  if (s) {
+    heading(out, 2, 'What counts as success');
+    para(out, s.purpose && `**Why this exercise exists.** ${s.purpose}`);
+    para(out, s.victoryConditions && `**Victory conditions.** ${s.victoryConditions}`);
+    para(out, s.performanceMetrics && `**How it is measured.** ${s.performanceMetrics}`);
+    table(out, ['Id', 'Objective', 'Type', 'Priority', 'Met when', 'Assigned'],
+      list(s.objectives).map(o => [o.id, o.name + (o.parentId ? ` (under ${o.parentId})` : ''), o.type,
+        o.priority, o.metWhen ? `\`${o.metWhen}\`` : o.successCriteria, o.assigned]));
+  }
+
+  table(out, ['Automation', 'Bound to'], list(doc.workflows).map(w => [w.name || w.id, w.ref]));
+
+  const refs = list(doc.references);
+  if (refs.length) {
+    heading(out, 2, 'References');
+    para(out, 'Every `[ref:id]` in the prose above points at one of these.');
+    table(out, ['Id', 'Title', 'Where'], refs.map(x => [x.id, x.title, x.url || x.citation]));
+  }
+
+  // The ledger is the other half of the review: which mission judgments a person made and which a
+  // model proposed. It is a separate file because it is not part of the document, and it is included
+  // verbatim because paraphrasing a record of who decided what would defeat its purpose.
+  if (ledgerFile) {
+    heading(out, 2, 'Decisions ledger');
+    out.push(readFileSync(ledgerFile, 'utf8').replace(/^#\s+/m, '### ').trimEnd(), '');
+  }
+
+  return out.join('\n').replace(/\n{3,}/g, '\n\n') + '\n';
+}
+
 // ─────────────────────────── main ───────────────────────────
 
 const [cmd, ...args] = process.argv.slice(2);
@@ -394,7 +603,10 @@ switch (cmd) {
     rc = coverage(args[0], args[1]) ? 1 : 0; break;
   case 'diff':
     rc = docDiff(args[0], args[1]) ? 1 : 0; break;
+  case 'render':
+    process.stdout.write(render(args[0], args[1])); break;
   default:
-    console.error('usage: scenario-doc.mjs validate|crosscheck|canonicalize|convert|coverage|diff ...'); rc = 2;
+    console.error('usage: scenario-doc.mjs validate|crosscheck|canonicalize|convert|coverage|diff|render ...\n' +
+      '       render <document.scenario.json> [decisions.md]   exercise plan to stdout'); rc = 2;
 }
 process.exit(rc);
