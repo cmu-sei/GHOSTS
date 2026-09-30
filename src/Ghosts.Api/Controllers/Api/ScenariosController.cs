@@ -152,12 +152,15 @@ public class ScenariosController : ControllerBase
 
     /// <summary>
     /// Creates a scenario from a scenario document (schema v1). It runs the same validator as POST
-    /// validate and refuses, writing nothing, on any finding of severity "error".
+    /// validate and refuses, writing nothing, on any finding of severity "error". On success the
+    /// response also carries a STORAGE_LOSSY finding for each top-level path the document populated
+    /// that has no column — this describes what the import just did, so only import reports it;
+    /// validate writes nothing and has nothing to describe.
     /// </summary>
     // POST: api/scenarios/import
     [HttpPost("import")]
     [Consumes("application/json")]
-    public async Task<ActionResult<ScenarioDto>> ImportScenarioDocument(CancellationToken ct)
+    public async Task<IActionResult> ImportScenarioDocument(CancellationToken ct)
     {
         var (document, parseFailure) = await ReadDocument(ct);
         if (parseFailure != null) return BadRequest(Findings([parseFailure]));
@@ -168,7 +171,9 @@ public class ScenariosController : ControllerBase
         try
         {
             var scenario = await _scenarioService.CreateAsync(ScenarioDocumentMapper.FromDocument(document), ct);
-            return CreatedAtAction(nameof(GetScenario), new { id = scenario.Id }, MapToDto(scenario));
+            var lossy = StorageLossAnalyzer.Analyze(document);
+            var body = ImportedBody(MapToDto(scenario), lossy);
+            return CreatedAtAction(nameof(GetScenario), new { id = scenario.Id }, body);
         }
         catch (Exception ex)
         {
@@ -176,6 +181,29 @@ public class ScenariosController : ControllerBase
             return StatusCode(500, new { error = "Error importing scenario document" });
         }
     }
+
+    /// <summary>
+    /// The created scenario, with every field ScenarioDto already exposes, plus "findings". Built as
+    /// a plain object referencing dto's properties directly — not by round-tripping through
+    /// System.Text.Json — because this API's output formatter is Newtonsoft (Program.cs
+    /// AddNewtonsoftJson), which has no special case for System.Text.Json.Nodes.JsonObject and would
+    /// reflect over its public shape instead of its contents. Additive: any caller reading today's
+    /// fields is unaffected.
+    /// </summary>
+    private static object ImportedBody(ScenarioDto dto, IReadOnlyList<ScenarioFinding> findings) => new
+    {
+        dto.Id,
+        dto.Name,
+        dto.Description,
+        dto.CreatedAt,
+        dto.UpdatedAt,
+        dto.ScenarioParameters,
+        dto.TechnicalEnvironment,
+        dto.GameMechanics,
+        dto.Timeline,
+        dto.BuilderStatus,
+        findings = ScenarioDocumentValidator.Ordered(findings)
+    };
 
     /// <summary>The request body as a document, or the tier-1 finding that says why it is not one.</summary>
     private async Task<(JsonObject Document, ScenarioFinding Failure)> ReadDocument(CancellationToken ct)
