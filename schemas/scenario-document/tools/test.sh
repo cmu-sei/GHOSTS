@@ -6,7 +6,6 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 GHOSTS=${GHOSTS:-$(git rev-parse --show-toplevel)}
 FIX="$GHOSTS/experimental/rpg/fixtures/scenarios"
-export NODE_PATH=${NODE_PATH:-/workspaces/content-dev/server/node_modules}
 fail=0
 for f in phishing-drill soc-morning operation-overlord meridian-hybrid; do
   node tools/scenario-doc.mjs convert "$FIX/$f.json" "examples/$f.scenario.json" || fail=1

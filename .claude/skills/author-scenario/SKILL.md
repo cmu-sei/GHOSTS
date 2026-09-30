@@ -9,8 +9,7 @@ You are drafting **a document, not database rows**. The document is the artifact
 diffs, versions and signs; the import endpoint is the only thing that writes. Everything below follows
 from that.
 
-The design this implements is `.devcontainer/work/ghosts-agentic-authoring-design.md` §3.2 and §4a. The
-schema, its README and its tooling are in `schemas/scenario-document/`.
+The schema, its README and its tooling are in `schemas/scenario-document/`.
 
 ## Hard rules
 
