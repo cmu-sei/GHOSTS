@@ -67,6 +67,9 @@
     <EmbeddedResource Include="..\..\schemas\scenario-document\corpus\attack-index.json">
       <LogicalName>Ghosts.Api.ScenarioDocuments.attack-index.json</LogicalName>
     </EmbeddedResource>
+    <EmbeddedResource Include="..\..\schemas\scenario-document\corpus\attack-groups.json">
+      <LogicalName>Ghosts.Api.ScenarioDocuments.attack-groups.json</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>

@@ -53,13 +53,17 @@ tables: an agent edits the document and imports it, so what a reviewer signs off
 | `scenario_document_import` | writes, or refuses | Runs the same validator and **refuses on any finding of severity `error`**, returning the findings and no id. On success, the new scenario id. |
 | `scenario_document_export` | read-only | One scenario as a canonical document: no database ids, no timestamps, no run state. Two exports of an unchanged scenario are byte-identical, and the output is valid input to import. |
 | `attack_technique_lookup` | read-only | Resolves ATT&CK techniques by id or by a fragment of a name, with MITRE's revoked and deprecated flags. |
+| `attack_group_lookup` | read-only | Resolves ATT&CK intrusion sets (groups) by id, name fragment, or alias fragment, with MITRE's revoked and deprecated flags. |
 
 A finding carries `tier` (1–4), `severity` (`error` blocks import; `warning` and `info` do not), a
 stable `code`, a JSON `path` pointer into the document, a `message`, and sometimes a `hint`.
 
-`attack_technique_lookup` reads `GET /api/attack/techniques` rather than carrying its own copy of the
-index. That is the point: the API serves the same embedded `corpus/attack-index.json` that the
-validator's tier 2 checks against, so the tool cannot tell an author a technique is fine and then have
-the import reject it. It is marked `OpenWorld = false` for the same reason — the set of answers is a
-committed, versioned corpus, not the open internet — and every response names the MITRE bundle commit
-it was built from.
+`attack_technique_lookup` and `attack_group_lookup` read `GET /api/attack/techniques` and
+`GET /api/attack/groups` rather than carrying their own copy of either index. That is the point: the
+API serves the same embedded `corpus/attack-index.json` and `corpus/attack-groups.json`, built
+together at the same MITRE bundle commit, that the validator's tier 2 checks against, so a tool cannot
+tell an author an id is fine and then have the import reject it. Both are marked `OpenWorld = false`
+for the same reason — the set of answers is a committed, versioned corpus, not the open internet — and
+every response names the MITRE bundle commit it was built from. `attack_group_lookup` exists so that
+naming a real adversary (ELICITATION.md E3) is a lookup against MITRE's own intrusion-set ids, never a
+recalled `G####`.

@@ -1,20 +1,22 @@
 #!/usr/bin/env node
-// Builds corpus/attack-index.json: every ATT&CK technique id the validator will accept, with
-// its name, its domains, and whether MITRE has revoked or deprecated it. Nothing else — the
-// document holds ids and the standard holds the content, so the index is a resolver, not a copy.
+// Builds corpus/attack-index.json and corpus/attack-groups.json: every ATT&CK technique id and every
+// ATT&CK intrusion-set (group) id the validator and the lookup tools will resolve, with names,
+// domains, and whether MITRE has revoked or deprecated each. Nothing else — the document holds ids
+// and the standard holds the content, so both indexes are resolvers, not copies.
 //
-//   node build-attack-index.mjs                 (downloads the three bundles, writes the index)
+//   node build-attack-index.mjs                 (downloads the three bundles, writes both indexes)
 //   node build-attack-index.mjs /path/to/dir    (reads <domain>-attack.json from a local dir)
 //
-// The MITRE bundles are ~30 MB each and are never committed. What is committed is this script,
-// the index, and the commit the bundles were read at, recorded in the index's builtFrom block.
+// The MITRE bundles are ~30-50 MB each and are never committed. What is committed is this script,
+// the two indexes, and the commit the bundles were read at, recorded in each index's builtFrom block.
 
 import { writeFileSync, readFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const OUT = join(here, 'attack-index.json');
+const TECHNIQUES_OUT = join(here, 'attack-index.json');
+const GROUPS_OUT = join(here, 'attack-groups.json');
 const REPO = 'mitre-attack/attack-stix-data';
 const REF = 'master';
 const DOMAINS = ['enterprise', 'ics', 'mobile'];
@@ -50,37 +52,70 @@ const attackId = obj =>
   (obj.external_references || []).find(r => r.source_name === 'mitre-attack')?.external_id || null;
 
 const techniques = new Map();
-const bundles = [];
+const groups = new Map();
+const techniqueBundles = [];
+const groupBundles = [];
 
 for (const domain of DOMAINS) {
   const b = await bundle(domain);
-  let count = 0;
+
+  let techniqueCount = 0;
+  let groupCount = 0;
   for (const obj of b.objects || []) {
-    if (obj.type !== 'attack-pattern') continue;
-    const id = attackId(obj);
-    if (!id || !/^T[0-9]{4}(\.[0-9]{3})?$/.test(id)) continue;
-    const entry = techniques.get(id) || { id, name: obj.name, domains: [] };
-    if (!entry.domains.includes(domain)) entry.domains.push(domain);
-    // Revoked or deprecated anywhere is reported: the id is not one to author against.
-    if (obj.revoked === true) entry.revoked = true;
-    if (obj.x_mitre_deprecated === true) entry.deprecated = true;
-    techniques.set(id, entry);
-    count++;
+    if (obj.type === 'attack-pattern') {
+      const id = attackId(obj);
+      if (!id || !/^T[0-9]{4}(\.[0-9]{3})?$/.test(id)) continue;
+      const entry = techniques.get(id) || { id, name: obj.name, domains: [] };
+      if (!entry.domains.includes(domain)) entry.domains.push(domain);
+      // Revoked or deprecated anywhere is reported: the id is not one to author against.
+      if (obj.revoked === true) entry.revoked = true;
+      if (obj.x_mitre_deprecated === true) entry.deprecated = true;
+      techniques.set(id, entry);
+      techniqueCount++;
+    } else if (obj.type === 'intrusion-set') {
+      const id = attackId(obj);
+      if (!id || !/^G[0-9]{4}$/.test(id)) continue;
+      const entry = groups.get(id) || { id, name: obj.name, aliases: obj.aliases || [], domains: [] };
+      if (!entry.domains.includes(domain)) entry.domains.push(domain);
+      if (obj.revoked === true) entry.revoked = true;
+      if (obj.x_mitre_deprecated === true) entry.deprecated = true;
+      groups.set(id, entry);
+      groupCount++;
+    }
   }
-  bundles.push({ domain, file: `${domain}-attack/${domain}-attack.json`, attackPatterns: count });
+  techniqueBundles.push({ domain, file: `${domain}-attack/${domain}-attack.json`, attackPatterns: techniqueCount });
+  groupBundles.push({ domain, file: `${domain}-attack/${domain}-attack.json`, intrusionSets: groupCount });
 }
 
-const ordered = [...techniques.values()].sort((a, b) => a.id.localeCompare(b.id));
-const index = {
-  builtFrom: { repo: REPO, ref: REF, commit: await commit(), builtAt: new Date().toISOString().slice(0, 10), bundles },
-  count: ordered.length,
-  revoked: ordered.filter(t => t.revoked).length,
-  deprecated: ordered.filter(t => t.deprecated).length,
-  techniques: ordered,
+const builtAt = new Date().toISOString().slice(0, 10);
+const builtFromCommit = await commit();
+
+const orderedTechniques = [...techniques.values()].sort((a, b) => a.id.localeCompare(b.id));
+const techniqueIndex = {
+  builtFrom: { repo: REPO, ref: REF, commit: builtFromCommit, builtAt, bundles: techniqueBundles },
+  count: orderedTechniques.length,
+  revoked: orderedTechniques.filter(t => t.revoked).length,
+  deprecated: orderedTechniques.filter(t => t.deprecated).length,
+  techniques: orderedTechniques,
 };
 
 // One technique per line: a 1,000-entry index that a reviewer can diff.
-const body = ordered.map(t => '    ' + JSON.stringify(t)).join(',\n');
-const head = JSON.stringify({ ...index, techniques: undefined }, null, 2).replace(/\n\}$/, '');
-writeFileSync(OUT, `${head},\n  "techniques": [\n${body}\n  ]\n}\n`);
-console.error(`wrote ${OUT}: ${ordered.length} techniques (${index.revoked} revoked, ${index.deprecated} deprecated)`);
+const techniqueBody = orderedTechniques.map(t => '    ' + JSON.stringify(t)).join(',\n');
+const techniqueHead = JSON.stringify({ ...techniqueIndex, techniques: undefined }, null, 2).replace(/\n\}$/, '');
+writeFileSync(TECHNIQUES_OUT, `${techniqueHead},\n  "techniques": [\n${techniqueBody}\n  ]\n}\n`);
+console.error(`wrote ${TECHNIQUES_OUT}: ${orderedTechniques.length} techniques (${techniqueIndex.revoked} revoked, ${techniqueIndex.deprecated} deprecated)`);
+
+const orderedGroups = [...groups.values()].sort((a, b) => a.id.localeCompare(b.id));
+const groupIndex = {
+  builtFrom: { repo: REPO, ref: REF, commit: builtFromCommit, builtAt, bundles: groupBundles },
+  count: orderedGroups.length,
+  revoked: orderedGroups.filter(g => g.revoked).length,
+  deprecated: orderedGroups.filter(g => g.deprecated).length,
+  groups: orderedGroups,
+};
+
+// One group per line, same reasoning as the technique index.
+const groupBody = orderedGroups.map(g => '    ' + JSON.stringify(g)).join(',\n');
+const groupHead = JSON.stringify({ ...groupIndex, groups: undefined }, null, 2).replace(/\n\}$/, '');
+writeFileSync(GROUPS_OUT, `${groupHead},\n  "groups": [\n${groupBody}\n  ]\n}\n`);
+console.error(`wrote ${GROUPS_OUT}: ${orderedGroups.length} groups (${groupIndex.revoked} revoked, ${groupIndex.deprecated} deprecated)`);

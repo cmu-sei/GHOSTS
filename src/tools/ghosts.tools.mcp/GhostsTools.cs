@@ -137,6 +137,16 @@ public sealed class GhostsTools
         return await GetJsonAsync($"/api/attack/techniques?q={Uri.EscapeDataString(query ?? string.Empty)}&take={take}", null, ct);
     }
 
+    [McpServerTool(Name = "attack_group_lookup", ReadOnly = true, OpenWorld = false)]
+    [Description("Resolves MITRE ATT&CK intrusion sets (groups) by id, by a fragment of the primary name, or by a fragment of a known alias, from the same corpus attack_technique_lookup uses. Returns id, name, aliases, domains, and whether MITRE revoked or deprecated it. Use this before naming a real adversary in a document (ELICITATION.md E3); never write a group id from memory.")]
+    public static async Task<string> LookupAttackGroupAsync(
+        [Description("An ATT&CK group id such as G0034, an id prefix, or part of a name or alias such as \"sandworm\" or \"voodoo bear\".")] string query,
+        [Description("Maximum number of matches to return.")] int take = 25,
+        CancellationToken ct = default)
+    {
+        return await GetJsonAsync($"/api/attack/groups?q={Uri.EscapeDataString(query ?? string.Empty)}&take={take}", null, ct);
+    }
+
     [McpServerTool(Name = "browser_timeline_build", ReadOnly = true, OpenWorld = false)]
     [Description("Builds a browser timeline JSON payload without sending it to GHOSTS.")]
     public static string BuildBrowserTimelineJson(

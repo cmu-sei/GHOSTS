@@ -7,12 +7,13 @@ using Microsoft.AspNetCore.Mvc;
 namespace Ghosts.Api.Controllers.Api;
 
 /// <summary>
-/// Read-only lookups against the ATT&amp;CK index the validator already carries as an embedded resource
-/// (schemas/scenario-document/corpus/attack-index.json). It exists so that an authoring agent has
-/// somewhere to resolve a technique id other than its own memory — the failure mode both Step 0 runs
-/// hit — and so the answer comes from the same index tier 2 validates against. One index, one verdict:
-/// a tool that carried its own copy could tell an author a technique is fine and then watch the
-/// validator reject it.
+/// Read-only lookups against the ATT&amp;CK indexes the validator already carries as embedded resources
+/// (schemas/scenario-document/corpus/attack-index.json and attack-groups.json, built together at the
+/// same MITRE bundle commit). It exists so that an authoring agent has somewhere to resolve a
+/// technique id, or an adversary's real name, other than its own memory — the failure mode both
+/// Step 0 runs hit for technique ids — and so the answer comes from the same index tier 2 validates
+/// against. One index, one verdict: a tool that carried its own copy could tell an author an id is
+/// fine and then watch the validator reject it.
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
@@ -42,6 +43,36 @@ public class AttackController : ControllerBase
                 domains = t.Domains,
                 revoked = t.Revoked,
                 deprecated = t.Deprecated
+            })
+        });
+    }
+
+    /// <summary>
+    /// Intrusion sets (groups) matching an exact id, an id prefix, a fragment of the primary name, or
+    /// a fragment of a known alias — "Sandworm" and "Voodoo Bear" both find G0034. Naming a real
+    /// adversary is a mission judgment (ELICITATION.md E3); this exists so the id attached to that
+    /// name is looked up rather than recalled, the same reason api/attack/techniques exists.
+    /// </summary>
+    // GET: api/attack/groups?q=sandworm&take=10
+    [HttpGet("groups")]
+    public IActionResult SearchGroups([FromQuery] string q, [FromQuery] int take = 25)
+    {
+        var matches = AttackGroupIndex.Search(q, take);
+
+        return Ok(new
+        {
+            query = q,
+            provenance = AttackGroupIndex.Provenance,
+            indexed = AttackGroupIndex.Count,
+            count = matches.Count,
+            groups = matches.Select(g => new
+            {
+                id = g.Id,
+                name = g.Name,
+                aliases = g.Aliases,
+                domains = g.Domains,
+                revoked = g.Revoked,
+                deprecated = g.Deprecated
             })
         });
     }
