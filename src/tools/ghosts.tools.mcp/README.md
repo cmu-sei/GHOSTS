@@ -58,8 +58,8 @@ tables: an agent edits the document and imports it, so what a reviewer signs off
 A finding carries `tier` (1–4), `severity` (`error` blocks import; `warning` and `info` do not), a
 stable `code`, a JSON `path` pointer into the document, a `message`, and sometimes a `hint`.
 
-`attack_technique_lookup` and `attack_group_lookup` read `GET /api/attack/techniques` and
-`GET /api/attack/groups` rather than carrying their own copy of either index. That is the point: the
+`attack_technique_lookup` and `attack_group_lookup` read `GET /api/attack/index/techniques` and
+`GET /api/attack/index/groups` rather than carrying their own copy of either index. That is the point: the
 API serves the same embedded `corpus/attack-index.json` and `corpus/attack-groups.json`, built
 together at the same MITRE bundle commit, that the validator's tier 2 checks against, so a tool cannot
 tell an author an id is fine and then have the import reject it. Both are marked `OpenWorld = false`

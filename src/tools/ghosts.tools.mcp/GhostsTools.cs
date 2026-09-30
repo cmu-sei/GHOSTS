@@ -134,7 +134,7 @@ public sealed class GhostsTools
         [Description("Maximum number of matches to return.")] int take = 25,
         CancellationToken ct = default)
     {
-        return await GetJsonAsync($"/api/attack/techniques?q={Uri.EscapeDataString(query ?? string.Empty)}&take={take}", null, ct);
+        return await GetJsonAsync($"/api/attack/index/techniques?q={Uri.EscapeDataString(query ?? string.Empty)}&take={take}", null, ct);
     }
 
     [McpServerTool(Name = "attack_group_lookup", ReadOnly = true, OpenWorld = false)]
@@ -144,7 +144,7 @@ public sealed class GhostsTools
         [Description("Maximum number of matches to return.")] int take = 25,
         CancellationToken ct = default)
     {
-        return await GetJsonAsync($"/api/attack/groups?q={Uri.EscapeDataString(query ?? string.Empty)}&take={take}", null, ct);
+        return await GetJsonAsync($"/api/attack/index/groups?q={Uri.EscapeDataString(query ?? string.Empty)}&take={take}", null, ct);
     }
 
     [McpServerTool(Name = "browser_timeline_build", ReadOnly = true, OpenWorld = false)]

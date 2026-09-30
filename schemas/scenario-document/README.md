@@ -25,7 +25,7 @@ environment block structured, and the schema versioned from the first commit.
 | `tests/tier2/` | One document per tier-2 referential check, each with exactly one planted defect, and the sidecar naming the finding each must produce. |
 | `corpus/build-attack-index.mjs` | Builds both indexes below from the same MITRE STIX bundles, at the same commit, in one pass. |
 | `corpus/attack-index.json` | ATT&CK technique ids, names, domains and revoked/deprecated flags. The first Step 3a corpus item. |
-| `corpus/attack-groups.json` | ATT&CK intrusion-set (group) ids, names, aliases, domains and revoked/deprecated flags — added in this cleanup pass so naming a real adversary (ELICITATION.md E3) is a lookup, never a recalled `G####`. Served at `GET /api/attack/groups`, beside `GET /api/attack/techniques`; `attack_group_lookup` is `attack_technique_lookup`'s sibling MCP tool. |
+| `corpus/attack-groups.json` | ATT&CK intrusion-set (group) ids, names, aliases, domains and revoked/deprecated flags — added in this cleanup pass so naming a real adversary (ELICITATION.md E3) is a lookup, never a recalled `G####`. Served at `GET /api/attack/index/groups`, beside `GET /api/attack/index/techniques`; `attack_group_lookup` is `attack_technique_lookup`'s sibling MCP tool. |
 
 Run the test from a GHOSTS checkout:
 
