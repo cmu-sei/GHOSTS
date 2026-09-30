@@ -127,8 +127,8 @@ public class ScenariosController : ControllerBase
     /// <summary>
     /// Validates a scenario document and returns the findings. Writes nothing, ever: this is the
     /// endpoint an authoring agent calls, and it has to be safe to call on a draft. With
-    /// ?dryRun=true it also loads and compiles the document inside a transaction that is always
-    /// rolled back, so the findings include what loading it would actually do.
+    /// ?dryRun=true it also creates the scenario and generates its population inside a transaction
+    /// that is always rolled back, so the findings include what loading it would actually do.
     /// </summary>
     // POST: api/scenarios/validate
     [HttpPost("validate")]

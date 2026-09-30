@@ -100,10 +100,10 @@ public sealed class GhostsTools
     // no tool here that edits a scenario row: an authoring agent changes the document and imports it.
 
     [McpServerTool(Name = "scenario_document_validate", ReadOnly = true, OpenWorld = true)]
-    [Description("Validates a GHOSTS scenario document and returns the findings. Writes nothing, ever, so it is safe on a draft. With dryRun it also loads and compiles the document inside a transaction that is always rolled back, adding tier-4 findings. Call this before import and after every edit.")]
+    [Description("Validates a GHOSTS scenario document and returns the findings. Writes nothing, ever, so it is safe on a draft. With dryRun it also creates the scenario and generates its population inside a transaction that is always rolled back, adding tier-4 findings. Call this before import and after every edit.")]
     public static async Task<string> ValidateScenarioDocumentAsync(
         [Description("The scenario document as a JSON object (schema 1.1.0).")] string document,
-        [Description("When true, also load and compile the document in a rolled-back transaction and report what that found.")] bool dryRun = false,
+        [Description("When true, also create the scenario and generate its population in a rolled-back transaction and report what that found.")] bool dryRun = false,
         CancellationToken ct = default)
     {
         return await PostDocumentAsync($"/api/scenarios/validate?dryRun={(dryRun ? "true" : "false")}", document, ct);

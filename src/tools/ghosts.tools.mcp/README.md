@@ -49,7 +49,7 @@ tables: an agent edits the document and imports it, so what a reviewer signs off
 
 | Tool | Reads or writes | What it does |
 |---|---|---|
-| `scenario_document_validate` | **writes nothing, ever** | Returns the validator's findings: tier 1 schema, tier 2 referential, and with `dryRun: true` tier 4, which loads and compiles the document inside a transaction that is always rolled back. Safe on a half-finished draft, which is what makes it the tool to call after every edit. |
+| `scenario_document_validate` | **writes nothing, ever** | Returns the validator's findings: tier 1 schema, tier 2 referential, and with `dryRun: true` tier 4, which creates the scenario and generates its population inside a transaction that is always rolled back. Safe on a half-finished draft, which is what makes it the tool to call after every edit. |
 | `scenario_document_import` | writes, or refuses | Runs the same validator and **refuses on any finding of severity `error`**, returning the findings and no id. On success, the new scenario id. |
 | `scenario_document_export` | read-only | One scenario as a canonical document: no database ids, no timestamps, no run state. Two exports of an unchanged scenario are byte-identical, and the output is valid input to import. |
 | `attack_technique_lookup` | read-only | Resolves ATT&CK techniques by id or by a fragment of a name, with MITRE's revoked and deprecated flags. |
