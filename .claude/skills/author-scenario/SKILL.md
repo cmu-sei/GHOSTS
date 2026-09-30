@@ -28,6 +28,18 @@ schema, its README and its tooling are in `schemas/scenario-document/`.
    No silent retries.
 6. **Repair mechanical findings; escalate judgment ones.** See `findings.md`. An agent that quietly
    resolves a judgment finding has rebuilt the original problem, only faster.
+7. **A document carries the observable and the technique id, never the operational how-to.** An
+   event or a playbook move names what a defender could see (`indicators`) and which ATT&CK id it
+   is. It does not narrate the mechanism that makes an attack step work — the exact parameters
+   changed, the exact spoofing method, the exact command sequence. That is not a workaround for a
+   content filter; it is what the document is *for*: the exercise trains detection and a decision,
+   and both run on an indicator plus a technique id. The mechanism is neither. (A Step 5 run drafted
+   a narrated sequence — disable protection, falsify telemetry, issue a trip command — as one
+   attacker-perspective paragraph; a safety classifier stopped it mid-write. The fix was not a
+   softer version of the same paragraph. It was three technique-tagged moves at outcome level, each
+   with its own indicators, gated in sequence — and that shape was the better document on its own
+   terms: more discoverable checkpoints for the audience, not fewer, because the training value was
+   always in what a defender could observe, never in how the adversary pulled it off.)
 
 ## The working folder
 

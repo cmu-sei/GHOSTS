@@ -20,6 +20,22 @@ A finding shape is `tier` (1–4), `severity` (`error` blocks import; `warning` 
 stable `code`, a JSON pointer `path` into the document, a `message`, and often a `hint`. The hint is
 usually the repair; read it before inventing one.
 
+## The content rule
+
+A document carries what a defender could observe and which ATT&CK technique it is — `indicators` and
+a technique id — and never an operational how-to for an attack step: not the exact parameters
+changed, not the exact spoofing method, not the exact command sequence. This is a design principle,
+not a workaround for a content filter: the exercise trains detection and a decision, and an indicator
+plus a technique id is everything either the audience or the validator can act on. The mechanism is
+neither, so leaving it out costs the document nothing it needed.
+
+A Step 5 run is the evidence, not the reason. A narrated sequence — disable protection, falsify
+telemetry, issue a trip command, written as one attacker-perspective paragraph — was stopped mid-write
+by a safety classifier. The repair was three technique-tagged moves at outcome level, each gated in
+sequence with its own indicators, and that shape turned out to be the better document: more
+discoverable checkpoints, not fewer, because the training value was always in what a defender could
+observe. Apply this rule before a classifier ever has to; do not wait for one to find the line for you.
+
 ## Never do this
 
 - **Do not delete the thing the finding points at** to make the finding go away. An `ATTACK_UNKNOWN_TECHNIQUE`
