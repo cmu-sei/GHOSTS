@@ -409,7 +409,9 @@ function timing(e) {
 function renderTimeline(out, doc) {
   const events = list(doc.timeline?.events);
   if (!events.length) return;
-  heading(out, 2, 'The timeline');
+  heading(out, 2, 'Master Scenario Events List');
+  para(out, 'In exercise-planning terms, each row below is an inject: a controller-triggered stimulus ' +
+    'with a time or a trigger, an owner, and the response it is meant to provoke.');
   para(out, `${events.length} beat${events.length === 1 ? '' : 's'}. Every one names who owns it, what the ` +
     'audience is expected to do, and what they would have to see in order to do it.');
 
@@ -461,6 +463,51 @@ function renderAdversaries(out, doc) {
   }
 }
 
+// A Mermaid identifier has to be word characters only; names and ids in the document do not.
+const mermaidId = s => String(s || '').replace(/[^a-zA-Z0-9_]/g, '_').replace(/^(\d)/, '_$1') || 'x';
+const mermaidLabel = s => String(s).replace(/"/g, "'");
+
+// One node per host, grouped in a subgraph per segment, so a reviewer sees the topology before the
+// tables spell it out row by row. Rendered as Mermaid in a fenced code block: GitHub and VS Code (the
+// viewers a plan like this is actually read in) render it inline, and a viewer that does not still
+// shows readable text — one line per host, grouped by segment — which a raw SVG's XML would not.
+function renderTopologyFigure(out, t) {
+  const hosts = list(t.hosts);
+  if (!hosts.length) return;
+  const segments = list(t.segments);
+  const bySegment = new Map();
+  const unassigned = [];
+  for (const s of segments) bySegment.set(s.name, []); // declared even if nothing is on it yet
+  for (const h of hosts) {
+    if (h.segment) {
+      if (!bySegment.has(h.segment)) bySegment.set(h.segment, []);
+      bySegment.get(h.segment).push(h);
+    } else {
+      unassigned.push(h);
+    }
+  }
+
+  para(out, '**Network diagram.** One node per host, grouped by segment. If this Markdown viewer does ' +
+    'not render Mermaid, the fenced block below is still a complete list, host by host.');
+  const lines = ['```mermaid', 'graph LR'];
+  for (const [segName, segHosts] of bySegment) {
+    const seg = segments.find(s => s.name === segName);
+    const label = seg?.cidr ? `${segName} (${seg.cidr})` : segName;
+    lines.push(`  subgraph ${mermaidId(segName)}["${mermaidLabel(label)}"]`);
+    for (const h of segHosts) {
+      lines.push(`    ${mermaidId(h.name)}["${mermaidLabel([h.name, h.role].filter(Boolean).join('<br/>'))}"]`);
+    }
+    lines.push('  end');
+  }
+  if (unassigned.length) {
+    lines.push('  subgraph unassigned["(segment not stated)"]');
+    for (const h of unassigned) lines.push(`    ${mermaidId(h.name)}["${mermaidLabel(h.name)}"]`);
+    lines.push('  end');
+  }
+  lines.push('```', '');
+  out.push(...lines);
+}
+
 function renderTerrain(out, doc) {
   const t = doc.terrain;
   if (!t) return;
@@ -470,6 +517,7 @@ function renderTerrain(out, doc) {
   if (t.summary?.topology) para(out, `**Topology.** ${t.summary.topology}`);
   if (t.summary?.assets) para(out, `**Assets.** ${t.summary.assets}`);
   if (t.summary?.services) para(out, `**Services.** ${t.summary.services}`);
+  renderTopologyFigure(out, t);
   table(out, ['Segment', 'CIDR', 'What it is'], list(t.segments).map(s => [s.name, s.cidr, s.description]));
   table(out, ['Host', 'Segment', 'OS', 'Role', 'What it is'],
     list(t.hosts).map(h => [h.name, h.segment, h.os, h.role, h.description]));
@@ -489,6 +537,26 @@ function renderTerrain(out, doc) {
       'exercise is a person playing.');
     table(out, ['Pool', 'Count', 'Who they are'], pools.map(p => [p.role, p.count, p.description]));
   }
+}
+
+// Every entity the document names, with its type, description and provenance, so nothing in the
+// graph is absent from the plan a reviewer actually reads. Provenance follows the schema's own
+// defaults (v1.1.0 rule 9) when the document omits it: an absent provenance block still means
+// operator origin, confidence 1, not reviewed, and the plan says so rather than showing a blank.
+function renderEntities(out, doc) {
+  const entities = list(doc.entities);
+  if (!entities.length) return;
+  heading(out, 2, 'Entities');
+  para(out, 'Everyone and everything the document names as part of the graph — people, systems, ' +
+    'organizations, and the rest of the recommended vocabulary — so nothing here is absent from the plan.');
+  table(out, ['Id', 'Name', 'Type', 'Description', 'Provenance'],
+    entities.map(e => {
+      const p = e.provenance || {};
+      const origin = p.origin ?? 'operator';
+      const confidence = p.confidence ?? 1;
+      const reviewed = p.reviewed ? 'reviewed' : 'not reviewed';
+      return [e.id, e.name, e.type, e.description, `${origin}, confidence ${confidence}, ${reviewed}`];
+    }));
 }
 
 function render(docFile, ledgerFile) {
@@ -544,6 +612,7 @@ function render(docFile, ledgerFile) {
 
   renderAdversaries(out, doc);
   renderTerrain(out, doc);
+  renderEntities(out, doc);
   renderTimeline(out, doc);
 
   const s = doc.assessment;
