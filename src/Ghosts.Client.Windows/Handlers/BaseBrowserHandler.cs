@@ -262,7 +262,6 @@ namespace Ghosts.Client.Handlers
             {
                 if (e is ThreadAbortException || e is ThreadInterruptedException)
                 {
-                    ProcessManager.KillProcessAndChildrenByName(this.BrowserType.ToString().Replace("Browser", ""));
                     Log.Trace($"Thread aborted, {this.BrowserType.ToString()} closing...");
                     throw;
                 }
@@ -361,7 +360,6 @@ namespace Ghosts.Client.Handlers
                                 {
                                     if (e is ThreadAbortException || e is ThreadInterruptedException)
                                     {
-                                        ProcessManager.KillProcessAndChildrenByName(this.BrowserType.ToString().Replace("Browser", ""));
                                         Log.Trace($"Thread aborted, {this.BrowserType.ToString()} closing...");
                                         throw;
                                     }
@@ -730,7 +728,6 @@ namespace Ghosts.Client.Handlers
                                 {
                                     if (e is ThreadAbortException || e is ThreadInterruptedException)
                                     {
-                                        ProcessManager.KillProcessAndChildrenByName(this.BrowserType.ToString().Replace("Browser", ""));
                                         Log.Trace($"Thread aborted, {this.BrowserType.ToString()} closing...");
                                         throw;
                                     }

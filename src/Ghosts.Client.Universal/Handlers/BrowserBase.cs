@@ -322,6 +322,7 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
         try
         {
             if (BrowserProcessTag == null) return; //no process tag, don't know which browser(s) to kill
+            if (!OperatingSystem.IsLinux()) return; //relies on bash and ps; elsewhere Driver.Quit() closes the browser
 
             // this will kill all processes that have the BrowserProcessTag as part of their command string
             // get pid, cmd | search for browser tag | use awk to remove leading white space | cut first value which is PID | kill

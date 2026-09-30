@@ -14,6 +14,7 @@ namespace Ghosts.Client.Infrastructure;
 public static class ProcessManager
 {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
+    private static readonly Lazy<HashSet<int>> _ancestorPids = new(() => GetAncestorPids(GetThisProcessPid()));
 
     public static int GetThisProcessPid()
     {
@@ -23,38 +24,32 @@ public static class ProcessManager
 
     public static void KillProcessAndChildrenByHandler(TimelineHandler handler)
     {
-        _log.Trace($"Killing: {handler.HandlerType}...");
-        switch (handler.HandlerType)
-        {
-            case HandlerType.BrowserChrome:
-                KillProcessAndChildrenByName("chrome");
-                KillProcessAndChildrenByName("chromedriver");
-                break;
-            case HandlerType.BrowserFirefox:
-                KillProcessAndChildrenByName("firefox");
-                KillProcessAndChildrenByName("geckodriver");
-                break;
-            case HandlerType.Command:
-                KillProcessAndChildrenByName("cmd");
-                break;
-            case HandlerType.PowerShell:
-                KillProcessAndChildrenByName("powershell");
-                break;
-            case HandlerType.Word:
-                KillProcessAndChildrenByName("winword");
-                break;
-            case HandlerType.Excel:
-                KillProcessAndChildrenByName("excel");
-                break;
-            case HandlerType.PowerPoint:
-                KillProcessAndChildrenByName("powerpnt");
-                break;
-            case HandlerType.Outlook:
-                KillProcessAndChildrenByName("outlook");
-                break;
+        //Outlook handlers keep one Outlook open across events and don't recover from it being killed mid-run
+        if (handler.HandlerType is HandlerType.Outlook or HandlerType.Outlookv2) return;
 
+        _log.Trace($"Killing: {handler.HandlerType}...");
+        foreach (var processName in GetProcessNames(handler.HandlerType))
+        {
+            KillProcessAndChildrenByName(processName);
         }
     }
+
+    /// <summary>
+    /// The processes a handler runs, which cleanup closes
+    /// </summary>
+    public static string[] GetProcessNames(HandlerType handlerType) => handlerType switch
+    {
+        HandlerType.BrowserChrome => [ProcessNames.Chrome, ProcessNames.ChromeDriver],
+        HandlerType.BrowserEdge => [ProcessNames.MSEdge, ProcessNames.MSEdgeDriver],
+        HandlerType.BrowserFirefox => [ProcessNames.Firefox, ProcessNames.GeckoDriver],
+        HandlerType.Command => [ProcessNames.Command],
+        HandlerType.PowerShell => [ProcessNames.PowerShell],
+        HandlerType.Word => [ProcessNames.Word],
+        HandlerType.Excel => [ProcessNames.Excel],
+        HandlerType.PowerPoint => [ProcessNames.PowerPoint],
+        HandlerType.Outlook or HandlerType.Outlookv2 => [ProcessNames.Outlook],
+        _ => []
+    };
 
     public static void KillProcessAndChildrenByName(string procName)
     {
@@ -71,6 +66,9 @@ public static class ProcessManager
                 try
                 {
                     if (process.Id == thisPid) //don't kill thyself
+                        continue;
+
+                    if (_ancestorPids.Value.Contains(process.Id)) //nor what ghosts runs under, SafeKill's taskkill /T would take ghosts with it
                         continue;
 
                     process.SafeKill();
@@ -119,6 +117,27 @@ public static class ProcessManager
         {
             _log.Trace(e);
         }
+    }
+
+    private static HashSet<int> GetAncestorPids(int pid)
+    {
+        var ancestors = new HashSet<int>();
+        try
+        {
+            while (true)
+            {
+                var searcher = new ManagementObjectSearcher($"Select ParentProcessId From Win32_Process Where ProcessId={pid}");
+                var parent = searcher.Get().Cast<ManagementObject>().Select(mo => Convert.ToInt32(mo["ParentProcessId"])).FirstOrDefault();
+                if (parent == 0 || !ancestors.Add(parent))
+                    break;
+                pid = parent;
+            }
+        }
+        catch (Exception e)
+        {
+            _log.Trace(e);
+        }
+        return ancestors;
     }
 
     public static IEnumerable<int> GetPids(string processName)

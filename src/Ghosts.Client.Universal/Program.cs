@@ -90,6 +90,10 @@ internal static class Program
 
         CheckId = new CheckId();
 
+        //close stray processes from a previous run, and a handler's processes when it sleeps through off hours
+        StartupTasks.CleanupProcesses();
+        WorkingHours.BeforeSleep = ProcessManager.KillProcessAndChildrenByHandler;
+
         //should we catch stray processes or check for job duplication?
         StartupTasks.SetStartup();
 
