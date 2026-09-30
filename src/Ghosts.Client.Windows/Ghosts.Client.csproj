@@ -129,10 +129,6 @@
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Microsoft.Identity.Client, Version=4.61.3.0, Culture=neutral, PublicKeyToken=0a613f4dd989e8ae">
-      <HintPath>..\packages\Microsoft.Identity.Client.4.61.3\lib\net462\Microsoft.Identity.Client.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Microsoft.VisualBasic" />
     <!-- SSH.NET 2026.0.1-prerelease.6: fixes MAC error on .NET Framework (sshnet/SSH.NET#1829). Revert to the SSH.NET PackageReference once 2026.0.1+ is on nuget.org -->
     <Reference Include="Renci.SshNet, Version=2026.0.1.0, Culture=neutral, PublicKeyToken=1cee9f8bde3db106">
@@ -146,10 +142,6 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Data.SqlClient, Version=4.6.1.6, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <HintPath>..\packages\System.Data.SqlClient.4.8.6\lib\net461\System.Data.SqlClient.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System.DirectoryServices.AccountManagement" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.IdentityModel" />
@@ -159,10 +151,6 @@
     <Reference Include="System.Printing" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
-    <Reference Include="System.Text.Json, Version=8.0.0.5, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
-      <HintPath>..\packages\System.Text.Json.8.0.5\lib\net462\System.Text.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System.Transactions" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
@@ -312,6 +300,7 @@
     <None Include="Sample Timelines\BrowserFirefoxSocial.json" />
     <None Include="Sample Timelines\ExecuteFile.json" />
     <None Include="Sample Timelines\Cron.json" />
+    <None Include="Sample Timelines\Database.json" />
     <None Include="Sample Timelines\Administrative Commands.json" />
     <None Include="Sample Timelines\BrowserChrome.json" />
     <None Include="Sample Timelines\BrowserChromeBlogDrupal.json" />
@@ -321,7 +310,7 @@
     <None Include="Sample Timelines\LightHandlers.json" />
     <None Include="Sample Timelines\Notepad.json" />
     <None Include="Sample Timelines\Clicks.json" />
-    <None Include="Sample Timelines\command.json" />
+    <None Include="Sample Timelines\Command.json" />
     <None Include="Sample Timelines\Excel.json" />
     <None Include="Sample Timelines\Full sample.timeline.json" />
     <Compile Include="Infrastructure\Winuser.cs" />
@@ -332,7 +321,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <None Include="Sample Timelines\NpcSystem.json" />
-    <None Include="Sample Timelines\outlook.json" />
+    <None Include="Sample Timelines\Outlook.json" />
     <None Include="Sample Timelines\Outlookv2.json" />
     <None Include="Sample Timelines\Pidgin.json" />
     <None Include="Sample Timelines\PowerPoint.json" />
@@ -347,7 +336,7 @@
     <None Include="Sample Timelines\Sftp.json" />
     <None Include="Sample Timelines\Ssh.json" />
     <None Include="Sample Timelines\trackables timeline.json" />
-    <None Include="Sample Timelines\watcher.json" />
+    <None Include="Sample Timelines\Watcher.json" />
     <None Include="Sample Timelines\Word.json" />
   </ItemGroup>
   <ItemGroup>
