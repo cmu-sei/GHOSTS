@@ -2346,10 +2346,12 @@
 <p>The browser handlers simulate realistic web browsing behavior using Firefox or Chrome. GHOSTS can control browser activities including page navigation, form interaction, file downloads, and more.</p>
 <p>Sample browser timelines are available in the <a href="https://github.com/cmu-sei/GHOSTS/tree/master/src/Ghosts.Client.Windows/Sample%20Timelines">GHOSTS GitHub repository</a>.</p>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
-<p>Before using browser handlers, you must download the appropriate WebDriver:</p>
+<p>Each browser handler needs a WebDriver that matches the installed browser. GHOSTS looks for it in the same folder as the GHOSTS executable first; if it is not there, Selenium Manager searches <code>PATH</code> and, if the host has internet access, downloads a matching driver.</p>
+<p>Geckodriver ships with the GHOSTS clients (except the Universal <code>linux-arm64</code> build). Chromedriver and msedgedriver are not bundled because they must match the browser's major version, so on offline hosts place a matching one next to the GHOSTS executable:</p>
 <ul>
-<li><strong>Firefox</strong>: <a href="https://github.com/mozilla/geckodriver/releases">Download Geckodriver</a> and place it in the same folder as the GHOSTS executable</li>
-<li><strong>Chrome</strong>: <a href="https://chromedriver.chromium.org/downloads">Download Chromedriver</a> and place it in the same folder as the GHOSTS executable</li>
+<li><strong>Firefox</strong>: <a href="https://github.com/mozilla/geckodriver/releases">Download Geckodriver</a></li>
+<li><strong>Chrome</strong>: <a href="https://chromedriver.chromium.org/downloads">Download Chromedriver</a></li>
+<li><strong>Edge</strong>: <a href="https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/">Download msedgedriver</a></li>
 </ul>
 <p>Ensure the WebDriver version matches your installed browser version.</p>
 <h2 id="handler-types">Handler Types<a class="headerlink" href="#handler-types" title="Permanent link">&para;</a></h2>
@@ -2650,7 +2652,7 @@
 </ol>
 <h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
 <h3 id="browser-wont-start">Browser Won't Start<a class="headerlink" href="#browser-wont-start" title="Permanent link">&para;</a></h3>
-<p><strong>Check WebDriver</strong>: Ensure Geckodriver/Chromedriver is in the GHOSTS directory and matches your browser version.</p>
+<p><strong>Check WebDriver</strong>: Ensure the driver is in the GHOSTS directory (or on <code>PATH</code>) and matches your browser version.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Check Chrome version</span>
 google-chrome<span class="w"> </span>--version
 
