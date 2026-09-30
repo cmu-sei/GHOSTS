@@ -1,0 +1,271 @@
+{
+  "schemaVersion": "1.1.0",
+  "slug": "operation-overlord",
+  "name": "OPERATION OVERLORD: The Normandy Decision",
+  "description": "January 1944. You sit with the Supreme Headquarters Allied Expeditionary Force joint planning staff. The COSSAC outline must become an executable plan for opening a lodgment in Normandy. Landing frontage, air cover, naval lift, deception, and sustainment all compete for scarce resources. Eisenhower expects a coherent recommendation before the conference closes.",
+  "catalog": {
+    "listed": true,
+    "sortOrder": 2,
+    "era": "1944",
+    "theater": "Northwest Europe",
+    "estimatedMinutes": 12
+  },
+  "context": {
+    "political": "The Combined Chiefs have directed a cross-Channel invasion in 1944. Allied unity must be preserved while American, British, Canadian, air, naval, and ground requirements are reconciled."
+  },
+  "audience": {
+    "role": "Blue Team (SHAEF Joint Planner)",
+    "rulesOfEngagement": "Plan within allocated landing craft and tactical air range. Preserve operational surprise, identify assumptions, and state which risks the Supreme Commander must accept."
+  },
+  "sides": [
+    {
+      "name": "Allied Expeditionary Force",
+      "alignment": "friendly"
+    },
+    {
+      "name": "German-occupied France",
+      "alignment": "adversary"
+    }
+  ],
+  "adversaries": [
+    {
+      "id": "german-seventh-and-fifteenth-armies",
+      "name": "German Seventh and Fifteenth Armies",
+      "type": "peer military",
+      "capability": 5,
+      "capabilities": [
+        "Atlantic Wall coastal defenses",
+        "mobile armored reserve",
+        "coastal artillery",
+        "rapid reinforcement"
+      ]
+    }
+  ],
+  "terrain": {
+    "summary": {
+      "topology": "English Channel crossing from southern England to a broad Normandy lodgment between the Cotentin Peninsula and the Orne River.",
+      "services": "Naval gunfire support, tactical air cover, airborne lift, landing craft, engineer support, deception, and cross-Channel logistics.",
+      "assets": "Five assault divisions, three airborne divisions, landing ships and craft, Mulberry artificial harbors, PLUTO pipeline, tactical air forces."
+    },
+    "defenses": [
+      {
+        "name": "ULTRA-derived intelligence picture"
+      },
+      {
+        "name": "Allied air superiority"
+      },
+      {
+        "name": "Naval fire support"
+      },
+      {
+        "name": "Operation FORTITUDE deception plan"
+      }
+    ],
+    "vulnerabilities": [
+      {
+        "asset": "Normandy lodgment",
+        "description": "No major port available on D-Day",
+        "severity": "high"
+      },
+      {
+        "asset": "Assault force",
+        "description": "Weather, tide, and landing-craft constraints",
+        "severity": "high"
+      }
+    ]
+  },
+  "population": {
+    "pools": [
+      {
+        "role": "SHAEF Joint Planning Staff",
+        "count": 1
+      },
+      {
+        "role": "Allied Assault Divisions",
+        "count": 5
+      },
+      {
+        "role": "Allied Airborne Divisions",
+        "count": 3
+      }
+    ]
+  },
+  "rulesOfPlay": {
+    "pacing": "turn-based",
+    "duration": "1h",
+    "clock": {
+      "label": "in conference"
+    },
+    "deadline": {
+      "at": "T+30m",
+      "label": "COMMAND DECISION",
+      "decisiveAction": "approve and sign the Normandy joint concept",
+      "warning": "This is the decisive command paper. Eisenhower closes the conference at the {deadline}m mark; secure approval for a specific Normandy concept before polishing the supporting annexes.",
+      "failureMessage": "The command conference closed without an approved OVERLORD concept; lift allocations and the invasion timetable now slip."
+    },
+    "adjudication": "automated",
+    "telemetry": {
+      "logs": true,
+      "chat": true
+    },
+    "escalationLadder": {
+      "summary": "Strategic directive -> operational concept -> joint force allocation -> NEPTUNE assault plan"
+    },
+    "branching": {
+      "summary": "Approving the decision brief at step 5 sets flag 'overlord-plan-approved'. Step 6 presents command approval when set; step 7 presents a planning failure when unset at the command deadline."
+    }
+  },
+  "assessment": {
+    "purpose": "Produce a coherent joint operational concept for OVERLORD that can secure and sustain a lodgment in Normandy.",
+    "victoryConditions": "WIN: the staff approves a specific five-division Normandy concept with airborne flank protection and a credible sustainment scheme. LOSS: the conference closes without an executable joint concept and the invasion timetable slips.",
+    "performanceMetrics": "constraint identification, prioritization, joint integration, decision quality",
+    "objectives": [
+      {
+        "id": 1,
+        "name": "Identify the decisive operational constraints",
+        "description": "Identify how enemy disposition, air cover, landing craft, weather, beach capacity, and sustainment shape the feasible assault area and force.",
+        "priority": 2,
+        "successCriteria": "The player investigates the area and joint-force estimates before committing the command.",
+        "assigned": "blue-team"
+      },
+      {
+        "id": 2,
+        "name": "Prevent the OVERLORD concept from stalling",
+        "description": "Approve an executable five-division Normandy concept with airborne flank protection, joint fires, deception, and a credible sustainment scheme.",
+        "successCriteria": "The 'overlord-plan-approved' flag is set on the Supreme Commander's decision brief, steering the conference onto the approved branch.",
+        "assigned": "blue-team"
+      }
+    ]
+  },
+  "timeline": {
+    "events": [
+      {
+        "id": "inject-1",
+        "at": "T+0m",
+        "owner": "white-cell",
+        "title": "Supreme Commander calls the OVERLORD planning conference to order"
+      },
+      {
+        "id": "event-1",
+        "displayTime": "21 JAN 44 / 0800",
+        "owner": "white-cell",
+        "description": "The Supreme Commander opens the planning conference at St. Paul's School in London. The Combined Chiefs' directive is plain: enter the continent, defeat Germany, and build the force required for operations into the heart of Europe. Your staff must turn the inherited COSSAC outline into a command decision."
+      },
+      {
+        "id": "event-2",
+        "displayTime": "21 JAN 44 / 0810",
+        "owner": "green-cell",
+        "description": "The joint intelligence and logistics teams post the common picture. Pas-de-Calais offers the shortest crossing but faces the strongest defenses. Normandy offers surprise and beaches within fighter range, but no major port is available at the lodgment. Landing craft, weather, tides, and the rate of German reinforcement define the problem.",
+        "objectives": [
+          1
+        ]
+      },
+      {
+        "id": "event-3",
+        "displayTime": "21 JAN 44 / 0820",
+        "owner": "blue-team",
+        "description": "PLANNING PAPER 1 — Area estimate. The staff must recommend the assault area. Pas-de-Calais shortens the crossing but concentrates against the German Fifteenth Army; Normandy offers operational surprise, usable beaches, and room to expand toward Cherbourg. State the decisive terrain, enemy, and air-cover factors.",
+        "objectives": [
+          1
+        ]
+      },
+      {
+        "id": "event-4",
+        "displayTime": "21 JAN 44 / 0820",
+        "owner": "blue-team",
+        "description": "PLANNING PAPER 2 — Joint force and sustainment estimate. A broad front improves the chance of a viable lodgment but consumes scarce landing craft. The staff must integrate five assault divisions, airborne flank protection, naval gunfire, tactical air, Mulberry harbors, and early capture of Cherbourg.",
+        "objectives": [
+          1
+        ]
+      },
+      {
+        "id": "event-5",
+        "displayTime": "21 JAN 44 / 0820",
+        "owner": "blue-team",
+        "description": "PLANNING PAPER 3 — Supreme Commander's decision brief. Recommend a five-division assault across the Utah, Omaha, Gold, Juno, and Sword sectors; airborne forces protect both flanks; naval and air plans isolate the battlefield; FORTITUDE holds German attention toward Pas-de-Calais; Mulberries sustain the lodgment while Cherbourg is opened. Approve, revise, or defer the joint concept.",
+        "objectives": [
+          2
+        ]
+      },
+      {
+        "id": "event-6",
+        "displayTime": "21 JAN 44 / 0850",
+        "when": "flag:overlord-plan-approved",
+        "owner": "white-cell",
+        "description": "The Supreme Commander approves the expanded Normandy concept. Five assault divisions will land on a broad front, airborne forces will secure the flanks, and the joint staff will develop the assault as Operation NEPTUNE. Landing-craft allocations are reopened to support the decision.",
+        "objectives": [
+          2
+        ]
+      },
+      {
+        "id": "event-7",
+        "displayTime": "21 JAN 44 / 0850",
+        "when": "!overlord-plan-approved",
+        "owner": "white-cell",
+        "description": "The conference adjourns without a unified recommendation. Air, naval, and ground staffs continue against different assumptions; landing craft remain allocated to competing demands. The cross-Channel timetable slips while the operational concept returns for revision."
+      },
+      {
+        "id": "event-8",
+        "displayTime": "21 JAN 44 / 0900",
+        "owner": "blue-team",
+        "description": "The conference secretary asks for your final staff action. Publish the warning order and assign the NEPTUNE annexes if the concept was approved, or record the unresolved assumptions and direct a rapid revision if it was not."
+      },
+      {
+        "id": "event-9",
+        "displayTime": "21 JAN 44 / 0910",
+        "owner": "white-cell",
+        "description": "Exercise control closes the planning session and begins the staff critique. The record now shows whether the team identified the decisive constraints, protected the command decision, and produced an executable operational concept."
+      }
+    ]
+  },
+  "entities": [
+    {
+      "id": "shaef",
+      "name": "SHAEF",
+      "type": "Organization",
+      "description": "Supreme Headquarters Allied Expeditionary Force.",
+      "externalId": "SHAEF"
+    },
+    {
+      "id": "german-seventh-and-fifteenth-armies",
+      "name": "German Seventh and Fifteenth Armies",
+      "type": "ThreatActor",
+      "description": "German field armies defending France and the Channel coast.",
+      "externalId": "OB-WEST"
+    },
+    {
+      "id": "normandy-lodgment",
+      "name": "Normandy Lodgment",
+      "type": "Location",
+      "description": "The intended Allied lodgment from the Cotentin Peninsula to the Orne.",
+      "externalId": "NORMANDY"
+    },
+    {
+      "id": "cross-channel-lift",
+      "name": "Cross-Channel Lift",
+      "type": "Resource",
+      "description": "Landing ships, landing craft, and airborne lift allocated to NEPTUNE.",
+      "externalId": "NEPTUNE-LIFT"
+    }
+  ],
+  "edges": [
+    {
+      "from": "german-seventh-and-fifteenth-armies",
+      "to": "normandy-lodgment",
+      "type": "Defends",
+      "label": "defends occupied coast"
+    },
+    {
+      "from": "shaef",
+      "to": "normandy-lodgment",
+      "type": "PlansFor",
+      "label": "plans lodgment"
+    },
+    {
+      "from": "cross-channel-lift",
+      "to": "normandy-lodgment",
+      "type": "Enables",
+      "label": "enables assault"
+    }
+  ]
+}

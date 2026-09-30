@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "1.1.0",
+  "slug": "time-outside-duration-clock",
+  "name": "Condition waiting past the end of the exercise",
+  "description": "The event waits for minute 600 of an eight-hour exercise, so the condition never holds.",
+  "rulesOfPlay": { "duration": "8h" },
+  "timeline": {
+    "events": [
+      { "id": "late-escalation", "when": "clock>=600", "owner": "white-cell", "description": "Control escalates to the incident commander." }
+    ]
+  }
+}

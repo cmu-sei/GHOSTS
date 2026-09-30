@@ -35,8 +35,8 @@ services:
       GRAFANA_URL: ${WEB_GRAFANA_URL:-http://localhost:3000}
   ghosts-api:
     build:
-      context: ..
-      dockerfile: Dockerfile-api
+      context: ../..
+      dockerfile: src/Dockerfile-api
     container_name: ghosts-api
     depends_on:
       ghosts-postgres:

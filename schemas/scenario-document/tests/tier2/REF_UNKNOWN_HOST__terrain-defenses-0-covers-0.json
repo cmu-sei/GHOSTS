@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "1.1.0",
+  "slug": "ref-unknown-host-defense",
+  "name": "Defense covering a host that is not declared",
+  "description": "The EDR covers MER-DB-02, and the only host in this document is MER-WEB-01.",
+  "terrain": {
+    "hosts": [
+      { "name": "MER-WEB-01" }
+    ],
+    "defenses": [
+      { "name": "Endpoint detection", "covers": ["MER-DB-02"] }
+    ]
+  }
+}

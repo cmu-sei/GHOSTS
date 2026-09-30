@@ -22,6 +22,7 @@
   <ItemGroup>
     <PackageReference Include="ClosedXML" Version="0.105.1" />
     <PackageReference Include="DocumentFormat.OpenXml" Version="3.5.1" />
+    <PackageReference Include="JsonSchema.Net" Version="9.4.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.12" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.12" />
     <!-- Pinned so Npgsql does not pull an older Relational than EntityFrameworkCore -->
@@ -54,6 +55,21 @@
   <ItemGroup>
     <ProjectReference Include="..\Ghosts.Animator\Ghosts.Animator.csproj" />
     <ProjectReference Include="..\Ghosts.Domain\Ghosts.Domain.csproj" />
+  </ItemGroup>
+
+  <!-- The scenario-document schema and the ATT&CK index are embedded, not copied: the shipped
+       image is aspnet:10.0 with no repository tree, and a validator that cannot find its schema
+       is a validator that does not run. -->
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\schemas\scenario-document\v1\scenario-document.schema.json">
+      <LogicalName>Ghosts.Api.ScenarioDocuments.scenario-document.schema.json</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\schemas\scenario-document\corpus\attack-index.json">
+      <LogicalName>Ghosts.Api.ScenarioDocuments.attack-index.json</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\schemas\scenario-document\corpus\attack-groups.json">
+      <LogicalName>Ghosts.Api.ScenarioDocuments.attack-groups.json</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>

@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "1.1.0",
+  "slug": "ref-unset-flag",
+  "name": "Event waiting on a flag nothing sets",
+  "description": "The event fires when has-foothold is set, and nothing in this document sets it.",
+  "timeline": {
+    "events": [
+      { "id": "foothold-noticed", "when": "flag:has-foothold", "owner": "blue-team", "description": "Odd authentication surfaces in the logs." }
+    ]
+  }
+}

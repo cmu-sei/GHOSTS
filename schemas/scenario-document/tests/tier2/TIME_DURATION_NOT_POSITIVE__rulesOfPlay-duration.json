@@ -1,0 +1,7 @@
+{
+  "schemaVersion": "1.1.0",
+  "slug": "time-duration-not-positive",
+  "name": "Exercise that lasts no time",
+  "description": "A duration of zero is not a duration.",
+  "rulesOfPlay": { "duration": "0m" }
+}

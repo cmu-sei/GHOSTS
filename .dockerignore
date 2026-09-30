@@ -1,6 +1,7 @@
 # Build context for client images is the repo root (see src/apphost/AppHost.cs
 # AddDockerfile calls). Keep the context lean — only src/ sources and
 # .devcontainer/certs are COPYed by src/Dockerfile-client-universal.
+# src/Dockerfile-api also builds from the repo root, for schemas/scenario-document.
 
 # Version control / tooling
 .git/

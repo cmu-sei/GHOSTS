@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "1.1.0",
+  "slug": "ref-unknown-entity",
+  "name": "Edge to an entity that is not declared",
+  "description": "The edge points at mer-web-01, which no entity in this document declares.",
+  "entities": [
+    { "id": "kestrel", "name": "Kestrel", "type": "ThreatActor" }
+  ],
+  "edges": [
+    { "from": "kestrel", "to": "mer-web-01", "type": "Targets" }
+  ]
+}

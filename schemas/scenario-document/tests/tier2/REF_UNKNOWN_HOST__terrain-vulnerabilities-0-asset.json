@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "1.1.0",
+  "slug": "ref-unknown-host-vulnerability",
+  "name": "Vulnerability on a host that is not declared",
+  "description": "The CVE sits on MER-DB-02, and the only host in this document is MER-WEB-01.",
+  "terrain": {
+    "hosts": [
+      { "name": "MER-WEB-01" }
+    ],
+    "vulnerabilities": [
+      { "asset": "MER-DB-02", "cve": "CVE-2024-21412", "severity": "high" }
+    ]
+  }
+}

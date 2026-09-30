@@ -3,11 +3,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Infrastructure.Models;
+using Ghosts.Api.Infrastructure.ScenarioDocuments;
+using Ghosts.Domain.Code;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 
@@ -18,6 +23,10 @@ namespace Ghosts.Api.Infrastructure.Services
         Task<List<Scenario>> GetAllAsync(CancellationToken ct);
         Task<Scenario> GetByIdAsync(int id, CancellationToken ct);
         Task<Scenario> CreateAsync(CreateScenarioDto dto, CancellationToken ct);
+        Task<Scenario> ImportDocumentAsync(JsonObject document, IReadOnlyList<ScenarioFinding> findings, CancellationToken ct);
+        Task StoreDocumentAsync(int scenarioId, JsonObject document, IReadOnlyList<ScenarioFinding> findings, CancellationToken ct);
+        Task<bool> HasDocumentAsync(int scenarioId, CancellationToken ct);
+        Task<string> ExportDocumentAsync(int id, bool derived, CancellationToken ct);
         Task<Scenario> UpdateAsync(int id, UpdateScenarioDto dto, CancellationToken ct);
         Task DeleteAsync(int id, CancellationToken ct);
     }
@@ -78,6 +87,134 @@ namespace Ghosts.Api.Infrastructure.Services
             return scenario;
         }
 
+        /// <summary>
+        /// The scenario as canonical scenario-document text: the document it was imported from when
+        /// there is one and the rows have not been edited since, and otherwise one derived from the
+        /// rows. Pass derived to force the derived form even when a document is stored — the
+        /// difference between the two is exactly what the columns cannot hold, which is what
+        /// STORAGE_LOSSY reports.
+        /// </summary>
+        public async Task<string> ExportDocumentAsync(int id, bool derived, CancellationToken ct)
+        {
+            var rows = await DerivedDocumentAsync(id, ct);
+            if (derived) return rows;
+
+            // The stored document is current only while the rows still derive to what they did when
+            // it was stored. Any edit since — PUT, the builder's graph, objectives — and the rows win.
+            var stored = await CurrentDocumentAsync(id, ct);
+            // Re-canonicalized rather than echoed: jsonb keeps the document but not its key order.
+            return stored != null && stored.RowsHash == Hash(rows)
+                ? ScenarioDocumentMapper.Serialize(JsonNode.Parse(stored.Document))
+                : rows;
+        }
+
+        /// <summary>The document the rows alone derive to.</summary>
+        private async Task<string> DerivedDocumentAsync(int id, CancellationToken ct)
+        {
+            // The graph and the objectives are read here because the scenario read path does not
+            // include them. GetByIdAsync throws when the scenario does not exist, which is the 404.
+            var scenario = await GetByIdAsync(id, ct);
+            var entities = await _context.ScenarioEntities.Where(e => e.ScenarioId == id).ToListAsync(ct);
+            var edges = await _context.ScenarioEdges.Where(e => e.ScenarioId == id).ToListAsync(ct);
+            var objectives = await _context.Objectives.Where(o => o.ScenarioId == id).ToListAsync(ct);
+
+            return ScenarioDocumentMapper.Serialize(
+                ScenarioDocumentMapper.ToDocument(scenario, entities, edges, objectives));
+        }
+
+        /// <summary>
+        /// Creates a scenario from a document and keeps the document beside the rows, both in one
+        /// transaction: CreateAsync sees this transaction as ambient and leaves the commit here, so a
+        /// scenario imported from a document never exists without it.
+        /// </summary>
+        public async Task<Scenario> ImportDocumentAsync(
+            JsonObject document, IReadOnlyList<ScenarioFinding> findings, CancellationToken ct)
+        {
+            var ambient = _context.Database.CurrentTransaction;
+            await using var transaction = ambient == null ? await _context.Database.BeginTransactionAsync(ct) : null;
+
+            var scenario = await CreateAsync(ScenarioDocumentMapper.FromDocument(document), ct);
+            // The rows hash is taken from what the database holds, not the entities just written:
+            // decimal(5,4) rounds and jsonb reorders, and every later export reads the database.
+            _context.ChangeTracker.Clear();
+            await StoreDocumentAsync(scenario.Id, document, findings, ct);
+
+            if (transaction != null) await transaction.CommitAsync(ct);
+
+            return scenario;
+        }
+
+        /// <summary>
+        /// Adds a document row for a scenario. One row per import, never an update: the newest row is
+        /// the current document and the older ones are the scenario's history.
+        /// </summary>
+        public async Task StoreDocumentAsync(
+            int scenarioId, JsonObject document, IReadOnlyList<ScenarioFinding> findings, CancellationToken ct)
+        {
+            var text = ScenarioDocumentMapper.Serialize(document);
+            var rows = await DerivedDocumentAsync(scenarioId, ct);
+
+            _context.ScenarioDocuments.Add(new ScenarioDocument
+            {
+                ScenarioId = scenarioId,
+                SchemaVersion = (document["schemaVersion"] as JsonValue)?.GetValue<string>()
+                                ?? ScenarioDocumentMapper.SchemaVersion,
+                ContentHash = Hash(text),
+                RowsHash = Hash(rows),
+                Document = text,
+                Validation = ValidationRecord(findings),
+                CreatedAt = DateTime.UtcNow
+            });
+
+            await _context.SaveChangesAsync(ct);
+            _log.Info($"Stored scenario document: scenario {scenarioId}, {findings.Count} finding(s)");
+        }
+
+        public async Task<bool> HasDocumentAsync(int scenarioId, CancellationToken ct) =>
+            await _context.ScenarioDocuments.AnyAsync(d => d.ScenarioId == scenarioId, ct);
+
+        /// <summary>The newest document row, or null when the scenario has none.</summary>
+        private async Task<ScenarioDocument> CurrentDocumentAsync(int id, CancellationToken ct) =>
+            await _context.ScenarioDocuments
+                .AsNoTracking()
+                .Where(d => d.ScenarioId == id)
+                .OrderByDescending(d => d.Id)
+                .FirstOrDefaultAsync(ct);
+
+        /// <summary>SHA-256 of the text, lower-case hex.</summary>
+        private static string Hash(string text) =>
+            Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(text))).ToLowerInvariant();
+
+        /// <summary>
+        /// What the validator said about this document, stored with it: a document is only as good as
+        /// the run that accepted it, and a warning that was acceptable in one import is a fact about
+        /// that import.
+        /// </summary>
+        private static string ValidationRecord(IReadOnlyList<ScenarioFinding> findings)
+        {
+            var list = new JsonArray();
+            foreach (var f in findings)
+            {
+                list.Add(new JsonObject
+                {
+                    ["tier"] = f.Tier,
+                    ["severity"] = f.Severity,
+                    ["code"] = f.Code,
+                    ["path"] = f.Path,
+                    ["message"] = f.Message
+                });
+            }
+
+            return new JsonObject
+            {
+                ["validator"] = ApplicationDetails.Version,
+                ["validatedAt"] = DateTime.UtcNow.ToString("o"),
+                ["errors"] = findings.Count(f => f.Severity == ScenarioFinding.Error),
+                ["warnings"] = findings.Count(f => f.Severity == ScenarioFinding.Warning),
+                ["findings"] = list
+            }.ToJsonString();
+        }
+
         public async Task<Scenario> CreateAsync(CreateScenarioDto dto, CancellationToken ct)
         {
             var scenario = new Scenario
@@ -108,7 +245,24 @@ namespace Ghosts.Api.Infrastructure.Services
                 scenario.ScenarioTimeline = MapTimeline(dto.Timeline);
             }
 
+            if (dto.Objectives != null)
+            {
+                scenario.Objectives = MapObjectives(dto.Objectives);
+            }
+
+            if (dto.Entities != null)
+            {
+                MapGraph(dto, scenario);
+            }
+
             _context.Scenarios.Add(scenario);
+
+            // One transaction: an objective's database id is only known after the first save, and
+            // the parent and event references that point at it are rewritten in the second. A caller
+            // that already opened one owns it — that is how the validator's dry run creates a
+            // scenario and then rolls the whole thing back.
+            var ambient = _context.Database.CurrentTransaction;
+            await using var transaction = ambient == null ? await _context.Database.BeginTransactionAsync(ct) : null;
 
             var operation = await _context.SaveChangesAsync(ct);
             if (operation < 1)
@@ -116,6 +270,14 @@ namespace Ghosts.Api.Infrastructure.Services
                 _log.Error($"Could not create scenario: {operation}");
                 throw new InvalidOperationException("Could not create Scenario");
             }
+
+            if (scenario.Objectives.Count > 0)
+            {
+                RemapObjectiveIds(dto.Objectives, scenario);
+                await _context.SaveChangesAsync(ct);
+            }
+
+            if (transaction != null) await transaction.CommitAsync(ct);
 
             _log.Info($"Created scenario: {scenario.Id} - {scenario.Name}");
 
@@ -399,6 +561,108 @@ namespace Ghosts.Api.Infrastructure.Services
                 CollectChat = dto.Telemetry.CollectChat,
                 PerformanceMetrics = dto.PerformanceMetrics
             };
+        }
+
+        private static List<Objective> MapObjectives(List<ScenarioObjectiveImportDto> dtos)
+        {
+            var now = DateTime.UtcNow;
+            return dtos.Select(o => new Objective
+            {
+                Name = o.Name,
+                Description = o.Description,
+                Type = string.IsNullOrEmpty(o.Type) ? "MET" : o.Type,
+                Priority = o.Priority > 0 ? o.Priority : 1,
+                SuccessCriteria = o.SuccessCriteria,
+                Assigned = o.Assigned,
+                SortOrder = o.SortOrder,
+                CreatedAt = now,
+                UpdatedAt = now
+            }).ToList();
+        }
+
+        /// <summary>
+        /// Entities and edges created with the scenario. Edges name their endpoints by the caller's
+        /// local entity id, resolved here to the GUIDs assigned to the new entities. CreatedAt is
+        /// stepped so the tables keep the order they were given in, which is all they can express.
+        /// </summary>
+        private static void MapGraph(CreateScenarioDto dto, Scenario scenario)
+        {
+            var now = DateTime.UtcNow;
+            var byLocalId = new Dictionary<string, ScenarioEntity>();
+
+            scenario.Entities = dto.Entities.Select((e, i) =>
+            {
+                var entity = new ScenarioEntity
+                {
+                    Name = e.Name,
+                    EntityType = string.IsNullOrEmpty(e.Type) ? "Custom" : e.Type,
+                    Description = e.Description,
+                    Properties = string.IsNullOrEmpty(e.Properties) ? "{}" : e.Properties,
+                    Confidence = e.Confidence,
+                    Origin = string.IsNullOrEmpty(e.Origin) ? "Operator" : e.Origin,
+                    ExternalId = e.ExternalId,
+                    IsReviewed = e.IsReviewed,
+                    CreatedAt = now.AddMilliseconds(i),
+                    UpdatedAt = now.AddMilliseconds(i)
+                };
+                if (!string.IsNullOrEmpty(e.Id)) byLocalId[e.Id] = entity;
+                return entity;
+            }).ToList();
+
+            if (dto.Edges == null) return;
+
+            var edges = new List<ScenarioEdge>();
+            foreach (var (e, i) in dto.Edges.Select((e, i) => (e, i)))
+            {
+                if (!byLocalId.TryGetValue(e.From ?? string.Empty, out var source) ||
+                    !byLocalId.TryGetValue(e.To ?? string.Empty, out var target))
+                {
+                    _log.Warn($"Edge {e.From} -> {e.To} skipped: unknown entity");
+                    continue;
+                }
+
+                edges.Add(new ScenarioEdge
+                {
+                    SourceEntityId = source.Id,
+                    TargetEntityId = target.Id,
+                    EdgeType = string.IsNullOrEmpty(e.Type) ? "Custom" : e.Type,
+                    Label = e.Label,
+                    Weight = e.Weight,
+                    Confidence = e.Confidence,
+                    Origin = string.IsNullOrEmpty(e.Origin) ? "Operator" : e.Origin,
+                    Properties = string.IsNullOrEmpty(e.Properties) ? "{}" : e.Properties,
+                    IsReviewed = e.IsReviewed,
+                    CreatedAt = now.AddMilliseconds(i)
+                });
+            }
+            scenario.Edges = edges;
+        }
+
+        /// <summary>
+        /// Rewrites the caller's local objective ids — in objective parents and in the timeline
+        /// events that refer to them — to the database ids assigned by the first save.
+        /// </summary>
+        private static void RemapObjectiveIds(List<ScenarioObjectiveImportDto> dtos, Scenario scenario)
+        {
+            var objectives = scenario.Objectives.ToList();
+            var ids = new Dictionary<int, int>();
+            for (var i = 0; i < objectives.Count; i++) ids[dtos[i].Id] = objectives[i].Id;
+
+            for (var i = 0; i < objectives.Count; i++)
+            {
+                if (dtos[i].ParentId is int parent && ids.TryGetValue(parent, out var parentId))
+                {
+                    objectives[i].ParentId = parentId;
+                }
+            }
+
+            foreach (var e in scenario.ScenarioTimeline?.ScenarioTimelineEvents ?? [])
+            {
+                if (string.IsNullOrEmpty(e.ObjectiveIds)) continue;
+                var mapped = JsonSerializer.Deserialize<List<int>>(e.ObjectiveIds)
+                    .Where(ids.ContainsKey).Select(id => ids[id]).ToList();
+                e.ObjectiveIds = mapped.Count > 0 ? JsonSerializer.Serialize(mapped) : null;
+            }
         }
 
         private static ScenarioTimeline MapTimeline(TimelineDto dto)

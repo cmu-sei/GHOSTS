@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "1.1.0",
+  "slug": "flag-never-read",
+  "name": "Flag set at the start and never read",
+  "description": "vpn-enabled is ground truth at the start, and no condition in this document asks about it.",
+  "startingConditions": {
+    "flags": ["vpn-enabled"]
+  }
+}

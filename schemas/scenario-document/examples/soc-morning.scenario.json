@@ -1,0 +1,273 @@
+{
+  "schemaVersion": "1.1.0",
+  "slug": "soc-morning",
+  "name": "SOC Morning: Clear the Queue by Lunch",
+  "description": "You are the on-shift Blue Team analyst at Meridian Logistics. It's Monday and three tickets are already stacked in your queue: a phishing report, an EDR ransomware alert, and a VPN account lockout from a traveling exec. They're all open at once — you decide the order. The ransomware alert is the one that bites if you dawdle. Clear the queue before it turns into a bad day, and try to make lunch.",
+  "catalog": {
+    "listed": true,
+    "sortOrder": 1,
+    "era": "Modern",
+    "theater": "Meridian Logistics SOC",
+    "estimatedMinutes": 10
+  },
+  "context": {
+    "political": "Routine Monday. Leadership expects the SOC to clear day-to-day tickets without escalation unless something is actively spreading."
+  },
+  "audience": {
+    "rulesOfEngagement": "Blue Team may investigate, quarantine, block, reset accounts, and notify users. Escalate to IR lead only if a host is confirmed encrypting."
+  },
+  "sides": [
+    {
+      "name": "Meridian Logistics (Home)",
+      "alignment": "friendly"
+    },
+    {
+      "name": "Cinder Wolf Group",
+      "alignment": "adversary"
+    }
+  ],
+  "adversaries": [
+    {
+      "id": "cinder-wolf",
+      "name": "Cinder Wolf",
+      "type": "ransomware",
+      "capability": 4,
+      "techniques": [
+        "T1021.001",
+        "T1078",
+        "T1486",
+        "T1566.001"
+      ]
+    }
+  ],
+  "terrain": {
+    "summary": {
+      "topology": "Flat /24 corporate LAN, finance VLAN, perimeter firewall with default-allow egress, split-tunnel VPN.",
+      "services": "Microsoft 365 mail, on-prem file server (FS01), domain controller (DC01), VPN concentrator.",
+      "assets": "FIN-WS-04 (finance workstation), FS01 (file server), DC01 (domain controller), VPN-GW"
+    },
+    "defenses": [
+      {
+        "name": "Email gateway with URL rewriting"
+      },
+      {
+        "name": "EDR on workstations"
+      },
+      {
+        "name": "SIEM with 15-min alert SLA"
+      },
+      {
+        "name": "MFA on VPN"
+      }
+    ],
+    "vulnerabilities": [
+      {
+        "asset": "FIN-WS-04",
+        "cve": "CVE-2023-23397",
+        "severity": "high"
+      }
+    ]
+  },
+  "population": {
+    "pools": [
+      {
+        "role": "Finance Staff",
+        "count": 12
+      },
+      {
+        "role": "Traveling Executive",
+        "count": 1
+      },
+      {
+        "role": "SOC Analyst",
+        "count": 1
+      }
+    ]
+  },
+  "rulesOfPlay": {
+    "pacing": "turn-based",
+    "duration": "45m",
+    "deadline": {
+      "at": "T+30m"
+    },
+    "adjudication": "automated",
+    "telemetry": {
+      "logs": true,
+      "network": true,
+      "endpoint": true
+    },
+    "escalationLadder": {
+      "summary": "Inbox -> Endpoint -> Identity -> Lateral"
+    },
+    "branching": {
+      "summary": "Containing the ransomware ticket (step 4) sets flag 'ransomware-contained'. If it isn't set by the 30m containment fuse, the threat detonates immediately and locks the loss branch. Red Team step 6 fires if contained (threat stalls); step 7 fires if !contained (encryption spreads)."
+    }
+  },
+  "assessment": {
+    "purpose": "Clear the morning queue: triage every ticket and contain the ransomware alert before it spreads.",
+    "victoryConditions": "WIN: the ransomware alert is contained before it encrypts a second host (objective 2 met). LOSS: encryption spreads across the file share.",
+    "performanceMetrics": "time-to-triage, time-to-contain, tickets-cleared, made-lunch",
+    "objectives": [
+      {
+        "id": 1,
+        "name": "Triage the morning queue",
+        "description": "Investigate the open tickets and identify which is the real, spreading threat rather than noise.",
+        "priority": 2,
+        "successCriteria": "Player investigates the tickets before acting blindly.",
+        "assigned": "blue-team"
+      },
+      {
+        "id": 2,
+        "name": "Contain the ransomware before it spreads",
+        "description": "Kill the shadow-copy deletion and isolate FIN-WS-04 before Cinder Wolf's payload encrypts the file share.",
+        "successCriteria": "The 'ransomware-contained' flag is set on ticket #2, steering the timeline onto the stalled branch.",
+        "assigned": "blue-team"
+      }
+    ]
+  },
+  "timeline": {
+    "events": [
+      {
+        "id": "inject-1",
+        "at": "T+0m",
+        "owner": "white-cell",
+        "title": "Three tickets already open in the SOC queue"
+      },
+      {
+        "id": "event-1",
+        "at": "T+0m",
+        "owner": "white-cell",
+        "description": "Exercise start. Monday, 08:30. You take the on-shift SOC analyst seat at Meridian Logistics. The queue is not empty — three tickets are already waiting, and the clock to lunch is running."
+      },
+      {
+        "id": "event-2",
+        "at": "T+2m",
+        "owner": "white-cell",
+        "description": "Your queue populates. Ticket #1: a finance clerk reports a suspicious payroll email. Ticket #2: EDR flagged a possible ransomware precursor on FIN-WS-04 (a service creating shadow-copy deletions). Ticket #3: a traveling exec is locked out of the VPN. All three are yours."
+      },
+      {
+        "id": "event-3",
+        "at": "T+5m",
+        "owner": "blue-team",
+        "description": "TICKET #1 — Phishing report. A finance clerk forwarded an email impersonating the payroll provider, carrying a link to a lookalike Microsoft 365 login. Twelve staff received it; two have opened it. What do you do about this one?",
+        "objectives": [
+          1
+        ]
+      },
+      {
+        "id": "event-4",
+        "at": "T+5m",
+        "owner": "blue-team",
+        "description": "TICKET #2 — Ransomware precursor. EDR shows a process on FIN-WS-04 deleting volume shadow copies (T1486 precursor). This is the one that spreads if you leave it. What do you do about this one?",
+        "objectives": [
+          1,
+          2
+        ]
+      },
+      {
+        "id": "event-5",
+        "at": "T+5m",
+        "owner": "blue-team",
+        "description": "TICKET #3 — VPN lockout. A traveling executive is locked out of the VPN after repeated MFA prompts. Could be a fat-fingered password on the road, could be someone spraying their account. What do you do about this one?"
+      },
+      {
+        "id": "event-6",
+        "at": "T+40m",
+        "when": "flag:ransomware-contained",
+        "owner": "red-team",
+        "description": "The shadow-copy deletion was killed and FIN-WS-04 isolated before encryption began. Cinder Wolf's payload never detonates on the share. The precursor stalls out on a single quarantined host.",
+        "objectives": [
+          2
+        ]
+      },
+      {
+        "id": "event-7",
+        "at": "T+40m",
+        "when": "!ransomware-contained",
+        "owner": "red-team",
+        "description": "The precursor ran unchecked. Cinder Wolf's payload detonates on FIN-WS-04, reaches FS01 over SMB, and begins encrypting the finance file share (T1486). The morning just became an incident."
+      },
+      {
+        "id": "event-8",
+        "at": "T+45m",
+        "owner": "blue-team",
+        "description": "Situation update, late morning. Either the queue is clear and you're eyeing lunch, or you're chasing an encrypting host. Decide your last action of the morning: confirm scope, isolate the affected host, or stand the team down.",
+        "objectives": [
+          2
+        ]
+      },
+      {
+        "id": "event-9",
+        "at": "T+60m",
+        "owner": "white-cell",
+        "description": "The white cell calls end-of-morning and begins the after-action review. Lunch is on the table — the question is whether you got to it."
+      }
+    ]
+  },
+  "entities": [
+    {
+      "id": "cinder-wolf",
+      "name": "Cinder Wolf",
+      "type": "ThreatActor",
+      "description": "Ransomware crew. Opens with phishing, deletes shadow copies, then encrypts file shares.",
+      "properties": {
+        "capability": 4,
+        "type": "ransomware"
+      },
+      "externalId": "G-CINDER",
+      "provenance": {
+        "reviewed": true
+      }
+    },
+    {
+      "id": "dana-okafor",
+      "name": "Dana Okafor",
+      "type": "Person",
+      "description": "Finance clerk at Meridian. Reported the phishing email; works on FIN-WS-04.",
+      "properties": {
+        "role": "Finance Staff"
+      },
+      "provenance": {
+        "reviewed": true
+      }
+    },
+    {
+      "id": "fin-ws-04",
+      "name": "FIN-WS-04",
+      "type": "System",
+      "description": "Finance workstation. Patient zero for the ransomware precursor.",
+      "properties": {
+        "os": "Windows 11"
+      },
+      "provenance": {
+        "reviewed": true
+      }
+    },
+    {
+      "id": "fs01",
+      "name": "FS01",
+      "type": "System",
+      "description": "On-prem file server. Encryption target over SMB.",
+      "properties": {
+        "os": "Windows Server 2019"
+      },
+      "provenance": {
+        "reviewed": true
+      }
+    }
+  ],
+  "edges": [
+    {
+      "from": "cinder-wolf",
+      "to": "dana-okafor",
+      "type": "Targets",
+      "label": "phishes"
+    },
+    {
+      "from": "fin-ws-04",
+      "to": "fs01",
+      "type": "CommunicatesWith",
+      "label": "SMB to"
+    }
+  ]
+}
