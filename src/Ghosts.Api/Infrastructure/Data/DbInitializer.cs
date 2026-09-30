@@ -1289,6 +1289,7 @@ namespace Ghosts.Api.Infrastructure.Data
                         scenarioid     INTEGER NOT NULL,
                         schemaversion  CHARACTER VARYING(20),
                         contenthash    CHARACTER VARYING(64),
+                        rowshash       CHARACTER VARYING(64),
                         document       JSONB,
                         validation     JSONB,
                         createdat      TIMESTAMP WITHOUT TIME ZONE NOT NULL,

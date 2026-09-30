@@ -30,6 +30,13 @@ public class ScenarioDocument
     [MaxLength(64)]
     public string ContentHash { get; set; } = string.Empty;
 
+    /// <summary>
+    /// SHA-256 of the document the rows derived to when this one was stored. While they still do,
+    /// nothing has edited the scenario and export returns this document; after an edit, the rows.
+    /// </summary>
+    [MaxLength(64)]
+    public string RowsHash { get; set; } = string.Empty;
+
     /// <summary>The canonical document, exactly as imported.</summary>
     [Column(TypeName = "jsonb")]
     public string Document { get; set; } = "{}";

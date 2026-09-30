@@ -99,9 +99,10 @@ public class ScenariosController : ControllerBase
     /// The scenario as a canonical scenario document (schema v1) — the authored specification, with
     /// no database ids, no timestamps and no run state. Two exports of an unchanged scenario are
     /// byte-identical, and POST api/scenarios/import accepts what this emits. A scenario imported from
-    /// a document returns that document; one built any other way returns a document derived from its
-    /// rows. With ?derived=true it always returns the derived form, which is how the difference — what
-    /// the columns cannot hold, reported by STORAGE_LOSSY — can be seen.
+    /// a document returns that document until its rows are edited; after an edit, or when it was built
+    /// any other way, it returns a document derived from its rows. With ?derived=true it always returns
+    /// the derived form, which is how the difference — what the columns cannot hold, reported by
+    /// STORAGE_LOSSY — can be seen.
     /// </summary>
     // GET: api/scenarios/5/document
     [HttpGet("{id}/document")]

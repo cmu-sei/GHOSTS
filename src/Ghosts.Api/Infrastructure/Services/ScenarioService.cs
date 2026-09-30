@@ -89,19 +89,28 @@ namespace Ghosts.Api.Infrastructure.Services
 
         /// <summary>
         /// The scenario as canonical scenario-document text: the document it was imported from when
-        /// there is one, and otherwise one derived from the rows. Pass derived to force the derived
-        /// form even when a document is stored — the difference between the two is exactly what the
-        /// columns cannot hold, which is what STORAGE_LOSSY reports.
+        /// there is one and the rows have not been edited since, and otherwise one derived from the
+        /// rows. Pass derived to force the derived form even when a document is stored — the
+        /// difference between the two is exactly what the columns cannot hold, which is what
+        /// STORAGE_LOSSY reports.
         /// </summary>
         public async Task<string> ExportDocumentAsync(int id, bool derived, CancellationToken ct)
         {
-            if (!derived)
-            {
-                var stored = await CurrentDocumentAsync(id, ct);
-                // Re-canonicalized rather than echoed: jsonb keeps the document but not its key order.
-                if (stored != null) return ScenarioDocumentMapper.Serialize(JsonNode.Parse(stored));
-            }
+            var rows = await DerivedDocumentAsync(id, ct);
+            if (derived) return rows;
 
+            // The stored document is current only while the rows still derive to what they did when
+            // it was stored. Any edit since — PUT, the builder's graph, objectives — and the rows win.
+            var stored = await CurrentDocumentAsync(id, ct);
+            // Re-canonicalized rather than echoed: jsonb keeps the document but not its key order.
+            return stored != null && stored.RowsHash == Hash(rows)
+                ? ScenarioDocumentMapper.Serialize(JsonNode.Parse(stored.Document))
+                : rows;
+        }
+
+        /// <summary>The document the rows alone derive to.</summary>
+        private async Task<string> DerivedDocumentAsync(int id, CancellationToken ct)
+        {
             // The graph and the objectives are read here because the scenario read path does not
             // include them. GetByIdAsync throws when the scenario does not exist, which is the 404.
             var scenario = await GetByIdAsync(id, ct);
@@ -125,6 +134,9 @@ namespace Ghosts.Api.Infrastructure.Services
             await using var transaction = ambient == null ? await _context.Database.BeginTransactionAsync(ct) : null;
 
             var scenario = await CreateAsync(ScenarioDocumentMapper.FromDocument(document), ct);
+            // The rows hash is taken from what the database holds, not the entities just written:
+            // decimal(5,4) rounds and jsonb reorders, and every later export reads the database.
+            _context.ChangeTracker.Clear();
             await StoreDocumentAsync(scenario.Id, document, findings, ct);
 
             if (transaction != null) await transaction.CommitAsync(ct);
@@ -140,13 +152,15 @@ namespace Ghosts.Api.Infrastructure.Services
             int scenarioId, JsonObject document, IReadOnlyList<ScenarioFinding> findings, CancellationToken ct)
         {
             var text = ScenarioDocumentMapper.Serialize(document);
+            var rows = await DerivedDocumentAsync(scenarioId, ct);
 
             _context.ScenarioDocuments.Add(new ScenarioDocument
             {
                 ScenarioId = scenarioId,
                 SchemaVersion = (document["schemaVersion"] as JsonValue)?.GetValue<string>()
                                 ?? ScenarioDocumentMapper.SchemaVersion,
-                ContentHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(text))).ToLowerInvariant(),
+                ContentHash = Hash(text),
+                RowsHash = Hash(rows),
                 Document = text,
                 Validation = ValidationRecord(findings),
                 CreatedAt = DateTime.UtcNow
@@ -159,13 +173,17 @@ namespace Ghosts.Api.Infrastructure.Services
         public async Task<bool> HasDocumentAsync(int scenarioId, CancellationToken ct) =>
             await _context.ScenarioDocuments.AnyAsync(d => d.ScenarioId == scenarioId, ct);
 
-        /// <summary>The newest document row's text, or null when the scenario has none.</summary>
-        private async Task<string> CurrentDocumentAsync(int id, CancellationToken ct) =>
+        /// <summary>The newest document row, or null when the scenario has none.</summary>
+        private async Task<ScenarioDocument> CurrentDocumentAsync(int id, CancellationToken ct) =>
             await _context.ScenarioDocuments
+                .AsNoTracking()
                 .Where(d => d.ScenarioId == id)
                 .OrderByDescending(d => d.Id)
-                .Select(d => d.Document)
                 .FirstOrDefaultAsync(ct);
+
+        /// <summary>SHA-256 of the text, lower-case hex.</summary>
+        private static string Hash(string text) =>
+            Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(text))).ToLowerInvariant();
 
         /// <summary>
         /// What the validator said about this document, stored with it: a document is only as good as

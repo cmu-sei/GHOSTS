@@ -136,9 +136,11 @@ Step 2's export and import (`GET /api/scenarios/{id}/document`, `POST /api/scena
 everything the tables above list. The blocks below have no column of their own. They survive an import
 all the same, because the import keeps the document whole in `scenario_documents` beside the rows it
 was mapped onto, and `GET {id}/document` returns that document — so a document imported since this
-table existed comes back byte for byte. `GET {id}/document?derived=true` rebuilds a document from the
-rows alone, which is what a scenario built in the wizard, seeded, or imported before the table existed
-gets, and the difference between the two forms is exactly this table.
+table existed comes back byte for byte, until the scenario's rows are edited (in the UI, the builder,
+or `PUT`); from then on the rows are the truth and export derives from them.
+`GET {id}/document?derived=true` rebuilds a document from the rows alone, which is what a scenario
+built in the wizard, seeded, or imported before the table existed gets, and the difference between
+the two forms is exactly this table.
 
 An import that populates any of these paths also says so out loud: the success response carries one
 `STORAGE_LOSSY` finding (tier 4, severity `warning`) per top-level path below, listing the leaf paths

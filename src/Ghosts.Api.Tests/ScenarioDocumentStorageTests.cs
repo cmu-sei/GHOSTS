@@ -57,6 +57,27 @@ public class ScenarioDocumentStorageTests
         Assert.Contains("\"slug\": \"rows-only\"", exported);
     }
 
+    [Fact]
+    public async Task An_edit_after_the_document_was_stored_makes_the_export_return_the_rows()
+    {
+        await using var context = NewContext();
+        context.Scenarios.Add(new Scenario { Id = 1, Name = "Held Document", Description = "d" });
+        await context.SaveChangesAsync();
+
+        var service = new ScenarioService(context);
+        await service.StoreDocumentAsync(1, Document("stored"), [], CancellationToken.None);
+        Assert.Contains("\"stored\"", await service.ExportDocumentAsync(1, false, CancellationToken.None));
+
+        // An edit through any other path than import leaves the stored document behind.
+        var scenario = await context.Scenarios.FindAsync(1);
+        scenario!.Name = "Edited In The Builder";
+        await context.SaveChangesAsync();
+
+        var exported = await service.ExportDocumentAsync(1, false, CancellationToken.None);
+        Assert.Equal(await service.ExportDocumentAsync(1, true, CancellationToken.None), exported);
+        Assert.Contains("Edited In The Builder", exported);
+    }
+
     private static JsonObject Document(string name) => new()
     {
         ["schemaVersion"] = ScenarioDocumentMapper.SchemaVersion,
