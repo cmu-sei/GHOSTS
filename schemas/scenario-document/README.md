@@ -227,9 +227,9 @@ being told is better than being imported wrong — and because no document of th
 
 ## Open questions for the GHOSTS team
 
-1. **Where does the schema live in the repository?** **Answered 2026-09-30:** it stays at
-   `schemas/scenario-document/` at the repository root, where the API, the RPG and an authoring agent
-   can all read it.
+1. **Where does the schema live in the repository?** This folder is written to land as
+   `schemas/scenario-document/` at the repository root, because the API (validator, Step 3), the RPG
+   (Python), and an authoring agent all read it. `src/Ghosts.Api/` would tie it to one consumer.
 2. **Entity and edge types.** The API comments list a vocabulary but the column is a free string, and
    the fixtures already use `Resource`, `Defends`, `Enables` and `PlansFor`, which are not in the
    list. The schema keeps the string free and lists the recommended vocabulary. Should v1 close it?
@@ -257,7 +257,7 @@ being told is better than being imported wrong — and because no document of th
    authored and validated in GHOSTS but not stored.
 
 6. **Threat-actor capability.** The schema allows 1–5 and so does the wizard's input, but
-   `config/SeedData/seed.json` ships scenarios with 6, 7 and 9, so six of the nine scenarios in a
+   `config/SeedData/seed.json` ships scenarios with 6, 7 and 9, so six of the seven scenarios in a
    stock database cannot be expressed as valid documents. Is the scale 1–5, and is the seed data
    wrong? Step 3 confirms this is their *only* defect: clamp capability to 5 and all six validate
    clean through both tiers.
