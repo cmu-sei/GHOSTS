@@ -14,69 +14,53 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
-    name: Build Windows Client
+    name: Build ${{ matrix.arch }}
     runs-on: windows-latest
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x32
+            platform: AnyCPU
+            output: bin/Release/
+          - arch: x64
+            platform: x64
+            output: bin/x64/Release/
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # dotnet SDK needed to restore Ghosts.Domain (SDK-style, netstandard2.0)
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
 
-      - uses: microsoft/setup-msbuild@v2
+      - uses: microsoft/setup-msbuild@v3
 
-      - name: Build x32
-        run: msbuild src/Ghosts.Client.Windows/Ghosts.Client.csproj /t:Rebuild /restore /nologo /v:minimal /p:Configuration=Release
-
-      - name: Build x64
-        run: msbuild src/Ghosts.Client.Windows/Ghosts.Client.csproj /t:Rebuild /restore /nologo /v:minimal /p:Configuration=Release /p:Platform=x64
-
-      - name: Upload x32 artifact
-        if: github.event_name == 'release'
-        uses: actions/upload-artifact@v4
+      - uses: actions/cache@v6
         with:
-          name: windows-x32
-          path: src/Ghosts.Client.Windows/bin/Release/
+          path: ~/.nuget/packages
+          key: nuget-windows-${{ matrix.arch }}-${{ hashFiles('src/Ghosts.Client.Windows/*.csproj', 'src/Ghosts.Domain/*.csproj') }}
+          restore-keys: nuget-windows-${{ matrix.arch }}-
 
-      - name: Upload x64 artifact
-        if: github.event_name == 'release'
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows-x64
-          path: src/Ghosts.Client.Windows/bin/x64/Release/
-
-  publish:
-    name: Release Windows Client
-    needs: build
-    if: github.event_name == 'release'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: windows-x32
-          path: artifacts/x32
-
-      - uses: actions/download-artifact@v4
-        with:
-          name: windows-x64
-          path: artifacts/x64
+      - name: Build
+        run: msbuild src/Ghosts.Client.Windows/Ghosts.Client.csproj /t:Rebuild /restore /nologo /v:minimal /p:Configuration=Release /p:Platform=${{ matrix.platform }}
 
       - name: Package
+        if: github.event_name == 'release'
         run: |
-          cd artifacts
-          zip -r ../ghosts-client-windows-x32.zip x32/
-          zip -r ../ghosts-client-windows-x64.zip x64/
+          Copy-Item -Recurse src/Ghosts.Client.Windows/${{ matrix.output }} ${{ matrix.arch }}
+          Compress-Archive -Path ${{ matrix.arch }} -DestinationPath ghosts-client-windows-${{ matrix.arch }}.zip
 
-      - name: Upload to release
+      - name: Upload release asset
+        if: github.event_name == 'release'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release upload "${{ github.event.release.tag_name }}" \
-            ghosts-client-windows-x32.zip \
-            ghosts-client-windows-x64.zip \
-            -R ${{ github.repository }}
+        run: gh release upload "${{ github.event.release.tag_name }}" ghosts-client-windows-${{ matrix.arch }}.zip
