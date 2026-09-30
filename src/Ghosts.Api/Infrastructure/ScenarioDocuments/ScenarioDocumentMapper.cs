@@ -269,16 +269,30 @@ public static class ScenarioDocumentMapper
         return doc;
     }
 
-    /// <summary>Canonical text: schema defaults omitted, two-space indent, one trailing newline.</summary>
+    /// <summary>
+    /// Canonical text: keys in schema order then free keys sorted, set-like arrays sorted, empty
+    /// optional values and schema defaults omitted, two-space indent, one trailing newline. Depends on
+    /// the schema, not on the order the document happened to arrive in, so a document that has been
+    /// through jsonb — which reorders object keys — comes back out byte-identical.
+    /// </summary>
     public static string Serialize(JsonNode doc) =>
-        (DropDefaults(doc, ScenarioDocumentSchema.Node) ?? doc).ToJsonString(Canonical) + "\n";
+        (Canonicalize(doc, ScenarioDocumentSchema.Node, null) ?? doc).ToJsonString(Canonical) + "\n";
 
     /// <summary>
-    /// A value equal to its schema default says nothing the default does not, so the document that
-    /// states it and the document that omits it are the same document, and only one of them is
-    /// canonical. Mirrors the default rule in scenario-doc.mjs. A required key stays whatever it says.
+    /// Arrays whose order carries no meaning, so canonical form sorts them. Mirrors SET_ARRAYS in
+    /// scenario-doc.mjs.
     /// </summary>
-    private static JsonNode DropDefaults(JsonNode value, JsonObject node)
+    private static readonly HashSet<string> SetArrays =
+        new(StringComparer.Ordinal) { "flags", "setFlags", "techniques", "objectives" };
+
+    /// <summary>
+    /// One document, one canonical form. Keys come out in the order the schema declares them, with any
+    /// key the schema does not name after them in sorted order; a set-like array of scalars is sorted; a
+    /// value that is empty, or equal to its schema default, says nothing the omission does not and is
+    /// dropped. Mirrors canonical() in scenario-doc.mjs, including sorting scalars by their JSON text
+    /// the way JavaScript's default sort does. A required key stays whatever it says.
+    /// </summary>
+    private static JsonNode Canonicalize(JsonNode value, JsonObject node, string key)
     {
         node = ScenarioDocumentSchema.Resolve(node);
         switch (value)
@@ -286,8 +300,13 @@ public static class ScenarioDocumentMapper
             case JsonArray a:
             {
                 var items = node?["items"] as JsonObject;
+                var canonicalItems = a.Select(item => Canonicalize(item, items, key)).ToList();
+                if (SetArrays.Contains(key ?? string.Empty) && canonicalItems.All(v => v is JsonValue or null))
+                    canonicalItems = canonicalItems
+                        .OrderBy(v => v?.ToJsonString() ?? "null", StringComparer.Ordinal).ToList();
+
                 var outArray = new JsonArray();
-                foreach (var item in a) outArray.Add(DropDefaults(item, items));
+                foreach (var item in canonicalItems) outArray.Add(item);
                 return outArray;
             }
             case JsonObject o:
@@ -295,17 +314,27 @@ public static class ScenarioDocumentMapper
                 var props = node?["properties"] as JsonObject;
                 var extra = node?["additionalProperties"] as JsonObject;
                 var requiredKeys = (node?["required"] as JsonArray)?.Select(r => r.GetValue<string>()).ToHashSet(StringComparer.Ordinal) ?? [];
+
+                var declared = props?.Select(p => p.Key).Where(o.ContainsKey) ?? [];
+                var free = o.Select(kv => kv.Key)
+                    .Where(k => props?.ContainsKey(k) != true)
+                    .OrderBy(k => k, StringComparer.Ordinal);
+
                 var outObject = new JsonObject();
-                foreach (var kv in o)
+                foreach (var name in declared.Concat(free))
                 {
-                    var child = ScenarioDocumentSchema.Resolve(props?[kv.Key] ?? extra);
-                    var isRequired = requiredKeys.Contains(kv.Key);
-                    if (!isRequired && child?["default"] is { } fallback && JsonNode.DeepEquals(kv.Value, fallback)) continue;
-                    var pruned = DropDefaults(kv.Value, child);
-                    // An object whose every key was a default is the same as no object at all, and
-                    // the schema says so: execution has minProperties 1, so {} would not validate.
-                    if (!isRequired && pruned is JsonObject { Count: 0 }) continue;
-                    outObject[kv.Key] = pruned;
+                    var child = ScenarioDocumentSchema.Resolve(props?[name] ?? extra);
+                    var pruned = Canonicalize(o[name], child, name);
+                    if (requiredKeys.Contains(name))
+                    {
+                        outObject[name] = pruned;
+                        continue;
+                    }
+                    // An object whose every key was a default is the same as no object at all, and the
+                    // schema says so: execution has minProperties 1, so {} would not validate.
+                    if (IsEmpty(pruned)) continue;
+                    if (child?["default"] is { } fallback && JsonNode.DeepEquals(pruned, fallback)) continue;
+                    outObject[name] = pruned;
                 }
                 return outObject;
             }
@@ -313,6 +342,15 @@ public static class ScenarioDocumentMapper
                 return value?.DeepClone();
         }
     }
+
+    private static bool IsEmpty(JsonNode v) => v switch
+    {
+        null => true,
+        JsonArray a => a.Count == 0,
+        JsonObject o => o.Count == 0,
+        JsonValue value => value.TryGetValue<string>(out var s) && s.Length == 0,
+        _ => false
+    };
 
     // ───────────────────────── import ─────────────────────────
 

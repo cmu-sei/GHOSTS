@@ -98,16 +98,19 @@ public class ScenariosController : ControllerBase
     /// <summary>
     /// The scenario as a canonical scenario document (schema v1) — the authored specification, with
     /// no database ids, no timestamps and no run state. Two exports of an unchanged scenario are
-    /// byte-identical, and POST api/scenarios/import accepts what this emits.
+    /// byte-identical, and POST api/scenarios/import accepts what this emits. A scenario imported from
+    /// a document returns that document; one built any other way returns a document derived from its
+    /// rows. With ?derived=true it always returns the derived form, which is how the difference — what
+    /// the columns cannot hold, reported by STORAGE_LOSSY — can be seen.
     /// </summary>
     // GET: api/scenarios/5/document
     [HttpGet("{id}/document")]
     [Produces("application/json")]
-    public async Task<IActionResult> GetScenarioDocument(int id, CancellationToken ct)
+    public async Task<IActionResult> GetScenarioDocument(int id, [FromQuery] bool derived, CancellationToken ct)
     {
         try
         {
-            return Content(await _scenarioService.ExportDocumentAsync(id, ct), "application/json");
+            return Content(await _scenarioService.ExportDocumentAsync(id, derived, ct), "application/json");
         }
         catch (InvalidOperationException)
         {
@@ -155,7 +158,9 @@ public class ScenariosController : ControllerBase
     /// validate and refuses, writing nothing, on any finding of severity "error". On success the
     /// response also carries a STORAGE_LOSSY finding for each top-level path the document populated
     /// that has no column — this describes what the import just did, so only import reports it;
-    /// validate writes nothing and has nothing to describe.
+    /// validate writes nothing and has nothing to describe. The document itself is kept whole beside
+    /// the rows, with the findings of this run, so GET {id}/document returns what was imported rather
+    /// than what the columns can rebuild.
     /// </summary>
     // POST: api/scenarios/import
     [HttpPost("import")]
@@ -170,8 +175,10 @@ public class ScenariosController : ControllerBase
 
         try
         {
-            var scenario = await _scenarioService.CreateAsync(ScenarioDocumentMapper.FromDocument(document), ct);
+            // Everything this import knows about the document goes into its validation record: what the
+            // validator found, and what the columns could not hold.
             var lossy = StorageLossAnalyzer.Analyze(document);
+            var scenario = await _scenarioService.ImportDocumentAsync(document, [.. result.Findings, .. lossy], ct);
             var body = ImportedBody(MapToDto(scenario), lossy);
             return CreatedAtAction(nameof(GetScenario), new { id = scenario.Id }, body);
         }

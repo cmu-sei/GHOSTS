@@ -89,6 +89,9 @@ namespace Ghosts.Api.Infrastructure.Data
         public DbSet<ScenarioCompilation> ScenarioCompilations { get; set; }
         public DbSet<ScenarioNpcAssignment> ScenarioNpcAssignments { get; set; }
 
+        // The authored scenario document, kept whole beside the rows it was mapped onto
+        public DbSet<ScenarioDocument> ScenarioDocuments { get; set; }
+
         public DbSet<Objective> Objectives { get; set; }
 
         public DbSet<Hypothesis> Hypotheses { get; set; }
@@ -379,6 +382,15 @@ namespace Ghosts.Api.Infrastructure.Data
                 .WithOne(c => c.Scenario)
                 .HasForeignKey(c => c.ScenarioId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Scenario → Documents (one row per import, newest is the current document)
+            modelBuilder.Entity<ScenarioDocument>()
+                .HasOne(d => d.Scenario)
+                .WithMany()
+                .HasForeignKey(d => d.ScenarioId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ScenarioDocument>().HasIndex(d => d.ScenarioId);
 
             // Source → Chunks
             modelBuilder.Entity<ScenarioSource>()

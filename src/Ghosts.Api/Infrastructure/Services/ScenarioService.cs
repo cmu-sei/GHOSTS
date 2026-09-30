@@ -3,12 +3,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.ScenarioDocuments;
+using Ghosts.Domain.Code;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 
@@ -19,7 +23,10 @@ namespace Ghosts.Api.Infrastructure.Services
         Task<List<Scenario>> GetAllAsync(CancellationToken ct);
         Task<Scenario> GetByIdAsync(int id, CancellationToken ct);
         Task<Scenario> CreateAsync(CreateScenarioDto dto, CancellationToken ct);
-        Task<string> ExportDocumentAsync(int id, CancellationToken ct);
+        Task<Scenario> ImportDocumentAsync(JsonObject document, IReadOnlyList<ScenarioFinding> findings, CancellationToken ct);
+        Task StoreDocumentAsync(int scenarioId, JsonObject document, IReadOnlyList<ScenarioFinding> findings, CancellationToken ct);
+        Task<bool> HasDocumentAsync(int scenarioId, CancellationToken ct);
+        Task<string> ExportDocumentAsync(int id, bool derived, CancellationToken ct);
         Task<Scenario> UpdateAsync(int id, UpdateScenarioDto dto, CancellationToken ct);
         Task DeleteAsync(int id, CancellationToken ct);
     }
@@ -81,11 +88,22 @@ namespace Ghosts.Api.Infrastructure.Services
         }
 
         /// <summary>
-        /// The scenario as canonical scenario-document text. The graph and the objectives are read
-        /// here because the scenario read path does not include them.
+        /// The scenario as canonical scenario-document text: the document it was imported from when
+        /// there is one, and otherwise one derived from the rows. Pass derived to force the derived
+        /// form even when a document is stored — the difference between the two is exactly what the
+        /// columns cannot hold, which is what STORAGE_LOSSY reports.
         /// </summary>
-        public async Task<string> ExportDocumentAsync(int id, CancellationToken ct)
+        public async Task<string> ExportDocumentAsync(int id, bool derived, CancellationToken ct)
         {
+            if (!derived)
+            {
+                var stored = await CurrentDocumentAsync(id, ct);
+                // Re-canonicalized rather than echoed: jsonb keeps the document but not its key order.
+                if (stored != null) return ScenarioDocumentMapper.Serialize(JsonNode.Parse(stored));
+            }
+
+            // The graph and the objectives are read here because the scenario read path does not
+            // include them. GetByIdAsync throws when the scenario does not exist, which is the 404.
             var scenario = await GetByIdAsync(id, ct);
             var entities = await _context.ScenarioEntities.Where(e => e.ScenarioId == id).ToListAsync(ct);
             var edges = await _context.ScenarioEdges.Where(e => e.ScenarioId == id).ToListAsync(ct);
@@ -93,6 +111,90 @@ namespace Ghosts.Api.Infrastructure.Services
 
             return ScenarioDocumentMapper.Serialize(
                 ScenarioDocumentMapper.ToDocument(scenario, entities, edges, objectives));
+        }
+
+        /// <summary>
+        /// Creates a scenario from a document and keeps the document beside the rows, both in one
+        /// transaction: CreateAsync sees this transaction as ambient and leaves the commit here, so a
+        /// scenario imported from a document never exists without it.
+        /// </summary>
+        public async Task<Scenario> ImportDocumentAsync(
+            JsonObject document, IReadOnlyList<ScenarioFinding> findings, CancellationToken ct)
+        {
+            var ambient = _context.Database.CurrentTransaction;
+            await using var transaction = ambient == null ? await _context.Database.BeginTransactionAsync(ct) : null;
+
+            var scenario = await CreateAsync(ScenarioDocumentMapper.FromDocument(document), ct);
+            await StoreDocumentAsync(scenario.Id, document, findings, ct);
+
+            if (transaction != null) await transaction.CommitAsync(ct);
+
+            return scenario;
+        }
+
+        /// <summary>
+        /// Adds a document row for a scenario. One row per import, never an update: the newest row is
+        /// the current document and the older ones are the scenario's history.
+        /// </summary>
+        public async Task StoreDocumentAsync(
+            int scenarioId, JsonObject document, IReadOnlyList<ScenarioFinding> findings, CancellationToken ct)
+        {
+            var text = ScenarioDocumentMapper.Serialize(document);
+
+            _context.ScenarioDocuments.Add(new ScenarioDocument
+            {
+                ScenarioId = scenarioId,
+                SchemaVersion = (document["schemaVersion"] as JsonValue)?.GetValue<string>()
+                                ?? ScenarioDocumentMapper.SchemaVersion,
+                ContentHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(text))).ToLowerInvariant(),
+                Document = text,
+                Validation = ValidationRecord(findings),
+                CreatedAt = DateTime.UtcNow
+            });
+
+            await _context.SaveChangesAsync(ct);
+            _log.Info($"Stored scenario document: scenario {scenarioId}, {findings.Count} finding(s)");
+        }
+
+        public async Task<bool> HasDocumentAsync(int scenarioId, CancellationToken ct) =>
+            await _context.ScenarioDocuments.AnyAsync(d => d.ScenarioId == scenarioId, ct);
+
+        /// <summary>The newest document row's text, or null when the scenario has none.</summary>
+        private async Task<string> CurrentDocumentAsync(int id, CancellationToken ct) =>
+            await _context.ScenarioDocuments
+                .Where(d => d.ScenarioId == id)
+                .OrderByDescending(d => d.Id)
+                .Select(d => d.Document)
+                .FirstOrDefaultAsync(ct);
+
+        /// <summary>
+        /// What the validator said about this document, stored with it: a document is only as good as
+        /// the run that accepted it, and a warning that was acceptable in one import is a fact about
+        /// that import.
+        /// </summary>
+        private static string ValidationRecord(IReadOnlyList<ScenarioFinding> findings)
+        {
+            var list = new JsonArray();
+            foreach (var f in findings)
+            {
+                list.Add(new JsonObject
+                {
+                    ["tier"] = f.Tier,
+                    ["severity"] = f.Severity,
+                    ["code"] = f.Code,
+                    ["path"] = f.Path,
+                    ["message"] = f.Message
+                });
+            }
+
+            return new JsonObject
+            {
+                ["validator"] = ApplicationDetails.Version,
+                ["validatedAt"] = DateTime.UtcNow.ToString("o"),
+                ["errors"] = findings.Count(f => f.Severity == ScenarioFinding.Error),
+                ["warnings"] = findings.Count(f => f.Severity == ScenarioFinding.Warning),
+                ["findings"] = list
+            }.ToJsonString();
         }
 
         public async Task<Scenario> CreateAsync(CreateScenarioDto dto, CancellationToken ct)

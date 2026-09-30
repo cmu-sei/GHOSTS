@@ -1,17 +1,19 @@
 #!/usr/bin/env bash
 # Step 2 done-when: a scenario document survives the API.
 #
-# For each document D: import it, export the new scenario as D', and compare. Four checks per
+# For each document D: import it, export the new scenario as D', and compare. Five checks per
 # document, all against a running API:
 #
 #   import      the document is accepted
 #   valid       D' validates against schema v1
 #   stable      two exports of the unchanged scenario are byte-identical
 #   fixedpoint  importing D' and exporting again gives D' byte for byte
+#   lossless    D' is D byte for byte — the import keeps the document, so this is a check, not a report
 #
 # and one report, which is not a pass/fail:
 #
-#   lossless    D' is D byte for byte — where it is not, the diff says what the API model cannot hold
+#   derived     D against ?derived=true, which rebuilds a document from the rows alone. The diff is
+#               what the columns cannot hold, and it is the same list STORAGE_LOSSY reports on import.
 #
 # Every scenario this script creates is deleted again, so the database is left as it was found.
 # Scenarios already in the database are exported first and their exports round-tripped too.
@@ -61,6 +63,13 @@ import() {
 export_document() { # id outfile
   local code
   code=$(curl -sS -o "$2" -w '%{http_code}' "$API/api/scenarios/$1/document")
+  [ "$code" = "200" ] || { echo "http $code" >&2; return 1; }
+}
+
+# The document rebuilt from the rows alone, ignoring the one the import stored.
+export_derived() { # id outfile
+  local code
+  code=$(curl -sS -o "$2" -w '%{http_code}' "$API/api/scenarios/$1/document?derived=true")
   [ "$code" = "200" ] || { echo "http $code" >&2; return 1; }
 }
 
@@ -120,9 +129,23 @@ roundtrip() {
   if cmp -s "$doc" "$first"; then
     pass "$name lossless" "import -> export is the document"
   else
-    printf 'loss  %-28s %s\n' "$name lossless" "D != D'"
-    node "$HERE/scenario-doc.mjs" diff "$doc" "$first" | sed 's/^/        /'
-    LOSSY+=("$name")
+    fail "$name lossless" "$(node "$HERE/scenario-doc.mjs" diff "$doc" "$first" | head -12 | tr '\n' ';')"
+  fi
+
+  # The derived form is the document the columns can rebuild on their own. Where it differs from D,
+  # the difference is what the columns cannot hold — the same paths the import reported as lossy.
+  local derived=$WORK/$name.derived.json
+  if export_derived "$id" "$derived" 2>>"$WORK/$name.err"; then
+    if cmp -s "$doc" "$derived"; then
+      printf 'same  %-28s %s\n' "$name derived" "the columns hold the whole document"
+    else
+      printf 'loss  %-28s %s\n' "$name derived" \
+        "STORAGE_LOSSY: $(jq -r '[.findings[]? | select(.code == "STORAGE_LOSSY") | .path] | join(" ")' "$WORK/$name.import.json")"
+      node "$HERE/scenario-doc.mjs" diff "$doc" "$derived" | sed 's/^/        /'
+      LOSSY+=("$name")
+    fi
+  else
+    fail "$name derived" "$(cat "$WORK/$name.err")"
   fi
 
   delete_scenario "$id"
@@ -156,7 +179,7 @@ done
 
 echo
 if [ ${#LOSSY[@]} -gt 0 ]; then
-  echo "documents that do not survive byte for byte: ${LOSSY[*]}"
+  echo "documents the columns alone cannot rebuild: ${LOSSY[*]}"
 fi
 if [ ${#UNREP[@]} -gt 0 ]; then
   echo "scenarios whose stored data schema v1 rejects: ${UNREP[*]}"
