@@ -4,7 +4,7 @@
 #   GHOSTS=/path/to/GHOSTS bash tools/test.sh
 set -euo pipefail
 cd "$(dirname "$0")/.."
-GHOSTS=${GHOSTS:-/tmp/ghosts}
+GHOSTS=${GHOSTS:-$(git rev-parse --show-toplevel)}
 FIX="$GHOSTS/experimental/rpg/fixtures/scenarios"
 export NODE_PATH=${NODE_PATH:-/workspaces/content-dev/server/node_modules}
 fail=0
