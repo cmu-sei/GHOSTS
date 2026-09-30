@@ -341,8 +341,10 @@ output/
 *.env
 
 *.claude/*
-# Skills are part of the repository: a committed skill is reviewable and shared, unlike a local one.
+# The author-scenario skill is part of the repository; any other skill under .claude/skills/ stays local.
 !.claude/skills/
+.claude/skills/*
+!.claude/skills/author-scenario/
 .claude/settings.local.json
 src/apphost/n8n_data/*
 src/Ghosts.Api/config/AttackData/enterprise-attack.json
