@@ -135,6 +135,8 @@ public class Program
         builder.Services.AddScoped<IScenarioEnrichmentService, ScenarioEnrichmentService>();
         builder.Services.AddScoped<IScenarioCompilerService, ScenarioCompilerService>();
         builder.Services.AddScoped<IEvidenceProcessor, EvidenceProcessorService>();
+        builder.Services.AddScoped<Ghosts.Api.Infrastructure.ScenarioDocuments.IScenarioDryRunService,
+            Ghosts.Api.Infrastructure.ScenarioDocuments.ScenarioDryRunService>();
 
         builder.Services.AddScoped<IClientResultsService, ClientResultsService>();
         builder.Services.AddScoped<IClientIdService, ClientIdService>();

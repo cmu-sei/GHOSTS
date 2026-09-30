@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "1.1.0",
+  "slug": "attack-deprecated-technique",
+  "name": "Adversary using a technique ATT&CK deprecated",
+  "description": "T1026 (Multiband Communication) still means what it meant, but new authoring should not use it.",
+  "adversaries": [
+    { "id": "kestrel", "name": "Kestrel", "capability": 3, "techniques": ["T1026"] }
+  ]
+}

@@ -1,0 +1,263 @@
+{
+  "schemaVersion": "1.1.0",
+  "slug": "phishing-drill",
+  "name": "Phishing Drill: First Contact",
+  "description": "A small SOC-defense rehearsal. You are the on-shift Blue Team analyst at Meridian Logistics. An adversary opens with a spear-phishing campaign against the finance team. How fast you detect and contain it decides whether the intrusion stops at the inbox or turns into hands-on-keyboard lateral movement.",
+  "context": {
+    "political": "Routine business operations. No heightened alert posture. Leadership expects the SOC to handle day-to-day threats without escalation unless containment fails."
+  },
+  "audience": {
+    "rulesOfEngagement": "Blue Team may investigate, quarantine, block, and notify users. No offensive action. Escalate to IR lead only if hosts are confirmed compromised."
+  },
+  "sides": [
+    {
+      "name": "Meridian Logistics (Home)",
+      "alignment": "friendly"
+    },
+    {
+      "name": "Crimson Tide Group",
+      "alignment": "adversary"
+    }
+  ],
+  "adversaries": [
+    {
+      "id": "crimson-tide",
+      "name": "Crimson Tide",
+      "type": "criminal",
+      "capability": 3,
+      "techniques": [
+        "T1021.001",
+        "T1078",
+        "T1566.001"
+      ]
+    }
+  ],
+  "terrain": {
+    "summary": {
+      "topology": "Flat /24 corporate LAN, single VLAN for finance, perimeter firewall with default-allow egress.",
+      "services": "Microsoft 365 mail, on-prem file server (FS01), domain controller (DC01).",
+      "assets": "FIN-WS-04 (finance workstation), FS01 (file server), DC01 (domain controller)"
+    },
+    "defenses": [
+      {
+        "name": "Email gateway with URL rewriting"
+      },
+      {
+        "name": "EDR on workstations"
+      },
+      {
+        "name": "SIEM with 15-min alert SLA"
+      }
+    ],
+    "vulnerabilities": [
+      {
+        "asset": "FIN-WS-04",
+        "cve": "CVE-2023-23397",
+        "severity": "high"
+      }
+    ]
+  },
+  "population": {
+    "pools": [
+      {
+        "role": "Finance Staff",
+        "count": 12
+      },
+      {
+        "role": "SOC Analyst",
+        "count": 1
+      }
+    ]
+  },
+  "rulesOfPlay": {
+    "pacing": "turn-based",
+    "duration": "1h",
+    "adjudication": "automated",
+    "telemetry": {
+      "logs": true,
+      "network": true,
+      "endpoint": true
+    },
+    "escalationLadder": {
+      "summary": "Inbox -> Endpoint -> Identity -> Lateral"
+    },
+    "branching": {
+      "summary": "Player containment at step 4 sets flag 'contained'. Red Team step 5 forks: contained -> blocked-retry path; not contained -> credential-theft path."
+    }
+  },
+  "assessment": {
+    "purpose": "Detect and contain a spear-phishing intrusion before it becomes lateral movement.",
+    "victoryConditions": "WIN: the phishing campaign is contained before the adversary obtains valid credentials (objective 2 met). LOSS: the adversary moves laterally to a second host.",
+    "performanceMetrics": "time-to-detect, time-to-contain, lateral-movement-prevented",
+    "objectives": [
+      {
+        "id": 1,
+        "name": "Detect the phishing campaign",
+        "description": "Recognize the inbound spear-phishing campaign from the SIEM alert and triage it as a real threat rather than noise.",
+        "successCriteria": "Player investigates the alert / lookalike domain before acting blindly.",
+        "assigned": "blue-team"
+      },
+      {
+        "id": 2,
+        "name": "Contain before lateral movement",
+        "description": "Quarantine the email and/or block the malicious domain before the adversary obtains valid credentials and pivots to a second host.",
+        "successCriteria": "The 'contained' flag is set at step 4, steering the timeline onto the blocked-retry branch.",
+        "assigned": "blue-team"
+      }
+    ]
+  },
+  "timeline": {
+    "events": [
+      {
+        "id": "inject-1",
+        "at": "T+10m",
+        "owner": "white-cell",
+        "title": "Suspicious email alert reaches the SOC queue"
+      },
+      {
+        "id": "event-1",
+        "at": "T+0m",
+        "owner": "white-cell",
+        "description": "Exercise start. It is a quiet Tuesday morning shift. The SIEM dashboard is green. You hold the on-shift SOC analyst seat at Meridian Logistics, responsible for the finance VLAN."
+      },
+      {
+        "id": "event-2",
+        "at": "T+5m",
+        "owner": "red-team",
+        "description": "Crimson Tide sends a spear-phishing email to twelve finance staff. It impersonates the company's payroll provider and carries a link to a credential-harvesting page styled like the Microsoft 365 login."
+      },
+      {
+        "id": "event-3",
+        "at": "T+10m",
+        "owner": "white-cell",
+        "description": "The email gateway fires a low-confidence alert into your SOC queue: 'Possible credential phishing - external sender, lookalike domain payroll-meridian[.]com, 12 recipients.' Two recipients have already opened the message.",
+        "objectives": [
+          1
+        ]
+      },
+      {
+        "id": "event-4",
+        "at": "T+12m",
+        "owner": "blue-team",
+        "description": "Your move. The alert is in your queue and the clock is running. What do you do? You can investigate the message and the lookalike domain, quarantine the email from all inboxes, block the malicious domain at the gateway, notify finance staff, or wait and watch.",
+        "objectives": [
+          1,
+          2
+        ]
+      },
+      {
+        "id": "event-5",
+        "at": "T+15m",
+        "when": "flag:contained",
+        "owner": "red-team",
+        "description": "Containment held. By the time Crimson Tide's harvesting page would have collected a password, the email is gone from every inbox and the domain is blocked. The adversary probes for another way in and finds the door shut. The campaign stalls at the inbox.",
+        "objectives": [
+          2
+        ]
+      },
+      {
+        "id": "event-6",
+        "at": "T+15m",
+        "when": "!contained",
+        "owner": "red-team",
+        "description": "No containment came. A finance clerk on FIN-WS-04 enters their M365 password into the harvesting page. Crimson Tide now holds valid credentials (T1078) and authenticates to the file server FS01 over SMB, moving laterally off the first host. The intrusion is now hands-on-keyboard."
+      },
+      {
+        "id": "event-7",
+        "at": "T+20m",
+        "owner": "blue-team",
+        "description": "Situation update. Either you stopped this at the inbox or you are now chasing an adversary on the network. Assess what you know and decide your next action: confirm scope, isolate the affected host, reset exposed credentials, or stand the team down.",
+        "objectives": [
+          2
+        ]
+      },
+      {
+        "id": "event-8",
+        "at": "T+30m",
+        "owner": "white-cell",
+        "description": "Exercise complete. The white cell calls end-of-scenario and begins the after-action review."
+      }
+    ]
+  },
+  "entities": [
+    {
+      "id": "crimson-tide",
+      "name": "Crimson Tide",
+      "type": "ThreatActor",
+      "description": "Financially motivated criminal crew. Opens with credential phishing, pivots on valid accounts.",
+      "properties": {
+        "capability": 3,
+        "type": "criminal"
+      },
+      "externalId": "G-CRIMSON",
+      "provenance": {
+        "reviewed": true
+      }
+    },
+    {
+      "id": "dana-okafor",
+      "name": "Dana Okafor",
+      "type": "Person",
+      "description": "Finance clerk at Meridian. First to open the phishing email; works on FIN-WS-04.",
+      "properties": {
+        "role": "Finance Staff"
+      },
+      "provenance": {
+        "reviewed": true
+      }
+    },
+    {
+      "id": "fin-ws-04",
+      "name": "FIN-WS-04",
+      "type": "System",
+      "description": "Finance workstation. Patient zero if credentials are harvested.",
+      "properties": {
+        "os": "Windows 11"
+      },
+      "provenance": {
+        "reviewed": true
+      }
+    },
+    {
+      "id": "fs01",
+      "name": "FS01",
+      "type": "System",
+      "description": "On-prem file server. Lateral-movement target over SMB.",
+      "properties": {
+        "os": "Windows Server 2019"
+      },
+      "provenance": {
+        "reviewed": true
+      }
+    }
+  ],
+  "edges": [
+    {
+      "from": "crimson-tide",
+      "to": "dana-okafor",
+      "type": "Targets",
+      "label": "spear-phishes",
+      "provenance": {
+        "reviewed": true
+      }
+    },
+    {
+      "from": "dana-okafor",
+      "to": "fin-ws-04",
+      "type": "Accesses",
+      "label": "works on",
+      "provenance": {
+        "reviewed": true
+      }
+    },
+    {
+      "from": "fin-ws-04",
+      "to": "fs01",
+      "type": "CommunicatesWith",
+      "label": "SMB to",
+      "provenance": {
+        "reviewed": true
+      }
+    }
+  ]
+}

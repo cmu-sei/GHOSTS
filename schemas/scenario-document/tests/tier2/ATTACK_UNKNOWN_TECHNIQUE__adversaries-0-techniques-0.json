@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "1.1.0",
+  "slug": "attack-unknown-technique",
+  "name": "Adversary using a technique id ATT&CK does not have",
+  "description": "T9999 is shaped like a technique id and is not one.",
+  "adversaries": [
+    { "id": "kestrel", "name": "Kestrel", "capability": 3, "techniques": ["T9999"] }
+  ]
+}

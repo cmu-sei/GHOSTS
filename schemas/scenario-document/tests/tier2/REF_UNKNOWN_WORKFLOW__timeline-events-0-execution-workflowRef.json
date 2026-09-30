@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "1.1.0",
+  "slug": "ref-unknown-workflow",
+  "name": "Event bound to a workflow that is not declared",
+  "description": "The event runs ghosts-mailer, and the document declares no workflows at all.",
+  "rulesOfPlay": { "duration": "8h" },
+  "timeline": {
+    "events": [
+      {
+        "id": "phishing-wave",
+        "at": "T+1h",
+        "owner": "white-cell",
+        "description": "The phishing wave goes out to the finance pool.",
+        "execution": { "mode": "workflow", "workflowRef": "ghosts-mailer" }
+      }
+    ]
+  }
+}

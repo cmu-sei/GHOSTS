@@ -1,0 +1,588 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cmu-sei.github.io/GHOSTS/schemas/scenario-document/1.1.0/scenario-document.schema.json",
+  "title": "GHOSTS scenario document",
+  "description": "One exercise scenario as a single, versioned, diffable file: what the exercise is for, who plays, who the adversary is and what it can do, the terrain, the rules of play, the timeline, the assessment standard, and the entity graph. It carries the authored specification only, never run state or database identity. Names use the exercise developer's vocabulary; standards (ATT&CK, CVE, cron) sit at the leaves.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "slug", "name", "description"],
+  "properties": {
+    "schemaVersion": {
+      "description": "Version of this schema the document was written against. Semantic versioning; a major bump means an older reader must refuse the file. 1.1.0 declares the defaults canonical form omits; a 1.0.0 document is read unchanged.",
+      "type": "string",
+      "enum": ["1.0.0", "1.1.0"]
+    },
+    "slug": {
+      "$ref": "#/$defs/slug",
+      "description": "Stable, author-chosen identity for the scenario. Used for file names and diffs. Never a database id."
+    },
+    "name": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "description": {
+      "type": "string",
+      "description": "One paragraph a participant could read: what this exercise is and what it asks of them."
+    },
+    "intent": {
+      "type": "string",
+      "description": "The exercise developer's plain-English intent, as given to whoever builds the scenario. White Cell material. This is the paragraph an authoring agent starts from and the text a reviewer checks the rest of the document against."
+    },
+    "catalog": {
+      "description": "How the scenario is listed in a picker. Optional; a scenario with no catalog block is unlisted.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "listed": { "type": "boolean" },
+        "sortOrder": { "type": "integer" },
+        "era": { "type": "string" },
+        "theater": { "type": "string" },
+        "estimatedMinutes": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "context": {
+      "description": "Background the exercise runs inside.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "political": {
+          "type": "string",
+          "description": "Political and economic context: why the adversary acts, what is at stake, whether a conflict is declared. White Cell material."
+        },
+        "situation": {
+          "type": "string",
+          "description": "The kickoff briefing shown to the training audience at the start of play."
+        }
+      }
+    },
+    "audience": {
+      "description": "Who is trained, and the mandate and limits they play under. This block holds the elicitation-checklist fields no retrieval can supply.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "role": { "type": "string", "description": "The seat the audience holds, e.g. 'On-shift SOC analyst, Meridian Logistics'." },
+        "size": { "type": "integer", "minimum": 1, "description": "How many people play the audience seat." },
+        "proficiency": { "type": "string", "description": "Current proficiency of the audience, in the developer's words, e.g. 'first rotation'." },
+        "mandate": { "type": "string", "description": "What the audience is expected to protect or achieve, and what actions are open to them." },
+        "rulesOfEngagement": { "type": "string", "description": "What the audience may and may not do. The judge holds them to this." }
+      }
+    },
+    "sides": {
+      "description": "Nations or organizations in the scenario and which side each is on.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "alignment"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "alignment": { "type": "string", "enum": ["friendly", "adversary", "neutral"] }
+        }
+      }
+    },
+    "adversaries": {
+      "description": "Each opposing force: who it is, how capable it is, what it wants, and the moves it could make. A move is precondition-gated, not scripted: the author supplies pieces and conditions, and the runtime composes the sequence.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name"],
+        "properties": {
+          "id": { "$ref": "#/$defs/slug" },
+          "name": { "type": "string", "minLength": 1 },
+          "type": {
+            "type": "string",
+            "description": "Kind of actor. Recommended vocabulary: state, criminal, hacktivist, insider, military. Free text is accepted because the exercise may not be a cyber one.",
+            "examples": ["state", "criminal", "hacktivist", "insider", "military"]
+          },
+          "capability": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "description": "1 = opportunistic, uses public tooling; 3 = organized, some custom tooling, persists for weeks; 5 = top-tier, custom implants, patient over months. A rating must be coherent with the techniques listed."
+          },
+          "techniques": {
+            "type": "array",
+            "description": "MITRE ATT&CK technique ids the actor is expected to use (Enterprise, ICS, or Mobile). Ids only; the validator resolves them against ATT&CK, and the document never restates ATT&CK content.",
+            "items": { "$ref": "#/$defs/attackTechniqueId" },
+            "uniqueItems": true
+          },
+          "capabilities": {
+            "type": "array",
+            "description": "Strengths in plain words when ATT&CK does not apply, e.g. 'coastal artillery', 'coordinated inauthentic accounts'.",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "objective": { "type": "string", "description": "What this adversary is trying to bring about." },
+          "winThreshold": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "The adversary wins when its accumulated move progress reaches this. 0 means never; the audience can then only win or lose on its own objectives and the clock."
+          },
+          "playbook": {
+            "type": "array",
+            "description": "Moves this adversary could make. The set whose preconditions currently hold is its live menu.",
+            "items": { "$ref": "#/$defs/move" }
+          }
+        }
+      }
+    },
+    "terrain": {
+      "description": "The environment the exercise runs on. References a base network where one exists, and states only what this exercise adds. Structured lists are what new authoring uses; the summary block carries prose from older scenarios so nothing is lost. Design-time knowledge: the document is White Cell material, and no running NPC reads it.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "reference": {
+          "description": "The base network this exercise runs on, by name, in a terrain provider such as GraySpace. The document does not restate what the provider knows.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["provider", "slice"],
+          "properties": {
+            "provider": { "type": "string", "minLength": 1 },
+            "slice": { "type": "string", "minLength": 1 }
+          }
+        },
+        "summary": {
+          "description": "Unstructured description, kept for scenarios authored before the structured lists existed. New scenarios should fill the lists instead.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "topology": { "type": "string" },
+            "services": { "type": "string" },
+            "assets": { "type": "string" }
+          }
+        },
+        "segments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name"],
+            "properties": {
+              "name": { "type": "string", "minLength": 1 },
+              "cidr": { "type": "string", "pattern": "^(\\d{1,3}\\.){3}\\d{1,3}/\\d{1,2}$" },
+              "description": { "type": "string" }
+            }
+          }
+        },
+        "hosts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name"],
+            "properties": {
+              "name": { "type": "string", "minLength": 1, "description": "Host name as injects and events refer to it." },
+              "segment": { "type": "string", "description": "Name of a segment in this document." },
+              "os": { "type": "string" },
+              "role": { "type": "string" },
+              "description": { "type": "string" },
+              "services": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+            }
+          }
+        },
+        "services": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name"],
+            "properties": {
+              "name": { "type": "string", "minLength": 1 },
+              "description": { "type": "string" },
+              "hosts": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        },
+        "defenses": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name"],
+            "properties": {
+              "name": { "type": "string", "minLength": 1 },
+              "description": { "type": "string" },
+              "covers": { "type": "array", "description": "Host names this defense protects.", "items": { "type": "string" } }
+            }
+          }
+        },
+        "vulnerabilities": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["asset", "severity"],
+            "anyOf": [{ "required": ["cve"] }, { "required": ["description"] }],
+            "properties": {
+              "asset": { "type": "string", "minLength": 1, "description": "The host, or the thing at risk when the exercise is not a cyber one." },
+              "cve": { "$ref": "#/$defs/cveId" },
+              "description": { "type": "string", "description": "The weakness in plain words when there is no CVE." },
+              "severity": { "type": "string", "enum": ["low", "medium", "high", "critical"] }
+            }
+          }
+        },
+        "informationEnvironment": {
+          "description": "The cognitive terrain: where narratives spread and who hears them.",
+          "type": "object",
+          "additionalProperties": { "type": "string" },
+          "properties": {
+            "platforms": { "type": "string" },
+            "audience": { "type": "string" }
+          }
+        }
+      }
+    },
+    "population": {
+      "description": "The simulated people GHOSTS animates. The training audience is not in this block.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "pools": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["role", "count"],
+            "properties": {
+              "role": { "type": "string", "minLength": 1 },
+              "count": { "type": "integer", "minimum": 0 },
+              "description": { "type": "string", "description": "Who these people are: employer, unit, working hours, what they use. The generator reads this instead of inventing a persona." }
+            }
+          }
+        }
+      }
+    },
+    "startingConditions": {
+      "description": "Ground truth at the start of play. Flags and facts seed the runtime world state; moves and events change them.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "flags": { "type": "array", "items": { "$ref": "#/$defs/flag" }, "uniqueItems": true },
+        "facts": { "type": "object", "additionalProperties": { "type": "string" } }
+      }
+    },
+    "rulesOfPlay": {
+      "description": "How the exercise is run: its clock, who adjudicates, what the audience can see, and how it escalates.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "pacing": { "type": "string", "enum": ["real-time", "compressed", "turn-based"] },
+        "duration": { "$ref": "#/$defs/duration", "description": "Length of play in exercise time, e.g. '11d', '90m', '1h30m'. One field; there is no second copy." },
+        "clock": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "tickMinutes": { "type": "integer", "minimum": 1, "description": "Exercise minutes consumed by one turn, when pacing is turn-based." },
+            "label": { "type": "string", "description": "What the clock counts down to, e.g. 'to the board meeting'." }
+          }
+        },
+        "deadline": {
+          "description": "A fixed point by which a decisive action must have happened, with the text control uses around it.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["at"],
+          "properties": {
+            "at": { "$ref": "#/$defs/offset" },
+            "label": { "type": "string" },
+            "decisiveAction": { "type": "string", "description": "What the audience must have done by the deadline." },
+            "warning": { "type": "string" },
+            "failureMessage": { "type": "string" }
+          }
+        },
+        "adjudication": { "type": "string", "enum": ["manual", "automated", "hybrid"] },
+        "fog": {
+          "type": "string",
+          "enum": ["partial", "full", "off"],
+          "description": "partial: the audience sees emitted indicators, never ground-truth flags. full: it sees nothing an adversary does until an indicator surfaces it. off: it sees ground truth (training or debugging)."
+        },
+        "telemetry": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "logs": { "type": "boolean", "default": false },
+            "network": { "type": "boolean", "default": false },
+            "endpoint": { "type": "boolean", "default": false },
+            "chat": { "type": "boolean", "default": false }
+          }
+        },
+        "escalationLadder": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "summary": { "type": "string" },
+            "rungs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["name"],
+                "properties": {
+                  "name": { "type": "string", "minLength": 1 },
+                  "description": { "type": "string" },
+                  "recoverable": { "type": "boolean", "description": "Whether the audience can still reach success from this rung." }
+                }
+              }
+            }
+          }
+        },
+        "branching": {
+          "description": "What happens on early success, late containment, or failure. Conditional events and move preconditions carry the mechanics; this block states the design.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "summary": { "type": "string" }
+          }
+        }
+      }
+    },
+    "assessment": {
+      "description": "The standard the audience is graded against.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "purpose": { "type": "string", "description": "The training purpose in one or two sentences." },
+        "victoryConditions": { "type": "string", "description": "What counts as success and what counts as failure, as a person would state it." },
+        "performanceMetrics": { "type": "string" },
+        "objectives": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "name"],
+            "properties": {
+              "id": { "type": "integer", "minimum": 1, "description": "Local to this document. Events and conditions refer to it." },
+              "parentId": { "type": "integer", "minimum": 1 },
+              "name": { "type": "string", "minLength": 1 },
+              "description": { "type": "string" },
+              "type": { "type": "string", "enum": ["MET", "JMET", "Rehearsal", "Onboarding", "ToolTraining"], "default": "MET" },
+              "priority": { "type": "integer", "minimum": 1, "default": 1 },
+              "successCriteria": { "type": "string" },
+              "metWhen": { "$ref": "#/$defs/condition", "description": "When this holds, the objective is achieved without a judge. Empty means only the judge can complete it." },
+              "assigned": { "$ref": "#/$defs/owner" }
+            }
+          }
+        }
+      }
+    },
+    "timeline": {
+      "description": "Every beat control introduces, in one list. An event fires at a time, on a schedule, or when a condition holds. There is no separate inject list.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "events": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/event" }
+        }
+      }
+    },
+    "workflows": {
+      "description": "Automation bound to a run. Nothing is bound unless it is listed here.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["ref", "cron"],
+        "properties": {
+          "ref": { "type": "string", "minLength": 1, "description": "Stable reference, the workflow's webhook path." },
+          "displayName": { "type": "string" },
+          "cron": { "$ref": "#/$defs/cron" },
+          "enabled": { "type": "boolean" }
+        }
+      }
+    },
+    "entities": {
+      "description": "The people, systems, organizations and other things the scenario is about, with where each came from.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "type"],
+        "properties": {
+          "id": { "$ref": "#/$defs/slug", "description": "Local to this document; edges refer to it." },
+          "name": { "type": "string", "minLength": 1 },
+          "type": {
+            "type": "string",
+            "description": "Recommended vocabulary: Person, Organization, System, Network, Location, Software, ThreatActor, Campaign, Vulnerability, DataAsset, Service, Resource, Custom.",
+            "examples": ["Person", "Organization", "System", "Network", "Location", "Software", "ThreatActor", "Campaign", "Vulnerability", "DataAsset", "Service", "Resource", "Custom"]
+          },
+          "description": { "type": "string" },
+          "properties": { "type": "object" },
+          "externalId": { "type": "string", "description": "An id in an external standard: an ATT&CK group or technique id, a CVE, a STIX id." },
+          "provenance": { "$ref": "#/$defs/provenance" }
+        }
+      }
+    },
+    "edges": {
+      "description": "Relationships between entities.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["from", "to", "type"],
+        "properties": {
+          "from": { "$ref": "#/$defs/slug" },
+          "to": { "$ref": "#/$defs/slug" },
+          "type": {
+            "type": "string",
+            "description": "Recommended vocabulary: MemberOf, Targets, Exploits, Uses, LocatedAt, CommunicatesWith, DependsOn, Accesses, Owns, ReportsTo, AffiliatedWith, DefendedBy, Defends, Enables, PlansFor, CommandsAndControl, Custom.",
+            "examples": ["MemberOf", "Targets", "Exploits", "Uses", "LocatedAt", "CommunicatesWith", "DependsOn", "Accesses", "Owns", "ReportsTo", "AffiliatedWith", "DefendedBy", "Defends", "Enables", "PlansFor", "CommandsAndControl", "Custom"]
+          },
+          "label": { "type": "string" },
+          "weight": { "type": "number", "minimum": 0, "maximum": 1, "default": 1 },
+          "properties": { "type": "object" },
+          "provenance": { "$ref": "#/$defs/provenance" }
+        }
+      }
+    },
+    "sources": {
+      "description": "Documents the scenario was built from. Metadata only; the document never embeds file contents.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "type"],
+        "properties": {
+          "id": { "$ref": "#/$defs/slug" },
+          "name": { "type": "string", "minLength": 1 },
+          "type": { "type": "string", "enum": ["document", "text", "url"] },
+          "uri": { "type": "string" },
+          "mimeType": { "type": "string" },
+          "note": { "type": "string" }
+        }
+      }
+    },
+    "references": {
+      "description": "Citations a reviewer can open. Prose anywhere in the document may cite one as [ref:<id>].",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "title"],
+        "properties": {
+          "id": { "$ref": "#/$defs/slug" },
+          "title": { "type": "string", "minLength": 1 },
+          "uri": { "type": "string" },
+          "locator": { "type": "string", "description": "Page, section, or paragraph." },
+          "note": { "type": "string" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{0,78}$"
+    },
+    "flag": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_-]{0,78}$"
+    },
+    "offset": {
+      "type": "string",
+      "description": "Time from the start of play: 'T+' followed by days, hours, minutes, in that order, each optional, at least one present. 'T+10m', 'T+2d9h40m', 'T+0m'.",
+      "pattern": "^T\\+(?=\\d)(\\d+d)?(\\d+h)?(\\d+m)?$"
+    },
+    "duration": {
+      "type": "string",
+      "description": "A length of exercise time: days, hours, minutes, in that order, each optional, at least one present. '11d', '1h', '45m', '1h30m'.",
+      "pattern": "^(?=\\d)(\\d+d)?(\\d+h)?(\\d+m)?$"
+    },
+    "condition": {
+      "type": "string",
+      "description": "Terms joined by '&&'. A term is 'flag:<flag>' (the flag is set), '!<flag>' (it is not), 'objective:<id>' (that objective is achieved), or 'clock>=<minutes>'. Empty means always true. An unknown term makes the whole condition false, never true.",
+      "pattern": "^\\s*$|^\\s*(flag:[a-z0-9][a-z0-9_-]*|![a-z0-9][a-z0-9_-]*|objective:[1-9][0-9]*|clock>=[0-9]+)(\\s*&&\\s*(flag:[a-z0-9][a-z0-9_-]*|![a-z0-9][a-z0-9_-]*|objective:[1-9][0-9]*|clock>=[0-9]+))*\\s*$"
+    },
+    "attackTechniqueId": {
+      "type": "string",
+      "pattern": "^T[0-9]{4}(\\.[0-9]{3})?$"
+    },
+    "cveId": {
+      "type": "string",
+      "pattern": "^CVE-[0-9]{4}-[0-9]{4,}$"
+    },
+    "cron": {
+      "type": "string",
+      "pattern": "^\\S+(\\s+\\S+){4}$"
+    },
+    "owner": {
+      "type": "string",
+      "enum": ["white-cell", "red-team", "blue-team", "green-cell", "unassigned"]
+    },
+    "effects": {
+      "description": "Changes to ground truth when this fires.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "setFlags": { "type": "array", "items": { "$ref": "#/$defs/flag" }, "uniqueItems": true },
+        "setFacts": { "type": "object", "additionalProperties": { "type": "string" } }
+      }
+    },
+    "move": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "description"],
+      "properties": {
+        "id": { "$ref": "#/$defs/slug" },
+        "domain": { "type": "string", "enum": ["cyber", "cognitive", "physical", "hybrid"] },
+        "description": { "type": "string", "minLength": 1 },
+        "techniques": { "type": "array", "items": { "$ref": "#/$defs/attackTechniqueId" }, "uniqueItems": true },
+        "preconditions": { "$ref": "#/$defs/condition", "description": "What must be true before this move is available." },
+        "effects": { "$ref": "#/$defs/effects" },
+        "progress": { "type": "integer", "minimum": 0, "description": "How far this move advances the adversary toward its win threshold." },
+        "indicators": {
+          "type": "array",
+          "description": "What a defender could observe when this move is played. Fog decides which the audience actually sees.",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "owner"],
+      "anyOf": [
+        { "required": ["at"] },
+        { "required": ["when"] },
+        { "required": ["schedule"] },
+        { "required": ["displayTime"] }
+      ],
+      "dependentRequired": {
+        "when": ["description"],
+        "schedule": ["description"],
+        "objectives": ["description"],
+        "execution": ["description"]
+      },
+      "properties": {
+        "id": { "$ref": "#/$defs/slug" },
+        "at": { "$ref": "#/$defs/offset", "description": "When the event fires, from the start of play." },
+        "displayTime": { "type": "string", "description": "The time as shown to the audience, in the exercise's own clock, e.g. '21 JAN 44 / 0800'. Use with or instead of 'at'." },
+        "schedule": { "$ref": "#/$defs/cron", "description": "For a recurring event." },
+        "when": { "$ref": "#/$defs/condition", "description": "The event fires when this holds. Combine with 'at' to mean 'at this time, if this holds'." },
+        "owner": { "$ref": "#/$defs/owner" },
+        "title": { "type": "string" },
+        "description": { "type": "string", "minLength": 1, "description": "What happens. An event carrying 'when', 'schedule', 'objectives' or 'execution' must have one: the API keeps a title-only event as an inject row, which holds a trigger and a title and nothing else, so those four fields would be dropped without a word." },
+        "objectives": { "type": "array", "items": { "type": "integer", "minimum": 1 }, "uniqueItems": true, "description": "Objective ids this event exercises." },
+        "expectedResponse": { "type": "string", "description": "What the audience is expected to do in reply. Control grades against this." },
+        "effects": { "$ref": "#/$defs/effects" },
+        "indicators": { "type": "array", "items": { "type": "string", "minLength": 1 }, "description": "What the audience could observe when this fires." },
+        "execution": {
+          "type": "object",
+          "additionalProperties": false,
+          "minProperties": 1,
+          "properties": {
+            "mode": { "type": "string", "enum": ["manual", "workflow"], "default": "manual" },
+            "workflowRef": { "type": "string", "description": "A ref in this document's workflows list." }
+          }
+        }
+      }
+    },
+    "provenance": {
+      "description": "Where an entity or edge came from and whether a person has checked it.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "origin": { "type": "string", "enum": ["operator", "extracted", "enriched", "generated"], "default": "operator" },
+        "source": { "$ref": "#/$defs/slug", "description": "Id of a source in this document." },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1, "default": 1 },
+        "reviewed": { "type": "boolean", "default": false }
+      }
+    }
+  }
+}

@@ -237,7 +237,52 @@ public record CreateScenarioDto(
     ScenarioParametersDto ScenarioParameters,
     TechnicalEnvironmentDto TechnicalEnvironment,
     GameMechanicsDto GameMechanics,
-    TimelineDto Timeline
+    TimelineDto Timeline,
+    List<ScenarioEntityImportDto> Entities = null,
+    List<ScenarioEdgeImportDto> Edges = null,
+    List<ScenarioObjectiveImportDto> Objectives = null
+);
+
+/// <summary>An entity created with the scenario. <see cref="Id"/> is document-local; edges refer to it.</summary>
+public record ScenarioEntityImportDto(
+    string Id,
+    string Name,
+    string Type,
+    string Description,
+    string Properties,
+    string ExternalId,
+    string Origin,
+    decimal Confidence,
+    bool IsReviewed
+);
+
+/// <summary>An edge created with the scenario, between two document-local entity ids.</summary>
+public record ScenarioEdgeImportDto(
+    string From,
+    string To,
+    string Type,
+    string Label,
+    decimal Weight,
+    string Properties,
+    string Origin,
+    decimal Confidence,
+    bool IsReviewed
+);
+
+/// <summary>
+/// An objective created with the scenario. <see cref="Id"/> is document-local: timeline events
+/// refer to it, and create rewrites those references to the database ids it assigns.
+/// </summary>
+public record ScenarioObjectiveImportDto(
+    int Id,
+    int? ParentId,
+    string Name,
+    string Description,
+    string Type,
+    int Priority,
+    string SuccessCriteria,
+    string Assigned,
+    int SortOrder
 );
 
 public record UpdateScenarioDto(

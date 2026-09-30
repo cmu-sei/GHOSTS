@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "1.1.0",
+  "slug": "ref-unknown-reference",
+  "name": "Citation with nothing to open",
+  "description": "The purpose cites the incident response plan, and the references list does not have it.",
+  "assessment": {
+    "purpose": "Rehearse the containment steps in the incident response plan [ref:ir-plan] under time pressure."
+  }
+}

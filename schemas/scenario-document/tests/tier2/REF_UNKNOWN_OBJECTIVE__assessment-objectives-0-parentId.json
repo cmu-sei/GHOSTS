@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "1.1.0",
+  "slug": "ref-unknown-objective-parent",
+  "name": "Objective under a parent that is not declared",
+  "description": "Objective 1 sits under objective 4, which the document does not declare.",
+  "assessment": {
+    "objectives": [
+      { "id": 1, "name": "Contain the intrusion", "parentId": 4 }
+    ]
+  }
+}
