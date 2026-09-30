@@ -19,6 +19,13 @@
         "ghcr.io/devcontainers-extra/features/uv:1": {},
         "ghcr.io/devcontainers-extra/features/ripgrep:1": {},
         "ghcr.io/jsburckhardt/devcontainer-features/fd:1": {},
+        "ghcr.io/devcontainers/features/dotnet:2": {
+            "version": "10.0"
+        },
+        // moby is not packaged for Debian trixie (the base image), so use Docker CE
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {
+            "moby": false
+        },
         "./features/sei-certs": {},
         "./features/bedrock": {},
         "./features/claude": {},
@@ -36,7 +43,8 @@
     "remoteEnv": {
         "LANG": "C.UTF-8",
         "LC_ALL": "C.UTF-8",
-        "TERM": "xterm-256color"
+        "TERM": "xterm-256color",
+        "PATH": "${containerEnv:PATH}:/home/vscode/.dotnet/tools"
     },
     "runArgs": [
         "--name",
@@ -53,8 +61,17 @@
     "postStartCommand": "bash -l .devcontainer/scripts/poststart.sh",
     "customizations": {
         "vscode": {
+            "extensions": [
+                "ms-dotnettools.csdevkit",
+                "microsoft-aspire.aspire-vscode",
+                "dbaeumer.vscode-eslint",
+                "esbenp.prettier-vscode",
+                "angular.ng-template",
+                "pflannery.vscode-versionlens"
+            ],
             "settings": {
-                "chat.disableAIFeatures": true
+                "chat.disableAIFeatures": true,
+                "dotnet.defaultSolution": "GHOSTS.sln"
             }
         }
     }
