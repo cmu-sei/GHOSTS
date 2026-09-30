@@ -34,7 +34,7 @@
     "@angular/forms": "22.1.6",
     "@angular/material": "22.1.6",
     "@angular/platform-browser": "22.1.6",
-    "@angular/router": "22.1.6",
+    "@angular/router": "22.2.0",
     "@fortawesome/fontawesome-free": "^7.2.0",
     "@types/d3": "^7.4.3",
     "d3": "^7.9.0",
