@@ -6,10 +6,13 @@ Sample browser timelines are available in the [GHOSTS GitHub repository](https:/
 
 ## Prerequisites
 
-Before using browser handlers, you must download the appropriate WebDriver:
+Each browser handler needs a WebDriver that matches the installed browser. GHOSTS looks for it in the same folder as the GHOSTS executable first; if it is not there, Selenium Manager searches `PATH` and, if the host has internet access, downloads a matching driver.
 
-- **Firefox**: [Download Geckodriver](https://github.com/mozilla/geckodriver/releases) and place it in the same folder as the GHOSTS executable
-- **Chrome**: [Download Chromedriver](https://chromedriver.chromium.org/downloads) and place it in the same folder as the GHOSTS executable
+Geckodriver ships with the GHOSTS clients (except the Universal `linux-arm64` build). Chromedriver and msedgedriver are not bundled because they must match the browser's major version, so on offline hosts place a matching one next to the GHOSTS executable:
+
+- **Firefox**: [Download Geckodriver](https://github.com/mozilla/geckodriver/releases)
+- **Chrome**: [Download Chromedriver](https://chromedriver.chromium.org/downloads)
+- **Edge**: [Download msedgedriver](https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/)
 
 Ensure the WebDriver version matches your installed browser version.
 
@@ -310,7 +313,7 @@ Here's a comprehensive browser handler configuration demonstrating key features:
 
 ### Browser Won't Start
 
-**Check WebDriver**: Ensure Geckodriver/Chromedriver is in the GHOSTS directory and matches your browser version.
+**Check WebDriver**: Ensure the driver is in the GHOSTS directory (or on `PATH`) and matches your browser version.
 
 ```bash
 # Check Chrome version

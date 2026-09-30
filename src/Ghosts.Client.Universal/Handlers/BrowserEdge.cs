@@ -1,6 +1,7 @@
 // Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Client.Universal.Infrastructure;
@@ -231,7 +232,14 @@ namespace Ghosts.Client.Universal.Handlers;
             EdgeDriver driver;
             try
             {
-                driver = new EdgeDriver(options);
+                // Prefer a driver next to ghosts; otherwise Selenium Manager finds one (PATH, cache, or download)
+                var driverDir = AppDomain.CurrentDomain.BaseDirectory;
+                var driverFile = OperatingSystem.IsWindows() ? "msedgedriver.exe" : "msedgedriver";
+                var service = File.Exists(Path.Combine(driverDir, driverFile))
+                    ? EdgeDriverService.CreateDefaultService(driverDir)
+                    : EdgeDriverService.CreateDefaultService();
+                service.HideCommandPromptWindow = true;
+                driver = new EdgeDriver(service, options);
             }
             catch
             {

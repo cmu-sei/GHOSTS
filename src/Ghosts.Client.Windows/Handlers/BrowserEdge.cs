@@ -292,9 +292,13 @@ namespace Ghosts.Client.Handlers
             options.AddArguments("--safebrowsing-disable-download-protection");
             options.AddArguments("--safebrowsing-disable-extension-blacklist");
 
-            var service = EdgeDriverService.CreateDefaultService(AppDomain.CurrentDomain.BaseDirectory);
+            // Prefer a driver next to ghosts.exe; otherwise Selenium Manager finds one (PATH, cache, or download)
+            var driverDir = AppDomain.CurrentDomain.BaseDirectory;
+            var service = File.Exists(Path.Combine(driverDir, "msedgedriver.exe"))
+                ? EdgeDriverService.CreateDefaultService(driverDir)
+                : EdgeDriverService.CreateDefaultService();
             service.HideCommandPromptWindow = true;
-            var driver = new EdgeDriver(options);
+            var driver = new EdgeDriver(service, options);
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
             return driver;
         }

@@ -138,10 +138,11 @@ GHOSTS clients simulate realistic user activity on target machines. Install one 
 
 Run clients as a **regular user account**, not as administrator or root, to produce realistic behavior and avoid permission issues with browser drivers.
 
-For browser automation, place the appropriate WebDriver binary in the same directory as the GHOSTS client binary:
+For browser automation, GHOSTS uses the WebDriver in the same directory as the GHOSTS client binary, falling back to `PATH` (or a download, if the host is online). Geckodriver is included; for Chrome or Edge, supply a driver that matches the installed browser version:
 
 - **Firefox**: [Geckodriver](https://github.com/mozilla/geckodriver/releases)
 - **Chrome/Chromium**: [ChromeDriver](https://chromedriver.chromium.org/downloads)
+- **Edge**: [msedgedriver](https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/)
 
 ### :material-microsoft-windows: Windows Client
 

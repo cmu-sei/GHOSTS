@@ -298,7 +298,11 @@ namespace Ghosts.Client.Handlers
                 options.AddArguments($"--load-extension={Program.Configuration.ChromeExtensions}");
             }
             
-            var service = ChromeDriverService.CreateDefaultService(AppDomain.CurrentDomain.BaseDirectory);
+            // Prefer a driver next to ghosts.exe; otherwise Selenium Manager finds one (PATH, cache, or download)
+            var driverDir = AppDomain.CurrentDomain.BaseDirectory;
+            var service = File.Exists(Path.Combine(driverDir, "chromedriver.exe"))
+                ? ChromeDriverService.CreateDefaultService(driverDir)
+                : ChromeDriverService.CreateDefaultService();
             service.HideCommandPromptWindow = true;
             var driver = new ChromeDriver(service, options);
 
