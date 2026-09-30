@@ -227,9 +227,9 @@ being told is better than being imported wrong — and because no document of th
 
 ## Open questions for the GHOSTS team
 
-1. **Where does the schema live in the repository?** This folder is written to land as
-   `schemas/scenario-document/` at the repository root, because the API (validator, Step 3), the RPG
-   (Python), and an authoring agent all read it. `src/Ghosts.Api/` would tie it to one consumer.
+1. **Where does the schema live in the repository?** **Answered 2026-09-30:** it stays at
+   `schemas/scenario-document/` at the repository root, where the API, the RPG and an authoring agent
+   can all read it.
 2. **Entity and edge types.** The API comments list a vocabulary but the column is a free string, and
    the fixtures already use `Resource`, `Defends`, `Enables` and `PlansFor`, which are not in the
    list. The schema keeps the string free and lists the recommended vocabulary. Should v1 close it?
@@ -274,32 +274,19 @@ being told is better than being imported wrong — and because no document of th
    exempts that one pair from its uniqueness check. An explicit `entityRef` on the adversary would
    say it out loud. Which does the team want?
 
-9. **The compile path drops the timeline.** A dry run of `phishing-drill` loads 8 timeline events and
-   1 inject and then compiles to 0 timeline events and 0 injects (`meridian-hybrid`: 2 events in, 0
-   out). Either compilation is expected to ignore the authored timeline, or something in it does not
-   survive `ScenarioCompilerService`. This was found by tier 4 and not investigated.
+9. **The compile path drops the timeline.** **Answered 2026-09-30:** not a defect — an execution
+   snapshots the timeline, while `ScenarioCompilerService` adapts an environment during a scenario, so
+   tier 4 no longer compiles anything.
 
 10. **Who keeps the ATT&CK index current?** `corpus/attack-index.json` and, since this cleanup pass,
     `corpus/attack-groups.json` name the `mitre-attack/attack-stix-data` commit they were built from.
     Both are committed artefacts with no refresh job, so a technique or a group revoked after that
     commit still validates. How often, and by what, should they be rebuilt?
 
-11. **A round trip can turn a valid document into an invalid one.** Prose anywhere may cite a
-    reference as `[ref:<id>]`, and tier 2 errors (`REF_UNKNOWN_REFERENCE`) when the citation names an
-    id the `references[]` list does not declare. But `references[]` has no column, so an import keeps
-    the prose and drops the list, and the export then cites a reference that is not there. Step 4's
-    agent run hit this: a document with one cited reference imported clean and its export failed tier
-    2 with one error. `roundtrip.sh` reports it as a failed `import` check on that scenario, and none
-    of the four examples cites a reference, which is why nothing saw it before — its `valid` check is
-    tier 1 only, so only the re-import catches it. Three ways out — give citations a column, have the
-    export strip a citation it cannot support, or have the validator downgrade the finding when the
-    document declares no references at all — and only the first keeps the citation. Which?
+11. **A round trip can turn a valid document into an invalid one.** **Answered 2026-09-30:** closed by
+    `scenario_documents` — `references[]` live in the stored document, so the export of a document that
+    cites one is valid again; a derived export still drops the list.
 
-12. **Do `population.pools` or `Person` entities generate NPCs?** The schema documents pools as the
-    simulated population GHOSTS animates, and `ELICITATION.md` calls the field the NPC binding, but
-    `ScenarioCompilerService` generates one NPC per `Person` entity and ignores pool counts entirely:
-    `phishing-drill` compiles to 1 NPC from its single `Person` entity while declaring pools of 12 and
-    1, and `operation-overlord` declares five pools and compiles to 0. Step 4's agent run tripped
-    `DRYRUN_NO_NPCS` on a document with three populated pools. Either pools should drive generation, or
-    they are a sizing note and a document needs a `Person` entity per NPC — which does not scale to a
-    twelve-clerk pool. Related to question 9: both are places the compile path ignores authored content.
+12. **Do `population.pools` or `Person` entities generate NPCs?** **Answered 2026-09-30:** the pools —
+    an execution generates NPCs per pool and tier 4 now does the same, so a document needs no `Person`
+    entity to be populated.

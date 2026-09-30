@@ -21,6 +21,9 @@ Each entry in ELICITATION.md gives the question in the developer's words, the do
 fills, why no default is defensible, and **whether you may propose an answer or must ask**. Honour that
 last field: where it says *must ask*, a proposal is not a substitute, even a well-reasoned one.
 
+When E3's answer is a real-world adversary, its identity is a lookup, not recall: **call
+`attack_group_lookup`** for the group id, name and aliases, the same rule that governs technique ids.
+
 ## How to ask
 
 - **Only what the intent leaves open.** An intent that says "a nine-person utility SOC, first rotation"
@@ -59,5 +62,6 @@ Everything not among the fourteen you **propose with one sentence of reasoning, 
 accept in a word**. ELICITATION.md's closing section lists what that covers — the slug and name,
 `context.situation`, event titles and descriptions and indicators, the entity graph,
 `startingConditions`, the information environment, performance metrics, workflows, sources — and the
-three things that are deliberately never questions: ATT&CK ids (look them up), clock arithmetic (compute
-it), and anything the API discards (proposing it costs nothing; asking wastes one of fourteen).
+three things that are deliberately never questions: ATT&CK ids (look them up — `attack_technique_lookup`
+for techniques, `attack_group_lookup` for the adversary's identity), clock arithmetic (compute it), and
+anything the API discards (proposing it costs nothing; asking wastes one of fourteen).

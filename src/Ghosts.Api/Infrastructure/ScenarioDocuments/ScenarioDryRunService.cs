@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
+using Ghosts.Animator;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Services;
@@ -19,16 +20,20 @@ public interface IScenarioDryRunService
 }
 
 /// <summary>
-/// Tier 4: would this document actually load? The only way to know is to load it, so the document is
-/// mapped, created and compiled inside a transaction that is rolled back whatever happens. Nothing
-/// survives — the scenario count is the same before and after — and every exception on the way becomes
-/// a finding instead of a stack trace. This is the cheap half of tier 4; tier 5, checking a deployed
-/// exercise against its document, is not built.
+/// Tier 4: would this document actually load, and would it put anyone in the exercise? The only way to
+/// know is to do it, so the document is mapped, created and its population generated inside a
+/// transaction that is rolled back whatever happens. Nothing survives — the scenario and NPC counts are
+/// the same before and after — and every exception on the way becomes a finding instead of a stack
+/// trace. This is the cheap half of tier 4; tier 5, checking a deployed exercise against its document,
+/// is not built.
+///
+/// It does not compile the scenario. ScenarioCompilerService adapts an environment during a scenario,
+/// which is a different question from whether an authored document is ready; the document's population
+/// is population.pools, and those are what an execution generates NPCs from.
 /// </summary>
 public class ScenarioDryRunService(
     ApplicationDbContext context,
-    IScenarioService scenarios,
-    IScenarioCompilerService compiler) : IScenarioDryRunService
+    IScenarioService scenarios) : IScenarioDryRunService
 {
     private const int Tier = 4;
 
@@ -55,7 +60,7 @@ public class ScenarioDryRunService(
                 $"{scratch.ScenarioTimeline?.ScenarioTimelineEvents?.Count ?? 0} timeline event(s), " +
                 $"{scratch.ScenarioParameters?.Injects?.Count ?? 0} inject(s)."));
 
-            await CompileAndReport(findings, scratch, ct);
+            await GeneratePopulationAndReport(findings, scratch, ct);
             return findings;
         }
         finally
@@ -68,48 +73,82 @@ public class ScenarioDryRunService(
         }
     }
 
-    private async Task CompileAndReport(List<ScenarioFinding> findings, Scenario scratch, CancellationToken ct)
+    /// <summary>
+    /// The population, generated pool by pool exactly as ExecutionService does when an execution is
+    /// created — same generator, same grouping by campaign and pool role — and then rolled back with
+    /// everything else. A count that the generator produces is worth more than a count read off the
+    /// document, because it is the one the exercise will actually get.
+    /// </summary>
+    private async Task GeneratePopulationAndReport(List<ScenarioFinding> findings, Scenario scratch, CancellationToken ct)
     {
-        ScenarioCompilation compilation;
-        try
+        var pools = scratch.ScenarioParameters?.UserPools?.ToList() ?? [];
+        if (pools.Count == 0)
         {
-            compilation = await compiler.CompileAsync(
-                scratch.Id, new CompileScenarioDto($"dry-run {scratch.Name}"), ct);
-        }
-        catch (Exception ex)
-        {
-            // The compile path needs no content or LLM service, so a failure here is the document's,
-            // not a missing dependency's — but it is still only a warning: an import does not compile.
-            findings.Add(ScenarioFinding.Warn(Tier, "DRYRUN_COMPILE_FAILED", string.Empty,
-                $"The document loads but does not compile: {ex.Message}", ex.GetType().Name));
+            findings.Add(ScenarioFinding.Warn(Tier, "DRYRUN_NPCS", "/population/pools",
+                "The document declares no population pools, so an execution generates nobody and there is no one to animate.",
+                "Give population.pools a role and a count."));
             return;
         }
 
-        if (!string.Equals(compilation.Status, "Completed", StringComparison.Ordinal))
+        var total = 0;
+        for (var i = 0; i < pools.Count; i++)
         {
-            findings.Add(ScenarioFinding.Warn(Tier, "DRYRUN_COMPILE_INCOMPLETE", string.Empty,
-                $"Compilation ended as \"{compilation.Status}\": {compilation.ErrorMessage ?? "no reason given"}."));
+            var pool = pools[i];
+            var path = $"/population/pools/{i}";
+
+            if (pool.Count < 1)
+            {
+                findings.Add(ScenarioFinding.Warn(Tier, "DRYRUN_NPCS", path,
+                    $"Pool \"{pool.Role}\" has a count of {pool.Count}, so it generates nobody."));
+                continue;
+            }
+
+            int created;
+            try
+            {
+                created = await GeneratePoolAsync(scratch, pool, ct);
+            }
+            catch (Exception ex)
+            {
+                findings.Add(ScenarioFinding.Note(Tier, "DRYRUN_POPULATION_SKIPPED", path,
+                    $"The population was not generated, so these counts are the document's rather than the generator's: {ex.Message}",
+                    ex.GetType().Name));
+                return;
+            }
+
+            total += created;
+            findings.Add(ScenarioFinding.Note(Tier, "DRYRUN_NPCS", path,
+                $"Pool \"{pool.Role}\" generates {created} of {pool.Count} NPC(s)."));
         }
 
-        findings.Add(ScenarioFinding.Note(Tier, "DRYRUN_COMPILED", string.Empty,
-            $"Compiles to {compilation.NpcCount} NPC(s), {compilation.TimelineEventCount} timeline event(s), " +
-            $"{compilation.InjectCount} inject(s)."));
-
-        // Readiness, as GET compilations/{id}/readiness computes it. The unassigned-NPC count is
-        // always the full count here: assigning NPCs to machines is a later, deliberate step, so it
-        // is reported as a fact about the compile and not as a defect in the document.
-        var npcs = await context.ScenarioEntities
-            .CountAsync(e => e.ScenarioId == scratch.Id && e.EntityType == "Person" && e.NpcId != null, ct);
-        if (npcs == 0)
-        {
-            findings.Add(ScenarioFinding.Warn(Tier, "DRYRUN_NO_NPCS", "/population/pools",
-                "Compiling this document generates no NPCs, so there is nobody to animate.",
-                "Give population.pools a role and a count, or add Person entities."));
-        }
-        else
+        if (total > 0)
         {
             findings.Add(ScenarioFinding.Note(Tier, "DRYRUN_READINESS", string.Empty,
-                $"{npcs} NPC(s) would need machines assigned before deployment."));
+                $"{total} NPC(s) across {pools.Count(p => p.Count > 0)} pool(s) would need machines assigned before deployment."));
         }
+    }
+
+    /// <summary>
+    /// One pool's NPCs, as GenerateUserPoolNpcsAsync makes them, minus the execution: a dry run has no
+    /// run to scope them to, and cohort linking says nothing about whether the pool generates.
+    /// </summary>
+    private async Task<int> GeneratePoolAsync(Scenario scratch, UserPool pool, CancellationToken ct)
+    {
+        var created = 0;
+        for (var i = 0; i < pool.Count; i++)
+        {
+            var npc = NpcRecord.TransformToNpc(Npc.Generate(MilitaryUnits.GetServiceBranch()));
+            npc.Id = npc.NpcProfile.Id;
+            npc.CreatedUtc = DateTime.UtcNow;
+            npc.ScenarioId = scratch.Id;
+            npc.Campaign = scratch.Name;
+            npc.Team = pool.Role;
+
+            context.Npcs.Add(npc);
+            created++;
+        }
+
+        await context.SaveChangesAsync(ct);
+        return created;
     }
 }

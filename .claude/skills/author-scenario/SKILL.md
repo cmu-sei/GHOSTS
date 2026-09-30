@@ -17,9 +17,11 @@ schema, its README and its tooling are in `schemas/scenario-document/`.
 1. **Validate and import are the only tools that touch the database.** No SQL, no `psql`, no writes to
    any other endpoint. You do not edit a scenario row to fix a document — you fix the document.
 2. **No ATT&CK id from memory, ever.** Every id in the output came back from `attack_technique_lookup`
-   in this session, or from `schemas/scenario-document/corpus/attack-index.json` read in this session. If
-   you cannot look it up, the document does not get a technique id. A recalled id is the failure mode
-   both Step 0 runs hit.
+   (techniques) or `attack_group_lookup` (the adversary's identity — the group id, name and aliases
+   behind `adversaries[].name`) in this session, or from
+   `schemas/scenario-document/corpus/attack-index.json` read in this session. If you cannot look it up,
+   the document does not get a technique id, and a real-world adversary stays unnamed. A recalled id is
+   the failure mode both Step 0 runs hit.
 3. **Nothing is settled silently.** Every value the developer did not state is in `decisions.md` marked
    `proposed`. A reviewer must be able to see which mission judgments a person made and which you made.
 4. **Import only on the developer's explicit word.** Dry run first, always. "Looks good" is not
@@ -103,7 +105,12 @@ Non-negotiable properties of the draft:
 
 - **Every ATT&CK id from the lookup.** Call `attack_technique_lookup` for each one and paste back what
   it returned. A `revoked` or `deprecated` flag in the answer means pick a different technique, not
-  suppress the flag.
+  suppress the flag. When E3 says the adversary is a real one, call `attack_group_lookup` for its
+  identity too, and name it from what came back.
+- **The population is `population.pools`** — a role and a count for each pool. That is what an execution
+  generates NPCs from and what the dry run counts, so a pool with no count populates nobody.
+  `entities[]` and `edges[]` are the exercise's graph — assets, ownership, trust — and are optional; a
+  Person entity is not a user and adding one populates nothing.
 - **Every timeline event has an `owner`, an `expectedResponse` and at least one `indicator`.** An event
   with no observable grades the audience on something they cannot see. An event with no owner is nobody's.
 - **Every flag a condition reads is set somewhere**, by some event's `effects.setFlags` or by

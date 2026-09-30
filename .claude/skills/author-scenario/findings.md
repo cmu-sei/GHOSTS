@@ -66,7 +66,6 @@ observe. Apply this rule before a classifier ever has to; do not wait for one to
 | `DRYRUN_LOAD_FAILED` | 4 | error | The document is valid but the loader could not build it. The message names the field. |
 | `REF_UNKNOWN_HOST` (warning, at `/timeline/events/*/description`) | 2 | warning | An event's prose names a host the terrain does not declare. Either declare it or fix the prose — prose that names non-existent hosts is how a plan and a document drift apart. |
 | `FLAG_NEVER_READ` | 2 | warning | A flag is set and nothing reads it: usually a branch you meant to write, or a leftover. Write the condition or remove the flag. |
-| `DRYRUN_COMPILE_FAILED`, `DRYRUN_COMPILE_INCOMPLETE` | 4 | warning | The timeline did not compile to handlers, or compiled partly. Fix what the message names. |
 
 ### Judgment — escalate with the question
 
@@ -76,7 +75,7 @@ observe. Apply this rule before a classifier ever has to; do not wait for one to
 | `TIME_OUTSIDE_DURATION` | 2 | error | Mechanical when you mis-converted a date. **Judgment when both numbers are intentional** — an inject scheduled after the exercise ends is either a wrong inject time or a wrong duration, and which one gives way is E1 or B3. Ask; do not pick the cheaper edit. |
 | `ATTACK_DEPRECATED_TECHNIQUE` | 2 | warning | MITRE deprecated it without a replacement. **Ask D2**: is the deprecated technique the point (this adversary really does the old thing), or should the adversary press differently? |
 | `REF_UNSET_FLAG` | 2 | warning | A condition reads a flag nothing sets, so the branch is false until something outside the document raises it. **Either a typo (mechanical) or an adjudicated outcome (judgment)** — if a white cell raises it, that is B3, and it belongs in `decisions.md` as adjudicated, with who adjudicates named. Never silence it by adding a `setFlags` you invented; that quietly removes a human from the exercise. |
-| `DRYRUN_NO_NPCS` | 4 | warning | The document populates no NPCs, so nothing will act. **Ask A3**: who is simulated and who is played? |
+| `DRYRUN_NPCS` (warning) | 4 | warning | `population.pools` is empty, or a pool has a count of zero, so the dry run's generator made nobody for it and nothing will act there. **Ask A3**: who is simulated and who is played? Entities and edges are the graph, not the population — adding a Person entity does not give the exercise a user. |
 | `TERRAIN_UNSTRUCTURED` | 2 | info | Terrain is prose, not hosts and segments, so nothing downstream can check it. **Ask E2** for the slice and what this exercise adds, then structure it. This is an info finding you should almost never accept. |
 | `TIME_NO_DURATION` | 2 | info | No duration declared, so no offset can be checked. **Ask E1.** |
 
@@ -84,7 +83,8 @@ observe. Apply this rule before a classifier ever has to; do not wait for one to
 
 | Code | Tier | Severity | Why it is often fine |
 |---|---|---|---|
-| `DRYRUN_LOADED`, `DRYRUN_COMPILED`, `DRYRUN_READINESS` | 4 | info | The dry run's own report: what loaded, what compiled, how ready the scenario is. Quote the readiness note to the developer; it is the closest thing to "this will actually run". |
+| `DRYRUN_LOADED`, `DRYRUN_NPCS` (info), `DRYRUN_READINESS` | 4 | info | The dry run's own report: what loaded, how many NPCs each pool generated, how ready the scenario is. The pool counts come from running the generator, so they are the counts the exercise will actually get. Quote the readiness note to the developer; it is the closest thing to "this will actually run". |
+| `DRYRUN_POPULATION_SKIPPED` | 4 | info | The generator could not run, so the pool counts are the document's own rather than measured. The document is not at fault; note it and say the population is unverified. |
 | `WORKFLOW_NOT_REGISTERED` | 2 | warning | A workflow the document names is not in n8n *yet*. Fine while authoring, not fine before running. Say which ones. |
 | `WORKFLOW_CHECK_SKIPPED` | 2 | info | n8n was not reachable, so workflow refs went unchecked. Note it; it is not a defect in the document. |
 
