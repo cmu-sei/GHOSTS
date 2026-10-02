@@ -88,20 +88,6 @@ public class PowerPointHandler : BaseHandler
                     Log.Trace($"PowerPoint event - {timelineEvent}");
                     WorkingHours.Is(handler);
 
-                    if (timelineEvent.DelayBeforeActual > 0)
-                    {
-                        if (jitterFactor > 0)
-                        {
-                            Log.Trace($"DelayBefore, Sleeping with jitterfactor of {jitterFactor}% {timelineEvent.DelayBeforeActual}");
-                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayBeforeActual, jitterFactor));
-                        }
-                        else
-                        {
-                            Log.Trace($"DelayBefore, Sleeping {timelineEvent.DelayBeforeActual}");
-                            Thread.Sleep(timelineEvent.DelayBeforeActual);
-                        }
-                    }
-
                     if (timeline != null)
                     {
                         var processIds = ProcessManager.GetPids(ProcessManager.ProcessNames.PowerPoint).Count();
@@ -117,6 +103,19 @@ public class PowerPointHandler : BaseHandler
                                Visible = MsoTriState.msoTrue
                            })
                     {
+                        if (timelineEvent.DelayBeforeActual > 0)
+                        {
+                            if (jitterFactor > 0)
+                            {
+                                Log.Trace($"DelayBefore, Sleeping with jitterfactor of {jitterFactor}% {timelineEvent.DelayBeforeActual}");
+                                Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayBeforeActual, jitterFactor));
+                            }
+                            else
+                            {
+                                Log.Trace($"DelayBefore, Sleeping {timelineEvent.DelayBeforeActual}");
+                                Thread.Sleep(timelineEvent.DelayBeforeActual);
+                            }
+                        }
 
                         try
                         {

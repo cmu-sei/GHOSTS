@@ -90,19 +90,7 @@ public class WordHandler : BaseHandler
                     Log.Trace($"Word event - {timelineEvent}");
                     WorkingHours.Is(handler);
 
-                    if (timelineEvent.DelayBeforeActual > 0)
-                    {
-                        if (jitterFactor > 0)
-                        {
-                            Log.Trace($"DelayBefore, Sleeping with jitterfactor of {jitterFactor}% {timelineEvent.DelayBeforeActual}");
-                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayBeforeActual, jitterFactor));
-                        }
-                        else
-                        {
-                            Log.Trace($"DelayBefore, Sleeping {timelineEvent.DelayBeforeActual}");
-                            Thread.Sleep(timelineEvent.DelayBeforeActual);
-                        }
-                    }
+                    
 
                     if (timeline != null)
                     {
@@ -120,6 +108,19 @@ public class WordHandler : BaseHandler
                                Visible = true
                            })
                     {
+                        if (timelineEvent.DelayBeforeActual > 0)
+                        {
+                            if (jitterFactor > 0)
+                            {
+                                Log.Trace($"DelayBefore, Sleeping with jitterfactor of {jitterFactor}% {timelineEvent.DelayBeforeActual}");
+                                Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayBeforeActual, jitterFactor));
+                            }
+                            else
+                            {
+                                Log.Trace($"DelayBefore, Sleeping {timelineEvent.DelayBeforeActual}");
+                                Thread.Sleep(timelineEvent.DelayBeforeActual);
+                            }
+                        }
                         Word.Document document = null;
                         if (OfficeHelpers.ShouldOpenExisting(handler))
                         {
