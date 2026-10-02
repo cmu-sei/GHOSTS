@@ -87,20 +87,6 @@ public class ExcelHandler : BaseHandler
                     Log.Trace($"Excel event - {timelineEvent}");
                     WorkingHours.Is(handler);
 
-                    if (timelineEvent.DelayBeforeActual > 0)
-                    {
-                        if (jitterFactor > 0)
-                        {
-                            Log.Trace($"DelayBefore, Sleeping with jitterfactor of {jitterFactor}% {timelineEvent.DelayBeforeActual}");
-                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayBeforeActual, jitterFactor));
-                        }
-                        else
-                        {
-                            Log.Trace($"DelayBefore, Sleeping {timelineEvent.DelayBeforeActual}");
-                            Thread.Sleep(timelineEvent.DelayBeforeActual);
-                        }
-                    }
-
                     if (timeline != null)
                     {
                         var processIds = ProcessManager.GetPids(ProcessManager.ProcessNames.Excel).ToList();
@@ -117,6 +103,19 @@ public class ExcelHandler : BaseHandler
                                Visible = true
                            })
                     {
+                         if (timelineEvent.DelayBeforeActual > 0)
+                        {
+                            if (jitterFactor > 0)
+                            {
+                                Log.Trace($"DelayBefore, Sleeping with jitterfactor of {jitterFactor}% {timelineEvent.DelayBeforeActual}");
+                                Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayBeforeActual, jitterFactor));
+                            }
+                            else
+                            {
+                                Log.Trace($"DelayBefore, Sleeping {timelineEvent.DelayBeforeActual}");
+                                Thread.Sleep(timelineEvent.DelayBeforeActual);
+                            }
+                        }
                         Excel.Workbook document = null;
                         if (OfficeHelpers.ShouldOpenExisting(handler))
                         {
