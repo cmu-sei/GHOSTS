@@ -8,6 +8,8 @@ using Ghosts.Client.Universal.Infrastructure;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using NLog;
+using NLog.Targets;
+using NPOI.OpenXmlFormats.Spreadsheet;
 using OpenQA.Selenium;
 using Actions = OpenQA.Selenium.Interactions.Actions;
 using Exception = System.Exception;
@@ -29,49 +31,262 @@ public class SocialHelperV1 : SocialHelper
     }
 
 
+    private bool IsSupportedTheme(string aTheme)
+    {
+        
+        bool isSupported = Array.Exists(supportedThemes, element => element == aTheme);
+        return isSupported;
+    }
+
+    private void GetTopicDirectories(string aTheme)
+    {
+        if (contentDirectory != null)
+        {
+            var themeDirectory = Path.Combine(contentDirectory, aTheme);
+            // create list of valid topic dirs
+            topicDirs = new List<string>();
+            var dirlist =
+                Directory.GetDirectories(themeDirectory, "*", SearchOption.TopDirectoryOnly);
+            if (dirlist.Length > 0)
+            {
+                //get the base directory
+                foreach (var dir in dirlist)
+                {
+                    if (topics == null)
+                    {
+                        topicDirs.Add(dir);
+                    }
+                    else
+                    {
+                        var f = Path.GetFileName(dir);
+                        if (topics.Contains(f, StringComparison.CurrentCultureIgnoreCase))
+                        {
+                            topicDirs.Add(dir);
+                        }
+                    }
+                }
+
+                if (topicDirs.Count == 0 && topics != null)
+                {
+                    // No match to specified topics, add all available
+                    foreach (var dir in dirlist)
+                    {
+                        topicDirs.Add(dir);
+                    }
+                }
+            }
+        }
+    }
+
     public override bool DoInitialLogin(TimelineHandler handler)
     {
-        postCount = 0; //reset post count
-
+        
         if (!GotoHomeSite(handler))
         {
             return false;
         }
 
+        if (siteToTheme != null && siteToTheme.ContainsKey(site))
+        {
+            // already discovered the theme
+            theme = siteToTheme[site];  
+            return true;
+        }
+
         // try to find an element on the page
-        var foundSocializer = false;
+        theme = null;
+        
+        // Try looking for PandoraV9 theme other than default
+        string themeValue = null;
         try
         {
-            var targetElement = Driver.FindElement(By.XPath("//img[@title='SOCIALIZER']"));
-            foundSocializer = true;
+            
+            var targetElement = Driver.FindElement(By.XPath("//head//child::link[@rel='stylesheet']"));
+            themeValue = targetElement.GetAttribute("href");
+            string[] words = themeValue.Split('/');
+            if (words.Length > 3)
+            {
+                // check if supported theme
+                themeValue = words[words.Length-3];
+                if (IsSupportedTheme(themeValue)) {
+                    theme = themeValue;
+                }
+            }
         }
-        
         catch (System.Exception e)
         {
             if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
             {
                  throw; //pass up
             }
-            Log.Trace(
-                $"Social:: Unable to do initial login for site {site}, url may be malformed. Social browser action will not be executed.");
-            Log.Error(e);
-            return false;
+            
         }
 
-        return foundSocializer;
+        if (theme == null)
+        {
+            try {
+                // try another way to get the theme for Pandora V9
+                var targetElement = Driver.FindElement(By.XPath("//body[@data-theme]"));
+                themeValue = targetElement.GetAttribute("data-theme");
+                if (IsSupportedTheme(themeValue)) {
+                    theme = themeValue;
+                }
+            }
+            catch (System.Exception e)
+            {
+                if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                {
+                    throw; //pass up
+                }
+                
+            }
+        }
+        if (theme == null)
+        {
+            // Check for Pandora V9 default theme
+            try
+            {
+                var targetElement = Driver.FindElement(By.XPath("//img[@title='PANDORA']"));
+                theme = "default";
+            }
+            catch (System.Exception e)
+            {
+                if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                {
+                    throw; //pass up
+                }
+                
+            }
+
+        }
+        if (theme == null) 
+        {
+            // Check for old Socializer 
+            try
+            {
+                var targetElement = Driver.FindElement(By.XPath("//img[@title='SOCIALIZER']"));
+                theme = "default";
+            }
+            catch (System.Exception e)
+            {
+                if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                {
+                    throw; //pass up
+                }
+                
+            }
+
+        }
+        if (theme == null) 
+        {
+            // Check if we have a web error or some kind
+            try
+            {
+                var targetElement = Driver.FindElement(By.XPath("//head//child::title"));
+                if (targetElement.Text.Contains("temporarily unavailable", StringComparison.OrdinalIgnoreCase))
+                {
+                    // web error. Leave theme as null, return true, and try again later
+                    Log.Trace(
+                        $"Social: Web error -- Site {site} is temporarily unavailable, trying again later.");
+                    return true;
+                }
+
+            }
+
+            catch (System.Exception e)
+            {
+                if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                {
+                    throw; //pass up
+                }
+                if (themeValue == null) {
+                    Log.Trace(
+                        $"Social:: Unable to verify that site {site} is a Pandora/Socializer site, url may be malformed. Social browser action will not be executed.");
+                    Log.Error(e);
+                } else if (theme == null)
+                {
+                    Log.Trace(
+                        $"Social:: Unable to verify that site {site} is has a supported Pandora/Socializer theme site, url may be malformed. Social browser action will not be executed.");
+                    Log.Error(e);
+                }
+                return false;
+            }
+
+        }
+
+        if (theme != null)
+        {
+            if (siteToTheme == null)
+            {
+                siteToTheme = new Dictionary<string, string>();
+            }
+            if (!siteToTheme.ContainsKey(site))
+            {
+                siteToTheme.Add(site,theme);
+            }
+            if (themeToPostcount == null)
+            {
+               themeToPostcount = new Dictionary<string, int>();
+            }
+            if (!themeToPostcount.ContainsKey(theme))
+            {
+                themeToPostcount.Add(theme,0);
+            }
+            GetTopicDirectories(theme);
+        }
+
+        return theme != null;
+    }
+
+    public string GetThemeAction(string aTheme, string action)
+    {
+        if (theme == null) return null;
+        if (!xPathByTheme.ContainsKey(aTheme)) return null;
+        var themeDictionary = xPathByTheme[aTheme];
+        if (!themeDictionary.ContainsKey(action)) return null;
+        return themeDictionary[action];
+    }
+
+    public string findUserName()
+    {
+        //var targetElement = Driver.FindElement(By.XPath(
+        //    "//ul[contains(@class,'w-friend-pages-added notification-list')]//child::div[contains(@class,'notification-event')]//child::a[contains(@class,'notification-friend')]"));
+        string targetXpath = GetThemeAction(theme, "Username");
+        IWebElement targetElement;
+        if (targetXpath != null) {
+            targetElement = Driver.FindElement(By.XPath(targetXpath));
+            if (theme == "default") {
+                var name = targetElement.Text;
+                return name;
+            } else if (theme == "facebook" || theme == "instagram")
+            {
+                var src = targetElement.GetAttribute("src");
+                string[] words = src.Split('/');
+                if (words.Length > 2) return words[words.Length-2];
+            } else if (theme == "linkedin" || theme == "reddit")
+            {
+                return targetElement.Text;
+            } else if (theme == "x")
+            {
+                var src = targetElement.GetAttribute("src");
+                string[] words = src.Split('/');
+                if (words.Length > 2) return words[words.Length-1];
+            }
+        }
+        Log.Trace($"Social:: Unable to find user name to use for post, using default name.");
+        return "Dr.Mysterious"; // always return a name
     }
 
 
     public override bool DoBrowse(TimelineHandler handler)
     {
-        // browse to the first friend suggestion in the friend feed
-        // var targetElement =  Driver.FindElement(By.XPath("//ul[contains(@class,'w-friend-pages-added notification-list')]//child::div[contains(@class,'notification-event')]//child::a[contains(@class,'notification-friend')]"));
         // browse to the first person of first post in feed
-        var targetElement =
-            Driver.FindElement(
-                By.XPath("//div[contains(@class,'author-date')]//child::a[contains(@class,'post__author-name')]"));
-        if (targetElement != null)
-        {
+        //var targetElement = 
+        //    Driver.FindElement(
+        //        By.XPath("//div[contains(@class,'author-date')]//child::a[contains(@class,'post__author-name')]"));
+        var targetXpath = GetThemeAction(theme, "Browse");
+        if (targetXpath != null) {
+            var targetElement = Driver.FindElement(By.XPath(targetXpath));
             BrowserHelperSupport.ElementClick(Driver, targetElement);
             if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
             Log.Trace($"Social:: Successfully browsed post on site {site}.");
@@ -83,12 +298,34 @@ public class SocialHelperV1 : SocialHelper
     public override bool DoLike(TimelineHandler handler)
     {
         // just like the first post in the feed
-        var targetElement = Driver.FindElement(By.XPath("//a[contains(@class,'btn btn-control like-it')]"));
-        if (targetElement != null)
+        // always scroll to the element as it may off the viewport
+        // this relies on the fact that before the next action the page
+        // will be reset to the top
+        try
         {
-            BrowserHelperSupport.ElementClick(Driver, targetElement);
-            if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
-            Log.Trace($"Social:: Successfully liked post on site {site}.");
+            // this is hacky -- element may be out of view, scroll to it
+            var targetXpath = GetThemeAction(theme, "Like");
+            var targetElement = Driver.FindElement(By.XPath(targetXpath));
+            if (targetElement != null)
+            {
+                // this uses Javascript for compatibility with older Selenium
+                IJavaScriptExecutor js = (IJavaScriptExecutor)Driver;
+                js.ExecuteScript("arguments[0].scrollIntoView(true);", targetElement);
+                if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
+                targetElement = Driver.FindElement(By.XPath(targetXpath));
+                BrowserHelperSupport.ElementClick(Driver, targetElement);
+                if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
+                Log.Trace($"Social:: Successfully liked post on site {site}.");
+            }
+            
+        }
+        catch (System.Exception e)
+        {
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+            {
+                throw; //pass up
+            }
+            // ignore others as there may not be a post to like yet
         }
 
         return true;
@@ -101,15 +338,48 @@ public class SocialHelperV1 : SocialHelper
         if (postDirectory == null) return false;
 
         var postFileList = Directory.GetFiles(postDirectory, "post.txt");
+        string useEnterKey = GetThemeAction(theme,"__USE_ENTER_KEY__");
         if (postFileList.Length > 0)
         {
             // get the file content
             var postContent = File.ReadAllText(postFileList[0]);
-            var targetElement =
-                Driver.FindElement(By.XPath(
-                    "//label[text()='Share what you are thinking here...']//following-sibling::textarea"));
-            targetElement.SendKeys(postContent);
-            if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
+            //var targetElement =
+            //    Driver.FindElement(By.XPath(
+            //        "//label[text()='Share what you are thinking here...']//following-sibling::textarea"));
+            string targetXpath = GetThemeAction(theme, "PostTextContent");
+            IWebElement targetElement;
+            if (targetXpath != null) {
+                targetElement = Driver.FindElement(By.XPath(targetXpath));
+                targetElement.Clear(); //clear before sending another one
+                
+                if (useEnterKey != null)
+                {
+                    targetElement.SendKeys(postContent + Keys.Enter);
+                    Log.Trace($"Social:: Successfully added post on site {site}.");
+                    themeToPostcount[theme] += 1;
+                } else {
+                    targetElement.SendKeys(postContent);
+                }
+                //targetElement.SendKeys(postContent.Substring(0, Math.Min(postContent.Length, 30)));
+                if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
+            }
+            targetXpath = GetThemeAction(theme, "PostTitle");
+            if (targetXpath != null) {
+                targetElement = Driver.FindElement(By.XPath(targetXpath));
+                targetElement.Clear(); //clear before sending another one
+                string title;
+                string[] words = postContent.Split('\n');
+                if (words.Length > 1)
+                {
+                    title = words[0];
+                } else
+                {
+                    title = "My very own post";
+                }
+                targetElement.SendKeys(title);
+                if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
+            }
+
             var targetName = "";
             if (userName != null) targetName = userName; //always use this if specified
             else
@@ -123,13 +393,19 @@ public class SocialHelperV1 : SocialHelper
             }
 
             // post target Name
-            targetElement =
-                Driver.FindElement(
-                    By.XPath("//label[text()='Share what you are thinking here...']//following-sibling::input"));
-            targetElement.Clear(); //clear the name before sending another one
-            targetElement.SendKeys(targetName);
-            if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
-            if (action == "postWimage")
+            //targetElement =
+            //    Driver.FindElement(
+            //        By.XPath("//label[text()='Share what you are thinking here...']//following-sibling::input"));
+            targetXpath = GetThemeAction(theme, "PostAuthorName");
+            if (targetXpath != null)
+            {
+                targetElement = Driver.FindElement(By.XPath(targetXpath));
+                targetElement.Clear(); //clear the name before sending another one
+                targetElement.SendKeys(targetName);
+                if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
+            }
+            targetXpath = GetThemeAction(theme, "PostImageFileInput");
+            if (action == "postWimage" && targetXpath != null)
             {
                 // get the image file
                 var imageFilesPng = Directory.GetFiles(postDirectory, "image*.png");
@@ -160,24 +436,23 @@ public class SocialHelperV1 : SocialHelper
                         imageFile = imageFilesPng[(_random.Next(0, imageFilesPng.Length))];
                     }
 
-                    // click the browse button
-                    targetElement = Driver.FindElement(By.XPath(
-                        "//label[text()='Share what you are thinking here...']//following-sibling::input[@type='file']"));
-                    if (targetElement != null)
-                    {
-                        targetElement.SendKeys(imageFile);
-                        if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
-                    }
+                    targetElement = Driver.FindElement(By.XPath(targetXpath));
+                    targetElement.SendKeys(imageFile);
+                    if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
+                    
                 }
             }
 
-
-            targetElement = Driver.FindElement(By.XPath("//button[@id='sendButton']"));
-            Actions actions = new Actions(Driver);
-            actions.MoveToElement(targetElement).Click().Perform();
-            if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
-            Log.Trace($"Social:: Successfully added post on site {site}.");
-            postCount += 1;
+            targetXpath = GetThemeAction(theme, "PostButton");
+            if (targetXpath != null && useEnterKey == null)
+            {
+                targetElement = Driver.FindElement(By.XPath(targetXpath));
+                Actions actions = new Actions(Driver);
+                actions.MoveToElement(targetElement).Click().Perform();
+                if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
+                Log.Trace($"Social:: Successfully added post on site {site}.");
+                themeToPostcount[theme] += 1;
+            }
         }
 
 
@@ -197,8 +472,18 @@ public abstract partial class SocialHelper : BrowserHelper
     public string userName { get; set; } = null;
     public string[] topicList { get; set; } = null;
 
-    public int postCount { get; set; } = 0;
+    public List<string> allSites = null;
 
+    public string theme { get; set; } = null;
+
+    public string[] supportedThemes = ["discord","facebook","instagram","linkedin","reddit","x"];
+
+    public Dictionary<string, Dictionary<string, string>> xPathByTheme = null;
+
+    public Dictionary<string, string> siteToTheme = null;
+
+    public Dictionary<string, int> themeToPostcount = null;
+    
     public System.Exception LastException;
 
     public List<string> topicDirs = null;
@@ -214,6 +499,8 @@ public abstract partial class SocialHelper : BrowserHelper
 
     public string version { get; set; } = null;
     public string contentDirectory { get; set; } = null;
+
+    public string topics { get; set; } = null;
 
     public string lastUserName { get; set; } = null;
 
@@ -235,20 +522,7 @@ public abstract partial class SocialHelper : BrowserHelper
         return;
     }
 
-    public string findUserName()
-    {
-        var targetElement = Driver.FindElement(By.XPath(
-            "//ul[contains(@class,'w-friend-pages-added notification-list')]//child::div[contains(@class,'notification-event')]//child::a[contains(@class,'notification-friend')]"));
-
-        if (targetElement != null)
-        {
-            var name = targetElement.Text;
-            return name;
-        }
-
-        Log.Trace($"Social:: Unable to find user name to use for post, using default name.");
-        return "Dr.Mysterious"; // always return a name
-    }
+    
 
 
     public static SocialHelper MakeHelper(BaseBrowserHandler callingHandler, IWebDriver callingDriver,
@@ -263,6 +537,69 @@ public abstract partial class SocialHelper : BrowserHelper
         return errorCount > errorThreshold;
     }
 
+    private void InitXpathByTheme()
+    {
+        xPathByTheme = new Dictionary<string, Dictionary<string, string>>
+        {
+            ["default"] = new Dictionary<string, string>
+            {
+                ["Browse"] = "//div[contains(@class,'author-date')]//child::a[contains(@class,'post__author-name')]",
+                ["Like"] = "//a[contains(@class,'btn btn-control like-it')]",
+                ["Username"] =  "//ul[contains(@class,'w-friend-pages-added notification-list')]//child::div[contains(@class,'notification-event')]//child::a[contains(@class,'notification-friend')]",
+                ["PostTextContent"] = "//label[text()='Share what you are thinking here...']//following-sibling::textarea",
+                ["PostAuthorName"] = "//label[text()='Share what you are thinking here...']//following-sibling::input",
+                ["PostImageFileInput"] = "//label[text()='Share what you are thinking here...']//following-sibling::input[@type='file']",
+                ["PostButton"] = "//button[@id='sendButton']"
+            },
+            
+            ["facebook"] = new Dictionary<string, string>
+            {
+                ["Browse"] = "//div[@class='post-user-name']//child::a[@href]",
+                ["PostTextContent"] = "//input[@class='create-post-input']",
+                ["Like"] = "//button[@class='post-action like-btn like-it']",
+                ["Username"] = "//div[@class='create-post-top']//child::img[@class='profile-pic']",
+                ["PostButton"] = "//button[@class='post-btn']"
+            },
+            ["linkedin"] = new Dictionary<string, string>
+            {
+                ["PostTextContent"] = "//textarea[@class='post-input']",
+                ["Like"] = "//button[@class='action-btn like-btn like-it']",
+                ["Username"] = "//div[@class='profile-details']//child::h3[@class='profile-name']",
+                ["PostButton"] = "//button[@class='post-btn']"
+            },
+            ["discord"] = new Dictionary<string, string>
+            {
+                ["__USE_ENTER_KEY__"] = "yes",
+                ["PostTextContent"] = "//input[@class='message-input']",
+                ["Like"] = "//button[@class='message-action like-it']",
+                ["PostButton"] = "//div[@class='input-actions']//child::button[@class='send-btn']"
+            },
+            ["instagram"] = new Dictionary<string, string>
+            {
+                ["PostTextContent"] = "//textarea[@class='post-input']",
+                ["Username"] = "//div[@class='post-composer']//child::img[@class='profile-pic']",
+                ["Like"] = "//div[@class='post-actions']//child::div[@class='action-buttons']//child::button[@class='action-btn like-btn like-it']",
+                ["PostButton"] = "//div[@class='post-composer']//child::button[@class='post-btn']"
+            },
+            ["reddit"] = new Dictionary<string, string>
+            {
+                ["PostTextContent"] = "//div[@class='post-composer']//child::textarea[@class='post-input']",
+                ["PostTitle"] = "//div[@class='post-composer']//child::input[@class='post-title']",
+                ["Username"] = "//div[@class='user-menu']//child::span[@class='username']",
+                ["Like"] = "//div[@class='post-actions']//child::button[@class='action-btn like-it']",
+                ["PostButton"] = "//div[@class='post-composer']//child::button[@class='post-btn']"
+            },
+            ["x"] = new Dictionary<string, string>
+            {
+                ["PostTextContent"] = "//div[@class='tweet-input-container']//child::textarea[@class='tweet-input']",
+                ["Username"] = "//div[@class='tweet-composer']//child::img[@class='tweet-avatar']",
+                ["Like"] = "//div[@class='tweet-actions']//child::button[@class='action-btn like-it']",
+                ["PostButton"] = "//div[@class='tweet-toolbar']//child::button[@class='tweet-btn']"
+            }
+        };
+
+    }
+
 
     public void Init(BaseBrowserHandler callingHandler, IWebDriver currentDriver, string aversion, CancellationToken atoken)
     {
@@ -271,6 +608,8 @@ public abstract partial class SocialHelper : BrowserHelper
         version = aversion;
         linuxHelper = new LinuxSupport(Log);
         token = atoken;
+        InitXpathByTheme();
+
     }
 
     private static bool CheckProbabilityVar(string name, int value)
@@ -318,6 +657,7 @@ public abstract partial class SocialHelper : BrowserHelper
 
         return true;
     }
+
 
     public string GetUploadFile()
     {
@@ -414,7 +754,7 @@ public abstract partial class SocialHelper : BrowserHelper
         int endRange;
         var startRange = 0;
 
-        if (postCount == 0)
+        if (!themeToPostcount.ContainsKey(theme) || themeToPostcount[theme] == 0)
         {
             // do at least one post so user can be set
             if (_addImageProbability > _random.Next(0, 100)) action = "postWimage";
@@ -494,13 +834,15 @@ public abstract partial class SocialHelper : BrowserHelper
                         }
                     }
 
-                    string topics = null;
+                    topics = null;
                     if (handler.HandlerArgs.TryGetValue("social-topiclist", out var v3))
                     {
                         // will be used to prune topic list directories
                         topics = v3.ToString();
                         topics = topics.ToLower();
                     }
+
+                    // will prune topic directories once the theme is determined
 
                     if (contentDirectory != null)
                     {
@@ -598,50 +940,88 @@ public abstract partial class SocialHelper : BrowserHelper
 
 
                     var charSeparators = new char[] { ':' };
+                    allSites = new List<string>();
+                    
                     foreach (var cmd in timelineEvent.CommandArgs)
                     {
                         //each argument string is key:value, parse this
                         var argString = cmd.ToString();
+                        
                         if (!string.IsNullOrEmpty(argString))
                         {
                             var words = argString.Split(charSeparators, 2, StringSplitOptions.None);
                             if (words.Length == 2)
                             {
-                                if (words[0] == "site") site = words[1];
+                                if (words[0] == "site") {
+                                    site = words[1];
+                                    //check if site starts with http:// or https://
+                                    site = site.ToLower();
+                                    header = null;
+                                    Regex rx = MyRegex();
+                                    var match = rx.Matches(site);
+                                    if (match.Count > 0) header = "http://";
+                                    if (header == null)
+                                    {
+                                        rx = new Regex("^https://.*", RegexOptions.Compiled);
+                                        match = rx.Matches(site);
+                                        if (match.Count > 0) header = "https://";
+                                    }
+
+                                    if (header != null)
+                                    {
+                                        site = site.Replace(header, "");
+                                    }
+                                    else
+                                    {
+                                        header = "http://"; //default header
+                                    }
+
+                                    allSites.Add(site);
+                                }
                             }
                         }
                     }
 
-                    if (site == null)
+                    if (allSites.Count == 0)
                     {
                         Log.Trace(
-                            $"Social:: The command args must specify a 'site:<value>' , social browser action will not be executed.");
+                            $"Social:: The command args must specify at least one 'site:<value>' , social browser action will not be executed.");
                         baseHandler.SocialAbort = true;
                         return;
                     }
 
-                    //check if site starts with http:// or https://
-                    site = site.ToLower();
-                    header = null;
-                    Regex rx = MyRegex();
-                    var match = rx.Matches(site);
-                    if (match.Count > 0) header = "http://";
-                    if (header == null)
+
+                    if (Driver is OpenQA.Selenium.Firefox.FirefoxDriver)
                     {
-                        rx = new Regex("^https://.*", RegexOptions.Compiled);
-                        match = rx.Matches(site);
-                        if (match.Count > 0) header = "https://";
+                        AttachmentWindowTitle = "File Upload";
                     }
 
-                    if (header != null)
-                    {
-                        site = site.Replace(header, "");
-                    }
-                    else
-                    {
-                        header = "http://"; //default header
-                    }
+                    // choose a random site, this just browses to site as we don't want an empty browser sitting there
+                    var index = _random.Next(0, allSites.Count);
+                    site = allSites[index];
 
+                    // this always goes back to home site
+                    // also fills in siteToTheme cache
+                    if (!DoInitialLogin(handler))
+                    {
+                        Log.Trace(
+                            $"Social:: Target site {site} does not appear to be a socializer site, aborting Social browsing.");
+                        baseHandler.SocialAbort = true;
+                        return;
+                    }
+                   
+
+                    //this initial browse was just a dummy browse to have the browser show something
+                    _state = "execute";
+                    break;
+                    
+                case "execute":
+
+                    // choose a random site
+                    var index1 = _random.Next(0, allSites.Count);
+                    site = allSites[index1];
+
+                    // this always goes back to home site
                     if (!DoInitialLogin(handler))
                     {
                         Log.Trace(
@@ -650,56 +1030,44 @@ public abstract partial class SocialHelper : BrowserHelper
                         return;
                     }
 
-                    if (Driver is OpenQA.Selenium.Firefox.FirefoxDriver)
+                    
+                    // theme could be null if webpage temporarily unavaiable, will try again later
+                    if (theme != null)
                     {
-                        AttachmentWindowTitle = "File Upload";
-                    }
-
-                    //at this point we are logged in, files tab selected, ready for action
-                    _state = "execute";
-                    break;
-
-                case "execute":
-
-                    //determine what to do
-                    //first go back to home site
-                    GotoHomeSite(handler);
-                    if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
-
-                    var socialAction = GetNextAction();
-
-                    if (socialAction == "post" || socialAction == "postWimage")
-                    {
-                        if (!DoPost(handler, socialAction))
+                        var socialAction = GetNextAction();
+                        if (socialAction == "post" || socialAction == "postWimage")
                         {
-                            baseHandler.SocialAbort = true;
-                            return;
+                            if (!DoPost(handler, socialAction))
+                            {
+                                baseHandler.SocialAbort = true;
+                                return;
+                            }
                         }
-                    }
-                    else if (socialAction == "like")
-                    {
-                        if (!DoLike(handler))
+                        else if (socialAction == "like")
                         {
-                            baseHandler.SocialAbort = true;
-                            return;
+                            if (!DoLike(handler))
+                            {
+                                baseHandler.SocialAbort = true;
+                                return;
+                            }
                         }
-                    }
-                    else if (socialAction == "browse")
-                    {
-                        if (!DoBrowse(handler))
+                        else if (socialAction == "browse")
                         {
-                            baseHandler.SocialAbort = true;
-                            return;
+                            if (!DoBrowse(handler))
+                            {
+                                baseHandler.SocialAbort = true;
+                                return;
+                            }
                         }
-                    }
 
-                    BaseHandler.Report(new ReportItem
-                    {
-                        Handler = $"Social{version}: {handler.HandlerType}",
-                        Command = socialAction,
-                        Arg = "",
-                        Trackable = timelineEvent.TrackableId
-                    });
+                        BaseHandler.Report(new ReportItem
+                        {
+                            Handler = $"Social{version}: {handler.HandlerType}",
+                            Command = socialAction,
+                            Arg = "",
+                            Trackable = timelineEvent.TrackableId
+                        });
+                    }
                     break;
             }
         }
