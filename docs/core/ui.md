@@ -92,26 +92,11 @@ Plan and track training/exercise scenarios:
 - Run scenarios and monitor execution events in real time
 - Review execution history and metric snapshots
 
-### Animations
-
-Start and stop the server-side animation jobs that drive autonomous NPC behavior:
-
-| Job | Description |
-|-----|-------------|
-| Social Graph | Evolves NPC relationship networks |
-| Social Sharing | NPCs share content across a social platform |
-| Social Belief | NPC beliefs evolve based on interactions |
-| Chat | NPCs engage in LLM-powered conversations |
-| Full Autonomy | NPCs make fully autonomous decisions |
-
-Each job can be started with custom configuration and stopped independently.
-
 ### Operations Dashboard
 
 Real-time overview showing:
 
 - Connected machine count and status
-- Currently running animation jobs
 - Recent timeline execution activity
 
 ### Belief Explorer

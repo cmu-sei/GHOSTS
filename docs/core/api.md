@@ -198,7 +198,7 @@ docker compose restart ghosts-grafana
 
 ### Social graph page shows no data
 
-This is expected on fresh installations. Social graphs are created when NPCs are generated and animations are run. See [Animator documentation](../animator/index.md).
+This is expected on fresh installations. Social graphs are created when NPCs are generated and workflows are run. See [Animator documentation](../animator/index.md).
 
 ---
 

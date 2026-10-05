@@ -10,12 +10,12 @@ export const routes: Routes = [
     loadChildren: () => import('./features/objectives/objectives.routes').then(m => m.OBJECTIVES_ROUTES)
   },
   {
-    path: 'scenarios',
-    loadChildren: () => import('./features/scenarios/scenarios.routes').then(m => m.SCENARIOS_ROUTES)
-  },
-  {
     path: 'scenarios/:id/builder',
     loadChildren: () => import('./features/scenario-builder/scenario-builder.routes').then(m => m.SCENARIO_BUILDER_ROUTES)
+  },
+  {
+    path: 'scenarios',
+    loadChildren: () => import('./features/scenarios/scenarios.routes').then(m => m.SCENARIOS_ROUTES)
   },
   {
     path: 'executions',
@@ -40,10 +40,6 @@ export const routes: Routes = [
   {
     path: 'npcs',
     loadChildren: () => import('./features/npcs/npcs.routes').then(m => m.NPCS_ROUTES)
-  },
-  {
-    path: 'animations',
-    loadChildren: () => import('./features/animations/animations.routes').then(m => m.ANIMATIONS_ROUTES)
   },
   {
     path: 'n8n-workflows',

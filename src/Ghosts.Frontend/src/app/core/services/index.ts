@@ -7,7 +7,6 @@ export * from './npc.service';
 export * from './npc-chat.service';
 export * from './activity.service';
 export * from './status.service';
-export * from './animation.service';
 export * from './relationship.service';
 export * from './scenario.service';
 export * from './scenario-hub.service';

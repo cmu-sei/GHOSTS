@@ -279,13 +279,6 @@ export class NavigationComponent {
         { label: 'Machine Groups', path: '/machine-groups', icon: 'fa-users-cog' }
       ]
     },
-    {
-      label: 'RangerAI',
-      path: '/n8n-workflows',
-      icon: 'fa-project-diagram',
-      children: [
-        { label: 'Animations', path: '/animations', icon: 'fa-play-circle' }
-      ]
-    }
+    { label: 'RangerAI', path: '/n8n-workflows', icon: 'fa-project-diagram' }
   ]);
 }

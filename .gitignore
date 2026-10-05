@@ -327,9 +327,6 @@ _output/*
 *_output/*
 output/
 
-**/.vscode/
-*.vscode*
-
 .devcontainer/certs/*
 !.devcontainer/certs/readme.md
 .devcontainer/aws.env

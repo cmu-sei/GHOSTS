@@ -5,7 +5,6 @@ export * from './npc.model';
 export * from './npc-chat.model';
 export * from './activity.model';
 export * from './status.model';
-export * from './animation.model';
 export * from './relationship.model';
 export * from './social.model';
 export * from './scenario.model';
