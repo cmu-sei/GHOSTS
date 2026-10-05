@@ -1987,17 +1987,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#legacy-configuration-reference" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Legacy Configuration Reference
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#managing-workflows-in-n8n" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2151,7 +2140,7 @@
 <h1 id="running-animation-workflows">Running Animation Workflows<a class="headerlink" href="#running-animation-workflows" title="Permanent link">&para;</a></h1>
 <details class="info" open="open">
 <summary>Animations now use n8n workflows</summary>
-<p>As of GHOSTS v9.0, animations are implemented as n8n workflows. This provides a visual, flexible approach to building and managing NPC behaviors. The configuration examples below are from the legacy system and are provided for reference.</p>
+<p>As of GHOSTS v9.0, animations are implemented as n8n workflows. This provides a visual, flexible approach to building and managing NPC behaviors.</p>
 </details>
 <p>Animator is a simulation of a population of agents. Animations run in cycles, and for each cycle, the agents make decisions based on their attributes, preferences, motivations, and behaviors.</p>
 <h2 id="setup-with-n8n">Setup with n8n<a class="headerlink" href="#setup-with-n8n" title="Permanent link">&para;</a></h2>
@@ -2163,102 +2152,6 @@
 <li>Configure workflow parameters through the n8n interface</li>
 </ol>
 <p>Each workflow can be started, stopped, and monitored through the n8n dashboard. Workflow execution logs are available in the n8n interface.</p>
-<h2 id="legacy-configuration-reference">Legacy Configuration Reference<a class="headerlink" href="#legacy-configuration-reference" title="Permanent link">&para;</a></h2>
-<p>The following configuration structure is from the legacy animation system and is provided for reference. New deployments should use n8n workflows instead.</p>
-<ul>
-<li>Get the Animator API up and running as outlined <a href="../">here</a></li>
-<li>The <code>appsettings.json</code> file points to Animator-specific configuration, which by default is in <code>./config/config.json</code>:</li>
-</ul>
-<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">"ApplicationDatabaseSettings"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">"ConnectionString"</span><span class="p">:</span><span class="w"> </span><span class="s2">"mongodb://ghosts-mongo:32770"</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">"DatabaseName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"AnimatorDb"</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">"ApplicationSettings"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">"GhostsApiUrl"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost:52388/"</span><span class="p">,</span><span class="w"> </span><span class="c1">//the root url of the Ghosts API</span>
-<span class="w">      </span><span class="nt">"Proxy"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">"Animations"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">"IsEnabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="c1">//if false, then all animations are disbled</span>
-<span class="w">        </span><span class="nt">"SocialGraph"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">"IsEnabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="c1">//if false, just this animation is disabled</span>
-<span class="w">          </span><span class="nt">"IsMultiThreaded"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="c1">//helpful to set to false for debugging purposes</span>
-<span class="w">          </span><span class="nt">"IsInteracting"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="c1">//means new agent interactions are being generated</span>
-<span class="w">          </span><span class="nt">"MaximumSteps"</span><span class="p">:</span><span class="w"> </span><span class="mi">4000</span><span class="p">,</span><span class="w"> </span><span class="c1">//max steps to execute</span>
-<span class="w">          </span><span class="nt">"TurnLength"</span><span class="p">:</span><span class="w"> </span><span class="mi">9000</span><span class="p">,</span><span class="w"> </span><span class="c1">//ms per step</span>
-<span class="w">          </span><span class="nt">"ChanceOfKnowledgeTransfer"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.3</span><span class="p">,</span><span class="w"> </span><span class="c1">//chance that an agent will share knowledge with another agent</span>
-<span class="w">          </span><span class="nt">"Decay"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="nt">"StepsTo"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="c1">//min steps to execute before an agent begins forgetting things</span>
-<span class="w">            </span><span class="nt">"ChanceOf"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.05</span>
-<span class="w">          </span><span class="p">}</span>
-<span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">"SocialBelief"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">"IsEnabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">"IsMultiThreaded"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">"IsInteracting"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">"MaximumSteps"</span><span class="p">:</span><span class="w"> </span><span class="mi">300</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">"TurnLength"</span><span class="p">:</span><span class="w"> </span><span class="mi">9000</span>
-<span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">"SocialSharing"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">"IsEnabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">"IsMultiThreaded"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">"IsInteracting"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">"IsSendingTimelinesToGhostsApi"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">"IsSendingTimelinesDirectToSocializer"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">"PostUrl"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost:8000"</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">"MaximumSteps"</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">"TurnLength"</span><span class="p">:</span><span class="w"> </span><span class="mi">9000</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">"ContentEngine"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="nt">"Source"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ollama"</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">"Host"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost:11434"</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">"Model"</span><span class="p">:</span><span class="w"> </span><span class="s2">"chat"</span>
-<span class="w">          </span><span class="p">}</span>
-<span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">"Chat"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">"IsEnabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">"IsMultiThreaded"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">"IsInteracting"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">"MaximumSteps"</span><span class="p">:</span><span class="w"> </span><span class="mi">300</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">"TurnLength"</span><span class="p">:</span><span class="w"> </span><span class="mi">9000</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">"IsSendingTimelinesToGhostsApi"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">"PostUrl"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost:8065"</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">"ContentEngine"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="nt">"Source"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ollama"</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">"Host"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost:11434"</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">"Model"</span><span class="p">:</span><span class="w"> </span><span class="s2">"chat"</span>
-<span class="w">          </span><span class="p">}</span>
-<span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">"FullAutonomy"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">"IsEnabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">"IsMultiThreaded"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">"IsInteracting"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">"IsSendingTimelinesToGhostsApi"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">"MaximumSteps"</span><span class="p">:</span><span class="w"> </span><span class="mi">10000</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">"TurnLength"</span><span class="p">:</span><span class="w"> </span><span class="mi">9000</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">"ContentEngine"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="nt">"Source"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ollama"</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">"Host"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost:11434"</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">"Model"</span><span class="p">:</span><span class="w"> </span><span class="s2">"activity"</span>
-<span class="w">          </span><span class="p">}</span>
-<span class="w">        </span><span class="p">}</span>
-<span class="w">      </span><span class="p">}</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">"AllowedHosts"</span><span class="p">:</span><span class="w"> </span><span class="s2">"*"</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">"ClientSettings"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">"CorsPolicy"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">"Origins"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">"http://localhost:4200"</span>
-<span class="w">      </span><span class="p">],</span>
-<span class="w">      </span><span class="nt">"Methods"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
-<span class="w">      </span><span class="nt">"Headers"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
-<span class="w">      </span><span class="nt">"AllowAnyOrigin"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">"AllowAnyMethod"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">"AllowAnyHeader"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">"SupportsCredentials"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">  </span><span class="p">}</span>
-<span class="w">  </span><span class="err">...</span>
-</code></pre></div>
 <h2 id="managing-workflows-in-n8n">Managing Workflows in n8n<a class="headerlink" href="#managing-workflows-in-n8n" title="Permanent link">&para;</a></h2>
 <p><strong>To activate/deactivate workflows:</strong></p>
 <ol>
