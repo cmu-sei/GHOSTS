@@ -10,12 +10,12 @@ export const routes: Routes = [
     loadChildren: () => import('./features/objectives/objectives.routes').then(m => m.OBJECTIVES_ROUTES)
   },
   {
-    path: 'scenarios',
-    loadChildren: () => import('./features/scenarios/scenarios.routes').then(m => m.SCENARIOS_ROUTES)
-  },
-  {
     path: 'scenarios/:id/builder',
     loadChildren: () => import('./features/scenario-builder/scenario-builder.routes').then(m => m.SCENARIO_BUILDER_ROUTES)
+  },
+  {
+    path: 'scenarios',
+    loadChildren: () => import('./features/scenarios/scenarios.routes').then(m => m.SCENARIOS_ROUTES)
   },
   {
     path: 'executions',
