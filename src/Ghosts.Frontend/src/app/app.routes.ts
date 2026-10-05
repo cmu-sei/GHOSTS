@@ -42,10 +42,6 @@ export const routes: Routes = [
     loadChildren: () => import('./features/npcs/npcs.routes').then(m => m.NPCS_ROUTES)
   },
   {
-    path: 'animations',
-    loadChildren: () => import('./features/animations/animations.routes').then(m => m.ANIMATIONS_ROUTES)
-  },
-  {
     path: 'n8n-workflows',
     loadChildren: () => import('./features/n8n-workflows/n8n-workflows.routes').then(m => m.N8N_WORKFLOWS_ROUTES)
   },

@@ -21,18 +21,12 @@ namespace Ghosts.Api.Controllers.Api;
 public class SocialController(ApplicationDbContext context) : Controller
 {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-    private readonly ApplicationSettings _configuration = Program.ApplicationSettings;
 
     [ProducesResponseType(typeof(IReadOnlyList<NpcRecord>), 200)]
     [SwaggerOperation("SocialGraphsGet")]
     [HttpGet]
     public async Task<IReadOnlyList<NpcRecord>> Index()
     {
-        if (!IsSocialGraphEnabled())
-        {
-            return new List<NpcRecord>();
-        }
-
         var npcs = await LoadNpcsAsync();
         if (npcs == null)
         {
@@ -48,11 +42,6 @@ public class SocialController(ApplicationDbContext context) : Controller
     [HttpGet("{id}")]
     public async Task<NpcRecord> Detail(Guid id)
     {
-        if (!IsSocialGraphEnabled())
-        {
-            return new NpcRecord();
-        }
-
         var npc = await LoadNpcByIdAsync(id);
         if (npc == null)
         {
@@ -81,11 +70,6 @@ public class SocialController(ApplicationDbContext context) : Controller
         var fileBytes = Encoding.ASCII.GetBytes(content); // Convert JSON to bytes
 
         return File(fileBytes, "application/json", $"{Guid.NewGuid()}.json"); // Return as a JSON file
-    }
-
-    private bool IsSocialGraphEnabled()
-    {
-        return _configuration.AnimatorSettings.Animations.SocialGraph.IsEnabled;
     }
 
     private async Task<List<NpcRecord>> LoadNpcsAsync()

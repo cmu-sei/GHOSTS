@@ -28,21 +28,6 @@ public class AnimationJobsController(IServiceProvider serviceProvider) : Control
         return _animationsManager.GetRunningJobs();
     }
 
-    [HttpPost("start")]
-    public IActionResult Start(AnimationConfiguration configuration, [FromForm] string jobConfiguration)
-    {
-        configuration.JobConfiguration = jobConfiguration;
-        _animationsManager.StartJob(configuration, CancellationToken.None);
-        return Ok();
-    }
-
-    [HttpPost("stop")]
-    public IActionResult Stop(string jobId)
-    {
-        _animationsManager.StopJob(jobId);
-        return Ok();
-    }
-
     [SwaggerOperation("WorkflowsGet")]
     [HttpGet("workflows")]
     public async Task<IActionResult> Workflows(CancellationToken cancellationToken)
