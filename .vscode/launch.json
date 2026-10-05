@@ -1,0 +1,29 @@
+{
+    "version": "0.4.0",
+    "configurations": [
+        {
+            "name": "Run Aspire AppHost",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "/home/vscode/.dotnet/tools/aspire",
+            "args": [
+                "run",
+                "--project",
+                "src/apphost/Ghosts-AppHost.csproj"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "stopAtEntry": false,
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+            }
+        },
+        {
+            "type": "aspire",
+            "request": "launch",
+            "name": "Aspire: Launch default apphost",
+            "program": ""
+        }
+    ]
+}
