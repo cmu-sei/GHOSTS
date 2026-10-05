@@ -24,10 +24,8 @@ namespace Ghosts.Client.Handlers
 
    
     /// <summary>
-    /// Supports upload, download, deletion of documents
-    /// download, deletion only done from the first page
-    /// Tested with Social 2013 and 2019
-    /// 2019 uses the 'classic view' for 2013 compatibility
+    /// Handles Social actions for base browser handler
+    /// Updated for Pandora V9
     /// </summary>
     public class SocialHelperV1 : SocialHelper
     {
@@ -38,42 +36,261 @@ namespace Ghosts.Client.Handlers
 
         }
 
+        private bool IsSupportedTheme(string aTheme)
+        {
+        
+        bool isSupported = Array.Exists(supportedThemes, element => element == aTheme);
+        return isSupported; 
+        }
+
+        private void GetTopicDirectories(string aTheme)
+        {
+            if (contentDirectory != null)
+            {
+                var themeDirectory = Path.Combine(contentDirectory, aTheme);
+                // create list of valid topic dirs
+                topicDirs = new List<string>();
+                var dirlist =
+                    Directory.GetDirectories(themeDirectory, "*", SearchOption.TopDirectoryOnly);
+                if (dirlist.Length > 0)
+                {
+                    //get the base directory
+                    foreach (var dir in dirlist)
+                    {
+                        if (topics == null)
+                        {
+                            topicDirs.Add(dir);
+                        }
+                        else
+                        {
+                            var f = Path.GetFileName(dir);
+                            if (topics.Contains(f, StringComparison.CurrentCultureIgnoreCase))
+                            {
+                                topicDirs.Add(dir);
+                            }
+                        }
+                    }
+
+                    if (topicDirs.Count == 0 && topics != null)
+                    {
+                        // No match to specified topics, add all available
+                        foreach (var dir in dirlist)
+                        {
+                            topicDirs.Add(dir);
+                        }
+                    }
+                }
+            }
+        }
+
 
         public override bool DoInitialLogin(TimelineHandler handler)
         {
 
-            postCount = 0;   //reset post count
-
             if (!GotoHomeSite(handler)) {
                 return false;
             }
-            
+
+            if (siteToTheme != null && siteToTheme.ContainsKey(site))
+            {
+                // already discovered the theme
+                theme = siteToTheme[site];  
+                return true;
+            }
+
             // try to find an element on the page
-            bool foundSocializer = false;
+            theme = null;
+            
+            // Try looking for PandoraV9 theme other than default
+            string themeValue = null;
             try
             {
-                var targetElement =  Driver.FindElement(By.XPath("//img[@title='SOCIALIZER']"));
-                foundSocializer = true;
+                
+                var targetElement = Driver.FindElement(By.XPath("//head//child::link[@rel='stylesheet']"));
+                themeValue = targetElement.GetAttribute("href");
+                string[] words = themeValue.Split('/');
+                if (words.Length > 3)
+                {
+                    // check if supported theme
+                    themeValue = words[words.Length-3];
+                    if (IsSupportedTheme(themeValue)) {
+                        theme = themeValue;
+                    }
+                }
             }
-            catch (ThreadAbortException)
+            catch (ThreadAbortException ex)
             {
                 throw;  //pass up
             }
-            return foundSocializer;
+            catch (Exception ex)
+            {
+                //ignore
+            }
+
+            if (theme == null)
+            {
+                try {
+                    // try another way to get the theme for Pandora V9
+                    var targetElement = Driver.FindElement(By.XPath("//body[@data-theme]"));
+                    themeValue = targetElement.GetAttribute("data-theme");
+                    if (IsSupportedTheme(themeValue)) {
+                        theme = themeValue;
+                    }
+                }
+                catch (ThreadAbortException ex)
+                {
+                    throw;  //pass up
+                }
+                catch (Exception ex)
+                {
+                    //ignore
+                }
+            }
+            if (theme == null)
+            {
+                // Check for Pandora V9 default theme
+                try
+                {
+                    var targetElement = Driver.FindElement(By.XPath("//img[@title='PANDORA']"));
+                    theme = "default";
+                }
+                catch (ThreadAbortException ex)
+                {
+                    throw;  //pass up
+                }
+                catch (Exception ex)
+                {
+                    //ignore
+                }
+            }
+            if (theme == null) 
+            {
+                // Check for old Socializer 
+                try
+                {
+                    var targetElement = Driver.FindElement(By.XPath("//img[@title='SOCIALIZER']"));
+                    theme = "default";
+                }
+                catch (ThreadAbortException ex)
+                {
+                    throw;  //pass up
+                }
+                catch (Exception ex)
+                {
+                    //ignore
+                }
+            }
+            if (theme == null) 
+            {
+                // Check if we have a web error or some kind
+                try
+                {
+                    var targetElement = Driver.FindElement(By.XPath("//head//child::title"));
+                    if (targetElement.Text.Contains("temporarily unavailable", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // web error. Leave theme as null, return true, and try again later
+                        Log.Trace(
+                            $"Social: Web error -- Site {site} is temporarily unavailable, trying again later.");
+                        return true;
+                    }
+
+                }
+                catch (ThreadAbortException ex)
+                {
+                    throw;  //pass up
+                }
+                catch (Exception ex)
+                {
+                    // if we get here, we have no theme and no web error, so we will log the error and return false
+                    if (themeValue == null) {
+                    Log.Trace(
+                        $"Social:: Unable to verify that site {site} is a Pandora/Socializer site, url may be malformed. Social browser action will not be executed.");
+                    Log.Error(ex);
+                    } else if (theme == null)
+                    {
+                        Log.Trace(
+                            $"Social:: Unable to verify that site {site} is has a supported Pandora/Socializer theme site, url may be malformed. Social browser action will not be executed.");
+                        Log.Error(ex);
+                    }
+                    return false;
+                    }
+            }
+
+
+            if (theme != null)
+            {
+                if (siteToTheme == null)
+                {
+                    siteToTheme = new Dictionary<string, string>();
+                }
+                if (!siteToTheme.ContainsKey(site))
+                {
+                    siteToTheme.Add(site,theme);
+                }
+                if (themeToPostcount == null)
+                {
+                themeToPostcount = new Dictionary<string, int>();
+                }
+                if (!themeToPostcount.ContainsKey(theme))
+                {
+                    themeToPostcount.Add(theme,0);
+                }
+                GetTopicDirectories(theme);
+            }
+
+            if (theme != null)
+            {
+                Log.Trace($"Social:: Verified that site {site} is a Pandora/Socializer site with theme {theme}.");
+            }
+
+            return theme != null;
         }
 
+        public string GetThemeAction(string aTheme, string action)
+        {
+            if (theme == null) return null;
+            if (!xPathByTheme.ContainsKey(aTheme)) return null;
+            var themeDictionary = xPathByTheme[aTheme];
+            if (!themeDictionary.ContainsKey(action)) return null;
+            return themeDictionary[action];
+        }
 
+        public string findUserName()
+        {
+            string targetXpath = GetThemeAction(theme, "Username");
+            IWebElement targetElement;
+            if (targetXpath != null) {
+                targetElement = Driver.FindElement(By.XPath(targetXpath));
+                if (theme == "default") {
+                    var name = targetElement.Text;
+                    return name;
+                } else if (theme == "facebook" || theme == "instagram")
+                {
+                    var src = targetElement.GetAttribute("src");
+                    string[] words = src.Split('/');
+                    if (words.Length > 2) return words[words.Length-2];
+                } else if (theme == "linkedin" || theme == "reddit")
+                {
+                    return targetElement.Text;
+                } else if (theme == "x")
+                {
+                    var src = targetElement.GetAttribute("src");
+                    string[] words = src.Split('/');
+                    if (words.Length > 2) return words[words.Length-1];
+                }
+            }
+            Log.Trace($"Social:: Unable to find user name to use for post, using default name.");
+            return "Dr.Mysterious"; // always return a name
+        }
         
         public override bool DoBrowse(TimelineHandler handler)
         {
-            // browse to the first friend suggestion in the friend feed
-            // var targetElement =  Driver.FindElement(By.XPath("//ul[contains(@class,'w-friend-pages-added notification-list')]//child::div[contains(@class,'notification-event')]//child::a[contains(@class,'notification-friend')]"));
-            // browse to the first person of first post in feed
-            var targetElement =  Driver.FindElement(By.XPath("//div[contains(@class,'author-date')]//child::a[contains(@class,'post__author-name')]"));
-            if (targetElement != null){
-                BrowserHelperSupport.ElementClick(Driver, targetElement);
-                Thread.Sleep(500);
-                Log.Trace($"Social:: Successfully browsed post on site {site}.");
+            var targetXpath = GetThemeAction(theme, "Browse");
+            if (targetXpath != null) {
+            var targetElement = Driver.FindElement(By.XPath(targetXpath));
+            BrowserHelperSupport.ElementClick(Driver, targetElement);
+            Thread.Sleep(500);
+            Log.Trace($"Social:: Successfully browsed post on site {site}.");
             }
             return true;
         }
@@ -81,12 +298,35 @@ namespace Ghosts.Client.Handlers
         public override bool DoLike(TimelineHandler handler)
         {
             // just like the first post in the feed
-            var targetElement =  Driver.FindElement(By.XPath("//a[contains(@class,'btn btn-control like-it')]"));
-            if (targetElement != null){
-                BrowserHelperSupport.ElementClick(Driver, targetElement);
-                Thread.Sleep(500);
-                Log.Trace($"Social:: Successfully liked post on site {site}.");
-            }
+            // always scroll to the element as it may off the viewport
+            // this relies on the fact that before the next action the page
+            // will be reset to the top
+            try
+                {
+                    // this is hacky -- element may be out of view, scroll to it
+                    var targetXpath = GetThemeAction(theme, "Like");
+                    var targetElement = Driver.FindElement(By.XPath(targetXpath));
+                    if (targetElement != null)
+                    {
+                        // this uses Javascript for compatibility with older Selenium
+                        IJavaScriptExecutor js = (IJavaScriptExecutor)Driver;
+                        js.ExecuteScript("arguments[0].scrollIntoView(true);", targetElement);
+                        Thread.Sleep(500);
+                        targetElement = Driver.FindElement(By.XPath(targetXpath));
+                        BrowserHelperSupport.ElementClick(Driver, targetElement);
+                        Thread.Sleep(500);
+                        Log.Trace($"Social:: Successfully liked post on site {site}.");
+                    }
+                    
+                }
+            catch (ThreadAbortException ex)
+                {
+                    throw;  //pass up
+                }
+            catch (Exception ex)
+                {
+                    //ignore others as there may be no posts to like
+                }
             return true;
         }
 
@@ -98,6 +338,8 @@ namespace Ghosts.Client.Handlers
             if (postDirectory == null) return false;
 
             string[] postFileList = Directory.GetFiles(postDirectory, "post.txt");
+            string useEnterKey = GetThemeAction(theme,"__USE_ENTER_KEY__");
+
             if (postFileList.Length > 0) {
                 // get the file content
                 string postContent = File.ReadAllText(postFileList[0]);
@@ -105,9 +347,37 @@ namespace Ghosts.Client.Handlers
                 {
                     postContent = Regex.Replace(postContent, @"[^\u0000-\u007F]+", "");
                 }
-                var targetElement =  Driver.FindElement(By.XPath("//label[text()='Share what you are thinking here...']//following-sibling::textarea"));
-                targetElement.SendKeys(postContent);
-                Thread.Sleep(500);
+                string targetXpath = GetThemeAction(theme, "PostTextContent");
+                IWebElement targetElement;
+                if (targetXpath != null) {
+                    targetElement = Driver.FindElement(By.XPath(targetXpath));
+                    targetElement.Clear(); //clear before sending another one
+                     if (useEnterKey != null)
+                    {
+                        targetElement.SendKeys(postContent + Keys.Enter);
+                        Log.Trace($"Social:: Successfully added post on site {site}.");
+                        themeToPostcount[theme] += 1;
+                    } else {
+                        targetElement.SendKeys(postContent);
+                    }
+                    Thread.Sleep(500);
+                }
+                targetXpath = GetThemeAction(theme, "PostTitle");
+                if (targetXpath != null) {
+                    targetElement = Driver.FindElement(By.XPath(targetXpath));
+                    targetElement.Clear(); //clear before sending another one
+                    string title;
+                    string[] words = postContent.Split('\n');
+                    if (words.Length > 1)
+                    {
+                        title = words[0];
+                    } else
+                    {
+                        title = "My very own post";
+                    }
+                    targetElement.SendKeys(title);
+                    
+                }
                 string targetName = "";
                 if (userName != null)  targetName = userName;  //always use this if specified
                 else {
@@ -117,11 +387,17 @@ namespace Ghosts.Client.Handlers
                     targetName = lastUserName;
                 }
                 // post target Name
-                targetElement =  Driver.FindElement(By.XPath("//label[text()='Share what you are thinking here...']//following-sibling::input"));
-                targetElement.Clear(); //clear the name before sending another one
-                targetElement.SendKeys(targetName);
-                Thread.Sleep(500);
-                if (action == "postWimage"){
+                targetXpath = GetThemeAction(theme, "PostAuthorName");
+                if (targetXpath != null)
+                {
+                    targetElement = Driver.FindElement(By.XPath(targetXpath));
+                    targetElement.Clear(); //clear the name before sending another one
+                    targetElement.SendKeys(targetName);
+                    Thread.Sleep(500);   
+                }                
+                targetXpath = GetThemeAction(theme, "PostImageFileInput");
+                if (action == "postWimage" && targetXpath != null) 
+                {
                     // get the image file
                     string[] imageFilesPng = Directory.GetFiles(postDirectory, "image*.png");
                     string[] imageFilesJpg = Directory.GetFiles(postDirectory, "image*.jpg");
@@ -149,7 +425,7 @@ namespace Ghosts.Client.Handlers
                         {
                             imageFile = imageFilesPng[(_random.Next(0, imageFilesPng.Length))];
                         }
-                        // click the browse button
+                        // Send image file to the file input element
                         targetElement =  Driver.FindElement(By.XPath("//label[text()='Share what you are thinking here...']//following-sibling::input[@type='file']"));
                         if (targetElement != null)
                         {
@@ -160,20 +436,18 @@ namespace Ghosts.Client.Handlers
 
                 }
 
-
-
-                targetElement =  Driver.FindElement(By.XPath("//button[@id='sendButton']"));
-                Actions actions = new Actions(Driver);
-                actions.MoveToElement(targetElement).Click().Perform();
-                Thread.Sleep(500);
-                Log.Trace($"Social:: Successfully added post to site {site}.");
-                postCount += 1;
-                
+                targetXpath = GetThemeAction(theme, "PostButton");
+                if (targetXpath != null && useEnterKey == null)
+                {
+                    targetElement = Driver.FindElement(By.XPath(targetXpath));
+                    Actions actions = new Actions(Driver);
+                    actions.MoveToElement(targetElement).Click().Perform();
+                   Thread.Sleep(500);
+                    Log.Trace($"Social:: Successfully added post on site {site}.");
+                    themeToPostcount[theme] += 1;
+                }
 
             }
-
-
-
             return true;
         }
 
@@ -195,8 +469,17 @@ namespace Ghosts.Client.Handlers
         public string userName { get; set; } = null;
         public string[] topicList { get; set; } = null;
 
-        public int postCount { get; set; } = 0;
+        public List<string> allSites = null;
 
+        public string theme { get; set; } = null;
+
+        public string[] supportedThemes = ["discord","facebook","instagram","linkedin","reddit","x"];
+
+        public Dictionary<string, Dictionary<string, string>> xPathByTheme = null;
+
+        public Dictionary<string, string> siteToTheme = null;
+
+        public Dictionary<string, int> themeToPostcount = null;
         public System.Exception LastException;
 
         public List<string> topicDirs = null;
@@ -211,6 +494,8 @@ namespace Ghosts.Client.Handlers
         public string version { get; set; } = null;
         public string contentDirectory { get; set; } = null;
 
+        public string topics { get; set; } = null;
+
         public string lastUserName { get; set; } = null;
 
         public bool useUniqueName { get; set; } = true;
@@ -218,6 +503,7 @@ namespace Ghosts.Client.Handlers
         public bool stripEmojis { get; set; } = true;
 
         public string AttachmentWindowTitle = "Open"; //this is for chrome
+
 
         private void OutputHandler(object sendingProcess, DataReceivedEventArgs outLine)
         {
@@ -231,19 +517,6 @@ namespace Ghosts.Client.Handlers
             return;
         }
 
-        public string findUserName() {
-
-            var targetElement =  Driver.FindElement(By.XPath("//ul[contains(@class,'w-friend-pages-added notification-list')]//child::div[contains(@class,'notification-event')]//child::a[contains(@class,'notification-friend')]"));
-            
-            if (targetElement != null) {
-                var name = targetElement.Text;
-                return name;
-            }
-            Log.Trace($"Social:: Unable to find user name to use for post, using default name.");
-            return "Dr.Mysterious";  // always return a name
-        }
-
-
         public static SocialHelper MakeHelper(BaseBrowserHandler callingHandler, IWebDriver callingDriver, TimelineHandler handler, Logger tlog)
         {
             SocialHelper helper = new SocialHelperV1(callingHandler, callingDriver, "1.0");
@@ -255,6 +528,70 @@ namespace Ghosts.Client.Handlers
         {
             return errorCount > errorThreshold;
         }
+
+        private void InitXpathByTheme()
+        {
+            xPathByTheme = new Dictionary<string, Dictionary<string, string>>
+            {
+                ["default"] = new Dictionary<string, string>
+                {
+                    ["Browse"] = "//div[contains(@class,'author-date')]//child::a[contains(@class,'post__author-name')]",
+                    ["Like"] = "//a[contains(@class,'btn btn-control like-it')]",
+                    ["Username"] =  "//ul[contains(@class,'w-friend-pages-added notification-list')]//child::div[contains(@class,'notification-event')]//child::a[contains(@class,'notification-friend')]",
+                    ["PostTextContent"] = "//label[text()='Share what you are thinking here...']//following-sibling::textarea",
+                    ["PostAuthorName"] = "//label[text()='Share what you are thinking here...']//following-sibling::input",
+                    ["PostImageFileInput"] = "//label[text()='Share what you are thinking here...']//following-sibling::input[@type='file']",
+                    ["PostButton"] = "//button[@id='sendButton']"
+                },
+                
+                ["facebook"] = new Dictionary<string, string>
+                {
+                    ["Browse"] = "//div[@class='post-user-name']//child::a[@href]",
+                    ["PostTextContent"] = "//input[@class='create-post-input']",
+                    ["Like"] = "//button[@class='post-action like-btn like-it']",
+                    ["Username"] = "//div[@class='create-post-top']//child::img[@class='profile-pic']",
+                    ["PostButton"] = "//button[@class='post-btn']"
+                },
+                ["linkedin"] = new Dictionary<string, string>
+                {
+                    ["PostTextContent"] = "//textarea[@class='post-input']",
+                    ["Like"] = "//button[@class='action-btn like-btn like-it']",
+                    ["Username"] = "//div[@class='profile-details']//child::h3[@class='profile-name']",
+                    ["PostButton"] = "//button[@class='post-btn']"
+                },
+                ["discord"] = new Dictionary<string, string>
+                {
+                    ["__USE_ENTER_KEY__"] = "yes",
+                    ["PostTextContent"] = "//input[@class='message-input']",
+                    ["Like"] = "//button[@class='message-action like-it']",
+                    ["PostButton"] = "//div[@class='input-actions']//child::button[@class='send-btn']"
+                },
+                ["instagram"] = new Dictionary<string, string>
+                {
+                    ["PostTextContent"] = "//textarea[@class='post-input']",
+                    ["Username"] = "//div[@class='post-composer']//child::img[@class='profile-pic']",
+                    ["Like"] = "//div[@class='post-actions']//child::div[@class='action-buttons']//child::button[@class='action-btn like-btn like-it']",
+                    ["PostButton"] = "//div[@class='post-composer']//child::button[@class='post-btn']"
+                },
+                ["reddit"] = new Dictionary<string, string>
+                {
+                    ["PostTextContent"] = "//div[@class='post-composer']//child::textarea[@class='post-input']",
+                    ["PostTitle"] = "//div[@class='post-composer']//child::input[@class='post-title']",
+                    ["Username"] = "//div[@class='user-menu']//child::span[@class='username']",
+                    ["Like"] = "//div[@class='post-actions']//child::button[@class='action-btn like-it']",
+                    ["PostButton"] = "//div[@class='post-composer']//child::button[@class='post-btn']"
+                },
+                ["x"] = new Dictionary<string, string>
+                {
+                    ["PostTextContent"] = "//div[@class='tweet-input-container']//child::textarea[@class='tweet-input']",
+                    ["Username"] = "//div[@class='tweet-composer']//child::img[@class='tweet-avatar']",
+                    ["Like"] = "//div[@class='tweet-actions']//child::button[@class='action-btn like-it']",
+                    ["PostButton"] = "//div[@class='tweet-toolbar']//child::button[@class='tweet-btn']"
+                }
+            };
+
+        }
+
         
 
         public void Init(BaseBrowserHandler callingHandler, IWebDriver currentDriver, string aversion)
@@ -262,6 +599,7 @@ namespace Ghosts.Client.Handlers
             baseHandler = callingHandler;
             Driver = currentDriver;
             version = aversion;
+            InitXpathByTheme();
         }
 
         private bool CheckProbabilityVar(string name, int value)
@@ -310,7 +648,7 @@ namespace Ghosts.Client.Handlers
             Log.Trace($"Social:: Bash command output: {Result}");
         }
 
-         public bool GotoHomeSite(TimelineHandler handler)
+        public bool GotoHomeSite(TimelineHandler handler)
         {
             //go to the site and determine if this is a socializer site
             RequestConfiguration config;
@@ -336,49 +674,6 @@ namespace Ghosts.Client.Handlers
             }
             return true;
         }
-
-
-        public void AttachFileWindows(string filename)
-        {
-            IntPtr winHandle = Winuser.FindWindow(null, AttachmentWindowTitle);
-            if (winHandle == IntPtr.Zero)
-            {
-                Log.Trace($"WebOutlook:: Unable to find '{AttachmentWindowTitle}' window to upload file attachment.");
-                return;
-            }
-            Winuser.SetForegroundWindow(winHandle);
-            Thread.Sleep(400);
-            string s;
-            // The spaces are needed because SendWait tends to drop the first character or so
-            if (Driver is OpenQA.Selenium.Firefox.FirefoxDriver)
-            {
-                s = "     " + filename + "{TAB}{TAB}{ENTER}";
-            }
-            else
-            {
-                s = "     " + filename + "{ENTER}";
-            }
-
-            System.Windows.Forms.SendKeys.SendWait(s);
-            Thread.Sleep(200);
-            winHandle = Winuser.FindWindow(null, AttachmentWindowTitle);
-            if (winHandle == IntPtr.Zero)
-            {
-                return;
-            }
-            // the window is still open. Grr. try closing it.
-            Winuser.SetForegroundWindow(winHandle);
-            System.Windows.Forms.SendKeys.SendWait("%{F4}");
-
-        }
-
-
-        public void AttachFile(string filename)
-        {
-            AttachFileWindows(filename);
-        }
-
-
 
         public string GetUploadFile()
         {
@@ -464,7 +759,8 @@ namespace Ghosts.Client.Handlers
             int endRange;
             var startRange = 0;
             
-            if (postCount == 0) {
+            if (!themeToPostcount.ContainsKey(theme) || themeToPostcount[theme] == 0)
+            {
                 // do at least one post so user can be set
                 if (_addImageProbability > _random.Next(0, 100)) action = "postWimage";
                 else action = "post";
@@ -507,6 +803,7 @@ namespace Ghosts.Client.Handlers
         /// <param name="timelineEvent"></param>
         public void Execute(TimelineHandler handler, TimelineEvent timelineEvent)
         {
+           
             try {
             
                 switch (_state)
@@ -628,6 +925,8 @@ namespace Ghosts.Client.Handlers
 
 
                         char[] charSeparators = new char[] { ':' };
+                        allSites = new List<string>();
+
                         foreach (var cmd in timelineEvent.CommandArgs)
                         {
                             //each argument string is key:value, parse this
@@ -637,41 +936,41 @@ namespace Ghosts.Client.Handlers
                                 var words = argString.Split(charSeparators, 2, StringSplitOptions.None);
                                 if (words.Length == 2)
                                 {
-                                    if (words[0] == "site") site = words[1];
+                                    if (words[0] == "site")
+                                    {
+                                        site = words[1];
+                                        //check if site starts with http:// or https://
+                                        site = site.ToLower();
+                                        header = null;
+                                        Regex rx = new Regex("^http://.*", RegexOptions.Compiled);
+                                        var match = rx.Matches(site);
+                                        if (match.Count > 0) header = "http://";
+                                        if (header == null)
+                                        {
+                                            rx = new Regex("^https://.*", RegexOptions.Compiled);
+                                            match = rx.Matches(site);
+                                            if (match.Count > 0) header = "https://";
+                                        }
+
+                                        if (header != null)
+                                        {
+                                            site = site.Replace(header, "");
+                                        }
+                                        else
+                                        {
+                                            header = "http://"; //default header
+                                        }
+
+                                        allSites.Add(site);
+                                    }
                                 }
                             }
                         }
 
-                        if (site == null)
+                        if (allSites.Count == 0)
                         {
-                            Log.Trace($"Social:: The command args must specify a 'site:<value>' , social browser action will not be executed.");
-                            baseHandler.SocialAbort = true;
-                            return;
-                        }
-
-                        //check if site starts with http:// or https:// 
-                        site = site.ToLower();
-                        header = null;
-                        Regex rx = new Regex("^http://.*", RegexOptions.Compiled);
-                        var match = rx.Matches(site);
-                        if (match.Count > 0) header = "http://";
-                        if (header == null)
-                        {
-                            rx = new Regex("^https://.*", RegexOptions.Compiled);
-                            match = rx.Matches(site);
-                            if (match.Count > 0) header = "https://";
-                        }
-                        if (header != null)
-                        {
-                            site = site.Replace(header, "");
-                        }
-                        else
-                        {
-                            header = "http://";  //default header
-                        }
-
-                        if (!DoInitialLogin(handler)) {
-                            Log.Trace($"Social:: Target site {site} does not appear to be a socializer site, aborting Social browsing.");
+                            Log.Trace(
+                                $"Social:: The command args must specify at least one 'site:<value>' , social browser action will not be executed.");
                             baseHandler.SocialAbort = true;
                             return;
                         }
@@ -681,16 +980,38 @@ namespace Ghosts.Client.Handlers
                             AttachmentWindowTitle = "File Upload";
                         }
 
-                        //at this point we are logged in, files tab selected, ready for action
+                        // choose a random site, this just browses to site as we don't want an empty browser sitting there
+                        var index = _random.Next(0, allSites.Count);
+                        site = allSites[index];
+
+                        // this always goes back to home site
+                        // also fills in siteToTheme cache
+                        if (!DoInitialLogin(handler))
+                        {
+                            Log.Trace(
+                                $"Social:: Target site {site} does not appear to be a socializer site, aborting Social browsing.");
+                            baseHandler.SocialAbort = true;
+                            return;
+                        }
+
+                        //this initial browse was just a dummy browse to have the browser show something
                         _state = "execute";
                         break;
 
                     case "execute":
 
-                        //determine what to do
-                        //first go back to home site
-                        GotoHomeSite(handler);  
-                        Thread.Sleep(500);
+                        // choose a random site
+                        var index1 = _random.Next(0, allSites.Count);
+                        site = allSites[index1];
+
+                        // this always goes back to home site
+                        if (!DoInitialLogin(handler))
+                        {
+                            Log.Trace(
+                                $"Social:: Target site {site} does not appear to be a socializer site, aborting Social browsing.");
+                            baseHandler.SocialAbort = true;
+                            return;
+                        }
 
                         string socialAction = GetNextAction();
 
@@ -718,6 +1039,7 @@ namespace Ghosts.Client.Handlers
 
 
                         this.baseHandler.Report(new ReportItem {Handler = $"Social{version}: {handler.HandlerType.ToString()}", Command = socialAction, Arg = "", Trackable = timelineEvent.TrackableId});
+                        //throw new Exception($"Social:: Simulated error to test restart logic, site {site}, action {socialAction}.");
                         break;
 
 
@@ -730,17 +1052,22 @@ namespace Ghosts.Client.Handlers
                 {
                     throw;
                 }
-                errorCount = errorThreshold + 1;  // an exception at  this level needs a restart
+                // DO NOT restart Socializer. The restart logic is not correct.
+                //errorCount = errorThreshold + 1;  // an exception at  this level needs a restart
+                errorCount = 0;  // reset error count so that we don't restart on next iteration
                 LastException = e;  //save last exception so that it can be thrown up during restart
                 Log.Trace($"WebSocial:: Error at top level of execute loop.");
+                if (theme != null) Log.Trace($"Social:: Theme is {theme}, site is {site}.");
+                else Log.Trace($"Social:: Theme is null, site is {site}.");
                 Log.Error(e);
                 Thread.Sleep(20000);   // sleep to prevent tight error loop
             }
         }
 
+       
     }
 
-
+   
     }
 
     
