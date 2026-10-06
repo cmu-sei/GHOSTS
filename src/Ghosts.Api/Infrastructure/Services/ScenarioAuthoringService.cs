@@ -774,7 +774,7 @@ namespace Ghosts.Api.Infrastructure.Services
                          (gaps.Count == 0 ? string.Empty : $"\n- What the exercise still lacks: {string.Join(" ", gaps)}");
             AppendNote(session, report);
             await _context.SaveChangesAsync(CancellationToken.None);
-            _log.Info($"Authoring session {session.Id} imported document {hash} as scenario {scenario.Id}");
+            _log.Info($"Authoring session {session.Id} imported document {latest.Hash} as scenario {scenario.Id}");
 
             return new AuthoringImportResult(true, scenario.Id, hash, null, false, report);
         }
