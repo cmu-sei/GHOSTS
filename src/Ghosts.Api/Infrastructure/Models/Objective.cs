@@ -19,6 +19,10 @@ public class Objective
     public string SuccessCriteria { get; set; } = string.Empty;
     public string Assigned { get; set; } = string.Empty;
     public int SortOrder { get; set; }
+
+    [Column(TypeName = "jsonb")]
+    public string Extras { get; set; } // ObjectiveExtrasDto
+
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 
@@ -43,7 +47,8 @@ public record ObjectiveDto(
     int SortOrder,
     DateTime CreatedAt,
     DateTime UpdatedAt,
-    List<ObjectiveDto> Children
+    List<ObjectiveDto> Children,
+    ObjectiveExtrasDto Extras = null
 );
 
 public record CreateObjectiveDto(
@@ -54,7 +59,8 @@ public record CreateObjectiveDto(
     string Type,
     int Priority,
     string SuccessCriteria,
-    string Assigned
+    string Assigned,
+    ObjectiveExtrasDto Extras = null
 );
 
 public record UpdateObjectiveDto(
@@ -66,5 +72,6 @@ public record UpdateObjectiveDto(
     int Priority,
     string SuccessCriteria,
     string Assigned,
-    int SortOrder
+    int SortOrder,
+    ObjectiveExtrasDto Extras = null
 );

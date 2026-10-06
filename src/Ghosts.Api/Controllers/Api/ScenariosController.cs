@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
+using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.ScenarioDocuments;
 using Ghosts.Api.Infrastructure.Services;
@@ -27,6 +28,7 @@ public class ScenariosController : ControllerBase
     private readonly INpcService _npcService;
     private readonly IScenarioDryRunService _dryRun;
     private readonly IHttpClientFactory _clients;
+    private readonly CurrentUser _user;
     private readonly ILogger<ScenariosController> _logger;
 
     public ScenariosController(
@@ -34,15 +36,18 @@ public class ScenariosController : ControllerBase
         INpcService npcService,
         IScenarioDryRunService dryRun,
         IHttpClientFactory clients,
+        CurrentUser user,
         ILogger<ScenariosController> logger)
     {
         _scenarioService = scenarioService;
         _npcService = npcService;
         _dryRun = dryRun;
         _clients = clients;
+        _user = user;
         _logger = logger;
     }
 
+    /// <summary>Every published scenario, and the caller's own drafts (I2).</summary>
     // GET: api/scenarios
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ScenarioDto>>> GetScenarios(CancellationToken ct)
@@ -50,7 +55,7 @@ public class ScenariosController : ControllerBase
         try
         {
             var scenarios = await _scenarioService.GetAllAsync(ct);
-            return Ok(scenarios.Select(MapToDto));
+            return Ok(scenarios.Where(s => s.IsVisibleTo(_user.Name)).Select(MapToDto));
         }
         catch (Exception ex)
         {
@@ -101,8 +106,7 @@ public class ScenariosController : ControllerBase
     /// byte-identical, and POST api/scenarios/import accepts what this emits. A scenario imported from
     /// a document returns that document until its rows are edited; after an edit, or when it was built
     /// any other way, it returns a document derived from its rows. With ?derived=true it always returns
-    /// the derived form, which is how the difference — what the columns cannot hold, reported by
-    /// STORAGE_LOSSY — can be seen.
+    /// the derived form, which is how a difference between the two can be seen.
     /// </summary>
     // GET: api/scenarios/5/document
     [HttpGet("{id}/document")]
@@ -122,6 +126,61 @@ public class ScenariosController : ControllerBase
             _logger.LogError(ex, "Error exporting scenario {ScenarioId}", id);
             return StatusCode(500, new { error = "Error exporting scenario document" });
         }
+    }
+
+    /// <summary>
+    /// The approved version (A5): the document the scenario was last imported from, whether its rows were
+    /// edited since, and the change list of that edit. 404 when no document was ever imported.
+    /// </summary>
+    // GET: api/scenarios/5/document/approved
+    [HttpGet("{id}/document/approved")]
+    public async Task<IActionResult> GetApprovedDocument(int id, CancellationToken ct)
+    {
+        try
+        {
+            var approved = await _scenarioService.ApprovedDocumentAsync(id, ct);
+            return approved == null ? NotFound(new { error = $"Scenario {id} was never imported from a document." }) : Ok(approved);
+        }
+        catch (InvalidOperationException)
+        {
+            return NotFound();
+        }
+    }
+
+    /// <summary>
+    /// Publishes a draft: it becomes visible to everyone and can be deployed. Only its author may publish
+    /// it, and only when the scenario's document, as export returns it now, validates with 0 errors.
+    /// There is no way back to draft.
+    /// </summary>
+    // POST: api/scenarios/5/publish
+    [HttpPost("{id}/publish")]
+    public async Task<IActionResult> PublishScenario(int id, CancellationToken ct)
+    {
+        Scenario scenario;
+        try
+        {
+            scenario = await _scenarioService.GetByIdAsync(id, ct);
+        }
+        catch (InvalidOperationException)
+        {
+            return NotFound();
+        }
+
+        if (scenario.PublishedAt != null)
+            return Conflict(new { error = $"Scenario {id} is already published." });
+        if (scenario.Author != _user.Name)
+            return StatusCode(403, new { error = $"Only the author of this draft, {scenario.Author}, can publish it." });
+
+        var document = JsonNode.Parse(await _scenarioService.ExportDocumentAsync(id, false, ct)) as JsonObject;
+        var result = await ScenarioDocumentValidator.ValidateAsync(document, _clients, ct);
+        if (!result.IsValid)
+            return Conflict(new
+            {
+                error = $"The scenario's document has {result.Errors} errors, so it cannot be published.",
+                validation = Findings(result.Findings)
+            });
+
+        return Ok(MapToDto(await _scenarioService.PublishAsync(id, ct)));
     }
 
     /// <summary>
@@ -157,11 +216,9 @@ public class ScenariosController : ControllerBase
     /// <summary>
     /// Creates a scenario from a scenario document (schema v1). It runs the same validator as POST
     /// validate and refuses, writing nothing, on any finding of severity "error". On success the
-    /// response also carries a STORAGE_LOSSY finding for each top-level path the document populated
-    /// that has no column — this describes what the import just did, so only import reports it;
-    /// validate writes nothing and has nothing to describe. The document itself is kept whole beside
-    /// the rows, with the findings of this run, so GET {id}/document returns what was imported rather
-    /// than what the columns can rebuild.
+    /// response carries the validator's findings for this run. What no column holds goes into the rows'
+    /// extras, and the document itself is kept whole beside the rows with those findings, so
+    /// GET {id}/document returns what was imported.
     /// </summary>
     // POST: api/scenarios/import
     [HttpPost("import")]
@@ -176,11 +233,8 @@ public class ScenariosController : ControllerBase
 
         try
         {
-            // Everything this import knows about the document goes into its validation record: what the
-            // validator found, and what the columns could not hold.
-            var lossy = StorageLossAnalyzer.Analyze(document);
-            var scenario = await _scenarioService.ImportDocumentAsync(document, [.. result.Findings, .. lossy], ct);
-            var body = ImportedBody(MapToDto(scenario), lossy);
+            var scenario = await _scenarioService.ImportDocumentAsync(document, result.Findings, ct);
+            var body = ImportedBody(MapToDto(scenario), result.Findings);
             return CreatedAtAction(nameof(GetScenario), new { id = scenario.Id }, body);
         }
         catch (Exception ex)
@@ -323,10 +377,11 @@ public class ScenariosController : ControllerBase
                     ta.Name,
                     ta.Type,
                     ta.Capability,
-                    ta.Ttps?.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList() ?? new List<string>()
+                    ta.Ttps?.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList() ?? new List<string>(),
+                    ScenarioExtras.Read<AdversaryExtrasDto>(ta.Extras)
                 )).ToList(),
-                scenario.ScenarioParameters.Injects.Select(i => new InjectDto(i.Trigger, i.Title)).ToList(),
-                scenario.ScenarioParameters.UserPools.Select(up => new UserPoolDto(up.Role, up.Count)).ToList(),
+                scenario.ScenarioParameters.Injects.Select(i => new InjectDto(i.Trigger, i.Title, ScenarioExtras.Read<EventExtrasDto>(i.Extras))).ToList(),
+                scenario.ScenarioParameters.UserPools.Select(up => new UserPoolDto(up.Role, up.Count, ScenarioExtras.Read<PoolExtrasDto>(up.Extras))).ToList(),
                 scenario.ScenarioParameters.Objectives,
                 scenario.ScenarioParameters.PoliticalContext,
                 scenario.ScenarioParameters.RulesOfEngagement,
@@ -339,7 +394,8 @@ public class ScenariosController : ControllerBase
                 scenario.TechnicalEnvironment.Services,
                 scenario.TechnicalEnvironment.Assets,
                 JsonSerializer.Deserialize<List<string>>(scenario.TechnicalEnvironment.Defenses ?? "[]") ?? new List<string>(),
-                scenario.TechnicalEnvironment.Vulnerabilities.Select(v => new VulnerabilityDto(v.Asset, v.Cve, v.Severity)).ToList()
+                scenario.TechnicalEnvironment.Vulnerabilities.Select(v => new VulnerabilityDto(v.Asset, v.Cve, v.Severity,
+                    ScenarioExtras.Read<VulnerabilityExtrasDto>(v.Extras))).ToList()
             ) : null,
             scenario.GameMechanics != null ? new GameMechanicsDto(
                 scenario.GameMechanics.TimelineType,
@@ -363,10 +419,14 @@ public class ScenariosController : ControllerBase
                     e.Schedule,
                     e.TriggerCondition,
                     e.ExecutionType.ToString().ToLowerInvariant(),
-                    e.WorkflowId
+                    e.WorkflowId,
+                    ScenarioExtras.Read<EventExtrasDto>(e.Extras)
                 )).ToList()
             ) : null,
-            scenario.BuilderStatus ?? "None"
+            scenario.BuilderStatus ?? "None",
+            scenario.Author,
+            scenario.PublishedAt,
+            ScenarioExtras.Read<ScenarioExtrasDto>(scenario.Extras)
         );
     }
 

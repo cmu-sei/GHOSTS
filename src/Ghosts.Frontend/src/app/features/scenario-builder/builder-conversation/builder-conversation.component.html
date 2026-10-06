@@ -1,0 +1,233 @@
+<div class="conversation">
+  @if (loading()) {
+  <div class="loading">
+    <mat-spinner diameter="36"></mat-spinner>
+  </div>
+  }
+
+  @if (!loading()) {
+
+  <!-- Session bar -->
+  <header class="session-bar">
+    <div class="session-title">
+      <span class="agent-dot"></span>
+      <strong>Scenario Authoring Agent</strong>
+      @if (session()) {
+      <span class="model-name">{{ session()!.model }}</span>
+      } @else if (models().length > 0) {
+      <mat-form-field subscriptSizing="dynamic" appearance="outline" class="model-picker">
+        <mat-select [value]="model()" (selectionChange)="model.set($event.value)" [disabled]="busy()">
+          @for (m of models(); track m.id) {
+          <mat-option [value]="m.id">{{ m.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      }
+    </div>
+    <span class="spacer"></span>
+    @if (session() && sessions().length > 1) {
+    <mat-form-field subscriptSizing="dynamic" appearance="outline" class="session-picker">
+      <mat-select [value]="session()!.id" (selectionChange)="openSession($event.value)">
+        @for (s of sessions(); track s.id) {
+        <mat-option [value]="s.id">
+          {{ s.createdAt | date: 'MMM d, h:mm a' }} &middot; {{ s.turns }} turn{{ s.turns === 1 ? '' : 's' }}
+          @if (s.importedScenarioId) { &middot; imported }
+        </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    }
+    @if (session()) {
+    <button mat-button (click)="startNewSession()">
+      <mat-icon>add</mat-icon>
+      New conversation
+    </button>
+    }
+  </header>
+
+  @if (error()) {
+  <div class="error-banner">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ error() }}</span>
+  </div>
+  }
+
+  <!-- The conversation: the agent's greeting, then the session's turns -->
+  <div class="posts" #posts>
+    <div class="posts-inner">
+    <div class="post agent">
+      <div class="avatar"><mat-icon>auto_awesome</mat-icon></div>
+      <div class="post-body">
+        <div class="post-text greeting">
+          <p><strong>Hi! I'm the Scenario Authoring Agent.</strong> I'll help you turn an exercise idea into a validated GHOSTS scenario.</p>
+          <p>To start, describe the exercise in a few sentences. Rough notes are fine. The more of these you cover, the fewer questions I'll need to ask:</p>
+          <ul>
+            <li><strong>Audience:</strong> who is training, how many, and how experienced they are</li>
+            <li><strong>Adversary:</strong> what they do, and when</li>
+            <li><strong>Success:</strong> what the audience must do, and by when</li>
+            <li><strong>Length:</strong> how long play runs</li>
+            <li><strong>Terrain:</strong> the network it runs on</li>
+          </ul>
+          <p>If you added sources on the Sources step, I'll search them and cite what I use. I'll show you the plan and every decision I made, and nothing is imported until you click Import.</p>
+        </div>
+      </div>
+    </div>
+
+    @for (turn of turns(); track turn.turn) {
+
+    <div class="post developer">
+      <div class="bubble">{{ turn.message }}</div>
+    </div>
+
+    @if (turn.result) {
+    <div class="post agent">
+      <div class="avatar"><mat-icon>auto_awesome</mat-icon></div>
+      <div class="post-body">
+        @if (turn.result.failure) {
+        <div class="failure-notice">
+          <mat-icon>warning_amber</mat-icon>
+          <span>{{ turn.result.failure.notice }}</span>
+        </div>
+        } @else {
+        <div class="post-text" [innerHTML]="turn.html"></div>
+
+        @if (turn.chunkIds.length) {
+        <div class="chunk-chips">
+          @for (chunkId of turn.chunkIds; track chunkId) {
+          <button class="chunk-chip" [class.open]="isChunkOpen(chunkId)" (click)="toggleChunk(chunkId)">
+            <mat-icon>description</mat-icon>
+            chunk {{ chunkId }}
+          </button>
+          }
+        </div>
+        @for (chunkId of turn.chunkIds; track chunkId) {
+        @if (isChunkOpen(chunkId)) {
+        <pre class="chunk-text">{{ chunkText(chunkId) }}</pre>
+        }
+        }
+        }
+        }
+
+        <!-- The server's own account of the turn (B2, B3, D2, E5) -->
+        @if (turn.result.attention?.length || turn.result.changes?.length || turn.result.gaps?.length) {
+        <div class="server-notes">
+          @if (turn.result.attention?.length) {
+          <ul class="attention-list">
+            @for (line of turn.result.attention; track line) {
+            <li>{{ line }}</li>
+            }
+          </ul>
+          }
+          @if (turn.result.changes?.length) {
+          <div class="changes">
+            <div class="changes-title">Changed since the last version</div>
+            <ul>
+              @for (line of turn.result.changes; track line) {
+              <li><code>{{ line }}</code></li>
+              }
+            </ul>
+          </div>
+          }
+          @if (turn.result.gaps?.length) {
+          <div class="gaps">
+            @for (line of turn.result.gaps; track line) {
+            <div class="gap-line">{{ line }}</div>
+            }
+          </div>
+          }
+        </div>
+        }
+
+        <div class="post-actions">
+          @if (turn.result.statusLine) {
+          <span class="turn-status">{{ turn.result.statusLine }}</span>
+          }
+          @if (turn.result.latestDocument?.hash) {
+          <button mat-button (click)="toggleDocument(turn.result.latestDocument!.hash)">
+            <mat-icon>description</mat-icon>
+            Document
+          </button>
+          }
+          <button mat-button (click)="toggleDetails(turn.turn)">
+            <mat-icon>{{ isDetailsOpen(turn.turn) ? 'expand_less' : 'expand_more' }}</mat-icon>
+            Details
+          </button>
+        </div>
+
+        @if (isDetailsOpen(turn.turn)) {
+        <pre class="gate-report">{{ turn.result.gateReport }}</pre>
+        }
+        @if (openDocument() && turn.result.latestDocument?.hash === openDocument()!.hash) {
+        <div class="document-panel">
+          <div class="document-findings">{{ openDocument()!.findings }}</div>
+          <pre class="document-text">{{ openDocument()!.text }}</pre>
+        </div>
+        }
+      </div>
+    </div>
+    } @else if (turn.interrupted) {
+    <div class="post agent">
+      <div class="avatar"><mat-icon>auto_awesome</mat-icon></div>
+      <div class="post-body">
+        <div class="failure-notice">
+          <mat-icon>warning_amber</mat-icon>
+          <span>This turn was interrupted by a server restart and never finished. Send your message again.</span>
+        </div>
+      </div>
+    </div>
+    }
+    }
+
+    @if (pending()) {
+    <div class="post developer">
+      <div class="bubble">{{ pending() }}</div>
+    </div>
+    }
+
+    @if (busy()) {
+    <div class="post agent working">
+      <div class="avatar"><mat-icon>auto_awesome</mat-icon></div>
+      <div class="post-body">
+        <div class="working-line">
+          <mat-spinner diameter="16"></mat-spinner>
+          <span>{{ progressLine() ?? 'Working…' }}</span>
+          <span class="elapsed">{{ elapsedSeconds() }}s</span>
+        </div>
+      </div>
+    </div>
+    }
+    </div>
+  </div>
+
+  <!-- The composer, with the session's one status line and its import control above it (B1) -->
+  <footer class="composer">
+    <div class="composer-inner">
+      @if (session()?.latestDocument) {
+      <div class="import-row" [class.ready]="canImport()">
+        <mat-icon>{{ canImport() ? 'check_circle' : 'info_outline' }}</mat-icon>
+        <span class="status-text">{{ session()!.statusLine }}</span>
+        @if (canImport()) {
+        <button mat-flat-button color="primary" (click)="import()">
+          <mat-icon>publish</mat-icon>
+          Import this scenario
+        </button>
+        }
+      </div>
+      }
+      <div class="composer-box">
+        <textarea
+          #composer
+          rows="1"
+          [ngModel]="message()"
+          (ngModelChange)="message.set($event)"
+          [placeholder]="session() ? 'Message the Scenario Authoring Agent' : 'e.g. A nine-person utility SOC faces a phishing-led OT intrusion over two compressed days…'"
+          (keydown.enter)="onComposerKeydown($event)"></textarea>
+        <button mat-icon-button class="send" color="primary" (click)="send()" [disabled]="busy() || !message().trim()" matTooltip="Send (Enter)">
+          <mat-icon>arrow_upward</mat-icon>
+        </button>
+      </div>
+      <div class="composer-hint">Enter to send · Shift+Enter for a new line</div>
+    </div>
+  </footer>
+  }
+</div>

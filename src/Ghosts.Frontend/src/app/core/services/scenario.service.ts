@@ -34,4 +34,9 @@ export class ScenarioService {
   deleteScenario(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+
+  /** Makes a draft visible to everyone and deployable. Only its author may, and only when it validates with 0 errors. */
+  publishScenario(id: number): Observable<Scenario> {
+    return this.http.post<Scenario>(`${this.apiUrl}/${id}/publish`, {});
+  }
 }

@@ -9,6 +9,11 @@
     <mat-spinner diameter="40"></mat-spinner>
     <p>Loading graph data...</p>
   </div>
+  } @else if (empty()) {
+  <div class="empty-state">
+    <mat-icon>hub</mat-icon>
+    <p>No graph yet. It is drawn from the entities above and the edges between them.</p>
+  </div>
   } @else {
   <div class="graph-workspace" [class.has-detail]="selectedNode()">
     <div class="graph-controls">

@@ -63,6 +63,17 @@
             placeholder="Enter scenario description"></textarea>
         </mat-form-field>
 
+        <mat-form-field class="full-width">
+          <mat-label>Slug</mat-label>
+          <input matInput [(ngModel)]="extras.slug" placeholder="e.g., meridian-hybrid">
+        </mat-form-field>
+
+        <mat-form-field class="full-width">
+          <mat-label>Intent</mat-label>
+          <textarea matInput [(ngModel)]="extras.intent" rows="3"
+            placeholder="The exercise developer's intent, as written"></textarea>
+        </mat-form-field>
+
         <!-- Nations Section -->
         <div class="form-section">
           <h3 class="subsection-title">Nations Involved
@@ -99,31 +110,97 @@
         <div class="form-section">
           <h3>Threat Actors</h3>
           <div class="list-manager">
-            <div *ngFor="let actor of scenario.scenarioParameters!.threatActors; let i = index" class="list-item">
-              <mat-form-field class="item-field">
-                <mat-label>Actor Name</mat-label>
-                <input matInput [(ngModel)]="actor.name" placeholder="e.g., GreyWolf, BlackFlag">
-              </mat-form-field>
-              <mat-form-field class="item-field-small">
-                <mat-label>Type</mat-label>
-                <mat-select [(ngModel)]="actor.type">
-                  <mat-option value="state">State-Sponsored</mat-option>
-                  <mat-option value="criminal">Criminal</mat-option>
-                  <mat-option value="hacktivist">Hacktivist</mat-option>
-                  <mat-option value="insider">Insider</mat-option>
-                </mat-select>
-              </mat-form-field>
-              <mat-form-field class="item-field-small">
-                <mat-label>Capability (1-5)</mat-label>
-                <input matInput type="number" [(ngModel)]="actor.capability" min="1" max="5">
-              </mat-form-field>
-              <mat-form-field class="item-field">
-                <mat-label>MITRE TTPs (comma-separated)</mat-label>
-                <input matInput [(ngModel)]="actor.ttpsString" placeholder="T1059,T1047">
-              </mat-form-field>
-              <button mat-icon-button color="warn" (click)="removeThreatActor(i)">
-                <i class="fas fa-trash"></i>
-              </button>
+            <div *ngFor="let actor of scenario.scenarioParameters!.threatActors; let i = index" class="list-block">
+              <div class="list-item">
+                <mat-form-field class="item-field">
+                  <mat-label>Actor Name</mat-label>
+                  <input matInput [(ngModel)]="actor.name" placeholder="e.g., GreyWolf, BlackFlag">
+                </mat-form-field>
+                <mat-form-field class="item-field-small">
+                  <mat-label>Type</mat-label>
+                  <mat-select [(ngModel)]="actor.type">
+                    <mat-option value="state">State-Sponsored</mat-option>
+                    <mat-option value="criminal">Criminal</mat-option>
+                    <mat-option value="hacktivist">Hacktivist</mat-option>
+                    <mat-option value="insider">Insider</mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <mat-form-field class="item-field-small">
+                  <mat-label>Capability (1-5)</mat-label>
+                  <input matInput type="number" [(ngModel)]="actor.capability" min="1" max="5">
+                </mat-form-field>
+                <mat-form-field class="item-field">
+                  <mat-label>MITRE TTPs (comma-separated)</mat-label>
+                  <input matInput [(ngModel)]="actor.ttpsString" placeholder="T1059,T1047">
+                </mat-form-field>
+                <button mat-icon-button color="warn" (click)="removeThreatActor(i)">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+              <div class="form-row">
+                <mat-form-field class="third-width">
+                  <mat-label>Id</mat-label>
+                  <input matInput [(ngModel)]="actor.extras!.id">
+                </mat-form-field>
+                <mat-form-field class="half-width">
+                  <mat-label>Objective</mat-label>
+                  <input matInput [(ngModel)]="actor.extras!.objective" placeholder="What this adversary is trying to bring about">
+                </mat-form-field>
+                <mat-form-field class="third-width">
+                  <mat-label>Win threshold</mat-label>
+                  <input matInput type="number" min="0" [(ngModel)]="actor.extras!.winThreshold">
+                </mat-form-field>
+              </div>
+              <div class="sub-list">
+                <h4>Playbook</h4>
+                @for (move of actor.extras!.playbook!; track $index; let m = $index) {
+                <div class="list-block">
+                  <div class="list-item">
+                    <mat-form-field class="item-field-small">
+                      <mat-label>Id</mat-label>
+                      <input matInput [(ngModel)]="move.id">
+                    </mat-form-field>
+                    <mat-form-field class="item-field-small">
+                      <mat-label>Domain</mat-label>
+                      <mat-select [(ngModel)]="move.domain">
+                        <mat-option *ngFor="let d of moveDomains" [value]="d">{{ d }}</mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                    <mat-form-field class="item-field">
+                      <mat-label>Description</mat-label>
+                      <input matInput [(ngModel)]="move.description">
+                    </mat-form-field>
+                    <mat-form-field class="item-field-small">
+                      <mat-label>Progress</mat-label>
+                      <input matInput type="number" min="0" [(ngModel)]="move.progress">
+                    </mat-form-field>
+                    <button mat-icon-button color="warn" (click)="removeItem(actor.extras!.playbook!, m)">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                  <div class="form-row">
+                    <mat-form-field class="half-width">
+                      <mat-label>Techniques (comma-separated)</mat-label>
+                      <input matInput [value]="commaText(move.techniques)"
+                        (change)="setCommaList(move, 'techniques', $any($event.target).value)" placeholder="T1566, T1078">
+                    </mat-form-field>
+                    <mat-form-field class="half-width">
+                      <mat-label>Preconditions</mat-label>
+                      <input matInput [(ngModel)]="move.preconditions" placeholder="e.g., flag:foothold && clock>=30">
+                    </mat-form-field>
+                  </div>
+                  <mat-form-field class="full-width">
+                    <mat-label>Indicators (one per line)</mat-label>
+                    <textarea matInput rows="2" [value]="linesText(move.indicators)"
+                      (change)="setLineList(move, 'indicators', $any($event.target).value)"></textarea>
+                  </mat-form-field>
+                  <ng-container *ngTemplateOutlet="effectsFields; context: { $implicit: move.effects }"></ng-container>
+                </div>
+                }
+                <button mat-stroked-button (click)="addItem(actor.extras!.playbook!, { id: '', description: '', effects: {} })">
+                  <i class="fas fa-plus"></i> Add Move
+                </button>
+              </div>
             </div>
             <button mat-raised-button color="primary" (click)="addThreatActor()">
               <i class="fas fa-plus"></i> Add Threat Actor
@@ -135,18 +212,37 @@
         <div class="form-section">
           <h3>Injects</h3>
           <div class="list-manager">
-            <div *ngFor="let inject of scenario.scenarioParameters!.injects; let i = index" class="list-item">
-              <mat-form-field class="item-field-small">
-                <mat-label>Trigger</mat-label>
-                <input matInput [(ngModel)]="inject.trigger" placeholder="e.g., T+10m, OnDetect">
-              </mat-form-field>
-              <mat-form-field class="item-field">
-                <mat-label>Title/Description</mat-label>
-                <input matInput [(ngModel)]="inject.title" placeholder="e.g., Phish email to finance">
-              </mat-form-field>
-              <button mat-icon-button color="warn" (click)="removeInject(i)">
-                <i class="fas fa-trash"></i>
-              </button>
+            <div *ngFor="let inject of scenario.scenarioParameters!.injects; let i = index" class="list-block">
+              <div class="list-item">
+                <mat-form-field class="item-field-small">
+                  <mat-label>Trigger</mat-label>
+                  <input matInput [(ngModel)]="inject.trigger" placeholder="e.g., T+10m, OnDetect">
+                </mat-form-field>
+                <mat-form-field class="item-field">
+                  <mat-label>Title/Description</mat-label>
+                  <input matInput [(ngModel)]="inject.title" placeholder="e.g., Phish email to finance">
+                </mat-form-field>
+                <button mat-icon-button color="warn" (click)="removeInject(i)">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+              <div class="form-row">
+                <mat-form-field class="third-width">
+                  <mat-label>Id</mat-label>
+                  <input matInput [(ngModel)]="inject.extras!.id">
+                </mat-form-field>
+                <mat-form-field class="third-width">
+                  <mat-label>Owner</mat-label>
+                  <mat-select [(ngModel)]="inject.extras!.owner">
+                    <mat-option *ngFor="let o of documentOwners" [value]="o.value">{{ o.label }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <mat-form-field class="third-width">
+                  <mat-label>When (condition)</mat-label>
+                  <input matInput [(ngModel)]="inject.extras!.when" placeholder="e.g., flag:phish_clicked">
+                </mat-form-field>
+              </div>
+              <ng-container *ngTemplateOutlet="eventFields; context: { $implicit: inject.extras }"></ng-container>
             </div>
             <button mat-raised-button color="primary" (click)="addInject()">
               <i class="fas fa-plus"></i> Add Inject
@@ -167,6 +263,10 @@
                 <mat-label>Count</mat-label>
                 <input matInput type="number" [(ngModel)]="pool.count" min="1">
               </mat-form-field>
+              <mat-form-field class="item-field">
+                <mat-label>Description</mat-label>
+                <input matInput [(ngModel)]="pool.extras!.description">
+              </mat-form-field>
               <button mat-icon-button color="warn" (click)="removeUserPool(i)">
                 <i class="fas fa-trash"></i>
               </button>
@@ -174,6 +274,30 @@
             <button mat-raised-button color="primary" (click)="addUserPool()">
               <i class="fas fa-plus"></i> Add User Pool
             </button>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3>Training Audience</h3>
+          <div class="form-row">
+            <mat-form-field class="half-width">
+              <mat-label>Role</mat-label>
+              <input matInput [(ngModel)]="extras.audience.role" placeholder="e.g., SOC tier-1 analysts">
+            </mat-form-field>
+            <mat-form-field class="third-width">
+              <mat-label>Size</mat-label>
+              <input matInput type="number" min="1" [(ngModel)]="extras.audience.size">
+            </mat-form-field>
+          </div>
+          <div class="form-row">
+            <mat-form-field class="half-width">
+              <mat-label>Proficiency</mat-label>
+              <textarea matInput [(ngModel)]="extras.audience.proficiency" rows="2"></textarea>
+            </mat-form-field>
+            <mat-form-field class="half-width">
+              <mat-label>Mandate</mat-label>
+              <textarea matInput [(ngModel)]="extras.audience.mandate" rows="2"></textarea>
+            </mat-form-field>
           </div>
         </div>
 
@@ -196,6 +320,11 @@
               <textarea matInput [(ngModel)]="scenario.scenarioParameters!.politicalContext" rows="3"></textarea>
             </mat-form-field>
           </div>
+
+          <mat-form-field class="full-width">
+            <mat-label>Situation</mat-label>
+            <textarea matInput [(ngModel)]="extras.context.situation" rows="3"></textarea>
+          </mat-form-field>
         </div>
 
         <div class="form-section">
@@ -218,6 +347,117 @@
             </mat-form-field>
           </div>
         </div>
+
+        <div class="form-section">
+          <h3>Catalog</h3>
+          <div class="form-row">
+            <mat-checkbox [(ngModel)]="extras.catalog.listed">Listed</mat-checkbox>
+            <mat-form-field class="third-width">
+              <mat-label>Sort order</mat-label>
+              <input matInput type="number" [(ngModel)]="extras.catalog.sortOrder">
+            </mat-form-field>
+            <mat-form-field class="third-width">
+              <mat-label>Estimated minutes</mat-label>
+              <input matInput type="number" min="0" [(ngModel)]="extras.catalog.estimatedMinutes">
+            </mat-form-field>
+          </div>
+          <div class="form-row">
+            <mat-form-field class="half-width">
+              <mat-label>Era</mat-label>
+              <input matInput [(ngModel)]="extras.catalog.era">
+            </mat-form-field>
+            <mat-form-field class="half-width">
+              <mat-label>Theater</mat-label>
+              <input matInput [(ngModel)]="extras.catalog.theater">
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3>Sources</h3>
+          <div class="list-manager">
+            @for (source of extras.sources; track $index; let i = $index) {
+            <div class="list-block">
+              <div class="list-item">
+                <mat-form-field class="item-field-small">
+                  <mat-label>Id</mat-label>
+                  <input matInput [(ngModel)]="source.id">
+                </mat-form-field>
+                <mat-form-field class="item-field">
+                  <mat-label>Name</mat-label>
+                  <input matInput [(ngModel)]="source.name">
+                </mat-form-field>
+                <mat-form-field class="item-field-small">
+                  <mat-label>Type</mat-label>
+                  <mat-select [(ngModel)]="source.type">
+                    <mat-option *ngFor="let t of sourceTypes" [value]="t">{{ t }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <button mat-icon-button color="warn" (click)="removeItem(extras.sources, i)">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+              <div class="form-row">
+                <mat-form-field class="half-width">
+                  <mat-label>URI</mat-label>
+                  <input matInput [(ngModel)]="source.uri">
+                </mat-form-field>
+                <mat-form-field class="third-width">
+                  <mat-label>MIME type</mat-label>
+                  <input matInput [(ngModel)]="source.mimeType">
+                </mat-form-field>
+                <mat-form-field class="half-width">
+                  <mat-label>Note</mat-label>
+                  <input matInput [(ngModel)]="source.note">
+                </mat-form-field>
+              </div>
+            </div>
+            }
+            <button mat-raised-button color="primary" (click)="addItem(extras.sources, { id: '', name: '' })">
+              <i class="fas fa-plus"></i> Add Source
+            </button>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3>References</h3>
+          <div class="list-manager">
+            @for (reference of extras.references; track $index; let i = $index) {
+            <div class="list-block">
+              <div class="list-item">
+                <mat-form-field class="item-field-small">
+                  <mat-label>Id</mat-label>
+                  <input matInput [(ngModel)]="reference.id">
+                </mat-form-field>
+                <mat-form-field class="item-field">
+                  <mat-label>Title</mat-label>
+                  <input matInput [(ngModel)]="reference.title">
+                </mat-form-field>
+                <button mat-icon-button color="warn" (click)="removeItem(extras.references, i)">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+              <div class="form-row">
+                <mat-form-field class="half-width">
+                  <mat-label>URI</mat-label>
+                  <input matInput [(ngModel)]="reference.uri">
+                </mat-form-field>
+                <mat-form-field class="third-width">
+                  <mat-label>Locator</mat-label>
+                  <input matInput [(ngModel)]="reference.locator" placeholder="e.g., §3.2">
+                </mat-form-field>
+                <mat-form-field class="half-width">
+                  <mat-label>Note</mat-label>
+                  <input matInput [(ngModel)]="reference.note">
+                </mat-form-field>
+              </div>
+            </div>
+            }
+            <button mat-raised-button color="primary" (click)="addItem(extras.references, { id: '', title: '' })">
+              <i class="fas fa-plus"></i> Add Reference
+            </button>
+          </div>
+        </div>
       </div>
     </mat-tab>
 
@@ -233,6 +473,122 @@
             <textarea matInput [(ngModel)]="scenario.technicalEnvironment!.networkTopology" rows="3"
               placeholder="Describe networks, domains, enclaves, cloud/on-prem architecture"></textarea>
           </mat-form-field>
+          <div class="form-row">
+            <mat-form-field class="half-width">
+              <mat-label>Base range provider</mat-label>
+              <input matInput [(ngModel)]="terrain.reference.provider" placeholder="e.g., topomojo">
+            </mat-form-field>
+            <mat-form-field class="half-width">
+              <mat-label>Base range slice</mat-label>
+              <input matInput [(ngModel)]="terrain.reference.slice">
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3 class="subsection-title">Segments</h3>
+          <div class="list-manager">
+            @for (segment of terrain.segments; track $index; let i = $index) {
+            <div class="list-item">
+              <mat-form-field class="item-field-small">
+                <mat-label>Name</mat-label>
+                <input matInput [(ngModel)]="segment.name">
+              </mat-form-field>
+              <mat-form-field class="item-field-small">
+                <mat-label>CIDR</mat-label>
+                <input matInput [(ngModel)]="segment.cidr" placeholder="10.0.0.0/24">
+              </mat-form-field>
+              <mat-form-field class="item-field">
+                <mat-label>Description</mat-label>
+                <input matInput [(ngModel)]="segment.description">
+              </mat-form-field>
+              <button mat-icon-button color="warn" (click)="removeItem(terrain.segments, i)">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+            }
+            <button mat-raised-button color="primary" (click)="addItem(terrain.segments, { name: '' })">
+              <i class="fas fa-plus"></i> Add Segment
+            </button>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3 class="subsection-title">Hosts</h3>
+          <div class="list-manager">
+            @for (host of terrain.hosts; track $index; let i = $index) {
+            <div class="list-block">
+              <div class="list-item">
+                <mat-form-field class="item-field">
+                  <mat-label>Name</mat-label>
+                  <input matInput [(ngModel)]="host.name">
+                </mat-form-field>
+                <mat-form-field class="item-field-small">
+                  <mat-label>Segment</mat-label>
+                  <input matInput [(ngModel)]="host.segment">
+                </mat-form-field>
+                <mat-form-field class="item-field-small">
+                  <mat-label>OS</mat-label>
+                  <input matInput [(ngModel)]="host.os">
+                </mat-form-field>
+                <mat-form-field class="item-field-small">
+                  <mat-label>Role</mat-label>
+                  <input matInput [(ngModel)]="host.role">
+                </mat-form-field>
+                <button mat-icon-button color="warn" (click)="removeItem(terrain.hosts, i)">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+              <div class="form-row">
+                <mat-form-field class="half-width">
+                  <mat-label>Description</mat-label>
+                  <input matInput [(ngModel)]="host.description">
+                </mat-form-field>
+                <mat-form-field class="half-width">
+                  <mat-label>Services (comma-separated)</mat-label>
+                  <input matInput [value]="commaText(host.services)"
+                    (change)="setCommaList(host, 'services', $any($event.target).value)">
+                </mat-form-field>
+              </div>
+            </div>
+            }
+            <button mat-raised-button color="primary" (click)="addItem(terrain.hosts, { name: '' })">
+              <i class="fas fa-plus"></i> Add Host
+            </button>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3 class="subsection-title">Services</h3>
+          <mat-form-field class="full-width">
+            <mat-label>Services summary</mat-label>
+            <textarea matInput [(ngModel)]="scenario.technicalEnvironment!.services" rows="2"></textarea>
+          </mat-form-field>
+          <div class="list-manager">
+            @for (service of terrain.services; track $index; let i = $index) {
+            <div class="list-item">
+              <mat-form-field class="item-field-small">
+                <mat-label>Name</mat-label>
+                <input matInput [(ngModel)]="service.name">
+              </mat-form-field>
+              <mat-form-field class="item-field">
+                <mat-label>Description</mat-label>
+                <input matInput [(ngModel)]="service.description">
+              </mat-form-field>
+              <mat-form-field class="item-field">
+                <mat-label>Hosts (comma-separated)</mat-label>
+                <input matInput [value]="commaText(service.hosts)"
+                  (change)="setCommaList(service, 'hosts', $any($event.target).value)">
+              </mat-form-field>
+              <button mat-icon-button color="warn" (click)="removeItem(terrain.services, i)">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+            }
+            <button mat-raised-button color="primary" (click)="addItem(terrain.services, { name: '' })">
+              <i class="fas fa-plus"></i> Add Service
+            </button>
+          </div>
         </div>
 
         <div class="form-section">
@@ -312,6 +668,87 @@
               placeholder="e.g., Windows/Linux mix, Critical apps, ICS/SCADA systems"></textarea>
           </mat-form-field>
         </div>
+
+        <div class="form-section">
+          <h3 class="subsection-title">Information Environment</h3>
+          <div class="form-row">
+            <mat-form-field class="half-width">
+              <mat-label>Platforms</mat-label>
+              <textarea matInput [(ngModel)]="terrain.informationEnvironment.platforms" rows="2"></textarea>
+            </mat-form-field>
+            <mat-form-field class="half-width">
+              <mat-label>Audience</mat-label>
+              <textarea matInput [(ngModel)]="terrain.informationEnvironment.audience" rows="2"></textarea>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3 class="subsection-title">Defenses</h3>
+          <div class="list-manager">
+            @for (defense of terrain.defenses; track $index; let i = $index) {
+            <div class="list-item">
+              <mat-form-field class="item-field-small">
+                <mat-label>Name</mat-label>
+                <input matInput [(ngModel)]="defense.name">
+              </mat-form-field>
+              <mat-form-field class="item-field">
+                <mat-label>Description</mat-label>
+                <input matInput [(ngModel)]="defense.description">
+              </mat-form-field>
+              <mat-form-field class="item-field">
+                <mat-label>Covers (comma-separated)</mat-label>
+                <input matInput [value]="commaText(defense.covers)"
+                  (change)="setCommaList(defense, 'covers', $any($event.target).value)">
+              </mat-form-field>
+              <button mat-icon-button color="warn" (click)="removeItem(terrain.defenses, i)">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+            }
+            <button mat-raised-button color="primary" (click)="addItem(terrain.defenses, { name: '' })">
+              <i class="fas fa-plus"></i> Add Defense
+            </button>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3 class="subsection-title">Vulnerabilities</h3>
+          <div class="list-manager">
+            @for (vulnerability of scenario.technicalEnvironment!.vulnerabilities; track $index; let i = $index) {
+            <div class="list-item">
+              <mat-form-field class="item-field-small">
+                <mat-label>Asset</mat-label>
+                <input matInput [(ngModel)]="vulnerability.asset">
+              </mat-form-field>
+              <mat-form-field class="item-field-small">
+                <mat-label>CVE</mat-label>
+                <input matInput [(ngModel)]="vulnerability.cve" placeholder="CVE-2021-26855">
+              </mat-form-field>
+              <mat-form-field class="item-field">
+                <mat-label>Description</mat-label>
+                <input matInput [(ngModel)]="vulnerability.extras!.description">
+              </mat-form-field>
+              <mat-form-field class="item-field-small">
+                <mat-label>Severity</mat-label>
+                <mat-select [(ngModel)]="vulnerability.severity">
+                  <mat-option value="low">Low</mat-option>
+                  <mat-option value="medium">Medium</mat-option>
+                  <mat-option value="high">High</mat-option>
+                  <mat-option value="critical">Critical</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <button mat-icon-button color="warn" (click)="removeItem(scenario.technicalEnvironment!.vulnerabilities, i)">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+            }
+            <button mat-raised-button color="primary"
+              (click)="addItem(scenario.technicalEnvironment!.vulnerabilities, { asset: '', cve: '', severity: 'medium', extras: {} })">
+              <i class="fas fa-plus"></i> Add Vulnerability
+            </button>
+          </div>
+        </div>
       </div>
     </mat-tab>
 
@@ -353,6 +790,66 @@
               </mat-select>
             </mat-form-field>
           </div>
+          <div class="form-row">
+            <mat-form-field class="third-width">
+              <mat-label>Clock tick (minutes)</mat-label>
+              <input matInput type="number" min="1" [(ngModel)]="rulesOfPlay.clock.tickMinutes">
+            </mat-form-field>
+            <mat-form-field class="third-width">
+              <mat-label>Clock label</mat-label>
+              <input matInput [(ngModel)]="rulesOfPlay.clock.label">
+            </mat-form-field>
+            <mat-form-field class="third-width">
+              <mat-label>Fog</mat-label>
+              <mat-select [(ngModel)]="rulesOfPlay.fog">
+                <mat-option *ngFor="let f of fogLevels" [value]="f">{{ f }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3 class="subsection-title">Deadline</h3>
+          <div class="form-row">
+            <mat-form-field class="third-width">
+              <mat-label>At</mat-label>
+              <input matInput [(ngModel)]="rulesOfPlay.deadline.at" placeholder="e.g., T+45m">
+            </mat-form-field>
+            <mat-form-field class="third-width">
+              <mat-label>Label</mat-label>
+              <input matInput [(ngModel)]="rulesOfPlay.deadline.label">
+            </mat-form-field>
+            <mat-form-field class="third-width">
+              <mat-label>Decisive action</mat-label>
+              <input matInput [(ngModel)]="rulesOfPlay.deadline.decisiveAction">
+            </mat-form-field>
+          </div>
+          <div class="form-row">
+            <mat-form-field class="half-width">
+              <mat-label>Warning</mat-label>
+              <textarea matInput [(ngModel)]="rulesOfPlay.deadline.warning" rows="2"></textarea>
+            </mat-form-field>
+            <mat-form-field class="half-width">
+              <mat-label>Failure message</mat-label>
+              <textarea matInput [(ngModel)]="rulesOfPlay.deadline.failureMessage" rows="2"></textarea>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3 class="subsection-title">Starting Conditions</h3>
+          <div class="form-row">
+            <mat-form-field class="half-width">
+              <mat-label>Flags (comma-separated)</mat-label>
+              <input matInput [value]="commaText(extras.startingConditions.flags)"
+                (change)="setCommaList(extras.startingConditions, 'flags', $any($event.target).value)">
+            </mat-form-field>
+            <mat-form-field class="half-width">
+              <mat-label>Facts (key=value, one per line)</mat-label>
+              <textarea matInput rows="3" [value]="factsText(extras.startingConditions.facts)"
+                (change)="setFacts(extras.startingConditions, 'facts', $any($event.target).value)"></textarea>
+            </mat-form-field>
+          </div>
         </div>
 
         <div class="form-section">
@@ -369,6 +866,29 @@
               <textarea matInput [(ngModel)]="scenario.simulationMechanics!.branchingLogic" rows="3"
                 placeholder="Describe how scenario branches based on player decisions"></textarea>
             </mat-form-field>
+          </div>
+
+          <h4>Escalation Rungs</h4>
+          <div class="list-manager">
+            @for (rung of rulesOfPlay.escalationLadder.rungs!; track $index; let i = $index) {
+            <div class="list-item">
+              <mat-form-field class="item-field-small">
+                <mat-label>Name</mat-label>
+                <input matInput [(ngModel)]="rung.name">
+              </mat-form-field>
+              <mat-form-field class="item-field">
+                <mat-label>Description</mat-label>
+                <input matInput [(ngModel)]="rung.description">
+              </mat-form-field>
+              <mat-checkbox [(ngModel)]="rung.recoverable">Recoverable</mat-checkbox>
+              <button mat-icon-button color="warn" (click)="removeItem(rulesOfPlay.escalationLadder.rungs!, i)">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+            }
+            <button mat-raised-button color="primary" (click)="addItem(rulesOfPlay.escalationLadder.rungs!, { name: '' })">
+              <i class="fas fa-plus"></i> Add Rung
+            </button>
           </div>
         </div>
 
@@ -474,6 +994,8 @@
                   style="margin-top: 16px;">
                   <mat-label>Workflow</mat-label>
                   <mat-select [(ngModel)]="element.workflowId" (selectionChange)="onExecutionTypeChanged(element)">
+                    <mat-option *ngFor="let b of scenario.scenarioParameters!.workflowBindings ?? []" [value]="b.workflowRef">
+                      {{ b.displayName || b.workflowRef }}</mat-option>
                     <mat-option *ngFor="let wf of availableWorkflows()" [value]="wf.id">{{ wf.name }}</mat-option>
                   </mat-select>
                 </mat-form-field>
@@ -518,8 +1040,127 @@
             <tr mat-row *matRowDef="let row; columns: timelineColumns;" cdkDrag class="table-row"></tr>
           </table>
         </div>
+
+        <div class="form-section">
+          <h3>Event Details</h3>
+          <mat-accordion multi>
+            @for (ev of scenario.timeline!.events; track $index) {
+            <mat-expansion-panel>
+              <mat-expansion-panel-header>
+                <mat-panel-title>#{{ ev.number }} {{ ev.extras?.title || ev.description }}</mat-panel-title>
+                <mat-panel-description>{{ ev.time }} · {{ ev.assigned }}</mat-panel-description>
+              </mat-expansion-panel-header>
+              <div class="form-row">
+                <mat-form-field class="third-width">
+                  <mat-label>Id</mat-label>
+                  <input matInput [(ngModel)]="ev.extras!.id">
+                </mat-form-field>
+                <mat-form-field class="half-width">
+                  <mat-label>Title</mat-label>
+                  <input matInput [(ngModel)]="ev.extras!.title">
+                </mat-form-field>
+              </div>
+              <div class="form-row">
+                <mat-form-field class="third-width">
+                  <mat-label>Trigger</mat-label>
+                  <mat-select [(ngModel)]="ev.triggerKind">
+                    <mat-option *ngFor="let k of triggerKinds" [value]="k">{{ k }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <mat-form-field class="third-width">
+                  <mat-label>Schedule</mat-label>
+                  <input matInput [(ngModel)]="ev.schedule" placeholder="e.g., */5 * * * *">
+                </mat-form-field>
+                <mat-form-field class="third-width">
+                  <mat-label>When (condition)</mat-label>
+                  <input matInput [(ngModel)]="ev.triggerCondition" placeholder="e.g., flag:foothold">
+                </mat-form-field>
+              </div>
+              <ng-container *ngTemplateOutlet="eventFields; context: { $implicit: ev.extras }"></ng-container>
+            </mat-expansion-panel>
+            }
+          </mat-accordion>
+        </div>
+
+        <!-- Absent on a new scenario: create binds the default animation workflows -->
+        @if (scenario.scenarioParameters!.workflowBindings; as bindings) {
+        <div class="form-section">
+          <h3>Animation Workflows</h3>
+          <div class="list-manager">
+            @for (binding of bindings; track $index; let i = $index) {
+            <div class="list-item">
+              <mat-form-field class="item-field-small">
+                <mat-label>Workflow ref</mat-label>
+                <input matInput [(ngModel)]="binding.workflowRef" placeholder="e.g., beliefs">
+              </mat-form-field>
+              <mat-form-field class="item-field">
+                <mat-label>Display name</mat-label>
+                <input matInput [(ngModel)]="binding.displayName">
+              </mat-form-field>
+              <mat-form-field class="item-field-small">
+                <mat-label>Cron</mat-label>
+                <input matInput [(ngModel)]="binding.cron" placeholder="*/15 * * * *">
+              </mat-form-field>
+              <mat-checkbox [(ngModel)]="binding.enabled">Enabled</mat-checkbox>
+              <button mat-icon-button color="warn" (click)="removeItem(bindings, i)">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+            }
+            <button mat-raised-button color="primary"
+              (click)="addItem(bindings, { workflowRef: '', displayName: '', cron: '', enabled: true })">
+              <i class="fas fa-plus"></i> Add Workflow
+            </button>
+          </div>
+        </div>
+        }
       </div>
+    </mat-tab>
+
+    <!-- Entities & Graph Tab -->
+    <mat-tab label="Entities & Graph">
+      <ng-template matTabContent>
+        <div class="content-card">
+          @if (scenarioId) {
+          <app-builder-entities [scenarioId]="scenarioId"></app-builder-entities>
+          <app-builder-graph [scenarioId]="scenarioId"></app-builder-graph>
+          } @else {
+          <p>Save the scenario first: entities and edges belong to a saved scenario.</p>
+          }
+        </div>
+      </ng-template>
     </mat-tab>
   </mat-tab-group>
 </div>
 }
+
+<!-- What an event says beyond its time and owner, shared by injects and timeline events -->
+<ng-template #eventFields let-x>
+  <div class="form-row">
+    <mat-form-field class="half-width">
+      <mat-label>Expected response</mat-label>
+      <textarea matInput rows="2" [(ngModel)]="x.expectedResponse"></textarea>
+    </mat-form-field>
+    <mat-form-field class="half-width">
+      <mat-label>Indicators (one per line)</mat-label>
+      <textarea matInput rows="2" [value]="linesText(x.indicators)"
+        (change)="setLineList(x, 'indicators', $any($event.target).value)"></textarea>
+    </mat-form-field>
+  </div>
+  <ng-container *ngTemplateOutlet="effectsFields; context: { $implicit: x.effects }"></ng-container>
+</ng-template>
+
+<ng-template #effectsFields let-effects>
+  <div class="form-row">
+    <mat-form-field class="half-width">
+      <mat-label>Sets flags (comma-separated)</mat-label>
+      <input matInput [value]="commaText(effects.setFlags)"
+        (change)="setCommaList(effects, 'setFlags', $any($event.target).value)">
+    </mat-form-field>
+    <mat-form-field class="half-width">
+      <mat-label>Sets facts (key=value, one per line)</mat-label>
+      <textarea matInput rows="2" [value]="factsText(effects.setFacts)"
+        (change)="setFacts(effects, 'setFacts', $any($event.target).value)"></textarea>
+    </mat-form-field>
+  </div>
+</ng-template>

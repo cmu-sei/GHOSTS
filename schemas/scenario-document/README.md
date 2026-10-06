@@ -133,35 +133,30 @@ an eleven-day exercise can say `T+2d9h40m` instead of `T+57h40m`.
 ### What the columns cannot hold
 
 Step 2's export and import (`GET /api/scenarios/{id}/document`, `POST /api/scenarios/import`) map
-everything the tables above list. The blocks below have no column of their own. They survive an import
-all the same, because the import keeps the document whole in `scenario_documents` beside the rows it
-was mapped onto, and `GET {id}/document` returns that document — so a document imported since this
-table existed comes back byte for byte, until the scenario's rows are edited (in the UI, the builder,
-or `PUT`); from then on the rows are the truth and export derives from them.
-`GET {id}/document?derived=true` rebuilds a document from the rows alone, which is what a scenario
-built in the wizard, seeded, or imported before the table existed gets, and the difference between
-the two forms is exactly this table.
+everything the tables above list. Whatever else a document says goes into an `extras` jsonb column on
+the row it belongs to, in the document's own shape, and export merges it back:
 
-An import that populates any of these paths also says so out loud: the success response carries one
-`STORAGE_LOSSY` finding (tier 4, severity `warning`) per top-level path below, listing the leaf paths
-this document actually used. Validate never emits it — it writes nothing, so it has nothing to
-describe; only import does, because this describes what import just did.
+| Row | Its extras |
+|---|---|
+| `scenarios` | `slug`, `intent`, `catalog`, `context.situation`, `audience.role`, `size`, `proficiency`, `mandate`, `terrain.reference`, `segments[]`, `hosts[]`, `services[]`, `informationEnvironment`, `defenses[]` (matched to the defense column by name), `startingConditions`, `rulesOfPlay.clock`, `deadline`, `fog`, `escalationLadder.rungs[]`, `sources[]`, `references[]` |
+| `threat_actors` | `adversaries[].id`, `objective`, `winThreshold`, `playbook[]` |
+| `userpools` | `population.pools[].description` |
+| `vulnerabilities` | `terrain.vulnerabilities[].description` when a `cve` is also given |
+| `objectives` | `assessment.objectives[].metWhen` |
+| `injects` | every event key but `at`/`displayTime` and `title` |
+| `scenario_timeline_events` | `timeline.events[].id`, `title`, `expectedResponse`, `effects`, `indicators` |
+
+The scenario screens show and edit all of it, so an edit there keeps it. The import also keeps the
+document whole in `scenario_documents`, and `GET {id}/document` returns that document byte for byte
+until the scenario's rows are edited; from then on it derives from the rows.
+`GET {id}/document?derived=true` always derives from the rows, and differs from the imported document
+only by what is left:
 
 | Document | Why |
 |---|---|
-| `slug` | No column. A derived export rebuilds it from the name, so it comes back changed wherever the two disagree. |
-| `intent`, `catalog` | No columns. |
-| `audience.role`, `size`, `proficiency`, `mandate` | Only `rulesOfEngagement` has a column. |
-| `adversaries[].objective`, `winThreshold`, `playbook[]` | The RPG keeps these in its own bundle. |
-| `terrain.reference`, `segments[]`, `hosts[]`, `services[]`, `informationEnvironment` | `technicalEnvironment` holds three prose columns and a defense list. |
-| `terrain.defenses[].description`, `covers`; `population.pools[].description` | Only the name and the count have columns. |
-| `startingConditions` | No columns. |
-| `rulesOfPlay.clock`, `deadline`, `fog`; `escalationLadder.rungs[]` | No columns. |
-| `assessment.objectives[].metWhen` | No column. |
-| `timeline.events[].id`, `title` with a description, `expectedResponse`, `effects`, `indicators` | The event row has `number` and one description. An event id is rebuilt as `event-{number}`. |
-| `sources[]`, `references[]` | Builder sources hold uploaded content, which a document must not carry; nothing else stores a citation. |
 | `entities[].provenance` absent | The columns have defaults (`Operator`, confidence 1, not reviewed), so an export always states provenance even where the document did not. |
 | a sub-hour or non-integral `duration` | `durationHours` is an integer. An import refuses the document (`TIME_DURATION_NOT_STORABLE`) rather than rounding it, so `45m` does not come back wrong — it does not go in at all. |
+| event order | Export lists injects (a title and no description) before the other events. |
 
 ### From the RPG bundle (kriegspiel shape)
 

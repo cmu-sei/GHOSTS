@@ -72,6 +72,7 @@ public class ObjectiveService(ApplicationDbContext context) : IObjectiveService
             Priority = dto.Priority,
             SuccessCriteria = dto.SuccessCriteria,
             Assigned = dto.Assigned ?? string.Empty,
+            Extras = ScenarioExtras.Write(dto.Extras),
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -100,6 +101,9 @@ public class ObjectiveService(ApplicationDbContext context) : IObjectiveService
         objective.SuccessCriteria = dto.SuccessCriteria;
         objective.Assigned = dto.Assigned ?? string.Empty;
         objective.SortOrder = dto.SortOrder;
+        // Only when supplied, so a caller that predates extras does not wipe them.
+        if (dto.Extras != null)
+            objective.Extras = ScenarioExtras.Write(dto.Extras);
         objective.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync(ct);

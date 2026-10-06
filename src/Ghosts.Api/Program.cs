@@ -138,6 +138,17 @@ public class Program
         builder.Services.AddScoped<Ghosts.Api.Infrastructure.ScenarioDocuments.IScenarioDryRunService,
             Ghosts.Api.Infrastructure.ScenarioDocuments.ScenarioDryRunService>();
 
+        // Scenario authoring: the agent loop, its model, and its configuration
+        builder.Services.Configure<Ghosts.Api.Infrastructure.Models.ScenarioAuthoringOptions>(
+            builder.Configuration.GetSection("ScenarioAuthoring"));
+        builder.Services.AddScoped<IAuthoringModel, BedrockAuthoringModel>();
+        builder.Services.AddScoped<IScenarioAuthoringService, ScenarioAuthoringService>();
+        builder.Services.AddSingleton<IAuthoringProgress, HubAuthoringProgress>();
+        builder.Services.AddSingleton<ScenarioAuthoringRunner>();
+
+        // The user named by the auth proxy's header, for drafts and publishing
+        builder.Services.AddScoped<Ghosts.Api.Infrastructure.CurrentUser>();
+
         builder.Services.AddScoped<IClientResultsService, ClientResultsService>();
         builder.Services.AddScoped<IClientIdService, ClientIdService>();
         builder.Services.AddScoped<IClientSurveyService, ClientSurveyService>();

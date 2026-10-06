@@ -64,6 +64,7 @@ export class BuilderGraphComponent implements OnInit, OnDestroy {
   private readonly snackBar = inject(MatSnackBar);
 
   protected readonly loading = signal(true);
+  protected readonly empty = signal(false);
   protected readonly selectedNode = signal<ScenarioEntity | null>(null);
   protected readonly editMode = signal(false);
   protected readonly relationshipMode = signal(false);
@@ -149,9 +150,8 @@ export class BuilderGraphComponent implements OnInit, OnDestroy {
         this.entities = graph.nodes;
         this.edges = graph.edges;
 
-        if (!this.entities || this.entities.length === 0) {
-          console.warn('No entities in graph data');
-          this.snackBar.open('No entities found. Run extraction first.', 'Close', { duration: 5000 });
+        this.empty.set(!this.entities || this.entities.length === 0);
+        if (this.empty()) {
           this.loading.set(false);
           return;
         }
