@@ -128,7 +128,8 @@ public class ObjectivesController(IObjectiveService objectiveService, ILogger<Ob
             o.SortOrder,
             o.CreatedAt,
             o.UpdatedAt,
-            o.Children?.Select(MapToDto).ToList() ?? new List<ObjectiveDto>()
+            o.Children?.Select(MapToDto).ToList() ?? new List<ObjectiveDto>(),
+            ScenarioExtras.Read<ObjectiveExtrasDto>(o.Extras)
         );
     }
 }

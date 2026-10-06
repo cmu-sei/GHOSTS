@@ -33,6 +33,12 @@ namespace Ghosts.Api.Infrastructure.Data
             // Ensure execution_timeline_items has workflow_id column
             await EnsureExecutionTimelineWorkflowColumn(context, logger);
 
+            // Ensure scenarios have author and publishedat columns (drafts and publishing)
+            await EnsureScenarioDraftColumns(context, logger);
+
+            // Ensure the rows a scenario document maps onto have extras columns (what no column holds)
+            await EnsureScenarioExtrasColumns(context, logger);
+
             // Import MITRE ATT&CK data if not already loaded
             await ImportMitreAttackData(context, logger, serviceProvider);
 
@@ -56,6 +62,9 @@ namespace Ghosts.Api.Infrastructure.Data
 
             // Give any scenario that has no document one, derived from its rows
             await BackfillScenarioDocuments(context, logger, serviceProvider);
+
+            // Ensure the scenario authoring tables exist (EnsureCreated is a no-op for existing DBs)
+            await EnsureAuthoringTablesExist(context, logger);
         }
 
         private static async Task EnsureNpcColumnsExist(ApplicationDbContext context, ILogger<DbInitializer> logger)
@@ -192,6 +201,69 @@ namespace Ghosts.Api.Infrastructure.Data
             }
         }
 
+        /// <summary>
+        /// Adds scenarios.author and scenarios.publishedat. Every scenario that existed before them counts as
+        /// published, so that nothing disappears from anyone's list; new scenarios start as drafts.
+        /// </summary>
+        private static async Task EnsureScenarioDraftColumns(ApplicationDbContext context, ILogger<DbInitializer> logger)
+        {
+            try
+            {
+                var connection = context.Database.GetDbConnection();
+                if (connection.State != System.Data.ConnectionState.Open)
+                    await connection.OpenAsync();
+
+                using var cmd = connection.CreateCommand();
+                cmd.CommandText = @"
+                    DO $$
+                    BEGIN
+                        IF NOT EXISTS (
+                            SELECT 1 FROM information_schema.columns
+                            WHERE table_name = 'scenarios' AND column_name = 'publishedat'
+                        ) THEN
+                            ALTER TABLE scenarios ADD COLUMN author TEXT;
+                            ALTER TABLE scenarios ADD COLUMN publishedat TIMESTAMP WITHOUT TIME ZONE;
+                            UPDATE scenarios SET publishedat = updatedat;
+                            RAISE NOTICE 'Added author and publishedat columns to scenarios';
+                        END IF;
+                    END $$;
+                ";
+                await cmd.ExecuteNonQueryAsync();
+                logger.LogInformation("Verified scenarios.author and scenarios.publishedat columns exist");
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Could not verify/add author and publishedat columns to scenarios");
+            }
+        }
+
+        private static async Task EnsureScenarioExtrasColumns(ApplicationDbContext context, ILogger<DbInitializer> logger)
+        {
+            try
+            {
+                var connection = context.Database.GetDbConnection();
+                if (connection.State != System.Data.ConnectionState.Open)
+                    await connection.OpenAsync();
+
+                using var cmd = connection.CreateCommand();
+                cmd.CommandText = @"
+                    ALTER TABLE scenarios ADD COLUMN IF NOT EXISTS extras JSONB;
+                    ALTER TABLE threat_actors ADD COLUMN IF NOT EXISTS extras JSONB;
+                    ALTER TABLE injects ADD COLUMN IF NOT EXISTS extras JSONB;
+                    ALTER TABLE userpools ADD COLUMN IF NOT EXISTS extras JSONB;
+                    ALTER TABLE vulnerabilities ADD COLUMN IF NOT EXISTS extras JSONB;
+                    ALTER TABLE scenario_timeline_events ADD COLUMN IF NOT EXISTS extras JSONB;
+                    ALTER TABLE objectives ADD COLUMN IF NOT EXISTS extras JSONB;
+                ";
+                await cmd.ExecuteNonQueryAsync();
+                logger.LogInformation("Verified extras columns exist on scenario rows");
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Could not verify/add extras columns to scenario rows");
+            }
+        }
+
         private static async Task EnsureNpcPhotos(ApplicationDbContext context, ILogger<DbInitializer> logger)
         {
             try
@@ -300,6 +372,7 @@ namespace Ghosts.Api.Infrastructure.Data
                             Description = s.Description,
                             CreatedAt = now.AddDays(-28),
                             UpdatedAt = now.AddDays(-28),
+                            PublishedAt = now.AddDays(-28),
                             ScenarioParameters = new ScenarioParameters
                             {
                                 Objectives = s.ScenarioParameters?.Objectives,
@@ -1276,6 +1349,11 @@ namespace Ghosts.Api.Infrastructure.Data
 
                 if (exists)
                 {
+                    using var alterCmd = connection.CreateCommand();
+                    alterCmd.CommandText = @"
+                        ALTER TABLE scenario_documents ADD COLUMN IF NOT EXISTS origin CHARACTER VARYING(20);
+                        ALTER TABLE scenario_documents ADD COLUMN IF NOT EXISTS rowsdocument JSONB;";
+                    await alterCmd.ExecuteNonQueryAsync();
                     logger.LogInformation("scenario_documents table already exists");
                     return;
                 }
@@ -1292,6 +1370,8 @@ namespace Ghosts.Api.Infrastructure.Data
                         rowshash       CHARACTER VARYING(64),
                         document       JSONB,
                         validation     JSONB,
+                        origin         CHARACTER VARYING(20),
+                        rowsdocument   JSONB,
                         createdat      TIMESTAMP WITHOUT TIME ZONE NOT NULL,
                         CONSTRAINT pk_scenario_documents PRIMARY KEY (id),
                         CONSTRAINT fk_scenario_documents_scenarios_scenarioid
@@ -1307,6 +1387,131 @@ namespace Ghosts.Api.Infrastructure.Data
             catch (Exception ex)
             {
                 logger.LogError(ex, "Failed to create scenario_documents table");
+                throw;
+            }
+        }
+
+        // ===== Scenario Authoring Tables =====
+
+        /// <summary>
+        /// Creates authoring_sessions, authoring_messages, authoring_documents and authoring_turns when they
+        /// are missing, each checked on its own, and adds the columns the Scenario Builder's panel added to
+        /// tables created before it. The DDL is what EnsureCreated builds from the authoring models.
+        /// </summary>
+        private static async Task EnsureAuthoringTablesExist(ApplicationDbContext context, ILogger<DbInitializer> logger)
+        {
+            var tables = new (string Name, string Ddl)[]
+            {
+                ("authoring_sessions", @"
+                    CREATE TABLE authoring_sessions (
+                        id                 UUID NOT NULL,
+                        model              CHARACTER VARYING(200),
+                        status             CHARACTER VARYING(20),
+                        pendingnote        TEXT,
+                        scenarioid         INTEGER,
+                        importedscenarioid INTEGER,
+                        createdat          TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+                        updatedat          TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+                        CONSTRAINT pk_authoring_sessions PRIMARY KEY (id)
+                    );
+                    CREATE INDEX ix_authoring_sessions_scenarioid ON authoring_sessions (scenarioid);"),
+                ("authoring_messages", @"
+                    CREATE TABLE authoring_messages (
+                        id               INTEGER GENERATED BY DEFAULT AS IDENTITY,
+                        sessionid        UUID NOT NULL,
+                        turn             INTEGER NOT NULL,
+                        sequence         INTEGER NOT NULL,
+                        role             CHARACTER VARYING(20),
+                        content          JSONB,
+                        inhistory        BOOLEAN NOT NULL,
+                        inputtokens      INTEGER,
+                        outputtokens     INTEGER,
+                        cachereadtokens  INTEGER,
+                        cachewritetokens INTEGER,
+                        stopreason       CHARACTER VARYING(40),
+                        error            TEXT,
+                        startedat        TIMESTAMP WITHOUT TIME ZONE,
+                        endedat          TIMESTAMP WITHOUT TIME ZONE,
+                        createdat        TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+                        CONSTRAINT pk_authoring_messages PRIMARY KEY (id),
+                        CONSTRAINT fk_authoring_messages_authoring_sessions_sessionid
+                            FOREIGN KEY (sessionid) REFERENCES authoring_sessions (id) ON DELETE CASCADE
+                    );
+                    CREATE INDEX ix_authoring_messages_sessionid ON authoring_messages (sessionid);"),
+                ("authoring_documents", @"
+                    CREATE TABLE authoring_documents (
+                        id                 INTEGER GENERATED BY DEFAULT AS IDENTITY,
+                        sessionid          UUID NOT NULL,
+                        turn               INTEGER NOT NULL,
+                        hash               CHARACTER VARYING(12),
+                        document           TEXT,
+                        errors             INTEGER NOT NULL,
+                        warnings           INTEGER NOT NULL,
+                        findings           JSONB,
+                        dryrun             BOOLEAN NOT NULL,
+                        basehash           CHARACTER VARYING(12),
+                        changes            JSONB,
+                        shown              BOOLEAN NOT NULL,
+                        importedscenarioid INTEGER,
+                        createdat          TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+                        CONSTRAINT pk_authoring_documents PRIMARY KEY (id),
+                        CONSTRAINT fk_authoring_documents_authoring_sessions_sessionid
+                            FOREIGN KEY (sessionid) REFERENCES authoring_sessions (id) ON DELETE CASCADE
+                    );
+                    CREATE INDEX ix_authoring_documents_sessionid ON authoring_documents (sessionid);
+                    CREATE INDEX ix_authoring_documents_hash ON authoring_documents (hash);"),
+                ("authoring_turns", @"
+                    CREATE TABLE authoring_turns (
+                        id        INTEGER GENERATED BY DEFAULT AS IDENTITY,
+                        sessionid UUID NOT NULL,
+                        turn      INTEGER NOT NULL,
+                        message   TEXT,
+                        result    JSONB,
+                        startedat TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+                        endedat   TIMESTAMP WITHOUT TIME ZONE,
+                        CONSTRAINT pk_authoring_turns PRIMARY KEY (id),
+                        CONSTRAINT fk_authoring_turns_authoring_sessions_sessionid
+                            FOREIGN KEY (sessionid) REFERENCES authoring_sessions (id) ON DELETE CASCADE
+                    );
+                    CREATE INDEX ix_authoring_turns_sessionid ON authoring_turns (sessionid);")
+            };
+
+            // Columns added after the first slice, for tables it created
+            const string added = @"
+                ALTER TABLE authoring_sessions ADD COLUMN IF NOT EXISTS scenarioid INTEGER;
+                CREATE INDEX IF NOT EXISTS ix_authoring_sessions_scenarioid ON authoring_sessions (scenarioid);
+                ALTER TABLE authoring_documents ADD COLUMN IF NOT EXISTS basehash CHARACTER VARYING(12);
+                ALTER TABLE authoring_documents ADD COLUMN IF NOT EXISTS changes JSONB;";
+
+            try
+            {
+                var connection = context.Database.GetDbConnection();
+                if (connection.State != System.Data.ConnectionState.Open)
+                    await connection.OpenAsync();
+
+                foreach (var (name, ddl) in tables)
+                {
+                    using var checkCmd = connection.CreateCommand();
+                    checkCmd.CommandText = $"SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = '{name}');";
+                    if ((bool)(await checkCmd.ExecuteScalarAsync() ?? false))
+                    {
+                        logger.LogInformation("{Table} table already exists", name);
+                        continue;
+                    }
+
+                    using var createCmd = connection.CreateCommand();
+                    createCmd.CommandText = ddl;
+                    await createCmd.ExecuteNonQueryAsync();
+                    logger.LogInformation("{Table} table created", name);
+                }
+
+                using var alterCmd = connection.CreateCommand();
+                alterCmd.CommandText = added;
+                await alterCmd.ExecuteNonQueryAsync();
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to create the scenario authoring tables");
                 throw;
             }
         }
@@ -1348,7 +1553,7 @@ namespace Ghosts.Api.Infrastructure.Data
                     var document = JsonNode.Parse(text).AsObject();
                     var result = await ScenarioDocumentValidator.ValidateAsync(document, clients, CancellationToken.None);
 
-                    await scenarios.StoreDocumentAsync(id, document, result.Findings, CancellationToken.None);
+                    await scenarios.StoreDocumentAsync(id, document, result.Findings, CancellationToken.None, ScenarioDocument.Backfilled);
                     written++;
                     if (!result.IsValid) withErrors++;
                 }

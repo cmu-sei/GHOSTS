@@ -3,6 +3,7 @@ import { Subject } from 'rxjs';
 import * as signalR from '@microsoft/signalr';
 import { ConfigService } from './config.service';
 import { CreateScenario } from '../models/scenario.model';
+import { AuthoringProgressEvent } from '../models/scenario-authoring.model';
 
 export interface ScenarioHubMessage {
   scenarioId: number;
@@ -21,6 +22,7 @@ export class ScenarioHubService {
   readonly saved$ = new Subject<ScenarioHubMessage>();
   readonly error$ = new Subject<ScenarioHubMessage>();
   readonly externalUpdate$ = new Subject<ScenarioHubMessage>();
+  readonly authoringProgress$ = new Subject<AuthoringProgressEvent>();
 
   connect(scenarioId: number): void {
     if (this.connection && this.connectedScenarioId === scenarioId) {
@@ -45,6 +47,10 @@ export class ScenarioHubService {
 
     this.connection.on('ScenarioUpdated', (message: ScenarioHubMessage) => {
       this.externalUpdate$.next(message);
+    });
+
+    this.connection.on('authoringProgress', (progress: AuthoringProgressEvent) => {
+      this.authoringProgress$.next(progress);
     });
 
     this.connection

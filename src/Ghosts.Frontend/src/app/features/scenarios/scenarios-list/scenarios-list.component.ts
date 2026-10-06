@@ -129,6 +129,20 @@ export class ScenariosListComponent implements OnInit {
     });
   }
 
+  protected publishScenario(scenario: Scenario, event: Event): void {
+    event.stopPropagation();
+    this.scenarioService.publishScenario(scenario.id).subscribe({
+      next: () => {
+        this.snackBar.open(`${scenario.name} is published.`, 'Close', { duration: 3000 });
+        this.loadScenarios();
+      },
+      error: (error) => {
+        const message = error?.error?.error ?? 'Error publishing scenario';
+        this.snackBar.open(message, 'Close', { duration: 5000 });
+      }
+    });
+  }
+
   protected exportScenario(scenario: Scenario, event: Event): void {
     event.stopPropagation();
 

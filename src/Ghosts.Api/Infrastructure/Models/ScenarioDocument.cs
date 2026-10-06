@@ -12,13 +12,15 @@ namespace Ghosts.Api.Infrastructure.Models;
 
 /// <summary>
 /// One scenario document as it was imported, beside the rows it was mapped onto. The rows are what
-/// GHOSTS runs; the document is what a person wrote, and it holds everything the columns have no
-/// place for (see STORAGE_LOSSY). One row per import, so a scenario keeps its history: the current
-/// document is the newest row.
+/// GHOSTS runs; the document is what a person wrote, byte for byte. One row per import, so a scenario
+/// keeps its history: the current document is the newest row.
 /// </summary>
 [Table("scenario_documents")]
 public class ScenarioDocument
 {
+    public const string Imported = "import";
+    public const string Backfilled = "backfill";
+
     public int Id { get; set; }
     public int ScenarioId { get; set; }
 
@@ -44,6 +46,17 @@ public class ScenarioDocument
     /// <summary>What the validator found for this import, with its version and the time it ran.</summary>
     [Column(TypeName = "jsonb")]
     public string Validation { get; set; } = "{}";
+
+    /// <summary>
+    /// "import" for a document someone approved and imported, "backfill" for one derived from rows at
+    /// startup. Null on rows stored before this was recorded. The newest import is the approved version.
+    /// </summary>
+    [MaxLength(20)]
+    public string Origin { get; set; }
+
+    /// <summary>The document the rows derived to when this one was stored, so that an edit since can be listed (A5).</summary>
+    [Column(TypeName = "jsonb")]
+    public string RowsDocument { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

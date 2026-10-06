@@ -138,7 +138,7 @@ export class ObjectivesListComponent implements OnInit {
   // -- Inline create --
 
   private freshObjective() {
-    return { name: '', description: '', type: 'MET', priority: 3, successCriteria: '', assigned: '' };
+    return { name: '', description: '', type: 'MET', priority: 3, successCriteria: '', assigned: '', extras: { metWhen: '' } };
   }
 
   private freshChild() {
@@ -221,7 +221,8 @@ export class ObjectivesListComponent implements OnInit {
       priority: objective.priority,
       successCriteria: objective.successCriteria,
       assigned: objective.assigned,
-      sortOrder: objective.sortOrder
+      sortOrder: objective.sortOrder,
+      extras: { ...objective.extras }
     };
     const expanded = new Set(this.expandedIds());
     expanded.add(objective.id);

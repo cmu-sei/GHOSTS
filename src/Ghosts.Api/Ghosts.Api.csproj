@@ -5,8 +5,8 @@
     <AssemblyName>ghosts.api</AssemblyName>
     <RootNamespace>Ghosts.Api</RootNamespace>
 
-    <AssemblyVersion>9.5.0.0</AssemblyVersion>
-    <FileVersion>9.5.0.0</FileVersion>
+    <AssemblyVersion>9.6.1.0</AssemblyVersion>
+    <FileVersion>9.6.1.0</FileVersion>
 
     <Authors>GHOSTS Development Team for CERT &gt; Software Engineering Institute &gt; Carnegie Mellon University</Authors>
     <Company>Carnegie Mellon University</Company>
@@ -46,7 +46,7 @@
     <PackageReference Include="FileHelpers" Version="3.5.2" />
     <PackageReference Include="RestSharp" Version="114.0.0" />
     <PackageReference Include="Betalgo.OpenAI" Version="8.7.2" />
-    <PackageReference Include="AWSSDK.BedrockRuntime" Version="3.7.402.14" />
+    <PackageReference Include="AWSSDK.BedrockRuntime" Version="3.7.514.21" />
     <PackageReference Include="UglyToad.PdfPig" Version="1.7.0-custom-5" />
     <PackageReference Include="WeightedRandomizer" Version="2.0.1" />
     <PackageReference Include="ncrontab" Version="3.4.0" />

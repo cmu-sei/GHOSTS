@@ -2,19 +2,18 @@
   <div class="header-section">
     <div>
       <h2>Review Entities</h2>
-      <p class="subtitle">Review and edit extracted entities before building the graph</p>
+      <p class="subtitle">Review and edit the scenario's entities; the graph below draws their relationships</p>
       <div class="help-text">
         <mat-icon class="help-icon">info</mat-icon>
         <div>
           <p><strong>What to do here:</strong></p>
           <ul>
-            <li><strong>Review</strong> the entities extracted from your sources</li>
+            <li><strong>Review</strong> the entities the scenario declares; a Scenario Builder import brings them in with the document</li>
             <li><strong>Edit</strong> entities to fix names, types, or descriptions</li>
             <li><strong>Merge</strong> duplicate entities by selecting 2 and clicking "Merge Selected"</li>
-            <li><strong>Add</strong> missing entities manually if the extraction missed anything important</li>
+            <li><strong>Add</strong> missing entities manually</li>
             <li><strong>Delete</strong> irrelevant entities to clean up the graph</li>
           </ul>
-          <p class="next-step">Once satisfied, proceed to the <strong>Graph</strong> tab to visualize relationships.</p>
         </div>
       </div>
     </div>
@@ -69,7 +68,7 @@
       } @else if (filteredEntities().length === 0) {
       <div class="empty-state">
         <mat-icon>info</mat-icon>
-        <p>No entities found. Run extraction in the previous step.</p>
+        <p>No entities yet. A scenario imported from the Scenario Builder conversation brings its entities and edges with it, or add one here.</p>
       </div>
       } @else {
       <table mat-table [dataSource]="filteredEntities()" class="entities-table">

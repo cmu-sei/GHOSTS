@@ -92,6 +92,12 @@ namespace Ghosts.Api.Infrastructure.Data
         // The authored scenario document, kept whole beside the rows it was mapped onto
         public DbSet<ScenarioDocument> ScenarioDocuments { get; set; }
 
+        // Scenario authoring sessions: the conversation, every model call, every validated document
+        public DbSet<AuthoringSession> AuthoringSessions { get; set; }
+        public DbSet<AuthoringMessage> AuthoringMessages { get; set; }
+        public DbSet<AuthoringDocument> AuthoringDocuments { get; set; }
+        public DbSet<AuthoringTurn> AuthoringTurns { get; set; }
+
         public DbSet<Objective> Objectives { get; set; }
 
         public DbSet<Hypothesis> Hypotheses { get; set; }
@@ -391,6 +397,29 @@ namespace Ghosts.Api.Infrastructure.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<ScenarioDocument>().HasIndex(d => d.ScenarioId);
+
+            // Authoring session → Messages, Documents. No key to scenarios: a session's record outlives
+            // the scenario it imported, which can be deleted.
+            modelBuilder.Entity<AuthoringSession>()
+                .HasMany(s => s.Messages)
+                .WithOne(m => m.Session)
+                .HasForeignKey(m => m.SessionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<AuthoringSession>()
+                .HasMany(s => s.Documents)
+                .WithOne(d => d.Session)
+                .HasForeignKey(d => d.SessionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<AuthoringSession>()
+                .HasMany(s => s.Turns)
+                .WithOne(t => t.Session)
+                .HasForeignKey(t => t.SessionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<AuthoringDocument>().HasIndex(d => d.Hash);
+            modelBuilder.Entity<AuthoringSession>().HasIndex(s => s.ScenarioId);
 
             // Source → Chunks
             modelBuilder.Entity<ScenarioSource>()

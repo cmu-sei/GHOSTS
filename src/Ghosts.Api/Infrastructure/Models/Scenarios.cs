@@ -12,6 +12,19 @@ public class Scenario
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 
+    /// <summary>Who created it, from the auth proxy's header; "anonymous" without one.</summary>
+    public string Author { get; set; }
+
+    /// <summary>Null while the scenario is its author's draft: hidden from others' lists, and not deployable.</summary>
+    public DateTime? PublishedAt { get; set; }
+
+    /// <summary>A draft is shown only to its author; a published scenario to everyone.</summary>
+    public bool IsVisibleTo(string user) => PublishedAt != null || Author == user;
+
+    /// <summary>What its document says that no column holds (<see cref="ScenarioExtrasDto"/>).</summary>
+    [Column(TypeName = "jsonb")]
+    public string Extras { get; set; }
+
     // Navigation properties
     public ScenarioParameters ScenarioParameters { get; set; }
     public TechnicalEnvironment TechnicalEnvironment { get; set; }
@@ -104,6 +117,9 @@ public class ThreatActor
     public int Capability { get; set; }
     public string Ttps { get; set; } // Comma-separated MITRE ATT&CK techniques
 
+    [Column(TypeName = "jsonb")]
+    public string Extras { get; set; } // AdversaryExtrasDto
+
     public ScenarioParameters ScenarioParameters { get; set; }
 }
 
@@ -114,6 +130,9 @@ public class Inject
     public string Trigger { get; set; } = string.Empty; // e.g., T+10m, OnDetect
     public string Title { get; set; } = string.Empty;
 
+    [Column(TypeName = "jsonb")]
+    public string Extras { get; set; } // EventExtrasDto
+
     public ScenarioParameters ScenarioParameters { get; set; }
 }
 
@@ -123,6 +142,9 @@ public class UserPool
     public int ScenarioParametersId { get; set; }
     public string Role { get; set; } = string.Empty;
     public int Count { get; set; }
+
+    [Column(TypeName = "jsonb")]
+    public string Extras { get; set; } // PoolExtrasDto
 
     public ScenarioParameters ScenarioParameters { get; set; }
 }
@@ -148,6 +170,9 @@ public class Vulnerability
     public string Asset { get; set; } = string.Empty;
     public string Cve { get; set; } = string.Empty;
     public string Severity { get; set; } = string.Empty;
+
+    [Column(TypeName = "jsonb")]
+    public string Extras { get; set; } // VulnerabilityExtrasDto
 
     public TechnicalEnvironment TechnicalEnvironment { get; set; }
 }
@@ -214,6 +239,9 @@ public class ScenarioTimelineEvent
     public ExecutionType ExecutionType { get; set; } = ExecutionType.Manual;
     public string? WorkflowId { get; set; }
 
+    [Column(TypeName = "jsonb")]
+    public string Extras { get; set; } // EventExtrasDto
+
     public ScenarioTimeline Timeline { get; set; }
 }
 
@@ -228,7 +256,10 @@ public record ScenarioDto(
     TechnicalEnvironmentDto TechnicalEnvironment,
     GameMechanicsDto GameMechanics,
     TimelineDto Timeline,
-    string BuilderStatus
+    string BuilderStatus,
+    string Author = null,
+    DateTime? PublishedAt = null,
+    ScenarioExtrasDto Extras = null
 );
 
 public record CreateScenarioDto(
@@ -240,7 +271,8 @@ public record CreateScenarioDto(
     TimelineDto Timeline,
     List<ScenarioEntityImportDto> Entities = null,
     List<ScenarioEdgeImportDto> Edges = null,
-    List<ScenarioObjectiveImportDto> Objectives = null
+    List<ScenarioObjectiveImportDto> Objectives = null,
+    ScenarioExtrasDto Extras = null
 );
 
 /// <summary>An entity created with the scenario. <see cref="Id"/> is document-local; edges refer to it.</summary>
@@ -282,7 +314,8 @@ public record ScenarioObjectiveImportDto(
     int Priority,
     string SuccessCriteria,
     string Assigned,
-    int SortOrder
+    int SortOrder,
+    ObjectiveExtrasDto Extras = null
 );
 
 public record UpdateScenarioDto(
@@ -292,7 +325,8 @@ public record UpdateScenarioDto(
     TechnicalEnvironmentDto TechnicalEnvironment,
     GameMechanicsDto GameMechanics,
     TimelineDto Timeline,
-    string? BuilderStatus = null
+    string? BuilderStatus = null,
+    ScenarioExtrasDto Extras = null
 );
 
 public record ScenarioParametersDto(
@@ -309,11 +343,11 @@ public record ScenarioParametersDto(
 
 public record NationDto(string Name, string Alignment);
 
-public record ThreatActorDto(string Name, string Type, int Capability, List<string> Ttps);
+public record ThreatActorDto(string Name, string Type, int Capability, List<string> Ttps, AdversaryExtrasDto Extras = null);
 
-public record InjectDto(string Trigger, string Title);
+public record InjectDto(string Trigger, string Title, EventExtrasDto Extras = null);
 
-public record UserPoolDto(string Role, int Count);
+public record UserPoolDto(string Role, int Count, PoolExtrasDto Extras = null);
 
 public record ScenarioWorkflowBindingDto(string WorkflowRef, string DisplayName, string Cron, bool Enabled);
 
@@ -325,7 +359,7 @@ public record TechnicalEnvironmentDto(
     List<VulnerabilityDto> Vulnerabilities
 );
 
-public record VulnerabilityDto(string Asset, string Cve, string Severity);
+public record VulnerabilityDto(string Asset, string Cve, string Severity, VulnerabilityExtrasDto Extras = null);
 
 public record GameMechanicsDto(
     string TimelineType,
@@ -360,5 +394,6 @@ public record TimelineEventDto(
     string? Schedule = null,
     string? TriggerCondition = null,
     string ExecutionType = "Manual",
-    string? WorkflowId = null
+    string? WorkflowId = null,
+    EventExtrasDto Extras = null
 );

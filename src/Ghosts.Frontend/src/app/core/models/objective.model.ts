@@ -14,6 +14,7 @@ export interface Objective {
   createdAt: string;
   updatedAt: string;
   children: Objective[];
+  extras?: { metWhen?: string } | null; // what the scenario document says no column holds
 }
 
 export type ObjectiveType = 'MET' | 'JMET' | 'Rehearsal' | 'Onboarding' | 'ToolTraining';
@@ -29,6 +30,7 @@ export interface CreateObjective {
   priority: number;
   successCriteria: string;
   assigned: string;
+  extras?: { metWhen?: string } | null;
 }
 
 export interface UpdateObjective {
@@ -41,6 +43,7 @@ export interface UpdateObjective {
   successCriteria: string;
   assigned: string;
   sortOrder: number;
+  extras?: { metWhen?: string } | null;
 }
 
 export const OBJECTIVE_TYPES: { value: ObjectiveType; label: string; description: string }[] = [

@@ -11,10 +11,13 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTableModule } from '@angular/material/table';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { ChangeDetectionStrategy } from '@angular/core';
 import { ScenarioService, ScenarioHubService, ObjectiveService, N8nWorkflowService } from '../../../core/services';
-import { CreateScenario, ScenarioTimelineEvent, Scenario, Objective, N8nWorkflow } from '../../../core/models';
+import { CreateScenario, ScenarioTimelineEvent, Scenario, Objective, N8nWorkflow, ScenarioExtras } from '../../../core/models';
+import { BuilderEntitiesComponent } from '../../scenario-builder/builder-entities/builder-entities.component';
+import { BuilderGraphComponent } from '../../scenario-builder/builder-graph/builder-graph.component';
 
 @Component({
   selector: 'app-scenarios-planner',
@@ -32,7 +35,10 @@ import { CreateScenario, ScenarioTimelineEvent, Scenario, Objective, N8nWorkflow
     MatTableModule,
     MatChipsModule,
     MatProgressSpinnerModule,
-    DragDropModule
+    MatExpansionModule,
+    DragDropModule,
+    BuilderEntitiesComponent,
+    BuilderGraphComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './scenarios-planner.component.html',
@@ -53,7 +59,7 @@ export class ScenariosPlannerComponent implements OnInit, OnDestroy {
   protected builderStatus = signal<string>('None');
   protected selectedTabIndex = 0;
 
-  private readonly tabSlugs = ['parameters', 'technical-environment', 'simulation-mechanics', 'timeline'];
+  private readonly tabSlugs = ['parameters', 'technical-environment', 'simulation-mechanics', 'timeline', 'graph'];
 
   protected scenario: CreateScenario = {
     name: '',
@@ -104,13 +110,27 @@ export class ScenariosPlannerComponent implements OnInit, OnDestroy {
           number: 1,
           assigned: 'White Cell',
           description: 'STARTEX - Exercise begins',
-          status: 'Pending'
+          status: 'Pending',
+          extras: { effects: {} }
         }
       ]
-    }
+    },
+    extras: this.withExtrasDefaults(null)
   };
 
   protected readonly cellRoles = ['None', 'White Cell', 'Red Team', 'Blue Team', 'Green Cell'];
+  // An inject's owner is kept as the document writes it
+  protected readonly documentOwners = [
+    { value: 'white-cell', label: 'White Cell' },
+    { value: 'red-team', label: 'Red Team' },
+    { value: 'blue-team', label: 'Blue Team' },
+    { value: 'green-cell', label: 'Green Cell' },
+    { value: 'unassigned', label: 'None' }
+  ];
+  protected readonly triggerKinds = ['PointInTime', 'Scheduled', 'Triggered'];
+  protected readonly moveDomains = ['cyber', 'cognitive', 'physical', 'hybrid'];
+  protected readonly fogLevels = ['partial', 'full', 'off'];
+  protected readonly sourceTypes = ['document', 'text', 'url'];
   protected readonly eventStatuses = ['Pending', 'Active', 'Complete'];
   protected readonly executionTypes: {value: string; label: string}[] = [
     { value: 'manual', label: 'Manual' },
@@ -236,16 +256,32 @@ export class ScenariosPlannerComponent implements OnInit, OnDestroy {
           scenarioParameters: scenario.scenarioParameters || this.scenario.scenarioParameters,
           technicalEnvironment: scenario.technicalEnvironment || this.scenario.technicalEnvironment,
           simulationMechanics: scenario.gameMechanics || scenario.simulationMechanics || this.scenario.simulationMechanics,
-          timeline: scenario.timeline || this.scenario.timeline
+          timeline: scenario.timeline || this.scenario.timeline,
+          extras: this.withExtrasDefaults(scenario.extras)
         };
 
         // Convert TTPs array to string for editing
         if (this.scenario.scenarioParameters) {
           this.scenario.scenarioParameters.threatActors = this.scenario.scenarioParameters.threatActors.map(actor => ({
             ...actor,
-            ttpsString: actor.ttps.join(',')
+            ttpsString: actor.ttps.join(','),
+            extras: { ...actor.extras, playbook: (actor.extras?.playbook ?? []).map(m => ({ ...m, effects: m.effects ?? {} })) }
           } as any));
+          this.scenario.scenarioParameters.injects.forEach(i => i.extras = { ...i.extras, effects: i.extras?.effects ?? {} });
+          this.scenario.scenarioParameters.userPools.forEach(p => p.extras = p.extras ?? {});
         }
+        this.scenario.technicalEnvironment!.vulnerabilities.forEach(v => {
+          v.extras = v.extras ?? {};
+          // The cve column holds the description when there is no CVE: show it as the description
+          if (v.cve && !/^CVE-\d{4}-\d{4,}$/.test(v.cve) && !v.extras.description) {
+            v.extras.description = v.cve;
+            v.cve = '';
+          }
+        });
+
+        // Defenses are named in their column and described in extras: edit them as one list
+        const details = this.terrain.defenses;
+        this.terrain.defenses = this.scenario.technicalEnvironment!.defenses.map(name => details.find(d => d.name === name) ?? { name });
 
         // Normalize timeline event fields for mat-select binding
         if (this.scenario.timeline?.events) {
@@ -253,7 +289,8 @@ export class ScenariosPlannerComponent implements OnInit, OnDestroy {
             ...e,
             objectiveIds: e.objectiveIds ?? [],
             executionType: (e.executionType || 'manual').toLowerCase() as any,
-            workflowId: e.workflowId ?? undefined
+            workflowId: e.workflowId ?? undefined,
+            extras: { ...e.extras, effects: e.extras?.effects ?? {} }
           }));
         }
 
@@ -302,7 +339,8 @@ export class ScenariosPlannerComponent implements OnInit, OnDestroy {
       type: 'state',
       capability: 1,
       ttps: [],
-      ttpsString: '' // Helper property for input binding
+      ttpsString: '', // Helper property for input binding
+      extras: { playbook: [] }
     } as any);
   }
 
@@ -314,7 +352,8 @@ export class ScenariosPlannerComponent implements OnInit, OnDestroy {
   protected addInject(): void {
     this.scenario.scenarioParameters!.injects.push({
       trigger: '',
-      title: ''
+      title: '',
+      extras: { effects: {} }
     });
   }
 
@@ -326,7 +365,8 @@ export class ScenariosPlannerComponent implements OnInit, OnDestroy {
   protected addUserPool(): void {
     this.scenario.scenarioParameters!.userPools.push({
       role: '',
-      count: 1
+      count: 1,
+      extras: {}
     });
   }
 
@@ -343,7 +383,8 @@ export class ScenariosPlannerComponent implements OnInit, OnDestroy {
       description: 'New event',
       status: 'Pending',
       objectiveIds: [],
-      executionType: 'manual'
+      executionType: 'manual',
+      extras: { effects: {} }
     };
     this.scenario.timeline!.events = [...this.scenario.timeline!.events, newEvent];
   }
@@ -411,10 +452,12 @@ export class ScenariosPlannerComponent implements OnInit, OnDestroy {
           name: actor.name,
           type: actor.type,
           capability: actor.capability,
-          ttps: ttpsString ? ttpsString.split(',').map((t: string) => t.trim()).filter((t: string) => t) : []
+          ttps: ttpsString ? ttpsString.split(',').map((t: string) => t.trim()).filter((t: string) => t) : [],
+          extras: actor.extras
         };
       });
     }
+    this.syncDefenseNames();
 
     scenarioToSave.gameMechanics = scenarioToSave.simulationMechanics;
 
@@ -472,12 +515,99 @@ export class ScenariosPlannerComponent implements OnInit, OnDestroy {
           name: actor.name,
           type: actor.type,
           capability: actor.capability,
-          ttps: ttpsString ? ttpsString.split(',').map((t: string) => t.trim()).filter((t: string) => t) : []
+          ttps: ttpsString ? ttpsString.split(',').map((t: string) => t.trim()).filter((t: string) => t) : [],
+          extras: actor.extras
         };
       });
     }
+    this.syncDefenseNames();
     scenarioToSave.gameMechanics = scenarioToSave.simulationMechanics;
     this.scenarioHub.updateScenario(this.scenarioId, scenarioToSave);
+  }
+
+  // What the scenario document says that no column holds (extras), with every nested part present
+  // so the template can bind straight to it.
+  protected get extras(): Required<ScenarioExtras> {
+    return this.scenario.extras as Required<ScenarioExtras>;
+  }
+
+  protected get terrain(): Required<NonNullable<ScenarioExtras['terrain']>> {
+    return this.extras.terrain as Required<NonNullable<ScenarioExtras['terrain']>>;
+  }
+
+  protected get rulesOfPlay(): Required<NonNullable<ScenarioExtras['rulesOfPlay']>> {
+    return this.extras.rulesOfPlay as Required<NonNullable<ScenarioExtras['rulesOfPlay']>>;
+  }
+
+  private withExtrasDefaults(extras: ScenarioExtras | null | undefined): ScenarioExtras {
+    const e = extras ?? {};
+    return {
+      ...e,
+      catalog: e.catalog ?? {},
+      context: e.context ?? {},
+      audience: e.audience ?? {},
+      terrain: {
+        ...e.terrain,
+        reference: e.terrain?.reference ?? {},
+        segments: e.terrain?.segments ?? [],
+        hosts: e.terrain?.hosts ?? [],
+        services: e.terrain?.services ?? [],
+        informationEnvironment: e.terrain?.informationEnvironment ?? {},
+        defenses: e.terrain?.defenses ?? []
+      },
+      startingConditions: e.startingConditions ?? {},
+      rulesOfPlay: {
+        ...e.rulesOfPlay,
+        clock: e.rulesOfPlay?.clock ?? {},
+        deadline: e.rulesOfPlay?.deadline ?? {},
+        escalationLadder: { rungs: e.rulesOfPlay?.escalationLadder?.rungs ?? [] }
+      },
+      sources: e.sources ?? [],
+      references: e.references ?? []
+    };
+  }
+
+  /** The defense column is the edited list's names; their details stay in extras. */
+  private syncDefenseNames(): void {
+    this.scenario.technicalEnvironment!.defenses = this.terrain.defenses.map(d => d.name).filter(n => n);
+  }
+
+  // Lists and maps are edited as text and parsed on change, so the input is not rewritten while typing
+  protected commaText(values: string[] | undefined): string {
+    return (values ?? []).join(', ');
+  }
+
+  protected setCommaList(target: object, key: string, text: string): void {
+    (target as any)[key] = text.split(',').map(t => t.trim()).filter(t => t);
+  }
+
+  protected linesText(values: string[] | undefined): string {
+    return (values ?? []).join('\n');
+  }
+
+  protected setLineList(target: object, key: string, text: string): void {
+    (target as any)[key] = text.split('\n').map(t => t.trim()).filter(t => t);
+  }
+
+  protected factsText(facts: Record<string, string> | undefined): string {
+    return Object.entries(facts ?? {}).map(([k, v]) => `${k}=${v}`).join('\n');
+  }
+
+  protected setFacts(target: object, key: string, text: string): void {
+    const facts: Record<string, string> = {};
+    for (const line of text.split('\n')) {
+      const at = line.indexOf('=');
+      if (at > 0) facts[line.slice(0, at).trim()] = line.slice(at + 1).trim();
+    }
+    (target as any)[key] = facts;
+  }
+
+  protected addItem<T>(list: T[], item: T): void {
+    list.push(item);
+  }
+
+  protected removeItem<T>(list: T[], index: number): void {
+    list.splice(index, 1);
   }
 
   protected exportScenario(): void {

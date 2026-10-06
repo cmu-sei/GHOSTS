@@ -2,6 +2,7 @@
   height: 100%;
   display: flex;
   flex-direction: column;
+  margin-top: 2rem;
 }
 
 .graph-header {
@@ -29,6 +30,18 @@
   p {
     margin-top: 1rem;
     color: #666;
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: #999;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
   }
 }
 

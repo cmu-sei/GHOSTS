@@ -69,6 +69,10 @@
         <mat-label>Success Criteria</mat-label>
         <input matInput [(ngModel)]="newObjective.successCriteria" placeholder="How will you know this is met?">
       </mat-form-field>
+      <mat-form-field class="form-field-grow">
+        <mat-label>Met When (condition)</mat-label>
+        <input matInput [(ngModel)]="newObjective.extras.metWhen" placeholder="e.g., flag:contained && clock>=30">
+      </mat-form-field>
     </div>
     <div class="form-actions">
       <button mat-raised-button color="primary" [disabled]="!newObjective.name.trim()" (click)="saveNew()">
@@ -233,6 +237,10 @@
             <mat-label>Success Criteria</mat-label>
             <input matInput [(ngModel)]="editForm.successCriteria">
           </mat-form-field>
+          <mat-form-field class="form-field-grow">
+            <mat-label>Met When (condition)</mat-label>
+            <input matInput [(ngModel)]="editForm.extras.metWhen">
+          </mat-form-field>
           <mat-form-field class="form-field-assigned">
             <mat-label>Assigned</mat-label>
             <input matInput [(ngModel)]="editForm.assigned">
@@ -253,6 +261,12 @@
         @if (objective.successCriteria) {
           <div class="criteria-section">
             <strong>Success Criteria:</strong> {{ objective.successCriteria }}
+          </div>
+        }
+
+        @if (objective.extras?.metWhen) {
+          <div class="criteria-section">
+            <strong>Met When:</strong> {{ objective.extras.metWhen }}
           </div>
         }
 
@@ -339,6 +353,9 @@
       @if (child.description) {
         <span class="child-desc">{{ child.description }}</span>
       }
+      @if (child.extras?.metWhen) {
+        <span class="child-desc">Met when: {{ child.extras?.metWhen }}</span>
+      }
     </span>
     <span class="tree-col-assigned">{{ child.assigned }}</span>
     <span class="tree-col-score">
@@ -394,6 +411,10 @@
       <mat-form-field class="form-field-grow">
         <mat-label>Description</mat-label>
         <input matInput [(ngModel)]="editForm.description">
+      </mat-form-field>
+      <mat-form-field class="form-field-grow">
+        <mat-label>Met When (condition)</mat-label>
+        <input matInput [(ngModel)]="editForm.extras.metWhen">
       </mat-form-field>
       <mat-form-field class="form-field-assigned">
         <mat-label>Assigned</mat-label>

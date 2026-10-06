@@ -129,6 +129,12 @@ namespace Ghosts.Api.Infrastructure.Services
                 throw new InvalidOperationException($"Scenario with id {dto.ScenarioId} not found");
             }
 
+            // Only a published scenario can be deployed; a draft is unreviewed work (I2)
+            if (scenario.PublishedAt == null)
+            {
+                throw new InvalidOperationException($"Scenario {scenario.Name} is a draft. Publish it before running it.");
+            }
+
             var executionCount = await Executions.CountAsync(e => e.ScenarioId == dto.ScenarioId, ct);
             var executionName = string.IsNullOrEmpty(dto.Name)
                 ? $"{scenario.Name} - Run {executionCount + 1}"

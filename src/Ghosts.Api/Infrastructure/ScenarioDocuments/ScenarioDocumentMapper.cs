@@ -46,6 +46,12 @@ public static class ScenarioDocumentMapper
         var gm = s.GameMechanics;
         var tl = s.ScenarioTimeline;
 
+        // What no column holds, merged in last. Defense details are matched to the defense column by name,
+        // since the column is where a defense is named, so they come out of the merge.
+        var extras = ParseObject(s.Extras) ?? new JsonObject();
+        var defenseDetails = (extras["terrain"]?["defenses"] as JsonArray)?.OfType<JsonObject>().ToList() ?? [];
+        (extras["terrain"] as JsonObject)?.Remove("defenses");
+
         // Objectives get document-local ids: 1..n in display order. Events refer to them.
         var ordered = (objectives ?? []).OrderBy(o => o.SortOrder).ThenBy(o => o.Id).ToList();
         var localId = new Dictionary<int, int>();
@@ -85,6 +91,7 @@ public static class ScenarioDocumentMapper
                 if (a.Capability > 0) o["capability"] = a.Capability;
                 Put(o, "techniques", Strings(ttps.Where(IsTechnique).OrderBy(t => t, StringComparer.Ordinal)));
                 Put(o, "capabilities", Strings(ttps.Where(t => !IsTechnique(t))));
+                Merge(o, a.Extras);
                 adversaries.Add(o);
             }
             Put(doc, "adversaries", adversaries);
@@ -102,7 +109,10 @@ public static class ScenarioDocumentMapper
             var defenses = new JsonArray();
             foreach (var d in ParseStringList(te.Defenses).Where(d => !string.IsNullOrEmpty(d)))
             {
-                defenses.Add(new JsonObject { ["name"] = d });
+                var o = new JsonObject { ["name"] = d };
+                var detail = defenseDetails.FirstOrDefault(x => Str(x, "name") == d);
+                if (detail != null) Merge(o, detail);
+                defenses.Add(o);
             }
             Put(terrain, "defenses", defenses);
 
@@ -113,6 +123,7 @@ public static class ScenarioDocumentMapper
                 // The column is named cve but holds prose in older scenarios; plain words go to description.
                 if (IsCve(v.Cve)) o["cve"] = v.Cve; else Put(o, "description", v.Cve);
                 o["severity"] = Lower(v.Severity);
+                Merge(o, v.Extras);
                 vulnerabilities.Add(o);
             }
             Put(terrain, "vulnerabilities", vulnerabilities);
@@ -124,7 +135,9 @@ public static class ScenarioDocumentMapper
             var pools = new JsonArray();
             foreach (var u in p.UserPools.OrderBy(x => x.Id))
             {
-                pools.Add(new JsonObject { ["role"] = u.Role ?? string.Empty, ["count"] = u.Count });
+                var o = new JsonObject { ["role"] = u.Role ?? string.Empty, ["count"] = u.Count };
+                Merge(o, u.Extras);
+                pools.Add(o);
             }
             var population = new JsonObject();
             Put(population, "pools", pools);
@@ -168,6 +181,7 @@ public static class ScenarioDocumentMapper
             if (o.Priority > 0) item["priority"] = o.Priority;
             Put(item, "successCriteria", o.SuccessCriteria);
             if (!string.IsNullOrEmpty(o.Assigned)) item["assigned"] = Owner(o.Assigned);
+            Merge(item, o.Extras);
             objectiveArray.Add(item);
         }
         Put(assessment, "objectives", objectiveArray);
@@ -184,6 +198,7 @@ public static class ScenarioDocumentMapper
                 PutTime(o, inj.Trigger);
                 o["owner"] = "white-cell";
                 Put(o, "title", inj.Title);
+                Merge(o, inj.Extras);
                 events.Add(o);
             }
         }
@@ -204,6 +219,7 @@ public static class ScenarioDocumentMapper
             var execution = new JsonObject { ["mode"] = e.ExecutionType.ToString().ToLowerInvariant() };
             Put(execution, "workflowRef", e.WorkflowId);
             o["execution"] = execution;
+            Merge(o, e.Extras);
             events.Add(o);
         }
         var timeline = new JsonObject();
@@ -266,6 +282,7 @@ public static class ScenarioDocumentMapper
         }
         Put(doc, "edges", edgeArray);
 
+        Merge(doc, extras);
         return doc;
     }
 
@@ -374,7 +391,8 @@ public static class ScenarioDocumentMapper
             Str(a, "name"),
             Str(a, "type"),
             Int(a, "capability"),
-            StrList(a, "techniques").Concat(StrList(a, "capabilities")).ToList())).ToList();
+            StrList(a, "techniques").Concat(StrList(a, "capabilities")).ToList(),
+            Extras<AdversaryExtrasDto>(a, "name", "type", "capability", "techniques", "capabilities"))).ToList();
 
         // Rule 5 reversed: an event with a title and no description is an inject.
         var injects = new List<InjectDto>();
@@ -386,7 +404,7 @@ public static class ScenarioDocumentMapper
             var title = Str(e, "title");
             if (!string.IsNullOrEmpty(title) && string.IsNullOrEmpty(Str(e, "description")))
             {
-                injects.Add(new InjectDto(time, title));
+                injects.Add(new InjectDto(time, title, Extras<EventExtrasDto>(e, "at", "displayTime", "title")));
                 continue;
             }
             var execution = Obj(e as JsonObject, "execution");
@@ -403,11 +421,12 @@ public static class ScenarioDocumentMapper
                 NullIfEmpty(schedule),
                 NullIfEmpty(when),
                 execution == null ? "Manual" : Capitalize(Str(execution, "mode")),
-                NullIfEmpty(Str(execution, "workflowRef"))));
+                NullIfEmpty(Str(execution, "workflowRef")),
+                Extras<EventExtrasDto>(e, "at", "displayTime", "owner", "description", "objectives", "schedule", "when", "execution")));
         }
 
         var pools = Arr(Obj(doc, "population"), "pools")
-            .Select(u => new UserPoolDto(Str(u, "role"), Int(u, "count"))).ToList();
+            .Select(u => new UserPoolDto(Str(u, "role"), Int(u, "count"), Extras<PoolExtrasDto>(u, "role", "count"))).ToList();
 
         // Nothing is bound silently: an absent workflows list binds nothing, so the list is never
         // null on this path — a null would seed the three defaults.
@@ -433,7 +452,11 @@ public static class ScenarioDocumentMapper
             Arr(terrain, "vulnerabilities").Select(v => new VulnerabilityDto(
                 Str(v, "asset"),
                 string.IsNullOrEmpty(Str(v, "cve")) ? Str(v, "description") : Str(v, "cve"),
-                Str(v, "severity"))).ToList());
+                Str(v, "severity"),
+                // The cve column holds the description only when there is no CVE.
+                string.IsNullOrEmpty(Str(v, "cve"))
+                    ? Extras<VulnerabilityExtrasDto>(v, "asset", "cve", "description", "severity")
+                    : Extras<VulnerabilityExtrasDto>(v, "asset", "cve", "severity"))).ToList());
 
         // One duration in the document, two columns in the database: both are written in hours from
         // it so they cannot disagree. A duration the columns cannot hold exactly is refused by the
@@ -493,7 +516,19 @@ public static class ScenarioDocumentMapper
             Int(o, "priority"),
             Str(o, "successCriteria"),
             CellName(Str(o, "assigned")),
-            i)).ToList();
+            i,
+            Extras<ObjectiveExtrasDto>(o, "id", "parentId", "name", "description", "type", "priority", "successCriteria", "assigned"))).ToList();
+
+        // The scenario's own extras, in the document's shape: every key no column holds, at whatever depth.
+        // Defenses go in whole, names too, because the column keeps only the names.
+        var rest = Remainder(doc, "schemaVersion", "name", "description", "context", "audience", "sides", "adversaries",
+            "terrain", "population", "rulesOfPlay", "assessment", "timeline", "workflows", "entities", "edges");
+        Put(rest, "context", Remainder(context, "political"));
+        Put(rest, "audience", Remainder(audience, "rulesOfEngagement"));
+        Put(rest, "terrain", Remainder(terrain, "summary", "vulnerabilities"));
+        var ropRest = Remainder(rop, "pacing", "duration", "adjudication", "telemetry", "escalationLadder", "branching");
+        Put(ropRest, "escalationLadder", Remainder(Obj(rop, "escalationLadder"), "summary"));
+        Put(rest, "rulesOfPlay", ropRest);
 
         return new CreateScenarioDto(
             Str(doc, "name"),
@@ -504,7 +539,8 @@ public static class ScenarioDocumentMapper
             new TimelineDto(hours, events),
             entities,
             edges,
-            objectives);
+            objectives,
+            rest.Count == 0 ? null : rest.Deserialize<ScenarioExtrasDto>(ScenarioExtras.Options));
     }
 
     // ───────────────────────── grammar ─────────────────────────
@@ -664,6 +700,42 @@ public static class ScenarioDocumentMapper
     }
 
     private static JsonObject Obj(JsonObject parent, string key) => parent?[key] as JsonObject;
+
+    /// <summary>An object's keys other than <paramref name="columns"/>: what its row has no column for.</summary>
+    private static JsonObject Remainder(JsonObject o, params string[] columns)
+    {
+        var rest = new JsonObject();
+        if (o == null) return rest;
+        foreach (var (key, value) in o)
+        {
+            if (!columns.Contains(key)) rest[key] = value?.DeepClone();
+        }
+        return rest;
+    }
+
+    /// <summary>A row's extras from its document object, or null when the object says nothing its columns do not.</summary>
+    private static T Extras<T>(JsonNode node, params string[] columns) where T : class
+    {
+        var rest = Remainder(node as JsonObject, columns);
+        return rest.Count == 0 ? null : rest.Deserialize<T>(ScenarioExtras.Options);
+    }
+
+    private static void Merge(JsonObject target, string extras) => Merge(target, ParseObject(extras));
+
+    /// <summary>
+    /// Extras over what the columns made: objects merge key by key, anything else replaces. An empty value
+    /// says nothing, so it leaves the column's value — a cleared slug does not blank a required key.
+    /// </summary>
+    private static void Merge(JsonObject target, JsonObject extras)
+    {
+        if (extras == null) return;
+        foreach (var (key, value) in extras)
+        {
+            if (IsEmpty(value)) continue;
+            if (value is JsonObject child && target[key] is JsonObject existing) Merge(existing, child);
+            else target[key] = value.DeepClone();
+        }
+    }
 
     private static IEnumerable<JsonNode> Arr(JsonObject parent, string key) =>
         parent?[key] is JsonArray a ? a.Where(n => n != null) : [];

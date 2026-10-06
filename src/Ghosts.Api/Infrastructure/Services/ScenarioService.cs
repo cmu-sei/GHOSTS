@@ -24,14 +24,26 @@ namespace Ghosts.Api.Infrastructure.Services
         Task<Scenario> GetByIdAsync(int id, CancellationToken ct);
         Task<Scenario> CreateAsync(CreateScenarioDto dto, CancellationToken ct);
         Task<Scenario> ImportDocumentAsync(JsonObject document, IReadOnlyList<ScenarioFinding> findings, CancellationToken ct);
-        Task StoreDocumentAsync(int scenarioId, JsonObject document, IReadOnlyList<ScenarioFinding> findings, CancellationToken ct);
+        Task<Scenario> ReplaceFromDocumentAsync(int id, JsonObject document, IReadOnlyList<ScenarioFinding> findings, CancellationToken ct);
+        Task<bool> HasContentAsync(int id, CancellationToken ct);
+        Task StoreDocumentAsync(int scenarioId, JsonObject document, IReadOnlyList<ScenarioFinding> findings, CancellationToken ct,
+            string origin = ScenarioDocument.Imported);
         Task<bool> HasDocumentAsync(int scenarioId, CancellationToken ct);
         Task<string> ExportDocumentAsync(int id, bool derived, CancellationToken ct);
+        Task<ApprovedScenarioDocument> ApprovedDocumentAsync(int id, CancellationToken ct);
+        Task<Scenario> PublishAsync(int id, CancellationToken ct);
         Task<Scenario> UpdateAsync(int id, UpdateScenarioDto dto, CancellationToken ct);
         Task DeleteAsync(int id, CancellationToken ct);
     }
 
-    public class ScenarioService(ApplicationDbContext context) : IScenarioService
+    /// <summary>
+    /// The document a scenario was last imported from, and what an edit since has changed in its rows (A5).
+    /// Changes is empty when nothing was edited.
+    /// </summary>
+    public record ApprovedScenarioDocument(int ScenarioId, DateTime ApprovedAt, string ContentHash, string Document,
+        bool Edited, IReadOnlyList<string> Changes);
+
+    public class ScenarioService(ApplicationDbContext context, CurrentUser user = null) : IScenarioService
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         private readonly ApplicationDbContext _context = context;
@@ -90,9 +102,8 @@ namespace Ghosts.Api.Infrastructure.Services
         /// <summary>
         /// The scenario as canonical scenario-document text: the document it was imported from when
         /// there is one and the rows have not been edited since, and otherwise one derived from the
-        /// rows. Pass derived to force the derived form even when a document is stored — the
-        /// difference between the two is exactly what the columns cannot hold, which is what
-        /// STORAGE_LOSSY reports.
+        /// rows. Pass derived to force the derived form even when a document is stored. What no column
+        /// holds is in the rows' extras, so the two differ only by the schema README's known remainders.
         /// </summary>
         public async Task<string> ExportDocumentAsync(int id, bool derived, CancellationToken ct)
         {
@@ -145,11 +156,115 @@ namespace Ghosts.Api.Infrastructure.Services
         }
 
         /// <summary>
+        /// Replaces what a scenario holds with a document, and keeps the scenario: its id, sources, document
+        /// history, runs, NPC records and draft or published state. The Scenario Builder imports into the
+        /// scenario it is open on this way. Old compilations and their NPC assignments go too, or a run would
+        /// deploy them beside the new timeline. One transaction, as ImportDocumentAsync.
+        /// </summary>
+        public async Task<Scenario> ReplaceFromDocumentAsync(
+            int id, JsonObject document, IReadOnlyList<ScenarioFinding> findings, CancellationToken ct)
+        {
+            var ambient = _context.Database.CurrentTransaction;
+            await using var transaction = ambient == null ? await _context.Database.BeginTransactionAsync(ct) : null;
+
+            var scenario = await GetByIdAsync(id, ct);
+
+            // Edges first: an edge's target entity is a restricting key.
+            _context.ScenarioEdges.RemoveRange(await _context.ScenarioEdges.Where(e => e.ScenarioId == id).ToListAsync(ct));
+            await _context.SaveChangesAsync(ct);
+            _context.ScenarioEntities.RemoveRange(await _context.ScenarioEntities.Where(e => e.ScenarioId == id).ToListAsync(ct));
+            _context.ScenarioEnrichments.RemoveRange(await _context.ScenarioEnrichments.Where(e => e.ScenarioId == id).ToListAsync(ct));
+            _context.Objectives.RemoveRange(await _context.Objectives.Where(o => o.ScenarioId == id).ToListAsync(ct));
+            _context.ScenarioNpcAssignments.RemoveRange(await _context.ScenarioNpcAssignments.Where(a => a.ScenarioId == id).ToListAsync(ct));
+            _context.ScenarioCompilations.RemoveRange(await _context.ScenarioCompilations.Where(c => c.ScenarioId == id).ToListAsync(ct));
+            if (scenario.ScenarioParameters != null) _context.Remove(scenario.ScenarioParameters);
+            if (scenario.TechnicalEnvironment != null) _context.Remove(scenario.TechnicalEnvironment);
+            if (scenario.GameMechanics != null) _context.Remove(scenario.GameMechanics);
+            if (scenario.ScenarioTimeline != null) _context.Remove(scenario.ScenarioTimeline);
+            await _context.SaveChangesAsync(ct);
+
+            scenario.ScenarioParameters = null;
+            scenario.TechnicalEnvironment = null;
+            scenario.GameMechanics = null;
+            scenario.ScenarioTimeline = null;
+
+            var dto = ScenarioDocumentMapper.FromDocument(document);
+            scenario.Name = dto.Name;
+            scenario.Description = dto.Description;
+            scenario.Extras = ScenarioExtras.Write(dto.Extras);
+            scenario.UpdatedAt = DateTime.UtcNow;
+            MapChildren(dto, scenario);
+            // Entities and edges get their keys when they are mapped. Found through the tracked scenario,
+            // a keyed entity would be taken for an existing row, so they are added explicitly.
+            _context.AddRange(scenario.Entities);
+            _context.AddRange(scenario.Edges);
+            await _context.SaveChangesAsync(ct);
+
+            if (scenario.Objectives.Count > 0)
+            {
+                RemapObjectiveIds(dto.Objectives, scenario);
+                await _context.SaveChangesAsync(ct);
+            }
+
+            _context.ChangeTracker.Clear();
+            await StoreDocumentAsync(id, document, findings, ct);
+
+            if (transaction != null) await transaction.CommitAsync(ct);
+
+            _log.Info($"Replaced scenario {id} from a document: {scenario.Name}");
+            return await GetByIdAsync(id, ct);
+        }
+
+        /// <summary>Whether a scenario holds anything an import would replace: events, actors, injects, pools, objectives or a graph.</summary>
+        public async Task<bool> HasContentAsync(int id, CancellationToken ct)
+        {
+            var scenario = await GetByIdAsync(id, ct);
+            var parameters = scenario.ScenarioParameters;
+            return scenario.ScenarioTimeline?.ScenarioTimelineEvents.Count > 0
+                   || parameters != null && parameters.Nations.Count + parameters.ThreatActors.Count + parameters.Injects.Count + parameters.UserPools.Count > 0
+                   || await _context.Objectives.AnyAsync(o => o.ScenarioId == id, ct)
+                   || await _context.ScenarioEntities.AnyAsync(e => e.ScenarioId == id, ct);
+        }
+
+        /// <summary>
+        /// The newest document someone imported, and the change list from what its rows derived to then to
+        /// what they derive to now. Null when the scenario has never had a document imported.
+        /// </summary>
+        public async Task<ApprovedScenarioDocument> ApprovedDocumentAsync(int id, CancellationToken ct)
+        {
+            var rows = await DerivedDocumentAsync(id, ct);
+            var approved = await _context.ScenarioDocuments.AsNoTracking()
+                .Where(d => d.ScenarioId == id && d.Origin == ScenarioDocument.Imported)
+                .OrderByDescending(d => d.Id)
+                .FirstOrDefaultAsync(ct);
+            if (approved == null) return null;
+
+            var edited = approved.RowsHash != Hash(rows);
+            var changes = edited && approved.RowsDocument != null
+                ? ScenarioDocumentDiff.Changes(JsonNode.Parse(approved.RowsDocument), JsonNode.Parse(rows))
+                : [];
+            return new ApprovedScenarioDocument(id, approved.CreatedAt, approved.ContentHash,
+                ScenarioDocumentMapper.Serialize(JsonNode.Parse(approved.Document)), edited, changes);
+        }
+
+        /// <summary>Makes a draft visible to everyone and deployable. The caller checks who may, and the document.</summary>
+        public async Task<Scenario> PublishAsync(int id, CancellationToken ct)
+        {
+            var scenario = await _context.Scenarios.FirstOrDefaultAsync(s => s.Id == id, ct)
+                           ?? throw new InvalidOperationException("Scenario not found");
+            scenario.PublishedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync(ct);
+            _log.Info($"Published scenario {id}");
+            return await GetByIdAsync(id, ct);
+        }
+
+        /// <summary>
         /// Adds a document row for a scenario. One row per import, never an update: the newest row is
         /// the current document and the older ones are the scenario's history.
         /// </summary>
         public async Task StoreDocumentAsync(
-            int scenarioId, JsonObject document, IReadOnlyList<ScenarioFinding> findings, CancellationToken ct)
+            int scenarioId, JsonObject document, IReadOnlyList<ScenarioFinding> findings, CancellationToken ct,
+            string origin = ScenarioDocument.Imported)
         {
             var text = ScenarioDocumentMapper.Serialize(document);
             var rows = await DerivedDocumentAsync(scenarioId, ct);
@@ -163,6 +278,8 @@ namespace Ghosts.Api.Infrastructure.Services
                 RowsHash = Hash(rows),
                 Document = text,
                 Validation = ValidationRecord(findings),
+                Origin = origin,
+                RowsDocument = rows,
                 CreatedAt = DateTime.UtcNow
             });
 
@@ -222,38 +339,13 @@ namespace Ghosts.Api.Infrastructure.Services
                 Name = dto.Name,
                 Description = dto.Description,
                 CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                UpdatedAt = DateTime.UtcNow,
+                // Every new scenario starts as its author's draft
+                Author = user?.Name ?? CurrentUser.Anonymous,
+                Extras = ScenarioExtras.Write(dto.Extras)
             };
 
-            if (dto.ScenarioParameters != null)
-            {
-                scenario.ScenarioParameters = MapScenarioParameters(dto.ScenarioParameters);
-            }
-
-            if (dto.TechnicalEnvironment != null)
-            {
-                scenario.TechnicalEnvironment = MapTechnicalEnvironment(dto.TechnicalEnvironment);
-            }
-
-            if (dto.GameMechanics != null)
-            {
-                scenario.GameMechanics = MapGameMechanics(dto.GameMechanics);
-            }
-
-            if (dto.Timeline != null)
-            {
-                scenario.ScenarioTimeline = MapTimeline(dto.Timeline);
-            }
-
-            if (dto.Objectives != null)
-            {
-                scenario.Objectives = MapObjectives(dto.Objectives);
-            }
-
-            if (dto.Entities != null)
-            {
-                MapGraph(dto, scenario);
-            }
+            MapChildren(dto, scenario);
 
             _context.Scenarios.Add(scenario);
 
@@ -283,6 +375,40 @@ namespace Ghosts.Api.Infrastructure.Services
 
             // Reload with all relationships
             return await GetByIdAsync(scenario.Id, ct);
+        }
+
+        /// <summary>A scenario's parts from a create DTO: what CreateAsync makes, and what ReplaceFromDocumentAsync remakes.</summary>
+        private static void MapChildren(CreateScenarioDto dto, Scenario scenario)
+        {
+            if (dto.ScenarioParameters != null)
+            {
+                scenario.ScenarioParameters = MapScenarioParameters(dto.ScenarioParameters);
+            }
+
+            if (dto.TechnicalEnvironment != null)
+            {
+                scenario.TechnicalEnvironment = MapTechnicalEnvironment(dto.TechnicalEnvironment);
+            }
+
+            if (dto.GameMechanics != null)
+            {
+                scenario.GameMechanics = MapGameMechanics(dto.GameMechanics);
+            }
+
+            if (dto.Timeline != null)
+            {
+                scenario.ScenarioTimeline = MapTimeline(dto.Timeline);
+            }
+
+            if (dto.Objectives != null)
+            {
+                scenario.Objectives = MapObjectives(dto.Objectives);
+            }
+
+            if (dto.Entities != null)
+            {
+                MapGraph(dto, scenario);
+            }
         }
 
         public async Task<Scenario> UpdateAsync(int id, UpdateScenarioDto dto, CancellationToken ct)
@@ -316,6 +442,9 @@ namespace Ghosts.Api.Infrastructure.Services
             scenario.UpdatedAt = DateTime.UtcNow;
             if (dto.BuilderStatus != null)
                 scenario.BuilderStatus = dto.BuilderStatus;
+            // Only when supplied, like workflow bindings, so a caller that predates extras does not wipe them.
+            if (dto.Extras != null)
+                scenario.Extras = ScenarioExtras.Write(dto.Extras);
 
             // Update ScenarioParameters
             if (dto.ScenarioParameters != null)
@@ -346,19 +475,22 @@ namespace Ghosts.Api.Infrastructure.Services
                         Name = ta.Name,
                         Type = ta.Type,
                         Capability = ta.Capability,
-                        Ttps = string.Join(",", ta.Ttps)
+                        Ttps = string.Join(",", ta.Ttps),
+                        Extras = ScenarioExtras.Write(ta.Extras)
                     }).ToList();
 
                     scenario.ScenarioParameters.Injects = dto.ScenarioParameters.Injects.Select(i => new Inject
                     {
                         Trigger = i.Trigger,
-                        Title = i.Title
+                        Title = i.Title,
+                        Extras = ScenarioExtras.Write(i.Extras)
                     }).ToList();
 
                     scenario.ScenarioParameters.UserPools = dto.ScenarioParameters.UserPools.Select(up => new UserPool
                     {
                         Role = up.Role,
-                        Count = up.Count
+                        Count = up.Count,
+                        Extras = ScenarioExtras.Write(up.Extras)
                     }).ToList();
 
                     // Only replace workflow bindings when the client explicitly supplies them,
@@ -391,7 +523,8 @@ namespace Ghosts.Api.Infrastructure.Services
                     {
                         Asset = v.Asset,
                         Cve = v.Cve,
-                        Severity = v.Severity
+                        Severity = v.Severity,
+                        Extras = ScenarioExtras.Write(v.Extras)
                     }).ToList();
                 }
                 else
@@ -442,7 +575,8 @@ namespace Ghosts.Api.Infrastructure.Services
                         Schedule = e.Schedule,
                         TriggerCondition = e.TriggerCondition,
                         ExecutionType = Enum.TryParse<ExecutionType>(e.ExecutionType, true, out var et) ? et : ExecutionType.Manual,
-                        WorkflowId = e.WorkflowId
+                        WorkflowId = e.WorkflowId,
+                        Extras = ScenarioExtras.Write(e.Extras)
                     }).ToList();
                 }
                 else
@@ -494,10 +628,11 @@ namespace Ghosts.Api.Infrastructure.Services
                     Name = ta.Name,
                     Type = ta.Type,
                     Capability = ta.Capability,
-                    Ttps = string.Join(",", ta.Ttps)
+                    Ttps = string.Join(",", ta.Ttps),
+                    Extras = ScenarioExtras.Write(ta.Extras)
                 }).ToList(),
-                Injects = dto.Injects.Select(i => new Inject { Trigger = i.Trigger, Title = i.Title }).ToList(),
-                UserPools = dto.UserPools.Select(up => new UserPool { Role = up.Role, Count = up.Count }).ToList(),
+                Injects = dto.Injects.Select(i => new Inject { Trigger = i.Trigger, Title = i.Title, Extras = ScenarioExtras.Write(i.Extras) }).ToList(),
+                UserPools = dto.UserPools.Select(up => new UserPool { Role = up.Role, Count = up.Count, Extras = ScenarioExtras.Write(up.Extras) }).ToList(),
                 WorkflowBindings = MapWorkflowBindings(dto.WorkflowBindings)
             };
         }
@@ -541,7 +676,8 @@ namespace Ghosts.Api.Infrastructure.Services
                 {
                     Asset = v.Asset,
                     Cve = v.Cve,
-                    Severity = v.Severity
+                    Severity = v.Severity,
+                    Extras = ScenarioExtras.Write(v.Extras)
                 }).ToList()
             };
         }
@@ -575,6 +711,7 @@ namespace Ghosts.Api.Infrastructure.Services
                 SuccessCriteria = o.SuccessCriteria,
                 Assigned = o.Assigned,
                 SortOrder = o.SortOrder,
+                Extras = ScenarioExtras.Write(o.Extras),
                 CreatedAt = now,
                 UpdatedAt = now
             }).ToList();
@@ -682,7 +819,8 @@ namespace Ghosts.Api.Infrastructure.Services
                     Schedule = e.Schedule,
                     TriggerCondition = e.TriggerCondition,
                     ExecutionType = Enum.TryParse<ExecutionType>(e.ExecutionType, true, out var et) ? et : ExecutionType.Manual,
-                    WorkflowId = e.WorkflowId
+                    WorkflowId = e.WorkflowId,
+                    Extras = ScenarioExtras.Write(e.Extras)
                 }).ToList()
             };
         }

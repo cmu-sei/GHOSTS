@@ -133,7 +133,8 @@ button i {
   font-size: 14px;
 }
 
-.builder-badge {
+.builder-badge,
+.draft-badge {
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -150,4 +151,10 @@ button i {
   i {
     font-size: 10px;
   }
+}
+
+.draft-badge {
+  background: #fff3e0;
+  border-color: #ffcc80;
+  color: #e65100;
 }

@@ -12,8 +12,8 @@
 #
 # and one report, which is not a pass/fail:
 #
-#   derived     D against ?derived=true, which rebuilds a document from the rows alone. The diff is
-#               what the columns cannot hold, and it is the same list STORAGE_LOSSY reports on import.
+#   derived     D against ?derived=true, which rebuilds a document from the rows alone. What no column
+#               holds is kept in the rows' extras, so a diff here is what the rows still cannot rebuild.
 #
 # Every scenario this script creates is deleted again, so the database is left as it was found.
 # Scenarios already in the database are exported first and their exports round-tripped too.
@@ -132,15 +132,14 @@ roundtrip() {
     fail "$name lossless" "$(node "$HERE/scenario-doc.mjs" diff "$doc" "$first" | head -12 | tr '\n' ';')"
   fi
 
-  # The derived form is the document the columns can rebuild on their own. Where it differs from D,
-  # the difference is what the columns cannot hold — the same paths the import reported as lossy.
+  # The derived form is the document the rows can rebuild on their own. Where it differs from D,
+  # the difference is what the rows still cannot hold.
   local derived=$WORK/$name.derived.json
   if export_derived "$id" "$derived" 2>>"$WORK/$name.err"; then
     if cmp -s "$doc" "$derived"; then
       printf 'same  %-28s %s\n' "$name derived" "the columns hold the whole document"
     else
-      printf 'loss  %-28s %s\n' "$name derived" \
-        "STORAGE_LOSSY: $(jq -r '[.findings[]? | select(.code == "STORAGE_LOSSY") | .path] | join(" ")' "$WORK/$name.import.json")"
+      printf 'loss  %-28s %s\n' "$name derived" "the rows do not rebuild the whole document"
       node "$HERE/scenario-doc.mjs" diff "$doc" "$derived" | sed 's/^/        /'
       LOSSY+=("$name")
     fi
