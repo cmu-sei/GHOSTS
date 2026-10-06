@@ -15,7 +15,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { ChangeDetectionStrategy } from '@angular/core';
 import { ScenarioService, ScenarioHubService, ObjectiveService, N8nWorkflowService } from '../../../core/services';
-import { CreateScenario, ScenarioTimelineEvent, Scenario, Objective, N8nWorkflow, ScenarioExtras } from '../../../core/models';
+import { CreateScenario, ScenarioTimelineEvent, Objective, N8nWorkflow, ScenarioExtras } from '../../../core/models';
 import { BuilderEntitiesComponent } from '../../scenario-builder/builder-entities/builder-entities.component';
 import { BuilderGraphComponent } from '../../scenario-builder/builder-graph/builder-graph.component';
 
