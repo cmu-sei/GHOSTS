@@ -1,8 +1,8 @@
 # Custom Certificates
 
-On a network that inspects TLS (Zscaler), place the PEM-encoded root CA
-certificates in this folder with a `.crt` extension, then rebuild the dev container.
-`install.sh` installs every `.crt` file here into the system trust store.
+Place PEM-encoded root CA certificates in this folder with a `.crt` extension before
+rebuilding the dev container. This feature's `install.sh` installs every `.crt` file here
+into the container's system trust store via `update-ca-certificates`; all other file
+types are ignored.
 
-The `.crt` files are gitignored, so they never reach the public repository. The feature
-files are tracked, so the container builds on any clone, with or without certificates.
+If you rely on Zscaler (or another SSL inspection solution), copy the issued root certificate into this folder as `*.crt`, rebuild, and the container will trust outbound TLS through that proxy.

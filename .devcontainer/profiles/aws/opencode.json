@@ -1,3 +1,66 @@
 {
-  "disabled_providers": ["opencode"]
+  "disabled_providers": ["opencode"],
+  "provider": {
+    "amazon-bedrock": {
+      "blacklist": [
+        "openai.gpt-5.6-sol",
+        "us.openai.gpt-5.6-sol",
+        "global.openai.gpt-5.6-sol",
+        "openai.gpt-5.6-luna",
+        "us.openai.gpt-5.6-luna",
+        "global.openai.gpt-5.6-luna",
+        "in.openai.gpt-5.6-luna"
+      ],
+      "models": {
+        "us.openai.gpt-6-sol": {
+          "id": "us.openai.gpt-6-sol",
+          "name": "GPT-6 Sol (US)",
+          "family": "gpt",
+          "reasoning": true,
+          "attachment": true,
+          "temperature": false,
+          "tool_call": true,
+          "modalities": {
+            "input": ["text", "image"],
+            "output": ["text"]
+          },
+          "limit": {
+            "context": 1050000,
+            "input": 922000,
+            "output": 128000
+          },
+          "cost": {
+            "input": 2.2,
+            "output": 11,
+            "cache_read": 0.22,
+            "cache_write": 2.75
+          }
+        },
+        "us.openai.gpt-6-luna": {
+          "id": "us.openai.gpt-6-luna",
+          "name": "GPT-6 Luna (US)",
+          "family": "gpt",
+          "reasoning": true,
+          "attachment": true,
+          "temperature": false,
+          "tool_call": true,
+          "modalities": {
+            "input": ["text", "image"],
+            "output": ["text"]
+          },
+          "limit": {
+            "context": 1050000,
+            "input": 922000,
+            "output": 128000
+          },
+          "cost": {
+            "input": 0.11,
+            "output": 0.55,
+            "cache_read": 0.011,
+            "cache_write": 0.1375
+          }
+        }
+      }
+    }
+  }
 }

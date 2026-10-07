@@ -463,7 +463,7 @@ choose_cui() {
         echo "  If you are not maintaining agent-dev, spawn a project instead — that asks the"
         echo "  question properly and enforces the answer:"
         echo ""
-        echo "    $SCRIPT_DIR/spawn.sh <path>"
+        echo "    $PROJECT_DIR/spawn.sh <path>"
         return 0
     fi
 
