@@ -336,6 +336,9 @@ output/
 .env.*
 !.env.example
 *.env
+# The per-profile template declares which vars a profile needs (credentials left blank);
+# setup.sh discovers profiles by its presence, so a clone without it has no profiles.
+!.devcontainer/profiles/*/profile.env
 
 *.claude/*
 # The author-scenario skill is part of the repository; any other skill under .claude/skills/ stays local.
