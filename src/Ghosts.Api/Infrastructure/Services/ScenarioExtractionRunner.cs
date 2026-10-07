@@ -43,6 +43,10 @@ namespace Ghosts.Api.Infrastructure.Services
                         await extraction.ExtractAllAsync(scenarioId, CancellationToken.None);
                     } while (Again.ContainsKey(scenarioId));
                 }
+                catch (OperationCanceledException ex)
+                {
+                    _log.Warn(ex, $"Extraction after a source was added was canceled, scenario {scenarioId}");
+                }
                 catch (Exception ex)
                 {
                     _log.Error(ex, $"Extraction after a source was added failed, scenario {scenarioId}");
