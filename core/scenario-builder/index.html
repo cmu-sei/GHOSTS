@@ -13,10 +13,10 @@
       
       
       
-        <link rel="prev" href="../handlers/wmi/">
+        <link rel="prev" href="../ui/">
       
       
-        <link rel="next" href="timelines/">
+        <link rel="next" href="../../animator/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>GHOSTS API - GHOSTS Documentation</title>
+        <title>Scenario Builder and authoring - GHOSTS Documentation</title>
       
     
     
@@ -90,7 +90,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#ghosts-api" class="md-skip">
+        <a href="#scenario-builder-and-authoring" class="md-skip">
           Skip to content
         </a>
       
@@ -125,7 +125,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              GHOSTS API
+              Scenario Builder and authoring
             
           </span>
         </div>
@@ -307,13 +307,11 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="./" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="../api/" class="md-tabs__link">
           
   
   
@@ -331,10 +329,12 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
+      <li class="md-tabs__item md-tabs__item--active">
         <a href="../ui/" class="md-tabs__link">
           
   
@@ -1473,10 +1473,8 @@
       
   
   
-    
   
   
-  
     
     
       
@@ -1490,22 +1488,19 @@
     
     
       
-        
-        
-      
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
             
   
   
@@ -1523,7 +1518,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1538,37 +1533,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    GHOSTS API
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
         
   
   
@@ -1584,276 +1552,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#stack-overview" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Stack Overview
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Installation
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Installation">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#step-1-choose-a-host" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 1 — Choose a Host
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#step-2-deploy" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 2 — Deploy
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#step-3-verify" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 3 — Verify
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Configuration
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Configuration">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#environment-variables" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Environment Variables
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#appsettingsjson-advanced" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        appsettings.json (Advanced)
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#managing-the-stack" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Managing the Stack
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Managing the Stack">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#data-persistence" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Data Persistence
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#api-reference" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        API Reference
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="API Reference">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#client-endpoints" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Client Endpoints
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#management-endpoints" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Management Endpoints
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#signalr-hub" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        SignalR Hub
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#troubleshooting" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Troubleshooting
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Troubleshooting">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#api-returns-database-error-on-startup" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        API returns database error on startup
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#cannot-connect-from-a-client-to-the-api" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Cannot connect from a client to the API
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#grafana-container-keeps-restarting" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Grafana container keeps restarting
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#social-graph-page-shows-no-data" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Social graph page shows no data
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#next-steps" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Next Steps
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1876,20 +1574,17 @@
       
       
         
-          
-          
-        
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2" >
         
           
-          <label class="md-nav__link" for="__nav_5_2" id="__nav_5_2_label" tabindex="">
+          <label class="md-nav__link" for="__nav_5_2" id="__nav_5_2_label" tabindex="0">
             
   
   
@@ -1925,7 +1620,7 @@
   
   
     <li class="md-nav__item">
-      <a href="timelines/" class="md-nav__link">
+      <a href="../api/timelines/" class="md-nav__link">
         
   
   
@@ -1993,8 +1688,10 @@
       
   
   
+    
   
   
+  
     
     
       
@@ -2006,19 +1703,22 @@
     
     
       
+        
+        
+      
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
             
   
   
@@ -2036,7 +1736,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
@@ -2079,10 +1779,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../scenario-builder/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scenario Builder and authoring
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -2098,6 +1825,70 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-a-session-costs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What a session costs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limits-to-know" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Limits to know
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-acceptance-tests-on-a-real-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The acceptance tests on a real model
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -2398,369 +2189,123 @@
   
 
 
-<h1 id="ghosts-api">GHOSTS API<a class="headerlink" href="#ghosts-api" title="Permanent link">&para;</a></h1>
-<p>The GHOSTS API is the central command-and-control server for the GHOSTS framework. It manages clients, distributes timelines, records activity, stores NPC data, and exposes a REST API plus a SignalR WebSocket hub.</p>
-<hr />
-<h2 id="stack-overview">Stack Overview<a class="headerlink" href="#stack-overview" title="Permanent link">&para;</a></h2>
-<p>The API stack runs as five Docker containers:</p>
-<table>
-<thead>
-<tr>
-<th>Container</th>
-<th>Image</th>
-<th>Port</th>
-<th>Purpose</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>ghosts-api</code></td>
-<td><code>dustinupdyke/ghosts</code></td>
-<td>5000</td>
-<td>.NET 10 REST API + SignalR</td>
-</tr>
-<tr>
-<td><code>ghosts-frontend</code></td>
-<td><code>dustinupdyke/ghosts-frontend</code></td>
-<td>4200</td>
-<td>Angular 20 management UI</td>
-</tr>
-<tr>
-<td><code>ghosts-postgres</code></td>
-<td><code>postgres:16.8</code></td>
-<td>5432</td>
-<td>PostgreSQL 16 database</td>
-</tr>
-<tr>
-<td><code>ghosts-n8n</code></td>
-<td><code>docker.n8n.io/n8nio/n8n</code></td>
-<td>5678</td>
-<td>n8n workflow automation</td>
-</tr>
-<tr>
-<td><code>ghosts-grafana</code></td>
-<td><code>grafana/grafana</code></td>
-<td>3000</td>
-<td>Activity dashboards</td>
-</tr>
-</tbody>
-</table>
-<hr />
-<h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
-<h3 id="step-1-choose-a-host">Step 1 — Choose a Host<a class="headerlink" href="#step-1-choose-a-host" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>Development / testing</strong>: your local machine</li>
-<li><strong>Training exercises</strong>: a dedicated server, VM, or cloud instance</li>
-<li><strong>Production</strong>: a container orchestration platform (AWS ECS, Kubernetes, Docker Swarm)</li>
-</ul>
-<p><strong>Minimum requirements:</strong></p>
-<ul>
-<li>Docker and Docker Compose v2+</li>
-<li>4 GB RAM (8 GB+ recommended)</li>
-<li>20 GB disk space</li>
-<li>Ports 3000, 4200, 5000, 5432, and 5678 available</li>
-</ul>
-<h3 id="step-2-deploy">Step 2 — Deploy<a class="headerlink" href="#step-2-deploy" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>ghosts<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>ghosts
-curl<span class="w"> </span>-O<span class="w"> </span>https://raw.githubusercontent.com/cmu-sei/GHOSTS/master/src/Ghosts.Api/docker-compose.yml
-docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
-</code></pre></div>
-<p>Verify:</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>ps<span class="w"> </span>-a
-</code></pre></div>
-<p>All five containers should be in a running state. PostgreSQL needs ~15 seconds on first start; the API will retry the connection automatically.</p>
-<h3 id="step-3-verify">Step 3 — Verify<a class="headerlink" href="#step-3-verify" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>URL</th>
-<th>Expected</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>http://localhost:5000</td>
-<td>API home page</td>
-</tr>
-<tr>
-<td>http://localhost:5000/swagger</td>
-<td>Swagger UI (API v9)</td>
-</tr>
-<tr>
-<td>http://localhost:4200</td>
-<td>Angular management frontend</td>
-</tr>
-<tr>
-<td>http://localhost:3000</td>
-<td>Grafana (default: <code>admin</code>/<code>admin</code>)</td>
-</tr>
-<tr>
-<td>http://localhost:5678</td>
-<td>n8n workflow editor</td>
-</tr>
-</tbody>
-</table>
-<hr />
-<h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
-<h3 id="environment-variables">Environment Variables<a class="headerlink" href="#environment-variables" title="Permanent link">&para;</a></h3>
-<p>Set these in a <code>.env</code> file alongside <code>docker-compose.yml</code> or directly in your container environment:</p>
-<table>
-<thead>
-<tr>
-<th>Variable</th>
-<th>Default</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>N8N_API_URL</code></td>
-<td><code>http://ghosts-n8n:5678/api/v1/workflows</code></td>
-<td>n8n REST API endpoint (used by the API to list and validate workflows)</td>
-</tr>
-<tr>
-<td><code>N8N_API_KEY</code></td>
-<td><em>(empty)</em></td>
-<td>n8n API key — <strong>required</strong> for workflow scheduling. Generate in n8n: Settings &gt; API &gt; Create API Key.</td>
-</tr>
-<tr>
-<td><code>WEB_API_URL</code></td>
-<td><code>http://localhost:5000/api</code></td>
-<td>GHOSTS API URL served to the frontend (must be reachable by the browser)</td>
-</tr>
-<tr>
-<td><code>WEB_N8N_API_URL</code></td>
-<td><code>http://localhost:5678</code></td>
-<td>n8n base URL served to the frontend (must be reachable by the browser)</td>
-</tr>
-<tr>
-<td><code>POSTGRES_PASSWORD</code></td>
-<td>set_me</td>
-<td>PostgreSQL password. <strong>Change this</strong> for any non-local deployment.</td>
-</tr>
-</tbody>
-</table>
-<h3 id="appsettingsjson-advanced">appsettings.json (Advanced)<a class="headerlink" href="#appsettingsjson-advanced" title="Permanent link">&para;</a></h3>
-<p>Override values for production via environment variables or a mounted <code>appsettings.Production.json</code>.</p>
-<hr />
-<h2 id="managing-the-stack">Managing the Stack<a class="headerlink" href="#managing-the-stack" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="c1"># Stop</span>
-docker<span class="w"> </span>compose<span class="w"> </span>down
-
-<span class="c1"># Update to latest images</span>
-docker<span class="w"> </span>compose<span class="w"> </span>pull<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
-
-<span class="c1"># Restart a specific service</span>
-docker<span class="w"> </span>compose<span class="w"> </span>restart<span class="w"> </span>ghosts-api
-
-<span class="c1"># Follow API logs</span>
-docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>ghosts-api
-</code></pre></div>
-<h3 id="data-persistence">Data Persistence<a class="headerlink" href="#data-persistence" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>Directory</th>
-<th>Contents</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>./_db</code></td>
-<td>PostgreSQL data (machines, NPCs, timelines, activities)</td>
-</tr>
-<tr>
-<td><code>./_g</code></td>
-<td>Grafana dashboards and configuration</td>
-</tr>
-<tr>
-<td><code>./n8n_data</code></td>
-<td>n8n workflows and credentials</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Reset the database (destroys all data):</strong></p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>down<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>rm<span class="w"> </span>-rf<span class="w"> </span>./_db<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
-</code></pre></div>
-<hr />
-<h2 id="api-reference">API Reference<a class="headerlink" href="#api-reference" title="Permanent link">&para;</a></h2>
-<p>Interactive documentation is available at <code>http://YOUR-API-HOST:5000/swagger</code> when the API is running.</p>
-<h3 id="client-endpoints">Client Endpoints<a class="headerlink" href="#client-endpoints" title="Permanent link">&para;</a></h3>
-<p>Used by deployed GHOSTS client agents:</p>
-<table>
-<thead>
-<tr>
-<th>Method</th>
-<th>Path</th>
-<th>Purpose</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>POST</td>
-<td><code>/api/clientid</code></td>
-<td>Machine self-registration</td>
-</tr>
-<tr>
-<td>GET/POST</td>
-<td><code>/api/clientupdates</code></td>
-<td>Fetch pending timeline updates</td>
-</tr>
-<tr>
-<td>POST</td>
-<td><code>/api/clientresults</code></td>
-<td>Submit activity results</td>
-</tr>
-<tr>
-<td>POST</td>
-<td><code>/api/clienttimeline</code></td>
-<td>Submit active timeline</td>
-</tr>
-<tr>
-<td>POST</td>
-<td><code>/api/clientsurvey</code></td>
-<td>Submit system survey data</td>
-</tr>
-</tbody>
-</table>
-<h3 id="management-endpoints">Management Endpoints<a class="headerlink" href="#management-endpoints" title="Permanent link">&para;</a></h3>
-<p>Used by the frontend and operators:</p>
-<table>
-<thead>
-<tr>
-<th>Resource</th>
-<th>Base Path</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Machines</td>
-<td><code>/api/machines</code></td>
-</tr>
-<tr>
-<td>Machine Groups</td>
-<td><code>/api/machinegroups</code></td>
-</tr>
-<tr>
-<td>Timelines</td>
-<td><code>/api/timelines</code></td>
-</tr>
-<tr>
-<td>Machine Timelines</td>
-<td><code>/api/machinetimelines</code></td>
-</tr>
-<tr>
-<td>Machine Updates</td>
-<td><code>/api/machineupdates</code></td>
-</tr>
-<tr>
-<td>NPCs</td>
-<td><code>/api/npcs</code></td>
-</tr>
-<tr>
-<td>NPC Generation</td>
-<td><code>/api/npcs/generate</code></td>
-</tr>
-<tr>
-<td>Scenarios</td>
-<td><code>/api/scenarios</code></td>
-</tr>
-<tr>
-<td>Executions</td>
-<td><code>/api/executions</code></td>
-</tr>
-<tr>
-<td>Trackables</td>
-<td><code>/api/trackables</code></td>
-</tr>
-<tr>
-<td>Surveys</td>
-<td><code>/api/surveys</code></td>
-</tr>
-<tr>
-<td>Webhooks</td>
-<td><code>/api/webhooks</code></td>
-</tr>
-<tr>
-<td>Animation Jobs</td>
-<td><code>/api/animations/jobs</code></td>
-</tr>
-<tr>
-<td>n8n Workflows</td>
-<td><code>/api/animations/workflows</code></td>
-</tr>
-</tbody>
-</table>
-<h3 id="signalr-hub">SignalR Hub<a class="headerlink" href="#signalr-hub" title="Permanent link">&para;</a></h3>
-<p>Clients connect to <code>/clientHub</code> (WebSocket). Hub methods:</p>
-<table>
-<thead>
-<tr>
-<th>Method</th>
-<th>Direction</th>
-<th>Purpose</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>SendId</code></td>
-<td>Client → Server</td>
-<td>Machine identification on connect</td>
-</tr>
-<tr>
-<td><code>SendResults</code></td>
-<td>Client → Server</td>
-<td>Timeline execution results</td>
-</tr>
-<tr>
-<td><code>SendSurvey</code></td>
-<td>Client → Server</td>
-<td>System survey data</td>
-</tr>
-<tr>
-<td><code>SendHeartbeat</code></td>
-<td>Client → Server</td>
-<td>Keep-alive</td>
-</tr>
-<tr>
-<td><code>ReceiveId</code></td>
-<td>Server → Client</td>
-<td>Returns machine GUID after registration</td>
-</tr>
-</tbody>
-</table>
-<p>The frontend connects to <code>/api/hubs/activities</code> for real-time animation and workflow events.</p>
-<hr />
-<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
-<h3 id="api-returns-database-error-on-startup">API returns database error on startup<a class="headerlink" href="#api-returns-database-error-on-startup" title="Permanent link">&para;</a></h3>
-<p>PostgreSQL takes ~15 seconds to initialize on first run. The API retries automatically — wait and refresh.</p>
-<p>If it persists, check PostgreSQL logs:</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>ghosts-postgres
-</code></pre></div>
-<h3 id="cannot-connect-from-a-client-to-the-api">Cannot connect from a client to the API<a class="headerlink" href="#cannot-connect-from-a-client-to-the-api" title="Permanent link">&para;</a></h3>
+<h1 id="scenario-builder-and-authoring">Scenario Builder and authoring<a class="headerlink" href="#scenario-builder-and-authoring" title="Permanent link">&para;</a></h1>
+<p>The Scenario Builder turns an exercise developer's plain-English intent into a validated GHOSTS scenario. It
+lives in the frontend at <code>/scenarios/{id}/builder</code> and has two steps. Everything it does with a model, extraction
+and the conversation, goes through Amazon Bedrock with the model picked on the Sources step.</p>
 <ol>
-<li>Confirm the API is reachable from the client machine:
-   <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>http://YOUR-API-HOST:5000/api
-</code></pre></div></li>
-<li>Ensure port 5000 is open in the firewall on the API host.</li>
-<li>Check <code>config/application.json</code> (or <code>application.yaml</code>) on the client has the correct <code>ApiRootUrl</code>.</li>
+<li><strong>Sources.</strong> First the <strong>Model</strong> and its <strong>Effort</strong>: one pair per scenario, Sonnet at its default effort to
+   begin with. The model both reads the sources and runs the conversation; the effort level sets how hard it
+   thinks in the conversation. Then text, web pages and files the scenario is built from. Each source is split into chunks
+   the conversation searches and cites, and extraction runs as soon as a source is added, reading its chunks
+   into entities (hosts, segments, people, organizations) and a graph. An entity a person marks <strong>Reviewed</strong> is
+   taken as the real name. Chunks a run leaves pending, usually because the model was unavailable, can be
+   retried from the Sources step.</li>
+<li><strong>Conversation.</strong> An authoring agent interviews the developer, drafts a scenario document against the
+   schema in <code>schemas/scenario-document/</code>, validates it, and shows the plan, the decisions ledger and the
+   warnings. Nothing is imported until the developer clicks <strong>Import</strong>; the server validates the exact bytes
+   again and writes them into the Builder's scenario. Every turn shows the server's own gate report of what
+   the agent called and what validated.</li>
 </ol>
-<h3 id="grafana-container-keeps-restarting">Grafana container keeps restarting<a class="headerlink" href="#grafana-container-keeps-restarting" title="Permanent link">&para;</a></h3>
-<p>Check ownership of the <code>_g</code> directory:</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>chown<span class="w"> </span>-R<span class="w"> </span><span class="m">472</span>:472<span class="w"> </span>./_g
-docker<span class="w"> </span>compose<span class="w"> </span>restart<span class="w"> </span>ghosts-grafana
-</code></pre></div>
-<h3 id="social-graph-page-shows-no-data">Social graph page shows no data<a class="headerlink" href="#social-graph-page-shows-no-data" title="Permanent link">&para;</a></h3>
-<p>This is expected on fresh installations. Social graphs are created when NPCs are generated and workflows are run. See <a href="../../animator/">Animator documentation</a>.</p>
-<hr />
-<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
+<p>Afterwards the scenario opens in the planner, whose <strong>Document</strong> tab shows the approved version, what any edit
+since has changed, and downloads of the document and its exercise plan.</p>
+<h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
+<p>The Builder calls Amazon Bedrock's Converse API. Credentials come from <code>AWS_ACCESS_KEY_ID</code> and
+<code>AWS_SECRET_ACCESS_KEY</code> or the default AWS credential chain, never from configuration and never to the browser.
+The <code>ScenarioAuthoring</code> section of <code>appsettings.json</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Region</code></td>
+<td>The Bedrock region.</td>
+<td><code>us-east-1</code></td>
+</tr>
+<tr>
+<td><code>Model</code></td>
+<td>The model a scenario uses until one is picked on its Sources step.</td>
+<td>Sonnet 5.5</td>
+</tr>
+<tr>
+<td><code>Models[]</code></td>
+<td>The models the Sources step offers, each with <code>Name</code>, <code>Id</code>, <code>Efforts</code>, the effort levels it takes (<code>low</code>, <code>medium</code>, <code>high</code>, <code>xhigh</code>, <code>max</code> on current Anthropic models), and <code>Pricing</code>, US dollars per million input, output, cache-read and cache-write tokens. A model with no <code>Efforts</code> has the Sources step's effort control greyed out; one with no <code>Pricing</code> shows token counts but no cost.</td>
+<td>the three Anthropic models, at Anthropic's list prices</td>
+</tr>
+<tr>
+<td><code>FallbackModel</code></td>
+<td>For ten minutes after <code>Model</code> returned HTTP 503, a new session that names no model starts here. A session that has begun keeps its model. Empty: no fallback.</td>
+<td>empty</td>
+</tr>
+<tr>
+<td><code>MaxOutputTokens</code></td>
+<td>The output limit of each model call. A full draft needs at least 64,000.</td>
+<td><code>64000</code></td>
+</tr>
+<tr>
+<td><code>PromptCaching</code></td>
+<td>Cache points on the system prompt, the tools and the conversation. Turn off for a model that rejects them.</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>RequestTimeoutSeconds</code></td>
+<td>Each model call's request timeout.</td>
+<td><code>300</code></td>
+</tr>
+<tr>
+<td><code>TurnTimeoutMinutes</code></td>
+<td>A turn's overall limit; the model call it is waiting on is cancelled.</td>
+<td><code>30</code></td>
+</tr>
+<tr>
+<td><code>ValidatorTimeoutSeconds</code></td>
+<td>Each validator and dry-run call's own timeout.</td>
+<td><code>90</code></td>
+</tr>
+</tbody>
+</table>
+<p>Extraction reads chunks <code>ScenarioBuilder:ExtractionConcurrency</code> at a time (default 6), one model call per
+4,000-character chunk.</p>
+<p><strong>Who is who.</strong> GHOSTS has no sign-in. The API reads the user from the header an authenticating proxy sets,
+<code>Identity:UserHeader</code> (<code>X-Forwarded-User</code> by default); without a proxy everyone is <code>anonymous</code>. A new scenario is
+its author's draft, shown to its author alone, and cannot run until its author publishes it, which needs its
+document to validate with 0 errors. Everything under a scenario, including its sources, chunks, entities, graph
+and authoring sessions, follows the same rule.</p>
+<p><strong>ATT&amp;CK data.</strong> The agent's technique and group lookups read an index embedded in the API. The Builder's
+ATT&amp;CK enrichment needs MITRE's STIX bundle in <code>config/AttackData/</code>; see the README there for where to get it.</p>
+<h2 id="what-a-session-costs">What a session costs<a class="headerlink" href="#what-a-session-costs" title="Permanent link">&para;</a></h2>
+<p>Under the conversation's text box, the page shows the session's model calls, input tokens (with how many were
+read from the prompt cache), output tokens, and an estimated cost. The counts are the provider's own, recorded
+for every call. The cost multiplies them by the model's configured <code>Pricing</code>, so it is an estimate at list
+prices: Bedrock's rate for a region or a provisioned model may differ. With caching on, a drafting session on
+Sonnet 5.5 runs about ten calls, a few dozen uncached input tokens, a quarter million cached, and some fifteen
+thousand out, which is roughly twenty cents.</p>
+<h2 id="limits-to-know">Limits to know<a class="headerlink" href="#limits-to-know" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Connect <a href="../client/">client machines</a></li>
-<li>Explore the <a href="../ui/">Frontend</a> for machine and timeline management</li>
-<li>Configure <a href="../grafana/">Grafana dashboards</a></li>
-<li>Learn about <a href="timelines/">timeline configuration</a></li>
-<li>Generate NPCs with the <a href="../../animator/">Animator</a></li>
+<li><strong>One API instance.</strong> A session runs one turn or import at a time through a lock held in the API's memory.
+  Two API instances serving the same session could run two turns at once; running one instance, as the Docker
+  Compose stack does, avoids it. A database-held lock would be the fix if that changes.</li>
+<li><strong>Bedrock only.</strong> Neither the conversation nor extraction has an Ollama provider.</li>
+<li><strong>Citations open the chunk, not the place.</strong> A <code>[chunk N]</code> citation opens the chunk's text; chunks record an
+  index, not a page or character offset.</li>
+<li><strong>The plan is the server's.</strong> The exercise plan under a reply's <strong>Plan</strong> button, and the <code>.plan.md</code> export,
+  are rendered by the server from the document; the agent's own summary in the reply is prose.</li>
 </ul>
+<h2 id="the-acceptance-tests-on-a-real-model">The acceptance tests on a real model<a class="headerlink" href="#the-acceptance-tests-on-a-real-model" title="Permanent link">&para;</a></h2>
+<p><code>ScenarioAuthoringServiceTests</code> covers the server's rules with a scripted model. The specification's
+acceptance tests that need a real model (Payroll Week in two messages, Night Shift and Wire Friday to an
+importable document, token records on every call, a draft grounded on a network source, a hostile source) are
+in <code>Ghosts.Api.Tests/Live</code>. They are skipped unless pointed at a running API, because they cost money and
+depend on the provider:</p>
+<div class="highlight"><pre><span></span><code>GHOSTS_LIVE_API=http://localhost:5000 GHOSTS_LIVE_EFFORT=medium dotnet test src/Ghosts.Api.Tests --filter FullyQualifiedName~Live
+</code></pre></div>
+<p><code>GHOSTS_LIVE_MODEL</code> picks one of the configured models. A turn may take several minutes. Run them on the model a
+deployment will rely on before relying on it.</p>
 
 
 
