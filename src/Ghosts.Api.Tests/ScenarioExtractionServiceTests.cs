@@ -28,7 +28,7 @@ public class ScenarioExtractionServiceTests
         context.Scenarios.Add(new Scenario { Id = 1, Name = "Mine", BuilderModel = "picked-model", Sources = [source] });
         await context.SaveChangesAsync();
 
-        string called = null;
+        string? called = null;
         var model = new ScriptedModel(request =>
         {
             called = request.ModelId;
@@ -57,7 +57,7 @@ public class ScenarioExtractionServiceTests
         await using var context = NewContext();
         context.Scenarios.Add(new Scenario { Id = 1, Name = "Mine", Sources = [new ScenarioSource { ScenarioId = 1, Name = "Notes", Chunks = [new ScenarioSourceChunk { ScenarioId = 1, Content = "Nothing much." }] }] });
         await context.SaveChangesAsync();
-        string called = null;
+        string? called = null;
         var model = new ScriptedModel(request => { called = request.ModelId; return """{"entities":[],"edges":[]}"""; });
         var service = new ScenarioExtractionService(context, new ConfigurationBuilder().Build(), null!, model,
             Options.Create(new ScenarioAuthoringOptions { Model = "default-model" }));

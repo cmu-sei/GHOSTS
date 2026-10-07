@@ -981,7 +981,7 @@ public class ScenarioAuthoringServiceTests
         throw new FileNotFoundException("schemas/scenario-document/examples/phishing-drill.scenario.json");
     }
 
-    private static ScenarioAuthoringService Service(ApplicationDbContext context, IAuthoringModel model, ScenarioAuthoringOptions options = null) => new(
+    private static ScenarioAuthoringService Service(ApplicationDbContext context, IAuthoringModel model, ScenarioAuthoringOptions? options = null) => new(
         context,
         new ScenarioService(context),
         model,
