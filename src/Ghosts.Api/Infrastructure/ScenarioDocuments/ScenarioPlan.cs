@@ -388,7 +388,7 @@ public static class ScenarioPlan
         null => false,
         JsonValue v when v.TryGetValue<string>(out var s) => s.Length > 0,
         JsonValue v when v.TryGetValue<bool>(out var b) => b,
-        JsonValue v when v.TryGetValue<double>(out var d) => d != 0,
+        JsonValue v when v.TryGetValue<double>(out var d) => !double.IsNaN(d) && System.Math.Abs(d) > double.Epsilon,
         _ => true
     };
 }
