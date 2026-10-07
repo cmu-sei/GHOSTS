@@ -198,11 +198,19 @@ public class Program
                 var context = services.GetRequiredService<ApplicationDbContext>();
                 var dbInitializerLogger = services.GetRequiredService<ILogger<DbInitializer>>();
 
-                DbInitializer.Initialize(context, dbInitializerLogger, services).Wait();
+                DbInitializer.Initialize(context, dbInitializerLogger, services).GetAwaiter().GetResult();
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                _log.Fatal(ex, "An error occurred while seeding the GHOSTS database");
+                _log.Fatal(ex, "An invalid operation occurred while seeding the GHOSTS database");
+            }
+            catch (DbUpdateException ex)
+            {
+                _log.Fatal(ex, "A database update error occurred while seeding the GHOSTS database");
+            }
+            catch (IOException ex)
+            {
+                _log.Fatal(ex, "An I/O error occurred while seeding the GHOSTS database");
             }
         }
 
