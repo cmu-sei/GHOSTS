@@ -180,7 +180,7 @@ namespace Ghosts.Animator
 
             var o = new List<AccountsProfile.Account>();
 
-            var numberOfAccounts = AnimatorRandom.Rand.Next(0, 15);
+            var numberOfAccounts = AnimatorRandom.Rand.Next(1, 15);
 
             for (var i = 0; i < numberOfAccounts; i++)
             {

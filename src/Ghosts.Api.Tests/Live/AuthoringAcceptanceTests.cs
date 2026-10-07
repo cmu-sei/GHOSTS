@@ -20,9 +20,9 @@ namespace Ghosts.Api.Tests.Live;
 /// </summary>
 public class AuthoringAcceptanceTests(ITestOutputHelper output)
 {
-    private static readonly string Api = Environment.GetEnvironmentVariable("GHOSTS_LIVE_API");
-    private static readonly string Model = Environment.GetEnvironmentVariable("GHOSTS_LIVE_MODEL");
-    private static readonly string Effort = Environment.GetEnvironmentVariable("GHOSTS_LIVE_EFFORT");
+    private static readonly string? Api = Environment.GetEnvironmentVariable("GHOSTS_LIVE_API");
+    private static readonly string? Model = Environment.GetEnvironmentVariable("GHOSTS_LIVE_MODEL");
+    private static readonly string? Effort = Environment.GetEnvironmentVariable("GHOSTS_LIVE_EFFORT");
     private static readonly TimeSpan TurnLimit = TimeSpan.FromMinutes(35);
     private static readonly JsonSerializerOptions Web = new(JsonSerializerDefaults.Web);
 
