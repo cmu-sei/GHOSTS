@@ -34,9 +34,6 @@ export class ScenarioBuilderShellComponent implements OnInit {
   protected readonly scenarioId = signal<number | null>(null);
   protected readonly loading = signal(true);
 
-  // Not used by this template. Left for Dustin's Q1: whether a side panel belongs here too.
-  protected readonly assistantOpen = signal(false);
-
   ngOnInit(): void {
     // Get 'id' from parent route since we're using loadChildren
     const id = this.route.parent?.snapshot.paramMap.get('id') ?? this.route.snapshot.paramMap.get('id');
@@ -46,10 +43,6 @@ export class ScenarioBuilderShellComponent implements OnInit {
     } else {
       this.router.navigate(['/scenarios']);
     }
-  }
-
-  protected toggleAssistant(): void {
-    this.assistantOpen.update((open) => !open);
   }
 
   protected backToScenarios(): void {

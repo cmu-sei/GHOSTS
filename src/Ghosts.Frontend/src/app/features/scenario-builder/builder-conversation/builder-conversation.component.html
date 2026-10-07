@@ -13,15 +13,12 @@
       <span class="agent-dot"></span>
       <strong>Scenario Authoring Agent</strong>
       @if (session()) {
-      <span class="model-name">{{ session()!.model }}</span>
-      } @else if (models().length > 0) {
-      <mat-form-field subscriptSizing="dynamic" appearance="outline" class="model-picker">
-        <mat-select [value]="model()" (selectionChange)="model.set($event.value)" [disabled]="busy()">
-          @for (m of models(); track m.id) {
-          <mat-option [value]="m.id">{{ m.name }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
+      <span class="model-name">{{ session()!.model }}@if (session()!.effort) { &middot; {{ session()!.effort }} effort }</span>
+      } @else {
+      <!-- The scenario's model and effort, picked on the Sources step, serve extraction and this conversation alike -->
+      <span class="model-name" matTooltip="Picked on the Sources step">
+        {{ modelName() || 'Default model' }}@if (builderModel()?.effort) { &middot; {{ builderModel()!.effort }} effort }
+      </span>
       }
     </div>
     <span class="spacer"></span>
@@ -89,6 +86,13 @@
           <span>{{ turn.result.failure.notice }}</span>
         </div>
         } @else {
+        @if (turn.searches) {
+        <div class="sources-line">
+          <mat-icon>manage_search</mat-icon>
+          Searched your sources {{ turn.searches }} time{{ turn.searches === 1 ? '' : 's' }}
+          &middot; cited {{ turn.chunkIds.length }} chunk{{ turn.chunkIds.length === 1 ? '' : 's' }}
+        </div>
+        }
         <div class="post-text" [innerHTML]="turn.html"></div>
 
         @if (turn.chunkIds.length) {
@@ -139,10 +143,14 @@
         }
 
         <div class="post-actions">
-          @if (turn.result.statusLine) {
-          <span class="turn-status">{{ turn.result.statusLine }}</span>
+          @if (turn.result.status) {
+          <span class="turn-status">{{ turn.result.status }}</span>
           }
           @if (turn.result.latestDocument?.hash) {
+          <button mat-button (click)="togglePlan(turn.result.latestDocument!.hash)" matTooltip="The exercise plan, rendered by the server from the document">
+            <mat-icon>article</mat-icon>
+            Plan
+          </button>
           <button mat-button (click)="toggleDocument(turn.result.latestDocument!.hash)">
             <mat-icon>description</mat-icon>
             Document
@@ -156,6 +164,9 @@
 
         @if (isDetailsOpen(turn.turn)) {
         <pre class="gate-report">{{ turn.result.gateReport }}</pre>
+        }
+        @if (openPlan() && turn.result.latestDocument?.hash === openPlan()!.hash) {
+        <div class="plan-panel post-text" [innerHTML]="openPlan()!.html"></div>
         }
         @if (openDocument() && turn.result.latestDocument?.hash === openDocument()!.hash) {
         <div class="document-panel">
@@ -209,7 +220,7 @@
         @if (canImport()) {
         <button mat-flat-button color="primary" (click)="import()">
           <mat-icon>publish</mat-icon>
-          Import this scenario
+          {{ importedBefore() ? 'Import again' : 'Import this scenario' }}
         </button>
         }
       </div>
@@ -226,7 +237,19 @@
           <mat-icon>arrow_upward</mat-icon>
         </button>
       </div>
-      <div class="composer-hint">Enter to send · Shift+Enter for a new line</div>
+      <div class="composer-hint">
+        <span>Enter to send · Shift+Enter for a new line</span>
+        @if (session()?.tokens; as tokens) {
+        <span class="token-line"
+          matTooltip="From the provider's own counts for every model call in this session. The cost is an estimate at the configured list prices for {{ session()!.model }}; the deployment's rate may differ.">
+          {{ tokens.modelCalls }} call{{ tokens.modelCalls === 1 ? '' : 's' }}
+          &middot; {{ compact(tokens.input) }} in
+          @if (tokens.cacheRead) { (+{{ compact(tokens.cacheRead) }} cached) }
+          &middot; {{ compact(tokens.output) }} out
+          @if (tokens.estimatedCostUsd !== null) { &middot; &asymp; {{ tokens.estimatedCostUsd | currency: 'USD' : 'symbol' : '1.2-2' }} }
+        </span>
+        }
+      </div>
     </div>
   </footer>
   }

@@ -15,6 +15,18 @@ export interface Scenario {
   extras?: ScenarioExtras | null;
 }
 
+/** The document a scenario was last imported from, and what an edit since changed in its rows (A5). */
+export interface ApprovedScenarioDocument {
+  scenarioId: number;
+  approvedAt: string;
+  contentHash: string;
+  /** The approved document's JSON text. */
+  document: string;
+  edited: boolean;
+  /** One line per changed path, such as "/name: Old → New"; empty when not edited. */
+  changes: string[];
+}
+
 export interface ScenarioParameters {
   nations: Nation[];
   threatActors: ThreatActor[];

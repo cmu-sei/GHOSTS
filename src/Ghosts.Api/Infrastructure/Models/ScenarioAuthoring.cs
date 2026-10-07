@@ -20,10 +20,16 @@ public class ScenarioAuthoringOptions
     /// <summary>The models a developer may pick for a new session; Model is the one picked by default.</summary>
     public List<AuthoringModelChoice> Models { get; set; } = [];
 
-    /// <summary>Read and kept for the deployer; nothing switches to it yet (C5 forbids a switch mid-session).</summary>
+    /// <summary>
+    /// The model a new session starts on, when it names none, for ten minutes after Model was unavailable
+    /// (F4). A session that has begun keeps its model (C5). Empty: new sessions always start on Model.
+    /// </summary>
     public string FallbackModel { get; set; } = string.Empty;
 
     public int MaxOutputTokens { get; set; } = 64000;
+
+    /// <summary>H2: cache points on the system prompt, the tools and the conversation. Off for a model that rejects them.</summary>
+    public bool PromptCaching { get; set; } = true;
     public int RequestTimeoutSeconds { get; set; } = 300;
     public int TurnTimeoutMinutes { get; set; } = 30;
     public int ValidatorTimeoutSeconds { get; set; } = 90;
@@ -33,6 +39,27 @@ public class AuthoringModelChoice
 {
     public string Name { get; set; } = string.Empty;
     public string Id { get; set; } = string.Empty;
+
+    /// <summary>
+    /// H3: the effort levels this model takes (low, medium, high, xhigh, max on current Anthropic models), sent
+    /// as the request's output_config.effort. Empty: the model takes none, and the page offers none.
+    /// </summary>
+    public List<string> Efforts { get; set; } = [];
+
+    /// <summary>What a session on this model costs, estimated from the provider's own token counts. Null: no estimate shown.</summary>
+    public AuthoringModelPricing Pricing { get; set; }
+}
+
+/// <summary>US dollars per million tokens, by the kind of token the provider reports. List prices; a deployment's rate may differ.</summary>
+public class AuthoringModelPricing
+{
+    public decimal InputPerMillion { get; set; }
+    public decimal OutputPerMillion { get; set; }
+    public decimal CacheReadPerMillion { get; set; }
+    public decimal CacheWritePerMillion { get; set; }
+
+    public decimal Estimate(long input, long output, long cacheRead, long cacheWrite) =>
+        (input * InputPerMillion + output * OutputPerMillion + cacheRead * CacheReadPerMillion + cacheWrite * CacheWritePerMillion) / 1_000_000m;
 }
 
 [Table("authoring_sessions")]
@@ -43,6 +70,10 @@ public class AuthoringSession
     /// <summary>Fixed when the session is created; every call of the session uses it (C5).</summary>
     [MaxLength(200)]
     public string Model { get; set; } = string.Empty;
+
+    /// <summary>H3: the model's effort level for every call of the session, or null for the model's default.</summary>
+    [MaxLength(20)]
+    public string Effort { get; set; }
 
     [MaxLength(20)]
     public string Status { get; set; } = "open";

@@ -125,6 +125,7 @@ nav:
       - Grafana: core/grafana.md
   - Frontend UI:
       - core/ui.md
+      - Scenario Builder and authoring: core/scenario-builder.md
   - Animator & Workflows:
       - animator/index.md
       - NPC Persona Reference: animator/personas.md

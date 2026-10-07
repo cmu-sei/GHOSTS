@@ -3,12 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ConfigService } from './config.service';
 import {
-  ScenarioSource, ScenarioSourceChunk, ScenarioEntity, ScenarioEdge,
-  ScenarioGraph, ScenarioEnrichment, ScenarioCompilation, ExtractionResult,
-  CreateTextSource, CreateUrlSource, CreateEntity, UpdateEntity, CreateEdge,
-  ApplyTechnique, ApplyGroup, CompileRequest,
-  AssistantRequest, AssistantResponse,
-  NpcForAssignment, NpcAssignment, DeploymentReadiness
+  ScenarioSource, ScenarioEntity, ScenarioEdge,
+  ScenarioGraph, ExtractionResult, BuilderModel,
+  CreateTextSource, CreateUrlSource, CreateEntity, UpdateEntity, CreateEdge
 } from '../models/scenario-builder.model';
 
 @Injectable({ providedIn: 'root' })
@@ -18,6 +15,16 @@ export class ScenarioBuilderService {
 
   private builderUrl(scenarioId: number): string {
     return `${this.config.apiUrl}/scenarios/${scenarioId}/builder`;
+  }
+
+  // ── The model: one per scenario, for extraction and the conversation ──
+
+  getModel(scenarioId: number): Observable<BuilderModel> {
+    return this.http.get<BuilderModel>(`${this.builderUrl(scenarioId)}/model`);
+  }
+
+  setModel(scenarioId: number, model: string, effort: string | null): Observable<BuilderModel> {
+    return this.http.put<BuilderModel>(`${this.builderUrl(scenarioId)}/model`, { model, effort });
   }
 
   // ── Sources ──
@@ -48,18 +55,10 @@ export class ScenarioBuilderService {
     return this.http.delete<void>(`${this.builderUrl(scenarioId)}/sources/${sourceId}`);
   }
 
-  getChunks(scenarioId: number, sourceId: number): Observable<ScenarioSourceChunk[]> {
-    return this.http.get<ScenarioSourceChunk[]>(`${this.builderUrl(scenarioId)}/sources/${sourceId}/chunks`);
-  }
-
   // ── Extraction ──
 
   extractAll(scenarioId: number): Observable<ExtractionResult> {
     return this.http.post<ExtractionResult>(`${this.builderUrl(scenarioId)}/extract`, {});
-  }
-
-  extractChunk(scenarioId: number, chunkId: number): Observable<ExtractionResult> {
-    return this.http.post<ExtractionResult>(`${this.builderUrl(scenarioId)}/extract/${chunkId}`, {});
   }
 
   // ── Graph ──
@@ -112,74 +111,5 @@ export class ScenarioBuilderService {
 
   deleteEdge(scenarioId: number, edgeId: string): Observable<void> {
     return this.http.delete<void>(`${this.builderUrl(scenarioId)}/edges/${edgeId}`);
-  }
-
-  // ── Enrichments ──
-
-  getEnrichments(scenarioId: number): Observable<ScenarioEnrichment[]> {
-    return this.http.get<ScenarioEnrichment[]>(`${this.builderUrl(scenarioId)}/enrichments`);
-  }
-
-  applyTechnique(scenarioId: number, dto: ApplyTechnique): Observable<ScenarioEnrichment> {
-    return this.http.post<ScenarioEnrichment>(`${this.builderUrl(scenarioId)}/enrichments/technique`, dto);
-  }
-
-  applyGroup(scenarioId: number, dto: ApplyGroup): Observable<ScenarioEnrichment> {
-    return this.http.post<ScenarioEnrichment>(`${this.builderUrl(scenarioId)}/enrichments/group`, dto);
-  }
-
-  deleteEnrichment(scenarioId: number, enrichmentId: number): Observable<void> {
-    return this.http.delete<void>(`${this.builderUrl(scenarioId)}/enrichments/${enrichmentId}`);
-  }
-
-  // ── Compilations ──
-
-  compile(scenarioId: number, dto: CompileRequest): Observable<ScenarioCompilation> {
-    return this.http.post<ScenarioCompilation>(`${this.builderUrl(scenarioId)}/compile`, dto);
-  }
-
-  getCompilations(scenarioId: number): Observable<ScenarioCompilation[]> {
-    return this.http.get<ScenarioCompilation[]>(`${this.builderUrl(scenarioId)}/compilations`);
-  }
-
-  getCompilation(scenarioId: number, compilationId: number): Observable<ScenarioCompilation> {
-    return this.http.get<ScenarioCompilation>(`${this.builderUrl(scenarioId)}/compilations/${compilationId}`);
-  }
-
-  getPackage(scenarioId: number, compilationId: number): Observable<any> {
-    return this.http.get<any>(`${this.builderUrl(scenarioId)}/compilations/${compilationId}/package`);
-  }
-
-  deleteCompilation(scenarioId: number, compilationId: number): Observable<void> {
-    return this.http.delete<void>(`${this.builderUrl(scenarioId)}/compilations/${compilationId}`);
-  }
-
-  // ── NPC-to-machine assignments ──
-
-  getNpcsForAssignment(scenarioId: number, compilationId: number): Observable<NpcForAssignment[]> {
-    return this.http.get<NpcForAssignment[]>(
-      `${this.builderUrl(scenarioId)}/compilations/${compilationId}/npcs`);
-  }
-
-  createAssignment(scenarioId: number, compilationId: number, npcId: string, machineId: string): Observable<NpcAssignment> {
-    return this.http.post<NpcAssignment>(
-      `${this.builderUrl(scenarioId)}/compilations/${compilationId}/assignments`,
-      { npcId, machineId });
-  }
-
-  deleteAssignment(scenarioId: number, compilationId: number, assignmentId: number): Observable<void> {
-    return this.http.delete<void>(
-      `${this.builderUrl(scenarioId)}/compilations/${compilationId}/assignments/${assignmentId}`);
-  }
-
-  getDeploymentReadiness(scenarioId: number, compilationId: number): Observable<DeploymentReadiness> {
-    return this.http.get<DeploymentReadiness>(
-      `${this.builderUrl(scenarioId)}/compilations/${compilationId}/readiness`);
-  }
-
-  // ── Assistant ──
-
-  chat(scenarioId: number, request: AssistantRequest): Observable<AssistantResponse> {
-    return this.http.post<AssistantResponse>(`${this.builderUrl(scenarioId)}/assistant`, request);
   }
 }

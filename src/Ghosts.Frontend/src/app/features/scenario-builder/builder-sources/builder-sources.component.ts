@@ -1,4 +1,5 @@
-import { Component, Input, OnInit, inject, signal } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, computed, inject, signal, viewChild } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -10,11 +11,15 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ChangeDetectionStrategy } from '@angular/core';
 import { ScenarioBuilderService } from '../../../core/services/scenario-builder.service';
 import { ScenarioService } from '../../../core/services/scenario.service';
-import { ScenarioSource } from '../../../core/models/scenario-builder.model';
+import { ScenarioHubService } from '../../../core/services/scenario-hub.service';
+import { BuilderModel, ExtractionProgress, ExtractionResult, ScenarioSource } from '../../../core/models/scenario-builder.model';
+import { BuilderEntitiesComponent } from '../builder-entities/builder-entities.component';
+import { BuilderGraphComponent } from '../builder-graph/builder-graph.component';
 
 @Component({
   selector: 'app-builder-sources',
@@ -31,24 +36,41 @@ import { ScenarioSource } from '../../../core/models/scenario-builder.model';
     MatChipsModule,
     MatTooltipModule,
     MatProgressSpinnerModule,
+    MatSelectModule,
     MatSnackBarModule,
+    BuilderEntitiesComponent,
+    BuilderGraphComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './builder-sources.component.html',
   styleUrls: ['./builder-sources.component.scss'],
 })
-export class BuilderSourcesComponent implements OnInit {
+export class BuilderSourcesComponent implements OnInit, OnDestroy {
   @Input({ required: true }) scenarioId!: number;
 
   private readonly builderService = inject(ScenarioBuilderService);
   private readonly scenarioService = inject(ScenarioService);
+  private readonly hub = inject(ScenarioHubService);
   private readonly fb = inject(FormBuilder);
   private readonly snackBar = inject(MatSnackBar);
 
   protected readonly sources = signal<ScenarioSource[]>([]);
   protected readonly loading = signal(true);
-  protected readonly displayedColumns = ['name', 'type', 'preview', 'status', 'chunks', 'actions'];
+  /** The scenario's model and effort level for extraction and the conversation, and the configured choices. */
+  protected readonly builderModel = signal<BuilderModel | null>(null);
+  protected readonly efforts = computed(() => this.builderModel()?.models.find((m) => m.id === this.builderModel()?.model)?.efforts ?? []);
+  protected readonly displayedColumns = ['name', 'type', 'preview', 'status', 'chunks', 'extracted', 'actions'];
   protected readonly dragOver = signal(false);
+
+  // Extraction (J9) runs on the server when a source is added; the step follows it over the hub. The button
+  // only reruns it for chunks a run left pending, such as when the model was unavailable.
+  protected readonly pendingChunks = computed(() => this.sources().reduce((n, s) => n + (s.pendingChunkCount || 0), 0));
+  protected readonly extracting = signal(false);
+  protected readonly extractionProgress = signal<ExtractionProgress | null>(null);
+  protected readonly extractionResult = signal<ExtractionResult | null>(null);
+  private readonly entities = viewChild(BuilderEntitiesComponent);
+  private readonly graph = viewChild(BuilderGraphComponent);
+  private progressSub?: Subscription;
 
   protected textForm!: FormGroup;
   protected urlForm!: FormGroup;
@@ -57,6 +79,55 @@ export class BuilderSourcesComponent implements OnInit {
   ngOnInit(): void {
     this.initForms();
     this.loadSources();
+    this.builderService.getModel(this.scenarioId).subscribe((choice) => this.builderModel.set(choice));
+    this.hub.connect(this.scenarioId);
+    this.progressSub = this.hub.extractionProgress$.subscribe((progress) => {
+      if (progress.scenarioId !== this.scenarioId) return;
+      this.extractionProgress.set(progress);
+      if (progress.status === 'completed') {
+        this.extracting.set(false);
+        this.loadSources();
+        this.entities()?.refresh();
+        this.graph()?.refresh();
+      } else {
+        this.extracting.set(true);
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.progressSub?.unsubscribe();
+  }
+
+  /** Saves the model and effort; an effort the new model does not take is dropped. */
+  protected pickModel(model: string, effort: string | null): void {
+    const efforts = this.builderModel()?.models.find((m) => m.id === model)?.efforts ?? [];
+    const kept = effort && efforts.includes(effort) ? effort : null;
+    this.builderService.setModel(this.scenarioId, model, kept).subscribe({
+      next: (choice) => this.builderModel.set(choice),
+      error: () => this.snackBar.open('Could not change the model', 'Close', { duration: 3000 }),
+    });
+  }
+
+  protected extract(): void {
+    this.extracting.set(true);
+    this.extractionResult.set(null);
+    this.extractionProgress.set(null);
+    this.builderService.extractAll(this.scenarioId).subscribe({
+      next: (result) => {
+        this.extractionResult.set(result);
+        this.extracting.set(false);
+        this.loadSources();
+        this.entities()?.refresh();
+        this.graph()?.refresh();
+      },
+      error: (error) => {
+        console.error('Error during extraction', error);
+        this.snackBar.open('Extraction failed', 'Close', { duration: 3000 });
+        this.extracting.set(false);
+        this.extractionProgress.set(null);
+      },
+    });
   }
 
   private initForms(): void {

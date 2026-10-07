@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Amazon;
@@ -48,7 +49,8 @@ public class BedrockConnectorService : IContentService
             };
 
             var response = await client.ConverseAsync(request, ct);
-            return response.Output.Message.Content[0].Text;
+            // The first block that holds text: newer Anthropic models put a reasoning block first, with no text.
+            return response.Output.Message.Content.FirstOrDefault(c => c.Text != null)?.Text;
         }
         catch (Exception ex)
         {

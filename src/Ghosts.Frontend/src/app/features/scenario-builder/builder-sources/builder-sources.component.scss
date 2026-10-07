@@ -13,6 +13,20 @@
   }
 }
 
+.model-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.model-field {
+  width: 22rem;
+}
+
+.effort-field {
+  width: 14rem;
+}
+
 .add-sources-section {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -108,6 +122,49 @@
 
   mat-chip {
     font-size: 0.75rem;
+  }
+
+  .extracted-all {
+    color: #2e7d32;
+  }
+
+  .extracted-none {
+    color: #999;
+  }
+}
+
+.extraction-card {
+  margin-top: 2rem;
+
+  .subtitle {
+    color: #666;
+    margin: 0 0 1rem;
+  }
+
+  .extraction-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+
+    .button-spinner {
+      display: inline-block;
+      margin-right: 0.5rem;
+    }
+  }
+
+  .extraction-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #666;
+    font-size: 0.9rem;
+  }
+
+  .extraction-errors {
+    color: #c62828;
+    font-size: 0.85rem;
+    margin: 0 0 1.5rem;
   }
 }
 

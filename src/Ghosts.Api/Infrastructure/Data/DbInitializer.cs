@@ -248,6 +248,8 @@ namespace Ghosts.Api.Infrastructure.Data
                 using var cmd = connection.CreateCommand();
                 cmd.CommandText = @"
                     ALTER TABLE scenarios ADD COLUMN IF NOT EXISTS extras JSONB;
+                    ALTER TABLE scenarios ADD COLUMN IF NOT EXISTS buildermodel CHARACTER VARYING(200);
+                    ALTER TABLE scenarios ADD COLUMN IF NOT EXISTS buildereffort CHARACTER VARYING(20);
                     ALTER TABLE threat_actors ADD COLUMN IF NOT EXISTS extras JSONB;
                     ALTER TABLE injects ADD COLUMN IF NOT EXISTS extras JSONB;
                     ALTER TABLE userpools ADD COLUMN IF NOT EXISTS extras JSONB;
@@ -309,7 +311,7 @@ namespace Ghosts.Api.Infrastructure.Data
                 var stixPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config", "AttackData", "enterprise-attack.json");
                 if (!File.Exists(stixPath))
                 {
-                    logger.LogWarning($"MITRE ATT&CK data file not found at {stixPath}. Skipping MITRE data import.");
+                    logger.LogWarning($"MITRE ATT&CK data file not found at {stixPath}. Skipping MITRE data import. See config/AttackData/README.md for where to get it.");
                     return;
                 }
 
@@ -1406,6 +1408,7 @@ namespace Ghosts.Api.Infrastructure.Data
                     CREATE TABLE authoring_sessions (
                         id                 UUID NOT NULL,
                         model              CHARACTER VARYING(200),
+                        effort             CHARACTER VARYING(20),
                         status             CHARACTER VARYING(20),
                         pendingnote        TEXT,
                         scenarioid         INTEGER,
@@ -1479,6 +1482,7 @@ namespace Ghosts.Api.Infrastructure.Data
             // Columns added after the first slice, for tables it created
             const string added = @"
                 ALTER TABLE authoring_sessions ADD COLUMN IF NOT EXISTS scenarioid INTEGER;
+                ALTER TABLE authoring_sessions ADD COLUMN IF NOT EXISTS effort CHARACTER VARYING(20);
                 CREATE INDEX IF NOT EXISTS ix_authoring_sessions_scenarioid ON authoring_sessions (scenarioid);
                 ALTER TABLE authoring_documents ADD COLUMN IF NOT EXISTS basehash CHARACTER VARYING(12);
                 ALTER TABLE authoring_documents ADD COLUMN IF NOT EXISTS changes JSONB;";

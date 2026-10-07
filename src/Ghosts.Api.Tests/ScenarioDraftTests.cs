@@ -10,6 +10,9 @@ using Ghosts.Api.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
@@ -62,6 +65,50 @@ public class ScenarioDraftTests
 
         var list = Assert.IsAssignableFrom<IEnumerable<ScenarioDto>>(Assert.IsType<OkObjectResult>(result.Result).Value);
         Assert.Equal(["Alice's draft", "Published"], list.Select(s => s.Name).Order());
+    }
+
+    [Fact]
+    public async Task A_draft_is_shown_by_id_and_exported_to_its_author_alone()
+    {
+        await using var context = NewContext();
+        var draft = await new ScenarioService(context, User("alice")).ImportDocumentAsync(Document(), [], default);
+
+        Assert.IsType<NotFoundResult>((await Controller(context, "bob").GetScenario(draft.Id, default)).Result);
+        Assert.IsType<NotFoundResult>(await Controller(context, "bob").GetScenarioDocument(draft.Id, false, default));
+        Assert.IsType<NotFoundResult>(await Controller(context, "bob").GetApprovedDocument(draft.Id, default));
+
+        Assert.IsType<OkObjectResult>((await Controller(context, "alice").GetScenario(draft.Id, default)).Result);
+        Assert.IsType<ContentResult>(await Controller(context, "alice").GetScenarioDocument(draft.Id, false, default));
+        Assert.IsType<OkObjectResult>(await Controller(context, "alice").GetApprovedDocument(draft.Id, default));
+    }
+
+    [Fact]
+    public async Task The_builders_endpoints_hide_another_authors_draft()
+    {
+        await using var context = NewContext();
+        var draft = await new ScenarioService(context, User("alice")).ImportDocumentAsync(Document(), [], default);
+
+        Assert.IsType<NotFoundResult>(await Filter(context, "bob", draft.Id));
+        Assert.Null(await Filter(context, "alice", draft.Id));
+        Assert.IsType<NotFoundResult>(await Filter(context, "alice", draft.Id + 1));
+    }
+
+    /// <summary>Runs the visibility filter for a route with this scenarioId: the result it set, or null when the action ran.</summary>
+    private static async Task<IActionResult?> Filter(ApplicationDbContext context, string user, int scenarioId)
+    {
+        var http = new DefaultHttpContext();
+        var routeData = new RouteData();
+        routeData.Values["scenarioId"] = scenarioId.ToString();
+        var executing = new ActionExecutingContext(
+            new ActionContext(http, routeData, new ActionDescriptor()), [], new Dictionary<string, object?>(), controller: null!);
+        var ran = false;
+        await new ScenarioVisibilityFilter(new ScenarioService(context), User(user)).OnActionExecutionAsync(executing, () =>
+        {
+            ran = true;
+            return Task.FromResult(new ActionExecutedContext(executing, [], null!));
+        });
+        Assert.Equal(executing.Result == null, ran);
+        return executing.Result;
     }
 
     [Fact]

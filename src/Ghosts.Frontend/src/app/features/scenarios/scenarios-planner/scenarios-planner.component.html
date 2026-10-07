@@ -1130,6 +1130,73 @@
         </div>
       </ng-template>
     </mat-tab>
+
+    <!-- Document Tab: the scenario document, its approved version, and what edits since changed (A5) -->
+    <mat-tab label="Document">
+      <ng-template matTabContent>
+        <div class="content-card document-tab">
+          @if (!scenarioId) {
+          <p>Save the scenario first: its document is built from the saved scenario.</p>
+          } @else {
+          <h3 class="section-title">Scenario document</h3>
+          <p class="document-note">
+            The scenario as a scenario document, the form the validator checks and the import reads. An edit in
+            these tabs changes it; the approved version is the document it was imported from.
+          </p>
+          <div class="document-actions">
+            <button mat-raised-button color="accent" (click)="downloadDocument('current')">
+              <i class="fas fa-download"></i>
+              Download current document
+            </button>
+            <button mat-raised-button (click)="downloadDocument('plan')">
+              <i class="fas fa-file-alt"></i>
+              Download exercise plan (.md)
+            </button>
+            @if (approved()) {
+            <button mat-raised-button (click)="downloadDocument('approved')">
+              <i class="fas fa-download"></i>
+              Download approved document
+            </button>
+            }
+          </div>
+
+          @if (approved() === undefined) {
+          <mat-spinner diameter="24"></mat-spinner>
+          } @else if (approved() === null) {
+          <p class="document-note">This scenario was not imported from a scenario document, so it has no approved version.</p>
+          } @else {
+          <h4 class="subsection-title">Approved version</h4>
+          <p class="document-note">
+            Imported {{ approved()!.approvedAt | date: 'medium' }} &middot; hash <code>{{ approved()!.contentHash }}</code>
+          </p>
+          @if (!approved()!.edited) {
+          <p class="document-unchanged">
+            <i class="fas fa-check-circle"></i>
+            Not edited since import: the current document is the approved one.
+          </p>
+          } @else {
+          <p class="document-edited">
+            <i class="fas fa-pen"></i>
+            Edited since import. What changed, by path in the document:
+          </p>
+          <ul class="change-list">
+            @for (line of approved()!.changes; track line) {
+            <li><code>{{ line }}</code></li>
+            }
+          </ul>
+          }
+          <button mat-button (click)="approvedOpen.set(!approvedOpen())">
+            <i class="fas" [class.fa-chevron-down]="!approvedOpen()" [class.fa-chevron-up]="approvedOpen()"></i>
+            {{ approvedOpen() ? 'Hide' : 'Show' }} the approved document
+          </button>
+          @if (approvedOpen()) {
+          <pre class="document-text">{{ approvedText() }}</pre>
+          }
+          }
+          }
+        </div>
+      </ng-template>
+    </mat-tab>
   </mat-tab-group>
 </div>
 }

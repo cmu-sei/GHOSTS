@@ -1,5 +1,15 @@
 // Scenario Builder Models
 
+import { AuthoringModelChoice } from './scenario-authoring.model';
+
+/** The model a scenario's Builder uses for extraction and the conversation, and the configured choices (GET/PUT builder/model). */
+export interface BuilderModel {
+  model: string;
+  /** The model's effort level for the conversation (H3), or null for the model's default. */
+  effort: string | null;
+  models: AuthoringModelChoice[];
+}
+
 export interface ScenarioSource {
   id: number;
   name: string;
@@ -12,16 +22,9 @@ export interface ScenarioSource {
   createdAt: string;
   chunkCount: number;
   contentPreview: string;
-}
-
-export interface ScenarioSourceChunk {
-  id: number;
-  sourceId: number;
-  chunkIndex: number;
-  content: string;
-  tokenCount: number;
-  extractionStatus: string;
-  createdAt: string;
+  /** Chunks extraction has read into entities and the graph, and chunks still waiting for it. */
+  extractedChunkCount: number;
+  pendingChunkCount: number;
 }
 
 export interface ScenarioEntity {
@@ -56,62 +59,22 @@ export interface ScenarioGraph {
   edges: ScenarioEdge[];
 }
 
-export interface ScenarioEnrichment {
-  id: number;
-  entityId: string | null;
-  enrichmentType: string;
-  externalId: string;
-  name: string;
-  description: string;
-  data: string;
-  source: string;
-  createdAt: string;
-}
-
-export interface ScenarioCompilation {
-  id: number;
-  name: string;
-  status: string;
-  npcCount: number;
-  timelineEventCount: number;
-  injectCount: number;
-  createdAt: string;
-  completedAt: string | null;
-  errorMessage: string;
-}
-
-export interface NpcForAssignment {
-  npcId: string;
-  npcName: string;
-  entityName: string;
-  assignedMachineId: string | null;
-  assignedMachineName: string | null;
-  assignmentId: number | null;
-}
-
-export interface NpcAssignment {
-  id: number;
-  compilationId: number;
-  npcId: string;
-  npcName: string;
-  machineId: string;
-  machineName: string;
-  createdAt: string;
-}
-
-export interface DeploymentReadiness {
-  isReady: boolean;
-  totalNpcs: number;
-  assignedNpcs: number;
-  unassignedNpcs: number;
-  issues: string[];
-}
-
 export interface ExtractionResult {
   entitiesCreated: number;
   edgesCreated: number;
   chunksProcessed: number;
   errors: string[];
+}
+
+/** Pushed over the Scenario Builder's hub ("extractionProgress") after each chunk extraction reads. */
+export interface ExtractionProgress {
+  scenarioId: number;
+  status: string;
+  chunksProcessed: number;
+  totalChunks: number;
+  entitiesCreated: number;
+  edgesCreated: number;
+  timestamp: string;
 }
 
 export interface CreateTextSource {
@@ -150,74 +113,7 @@ export interface CreateEdge {
   confidence: number;
 }
 
-export interface ApplyTechnique {
-  entityId: string;
-  techniqueId: string;
-}
-
-export interface ApplyGroup {
-  entityId: string;
-  groupId: string;
-}
-
-export interface CompileRequest {
-  name: string;
-  generateNpcs: boolean;
-  generateTimeline: boolean;
-  mapAttackToInjects: boolean;
-}
-
-export interface AssistantMessage {
-  role: string;
-  content: string;
-}
-
-export interface AssistantRequest {
-  message: string;
-  history: AssistantMessage[];
-}
-
-export interface AssistantResponse {
-  response: string;
-  action: string;
-  actionData: any;
-}
-
 // ATT&CK models
-export interface AttackTechnique {
-  id: string;
-  name: string;
-  description: string;
-  tactics: string;
-  platforms: string;
-  url: string;
-  isSubtechnique: boolean;
-  parentId: string;
-}
-
-export interface AttackTechniqueSummary {
-  id: string;
-  name: string;
-  tactics: string;
-  isSubtechnique: boolean;
-}
-
-export interface AttackGroup {
-  id: string;
-  name: string;
-  aliases: string;
-  description: string;
-  url: string;
-  techniques: AttackTechniqueSummary[];
-}
-
-export interface AttackGroupSummary {
-  id: string;
-  name: string;
-  aliases: string;
-  techniqueCount: number;
-}
-
 // Entity type constants
 export const ENTITY_TYPES = [
   'Person', 'Organization', 'System', 'Network', 'Location',

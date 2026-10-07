@@ -1,6 +1,33 @@
 <div class="sources-container">
   <h2>Add Sources</h2>
-  <p class="subtitle">Add documents, URLs, or text to extract scenario entities from</p>
+  <p class="subtitle">Add documents, URLs, or text for the conversation to search and cite, and to extract scenario entities from</p>
+
+  <!-- One model and effort level per scenario: the model reads the sources into entities and runs the conversation -->
+  @if (builderModel(); as choice) {
+  <div class="model-row">
+    <mat-form-field appearance="outline" class="model-field" subscriptSizing="dynamic">
+      <mat-label>Model</mat-label>
+      <mat-select [value]="choice.model" (selectionChange)="pickModel($event.value, choice.effort)" [disabled]="extracting()">
+        @for (m of choice.models; track m.id) {
+        <mat-option [value]="m.id">{{ m.name }}</mat-option>
+        }
+      </mat-select>
+      <mat-hint>Reads the sources into entities, and runs the conversation</mat-hint>
+    </mat-form-field>
+    <!-- H3: the effort level, from the model's own list; a model with none has the control greyed out -->
+    <mat-form-field appearance="outline" class="effort-field" subscriptSizing="dynamic"
+      [matTooltip]="efforts().length ? '' : 'This model has no effort levels'">
+      <mat-label>Effort</mat-label>
+      <mat-select [value]="choice.effort ?? ''" (selectionChange)="pickModel(choice.model, $event.value || null)" [disabled]="extracting() || efforts().length === 0">
+        <mat-option value="">Default effort</mat-option>
+        @for (level of efforts(); track level) {
+        <mat-option [value]="level">{{ level }} effort</mat-option>
+        }
+      </mat-select>
+      <mat-hint>How hard the model thinks in the conversation</mat-hint>
+    </mat-form-field>
+  </div>
+  }
 
   <div class="add-sources-section">
     <!-- Text Input -->
@@ -144,6 +171,21 @@
           <td mat-cell *matCellDef="let source">{{ source.chunkCount || 0 }}</td>
         </ng-container>
 
+        <ng-container matColumnDef="extracted">
+          <th mat-header-cell *matHeaderCellDef>Extracted</th>
+          <td mat-cell *matCellDef="let source">
+            @if (!source.chunkCount) {
+            &mdash;
+            } @else if (source.extractedChunkCount === source.chunkCount) {
+            <span class="extracted-all">All {{ source.chunkCount }} chunks</span>
+            } @else if (source.extractedChunkCount) {
+            {{ source.extractedChunkCount }} of {{ source.chunkCount }} chunks
+            } @else {
+            <span class="extracted-none">Not yet</span>
+            }
+          </td>
+        </ng-container>
+
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef>Actions</th>
           <td mat-cell *matCellDef="let source">
@@ -161,6 +203,55 @@
         <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
       </table>
       }
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Extraction (J9): what the sources say, as entities and a graph, grown here beneath the sources -->
+  <mat-card class="extraction-card">
+    <mat-card-header>
+      <mat-card-title>Entities and graph</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <p class="subtitle">
+        When a source is added, extraction reads its chunks for people, organizations, systems and the
+        relationships between them, and adds them to the scenario's graph. The conversation reads that graph
+        before it proposes terrain or people, takes an entity you mark reviewed as the real name, and cites the
+        chunk each one came from.
+      </p>
+      <div class="extraction-row">
+        @if (extracting()) {
+        <span class="extraction-status">
+          <mat-spinner diameter="18" class="button-spinner"></mat-spinner>
+          Extracting…
+        </span>
+        } @else if (pendingChunks() > 0) {
+        <button mat-stroked-button color="primary" (click)="extract()" matTooltip="These chunks were not read, usually because the model was unavailable. Try them again.">
+          <mat-icon>replay</mat-icon>
+          Extract {{ pendingChunks() }} pending chunk{{ pendingChunks() === 1 ? '' : 's' }}
+        </button>
+        }
+        @if (extracting() && extractionProgress(); as progress) {
+        <span class="extraction-status">
+          Chunk {{ progress.chunksProcessed }} of {{ progress.totalChunks }} &middot;
+          {{ progress.entitiesCreated }} entities &middot; {{ progress.edgesCreated }} relationships
+        </span>
+        } @else if (extractionResult(); as result) {
+        <span class="extraction-status">
+          {{ result.entitiesCreated }} entities and {{ result.edgesCreated }} relationships from
+          {{ result.chunksProcessed }} chunk{{ result.chunksProcessed === 1 ? '' : 's' }}.
+        </span>
+        }
+      </div>
+      @if (extractionResult()?.errors?.length) {
+      <ul class="extraction-errors">
+        @for (error of extractionResult()!.errors; track $index) {
+        <li>{{ error }}</li>
+        }
+      </ul>
+      }
+
+      <app-builder-entities [scenarioId]="scenarioId"></app-builder-entities>
+      <app-builder-graph [scenarioId]="scenarioId"></app-builder-graph>
     </mat-card-content>
   </mat-card>
 </div>
