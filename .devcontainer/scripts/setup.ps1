@@ -370,7 +370,7 @@ function Select-CuiHandling {
         Write-Host "  If you are not maintaining agent-dev, spawn a project instead - that asks"
         Write-Host "  the question properly and enforces the answer:"
         Write-Host ""
-        Write-Host "    $ScriptDir\spawn.ps1 <path>"
+        Write-Host "    $ProjectDir\spawn.ps1 <path>"
         return
     }
 

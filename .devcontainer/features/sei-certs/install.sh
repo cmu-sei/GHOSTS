@@ -1,16 +1,11 @@
 #!/bin/bash
-## Install any root CA certificates placed beside this script. None is a valid state:
-## outside a TLS-inspecting network there is nothing to add.
+## Install certs
 set -euo pipefail
-src=$(dirname "$0")
-dest=${SEI_CERTS_DEST:-/usr/local/share/ca-certificates/custom}
-mkdir -p "$dest"
-shopt -s nullglob
-certs=("$src"/*.crt)
-if [ ${#certs[@]} -eq 0 ]; then
-    echo "sei-certs: no .crt files in $src; nothing to install."
-    exit 0
+dest=/usr/local/share/ca-certificates/custom
+mkdir -p $dest
+cp $(dirname "$0")/*.crt $dest
+
+find $dest -type f ! -name '*.crt' -delete
+if find $dest -type f -name '*.crt' -print -quit | grep -q .; then
+    update-ca-certificates
 fi
-cp "${certs[@]}" "$dest"
-find "$dest" -type f ! -name '*.crt' -delete
-update-ca-certificates

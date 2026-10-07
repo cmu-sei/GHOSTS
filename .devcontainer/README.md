@@ -32,8 +32,8 @@ The model names exposed depend on the active profiles:
 
 | Profile | Model names |
 |---------|-------------|
-| `aws` | `aws/fable-5.1`, `aws/opus-5.5`, `aws/sonnet-5`, `aws/gpt-6-astra`, `aws/gpt-5.6-terra`, `aws/gpt-5.6-sol` |
-| `awsgov` | `awsgov/fable-5.1`, `awsgov/opus-5`, `awsgov/sonnet-5`, `awsgov/gpt-5.4` |
+| `aws` | `aws/fable-5.1`, `aws/opus-5.5`, `aws/sonnet-5`, `aws/gpt-6-sol`, `aws/gpt-6-luna`, `aws/gpt-6-astra`, `aws/gpt-5.6-terra`, `aws/grok-4.6` |
+| `awsgov` | `awsgov/fable-5.1`, `awsgov/opus-5.5`, `awsgov/sonnet-5`, `awsgov/grok-4.6` |
 | `opal` | `opal/gpt-oss-120b`, `opal/gemma-4-26b` |
 | `etc` | `etc/gpt-oss-120b` |
 
@@ -57,8 +57,8 @@ These services (LiteLLM, Open WebUI, the Open Terminal sandbox, and SearXNG) are
 The whole browser-chat stack (LiteLLM, Open WebUI, Open Terminal, SearXNG, and supervisord) ships as one dev container feature, `./features/chat`. It is **unchecked by default** in the feature prompt the spawn scripts run (see [Choosing Features](#choosing-features)) — it's the bulk of the image build, and the coding agents talk to their providers directly and don't need it. Pass `--chat` (or `-Chat` on Windows) to have it preselected instead:
 
 ```bash
-.devcontainer/scripts/spawn.sh <target-directory> --chat   # POSIX
-.devcontainer/scripts/spawn.ps1 <target-directory> -Chat   # Windows
+./spawn.sh <target-directory> --chat   # POSIX
+.\spawn.ps1 <target-directory> -Chat   # Windows
 ```
 
 The flag only sets the default; you can flip the answer at the prompt either way.
@@ -110,9 +110,7 @@ Nothing is written to a project-level `.claude/settings.json`; if you create one
 
 ### Pinned models
 
-Which Bedrock model each of `opus`/`sonnet`/`haiku` resolves to is defined per profile in `.devcontainer/profiles/<profile>/claude.json`, alongside the equivalent files for the other agents (`litellm.json`, `opencode.json`, `models.json`, `config.toml`, `grok.toml`). On every container create, `postcreate.sh` merges the configured profiles' entries into the `env` block of the **user-level** `~/.claude/settings.json`; the `/model` picker is left stock, so every family listed there — Fable included — is offered. Because the fragment is tracked in git and re-read on every create, a model bump reaches you on your next rebuild after a `git pull`. LiteLLM, OpenCode, and Pi are configured to the same three families (Fable 5.1, Opus 5.5, Sonnet 5) from the sibling files in each profile directory, plus xAI's Grok 4.6, which is also the model behind the Grok CLI (see below); Pi's picker shows only those, so Haiku is not offered there.
-
-Every `aws`-profile model, Opus included, is pinned to a `us.` inference profile. `us.anthropic.claude-opus-5-5` briefly returned `ServiceUnavailableException` from all three US Regions it routes to while AWS had not yet turned on US capacity, which is why Opus was pinned to `global.` for a time; US capacity is live and the `us.` id serves normally, so no `global.` override is needed.
+Which Bedrock model each of `opus`/`sonnet`/`haiku` resolves to is defined per profile in `.devcontainer/profiles/<profile>/claude.json`, alongside the equivalent files for the other agents (`litellm.json`, `opencode.json`, `models.json`, `config.toml`, `grok.toml`). On every container create, `postcreate.sh` merges the configured profiles' entries into the `env` block of the **user-level** `~/.claude/settings.json`; the `/model` picker is left stock, so every family listed there — Fable included — is offered. Because the fragment is tracked in git and re-read on every create, a model bump reaches you on your next rebuild after a `git pull`. LiteLLM, OpenCode, and Pi offer the same three families (Fable 5.1, Opus 5.5, Sonnet 5) in both Bedrock profiles; OpenCode gets the commercial models from its built-in catalog, while the other entries come from the sibling files in each profile directory. They also offer xAI's Grok 4.6 where supported, which is the model behind the Grok CLI (see below); Pi's picker shows only the profile's listed models, so Haiku is not offered there.
 
 ### Grok CLI
 
@@ -140,6 +138,67 @@ You can extend Claude Code's behavior with reusable prompt instructions by addin
 
 You can install and manage skills yourself at any time with `npx skills add <owner/repo>`, `npx skills find <query>`, and `npx skills list` — add `-g` to install at user scope alongside find-skills instead of into the project. To drop find-skills for the current container, run `npx skills remove -g -s find-skills -y`; the next create reinstalls it.
 
+## GPT-6 Sol and Luna on AWS
+
+The `aws` profile defaults Codex to **GPT-6 Sol** (`us.openai.gpt-6-sol`), with
+**GPT-6 Luna** also available in `/model`. Both use Bedrock Runtime in `us-east-1`
+with the profile's existing AWS credentials. Astra and GPT-5.6 Terra remain
+available; GPT-5.6 Sol and Luna are removed from the AWS selections and chat list.
+User settings in `~/.codex/config.toml` take precedence over the profile;
+use `/model` to change an existing selection.
+
+Pi and OpenCode offer `amazon-bedrock/us.openai.gpt-6-sol` and
+`amazon-bedrock/us.openai.gpt-6-luna` through Bedrock Converse. The optional chat
+stack offers `aws/gpt-6-sol` and `aws/gpt-6-luna` through Mantle in `us-east-1`,
+with low reasoning effort by default and per-chat overrides supported.
+Pi 0.87.0 uses the models' default reasoning on this route; its thinking selector
+does not send an OpenAI reasoning-effort override.
+
+Codex 0.156.0 and OpenCode's current Bedrock catalog do not yet list the new
+models. The container supplies OpenCode entries and generates complete Codex entries
+from the installed binary's predecessor templates until native entries arrive.
+Codex keeps those templates' context and compaction settings; Pi and OpenCode declare
+the models' 1,050,000-token context and 128,000-token output limits.
+Displayed costs use commercial US rates, including the regional premium.
+See the official [Sol](https://developers.openai.com/api/docs/models/gpt-6-sol),
+[Luna](https://developers.openai.com/api/docs/models/gpt-6-luna), and
+[pricing](https://developers.openai.com/api/docs/pricing) documentation.
+
+Rebuild the container to regenerate the agent configurations and chat model list.
+This update applies to `aws`; GovCloud keeps its separately verified models below.
+
+## Codex in GovCloud
+
+The `awsgov` profile configures Codex to use **GPT-5.6 Terra** by default, with **GPT-5.6 Luna**
+also in `/model`. Both use Bedrock Mantle in `us-gov-west-1`, authenticated with the
+profile's existing AWS credentials, including temporary session credentials. No Bedrock API key or
+chat-stack proxy is needed.
+
+[Codex issue #29646](https://github.com/openai/codex/issues/29646) remains open, but an explicit
+endpoint works around its automatic Region check. The profile supplies both settings:
+
+```toml
+model_provider = "amazon-bedrock"
+model = "openai.gpt-5.6-terra"
+model_reasoning_summary = "none"
+
+[model_providers.amazon-bedrock]
+base_url = "https://bedrock-mantle.us-gov-west-1.api.aws/openai/v1"
+aws = { region = "us-gov-west-1" }
+```
+
+Verified on Codex **0.155.1**, including file edits, shell commands, interactive conversations, and
+continuation after `/compact`.
+Keep both the endpoint and signing Region: the profile's `AWS_REGION`
+is east for Claude. Reasoning summaries must remain disabled because Mantle rejects that parameter.
+The model picker is generated from the installed Codex binary and filtered to these two
+models; GPT-5.6 Sol, GPT-5.5, and GPT-6 Astra returned 404 in the GovCloud west tests.
+
+Rebuild an existing `awsgov` container to apply the profile. If Codex was previously disabled, enable
+`./features/codex` in `devcontainer.json` first. A user-level `model` or `model_provider` in
+`~/.codex/config.toml` takes precedence over these generated defaults; the create step warns about
+those overrides and leaves them for you to remove.
+
 ## Choosing Features
 
 Every concern in this container — each coding agent, the Bedrock account gates, the browser-chat stack — is a dev container feature listed in `.devcontainer/devcontainer.json`. Listing a feature is the whole opt-in: each one owns both its build-time `install.sh` and its create-time `postcreate.sh`, so nothing has to be added to the project's own `scripts/postcreate.sh` to go with it.
@@ -152,7 +211,7 @@ The spawn scripts ask which of them to build, right after the CUI and profile qu
   [x] gets installed. Defaults follow the profile(s) you picked.
 
   1. [x] claude    Claude Code
-  2. [ ] codex     Codex CLI  (no config for awsgov)
+  2. [x] codex     Codex CLI
   3. [x] opencode  OpenCode
   4. [x] pi        Pi Coding Agent
   5. [x] grok      Grok Build
@@ -164,7 +223,7 @@ Customize the feature set? [y/N]
 
 The list is always shown, because it's how you see what your profile choice implied; the question after it decides whether you're asked for anything else. Press Enter (or answer `n`) to take those defaults, or answer `y` to get `Numbers to flip (comma or space separated, Enter to accept):` and toggle entries until you're happy.
 
-The defaults come from the profiles you just selected: a feature is unchecked when no selected profile ships the config fragment it needs (Codex has no GovCloud route, for instance, so it is unchecked under `awsgov` alone), and `chat` is unchecked unless you passed `--chat`/`-Chat`.
+The defaults come from the profiles you just selected: a feature is unchecked when no selected profile ships the config fragment it needs (Codex is unchecked for SEI-only profiles, for example), and `chat` is unchecked unless you passed `--chat`/`-Chat`.
 
 **`bedrock` has no number, and that's deliberate.** It isn't a tool you'd choose — it's the AWS *account* gates (data retention, GovCloud model entitlement) that every agent reaching Bedrock needs — so it simply follows the profiles: on when a selected profile targets Bedrock, off otherwise. It's printed so the derived choice is visible, but it can't be flipped, because turning it off while keeping an AWS profile would leave you with models that don't answer and no obvious reason why. If you really want to build without it, comment its line out in `devcontainer.json` after the spawn.
 

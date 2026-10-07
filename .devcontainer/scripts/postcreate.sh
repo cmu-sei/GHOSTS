@@ -28,17 +28,3 @@ npx -y skills@latest add vercel-labs/skills -s find-skills \
 # link's own directory (~/.local/bin), not the workspace, so it dangles.
 mkdir -p "$HOME/.local/bin"
 ln -sfn "$SCRIPT_DIR/setup.sh" "$HOME/.local/bin/setup-devcontainer"
-
-# Aspire CLI: the F5 launch config in .vscode/launch.json runs ~/.dotnet/tools/aspire
-echo "Installing Aspire CLI..."
-dotnet tool install -g Aspire.Cli
-
-echo "Installing Angular CLI..."
-npm install -g @angular/cli@latest
-
-# npm install on the workspace bind mount can fail with ENOTDIR; don't fail the create over it
-echo "Installing frontend dependencies..."
-(cd "$SCRIPT_DIR/../../src/Ghosts.Frontend" && npm install) || echo "postcreate: frontend npm install failed (continuing)" >&2
-
-echo "Installing Python packages..."
-pip install --no-cache-dir --break-system-packages openai anthropic mkdocs-material

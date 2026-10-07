@@ -329,16 +329,12 @@ output/
 
 .devcontainer/certs/*
 !.devcontainer/certs/readme.md
-.devcontainer/aws.env
 
 # Environment / secrets files — never commit credentials
 .env
 .env.*
-!.env.example
 *.env
-# The per-profile template declares which vars a profile needs (credentials left blank);
-# setup.sh discovers profiles by its presence, so a clone without it has no profiles.
-!.devcontainer/profiles/*/profile.env
+!.env.example
 
 *.claude/*
 # The author-scenario skill is part of the repository; any other skill under .claude/skills/ stays local.

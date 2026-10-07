@@ -7,18 +7,14 @@
 # The provider is amazon-bedrock-runtime, not amazon-bedrock (Bedrock
 # Mantle). The Runtime route is the regional OpenAI-compatible endpoint
 # https://bedrock-runtime.<region>.amazonaws.com/openai/v1, and it accepts
-# the `global.`/`us.` cross-region inference-profile ids — so gpt-6-astra
-# and the gpt-5.6 family are both reachable from one Region. Mantle serves
-# different models in different Regions (astra in us-west-2 only, gpt-5.6-*
-# in us-east-1/us-east-2 only), which forced an either/or choice.
-# Requires Codex >= 0.153.3, the first release carrying gpt-6-astra in the
-# Bedrock Runtime catalog (verified on 0.153.3 and 0.155.0; on 0.153.0 it
-# runs but falls back to generic model metadata).
+# the `global.`/`us.` cross-region inference-profile ids — so GPT-6 Sol,
+# Luna, Astra, and the GPT-5.6 family are reachable from one Region.
+# Sol and Luna also support Mantle in us-east-1; Astra needs us-west-2
+# on that route. Runtime keeps all of them on the profile's us-east-1.
 #
 # Mantle fallback, if the Runtime route ever regresses: set
-# model_provider = "amazon-bedrock", model = "openai.gpt-6-astra", and add
-# [model_providers.amazon-bedrock] with aws = { region = "us-west-2" } —
-# which again makes gpt-5.6-* unreachable.
+# model_provider = "amazon-bedrock", model = "openai.gpt-6-sol".
+# AWS_REGION=us-east-1 serves Sol and Luna there, but not Astra.
 #
 # The model id carries the `us.` prefix, not `global.`, to match the
 # us-only model catalog postcreate.sh generates (it strips the duplicate
@@ -26,7 +22,7 @@
 # catalog: an id the catalog does not list falls back to generic metadata,
 # which re-breaks model_reasoning_summary below.
 model_provider = "amazon-bedrock-runtime"
-model = "us.openai.gpt-6-astra"
+model = "us.openai.gpt-6-sol"
 model_reasoning_effort = "medium"
 sandbox_mode = "danger-full-access"
 
