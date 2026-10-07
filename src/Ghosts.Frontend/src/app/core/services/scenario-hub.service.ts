@@ -4,6 +4,7 @@ import * as signalR from '@microsoft/signalr';
 import { ConfigService } from './config.service';
 import { CreateScenario } from '../models/scenario.model';
 import { AuthoringProgressEvent } from '../models/scenario-authoring.model';
+import { ExtractionProgress } from '../models/scenario-builder.model';
 
 export interface ScenarioHubMessage {
   scenarioId: number;
@@ -23,6 +24,7 @@ export class ScenarioHubService {
   readonly error$ = new Subject<ScenarioHubMessage>();
   readonly externalUpdate$ = new Subject<ScenarioHubMessage>();
   readonly authoringProgress$ = new Subject<AuthoringProgressEvent>();
+  readonly extractionProgress$ = new Subject<ExtractionProgress>();
 
   connect(scenarioId: number): void {
     if (this.connection && this.connectedScenarioId === scenarioId) {
@@ -51,6 +53,10 @@ export class ScenarioHubService {
 
     this.connection.on('authoringProgress', (progress: AuthoringProgressEvent) => {
       this.authoringProgress$.next(progress);
+    });
+
+    this.connection.on('extractionProgress', (progress: ExtractionProgress) => {
+      this.extractionProgress$.next(progress);
     });
 
     this.connection

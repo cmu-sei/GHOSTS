@@ -16,7 +16,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ChangeDetectionStrategy } from '@angular/core';
 import { ScenarioBuilderService } from '../../../core/services/scenario-builder.service';
-import { ScenarioEntity, ENTITY_TYPES, ENTITY_COLORS } from '../../../core/models/scenario-builder.model';
+import { ScenarioEntity, UpdateEntity, ENTITY_TYPES, ENTITY_COLORS } from '../../../core/models/scenario-builder.model';
 
 @Component({
   selector: 'app-builder-entities',
@@ -179,6 +179,28 @@ export class BuilderEntitiesComponent implements OnInit {
         this.editingEntity.set(null);
         this.toggleAddForm();
         this.loadEntities();
+      },
+      error: (error) => {
+        console.error('Error updating entity', error);
+        this.snackBar.open('Failed to update entity', 'Close', { duration: 3000 });
+      },
+    });
+  }
+
+  /** Q4: a person marks an entity as checked, which the authoring agent reads as the real name. */
+  protected toggleReviewed(entity: ScenarioEntity): void {
+    const updateDto: UpdateEntity = {
+      name: entity.name,
+      entityType: entity.entityType,
+      description: entity.description,
+      properties: entity.properties,
+      confidence: entity.confidence,
+      isReviewed: !entity.isReviewed,
+    };
+    this.builderService.updateEntity(this.scenarioId, entity.id, updateDto).subscribe({
+      next: (updated) => {
+        this.entities.update((list) => list.map((e) => (e.id === updated.id ? updated : e)));
+        this.applyFilter();
       },
       error: (error) => {
         console.error('Error updating entity', error);

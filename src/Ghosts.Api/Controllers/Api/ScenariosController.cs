@@ -71,7 +71,8 @@ public class ScenariosController : ControllerBase
         try
         {
             var scenario = await _scenarioService.GetByIdAsync(id, ct);
-            return Ok(MapToDto(scenario));
+            // A draft is shown to its author alone (I2), by id as in the list.
+            return scenario.IsVisibleTo(_user.Name) ? Ok(MapToDto(scenario)) : NotFound();
         }
         catch (InvalidOperationException)
         {
@@ -115,6 +116,7 @@ public class ScenariosController : ControllerBase
     {
         try
         {
+            if (!await _scenarioService.IsVisibleAsync(id, _user.Name, ct)) return NotFound();
             return Content(await _scenarioService.ExportDocumentAsync(id, derived, ct), "application/json");
         }
         catch (InvalidOperationException)
@@ -129,6 +131,44 @@ public class ScenariosController : ControllerBase
     }
 
     /// <summary>
+    /// The scenario document as an exercise plan, in Markdown (B4): the review only a person can do, rendered
+    /// by the server from the document GET {id}/document returns, never written by a model. The same plan the
+    /// schema tool's render command produces.
+    /// </summary>
+    // GET: api/scenarios/5/document/plan
+    [HttpGet("{id}/document/plan")]
+    [Produces("text/markdown")]
+    public async Task<IActionResult> GetScenarioPlan(int id, CancellationToken ct)
+    {
+        try
+        {
+            if (!await _scenarioService.IsVisibleAsync(id, _user.Name, ct)) return NotFound();
+            var text = await _scenarioService.ExportDocumentAsync(id, false, ct);
+            var plan = ScenarioPlan.Render(JsonNode.Parse(text).AsObject(), $"scenario {id}'s document, hash `{ScenarioAuthoringTools.Hash(text)}`");
+            return Content(plan, "text/markdown");
+        }
+        catch (InvalidOperationException)
+        {
+            return NotFound();
+        }
+        catch (JsonException ex)
+        {
+            _logger.LogError(ex, "Error rendering the plan of scenario {ScenarioId}", id);
+            return StatusCode(500, new { error = "Error rendering the exercise plan" });
+        }
+        catch (FormatException ex)
+        {
+            _logger.LogError(ex, "Error rendering the plan of scenario {ScenarioId}", id);
+            return StatusCode(500, new { error = "Error rendering the exercise plan" });
+        }
+        catch (NotSupportedException ex)
+        {
+            _logger.LogError(ex, "Error rendering the plan of scenario {ScenarioId}", id);
+            return StatusCode(500, new { error = "Error rendering the exercise plan" });
+        }
+    }
+
+    /// <summary>
     /// The approved version (A5): the document the scenario was last imported from, whether its rows were
     /// edited since, and the change list of that edit. 404 when no document was ever imported.
     /// </summary>
@@ -138,6 +178,7 @@ public class ScenariosController : ControllerBase
     {
         try
         {
+            if (!await _scenarioService.IsVisibleAsync(id, _user.Name, ct)) return NotFound();
             var approved = await _scenarioService.ApprovedDocumentAsync(id, ct);
             return approved == null ? NotFound(new { error = $"Scenario {id} was never imported from a document." }) : Ok(approved);
         }
@@ -300,11 +341,6 @@ public class ScenariosController : ControllerBase
     {
         try
         {
-            if (dto.Timeline?.Events != null)
-            {
-                foreach (var e in dto.Timeline.Events)
-                    _logger.LogWarning("Event #{Num} objectiveIds={ObjIds}", e.Number, e.ObjectiveIds != null ? string.Join(",", e.ObjectiveIds) : "none");
-            }
             await _scenarioService.UpdateAsync(id, dto, ct);
             return NoContent();
         }

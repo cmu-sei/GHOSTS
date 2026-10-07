@@ -302,12 +302,13 @@ namespace Ghosts.Api.Infrastructure.Services
                 }
             }
 
-            // Map Location entities to Nations
-            var locationEntities = scenario.Entities
-                .Where(e => e.EntityType == "Location")
+            // Map Organization entities to Nations: the nations table is the document's "sides", which holds
+            // nations or organizations and which side each is on. A Location is a place, so it is not a side.
+            var organizationEntities = scenario.Entities
+                .Where(e => e.EntityType == "Organization")
                 .ToList();
 
-            foreach (var entity in locationEntities)
+            foreach (var entity in organizationEntities)
             {
                 var existingNation = scenario.ScenarioParameters.Nations
                     .FirstOrDefault(n => n.Name.Equals(entity.Name, StringComparison.OrdinalIgnoreCase));

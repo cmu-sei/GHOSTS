@@ -26,12 +26,13 @@ namespace Ghosts.Api.Infrastructure.Services
 {
     public interface IScenarioAuthoringService
     {
-        Task<AuthoringSession> CreateSessionAsync(int? scenarioId, string model, CancellationToken ct);
+        Task<AuthoringSession> CreateSessionAsync(int? scenarioId, string model, string effort, CancellationToken ct);
         Task<IReadOnlyList<AuthoringSessionSummary>> SessionsAsync(int scenarioId, CancellationToken ct);
         Task<AuthoringSession> FindSessionAsync(Guid sessionId, CancellationToken ct);
         Task<AuthoringTurnResult> RunTurnAsync(Guid sessionId, string message, CancellationToken ct);
         Task<object> GetSessionAsync(Guid sessionId, bool running, CancellationToken ct);
         Task<object> GetDocumentAsync(Guid sessionId, string hash, CancellationToken ct);
+        Task<string> GetPlanAsync(Guid sessionId, string hash, CancellationToken ct);
         Task<object> GetChunkAsync(Guid sessionId, int chunkId, CancellationToken ct);
         Task<AuthoringImportResult> ImportAsync(Guid sessionId, string hash, bool again, bool replace, CancellationToken ct);
     }
@@ -51,7 +52,8 @@ namespace Ghosts.Api.Infrastructure.Services
     /// <summary>
     /// One turn's result. On a failure Reply is empty, Failure names the cause (B5), and the gate report still
     /// lists what the turn did, including any document it validated and kept (C2). Status, Attention, Changes
-    /// and Gaps are the server's lines for the page (B2, B3, D2, E5), never the model's.
+    /// and Gaps are the server's lines for the page (B2, B3, D2, E5), never the model's. CanImport says the
+    /// import rule holds; ImportedBefore says the import endpoint will ask first (A4).
     /// </summary>
     public record AuthoringTurnResult(
         int Turn,
@@ -66,7 +68,8 @@ namespace Ghosts.Api.Infrastructure.Services
         IReadOnlyList<string> Attention = null,
         IReadOnlyList<string> Changes = null,
         IReadOnlyList<string> Gaps = null,
-        string Model = null);
+        string Model = null,
+        bool ImportedBefore = false);
 
     /// <summary>Cause is "model error", "timeout" or "empty reply".</summary>
     public record AuthoringFailure(string Cause, string Notice, string Details);
@@ -88,6 +91,11 @@ namespace Ghosts.Api.Infrastructure.Services
 
         // One turn or import at a time per session; sessions run side by side (C6).
         private static readonly ConcurrentDictionary<Guid, SemaphoreSlim> Locks = new();
+
+        // F4: when a model was last unavailable (HTTP 503). For this long after, a new session that names no
+        // model starts on the configured fallback instead; a session that has begun keeps its model (C5).
+        private static readonly ConcurrentDictionary<string, DateTime> Unavailable = new();
+        private static readonly TimeSpan FallbackFor = TimeSpan.FromMinutes(10);
 
         private static readonly Lazy<string> DefaultPrompt = new(() => File.ReadAllText(Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory, "config", "ContentServices", "ScenarioAuthoring", "system-prompt.md")));
@@ -128,22 +136,45 @@ namespace Ghosts.Api.Infrastructure.Services
 
         /// <summary>
         /// A session for the Scenario Builder's scenario, which its import replaces; with none, the import makes a new one.
-        /// Its model is picked here, from the configured ones, and kept for the whole session (C5).
+        /// Its model and effort level are picked here, from the configured ones, and kept for the whole session (C5, H3).
         /// </summary>
-        public async Task<AuthoringSession> CreateSessionAsync(int? scenarioId, string model, CancellationToken ct)
+        public async Task<AuthoringSession> CreateSessionAsync(int? scenarioId, string model, string effort, CancellationToken ct)
         {
-            if (scenarioId != null && !await _context.Scenarios.AnyAsync(s => s.Id == scenarioId, ct))
-                throw new KeyNotFoundException($"No scenario {scenarioId}.");
+            string scenarioModel = null, scenarioEffort = null;
+            if (scenarioId != null)
+            {
+                var scenario = await _context.Scenarios.Where(s => s.Id == scenarioId).Select(s => new { s.BuilderModel, s.BuilderEffort }).FirstOrDefaultAsync(ct)
+                               ?? throw new KeyNotFoundException($"No scenario {scenarioId}.");
+                scenarioModel = scenario.BuilderModel;
+                scenarioEffort = scenario.BuilderEffort;
+            }
 
-            if (string.IsNullOrWhiteSpace(model)) model = _options.Model;
-            if (model != _options.Model && _options.Models.All(m => m.Id != model))
+            // The Scenario Builder's model and effort, picked on its Sources step, serve extraction and the conversation alike.
+            var named = !string.IsNullOrWhiteSpace(model);
+            if (!named) model = scenarioModel ?? DefaultModel();
+            if (string.IsNullOrWhiteSpace(effort) && !named) effort = scenarioEffort;
+            if (model != _options.Model && model != _options.FallbackModel && _options.Models.All(m => m.Id != model))
                 throw new ArgumentException($"{model} is not one of the configured models.");
 
-            var session = new AuthoringSession { Id = Guid.NewGuid(), Model = model, ScenarioId = scenarioId };
+            if (string.IsNullOrWhiteSpace(effort)) effort = null;
+            var efforts = _options.Models.FirstOrDefault(m => m.Id == model)?.Efforts ?? [];
+            if (effort != null && !efforts.Contains(effort))
+                throw new ArgumentException(efforts.Count == 0
+                    ? $"{model} takes no effort level."
+                    : $"{effort} is not an effort level of {model}: {string.Join(", ", efforts)}.");
+
+            var session = new AuthoringSession { Id = Guid.NewGuid(), Model = model, Effort = effort, ScenarioId = scenarioId };
             _context.AuthoringSessions.Add(session);
             await _context.SaveChangesAsync(ct);
             return session;
         }
+
+        /// <summary>The default model, or the fallback while the default was unavailable within the last FallbackFor (F4).</summary>
+        private string DefaultModel() =>
+            !string.IsNullOrWhiteSpace(_options.FallbackModel)
+            && Unavailable.TryGetValue(_options.Model, out var at) && DateTime.UtcNow - at < FallbackFor
+                ? _options.FallbackModel
+                : _options.Model;
 
         /// <summary>A scenario's sessions, newest first, so the Scenario Builder can resume the latest (section 2, step 7).</summary>
         public async Task<IReadOnlyList<AuthoringSessionSummary>> SessionsAsync(int scenarioId, CancellationToken ct) =>
@@ -218,7 +249,7 @@ namespace Ghosts.Api.Infrastructure.Services
             {
                 while (true)
                 {
-                    var response = await CallModelAsync(session.Model, conversation, rows, sessionId, turn, limit.Token);
+                    var response = await CallModelAsync(session.Model, session.Effort, conversation, rows, sessionId, turn, limit.Token);
                     var content = response.Output?.Message?.Content ?? [];
                     await ReportAsync(session, turn, "model-reply", new { stopReason = response.StopReason?.Value });
                     conversation.Add(new Message { Role = ConversationRole.Assistant, Content = content });
@@ -315,13 +346,14 @@ namespace Ghosts.Api.Infrastructure.Services
                 calls,
                 validated.Select(Status).ToList(),
                 latest == null ? null : Status(latest),
-                ImportRefusal(latest) == null && !importedBefore,
+                ImportRefusal(latest) == null,
                 failure,
                 StatusLine(latest, importedBefore, failure),
                 Attention(last),
                 last == null ? [] : JsonSerializer.Deserialize<List<string>>(last.Changes) ?? [],
                 gaps,
-                session.Model);
+                session.Model,
+                importedBefore);
 
             record.Result = JsonSerializer.Serialize(result, Web);
             record.EndedAt = DateTime.UtcNow;
@@ -345,20 +377,30 @@ namespace Ghosts.Api.Infrastructure.Services
         /// One model call, retried once on HTTP 503 (F4). Every attempt is a row with its usage and stop
         /// reason from the provider's response (H1); a failed attempt records its error instead.
         /// </summary>
-        private async Task<ConverseResponse> CallModelAsync(string model, List<Message> conversation,
+        private async Task<ConverseResponse> CallModelAsync(string model, string effort, List<Message> conversation,
             List<AuthoringMessage> rows, Guid sessionId, int turn, CancellationToken limit)
         {
             for (var attempt = 1; ; attempt++)
             {
+                var system = new List<SystemContentBlock> { new() { Text = _prompt ?? DefaultPrompt.Value } };
+                var tools = ScenarioAuthoringTools.Configuration();
+                if (_options.PromptCaching)
+                {
+                    system.Add(new SystemContentBlock { CachePoint = CachePoint() });
+                    tools.Tools.Add(new Tool { CachePoint = CachePoint() });
+                }
                 var request = new ConverseRequest
                 {
                     ModelId = model,
-                    System = [new SystemContentBlock { Text = _prompt ?? DefaultPrompt.Value }],
-                    Messages = conversation,
-                    ToolConfig = ScenarioAuthoringTools.Configuration(),
+                    System = system,
+                    Messages = _options.PromptCaching ? WithCachePoint(conversation) : conversation,
+                    ToolConfig = tools,
                     // Temperature is not sent: newer Anthropic models on Bedrock reject it.
                     InferenceConfig = new InferenceConfiguration { MaxTokens = _options.MaxOutputTokens }
                 };
+                // H3: the effort level is an Anthropic request field, output_config.effort, which Converse passes through.
+                if (effort != null)
+                    request.AdditionalModelRequestFields = AuthoringBlocks.ToDocument(new JsonObject { ["output_config"] = new JsonObject { ["effort"] = effort } });
 
                 var row = new AuthoringMessage
                 {
@@ -389,6 +431,7 @@ namespace Ghosts.Api.Infrastructure.Services
                     row.EndedAt = DateTime.UtcNow;
                     row.Error = $"{ex.GetType().Name}: {ex.Message}";
                     _log.Warn($"Authoring model call failed, session {sessionId}, turn {turn}, attempt {attempt}: {row.Error}");
+                    if (IsUnavailable(ex)) Unavailable[model] = DateTime.UtcNow;
                     if (attempt == 1 && IsUnavailable(ex)) continue;
                     throw new AuthoringModelException(row.Error, ex);
                 }
@@ -398,6 +441,20 @@ namespace Ghosts.Api.Infrastructure.Services
         private static bool IsUnavailable(Exception ex) =>
             ex is ServiceUnavailableException
             || (ex is AmazonServiceException s && (int)s.StatusCode == 503);
+
+        /// <summary>
+        /// H2: the system prompt, the tools and the conversation up to the last message are the same on every
+        /// call of a turn, and on the next turn, so each gets a cache point. The one in the conversation moves
+        /// with the last message, in a copy: the stored rows and the history the model sees never hold it.
+        /// </summary>
+        private static List<Message> WithCachePoint(List<Message> conversation)
+        {
+            var last = conversation[^1];
+            var marked = new Message { Role = last.Role, Content = [.. last.Content, new ContentBlock { CachePoint = CachePoint() }] };
+            return [.. conversation.Take(conversation.Count - 1), marked];
+        }
+
+        private static CachePointBlock CachePoint() => new() { Type = CachePointType.Default };
 
         /// <summary>C2: a validation is kept the moment it returns, inside the turn, whatever happens next.</summary>
         private async Task<AuthoringDocument> KeepAsync(Guid sessionId, int turn, AuthoringValidation v)
@@ -434,7 +491,7 @@ namespace Ghosts.Api.Infrastructure.Services
         /// The import rule, for the turn's canImport and for the import endpoint alike (A2, A3): the session's
         /// latest validated document, validated with 0 errors, and shown. Null when it holds, otherwise why not.
         /// The endpoint also checks that the hash it was given is that document's; a hash imported before is a
-        /// separate, second gate (A4).
+        /// separate, second gate (A4), which asks rather than refuses, so it does not decide canImport.
         /// </summary>
         private static string ImportRefusal(AuthoringDocument latest) =>
             latest == null ? "Nothing has been validated in this session."
@@ -573,6 +630,7 @@ namespace Ghosts.Api.Infrastructure.Services
             {
                 session.Id,
                 session.Model,
+                session.Effort,
                 session.Status,
                 session.ScenarioId,
                 session.ImportedScenarioId,
@@ -590,7 +648,8 @@ namespace Ghosts.Api.Infrastructure.Services
                     result = t.Result == null ? null : JsonSerializer.Deserialize<AuthoringTurnResult>(t.Result, Web)
                 }),
                 latestDocument = latest == null ? null : Status(latest),
-                canImport = ImportRefusal(latest) == null && !importedBefore,
+                canImport = ImportRefusal(latest) == null,
+                importedBefore,
                 statusLine = StatusLine(latest, importedBefore, null),
                 gaps = Gaps(latest),
                 documents = documents.Select(d => new
@@ -620,14 +679,7 @@ namespace Ghosts.Api.Infrastructure.Services
                     m.StartedAt,
                     m.EndedAt
                 }),
-                tokens = new
-                {
-                    modelCalls = calls.Count,
-                    input = calls.Sum(m => m.InputTokens ?? 0),
-                    output = calls.Sum(m => m.OutputTokens ?? 0),
-                    cacheRead = calls.Sum(m => m.CacheReadTokens ?? 0),
-                    cacheWrite = calls.Sum(m => m.CacheWriteTokens ?? 0)
-                }
+                tokens = Tokens(session.Model, calls)
             };
         }
 
@@ -664,6 +716,48 @@ namespace Ghosts.Api.Infrastructure.Services
                 gaps = Gaps(document),
                 document = document.Document
             };
+        }
+
+        /// <summary>
+        /// The session's token totals from the provider's own counts (H1), and what they cost at the model's configured
+        /// list prices, as an estimate; null when the model has no pricing configured.
+        /// </summary>
+        private object Tokens(string model, List<AuthoringMessage> calls)
+        {
+            long input = calls.Sum(m => m.InputTokens ?? 0), output = calls.Sum(m => m.OutputTokens ?? 0),
+                cacheRead = calls.Sum(m => m.CacheReadTokens ?? 0), cacheWrite = calls.Sum(m => m.CacheWriteTokens ?? 0);
+            var pricing = _options.Models.FirstOrDefault(m => m.Id == model)?.Pricing;
+            return new
+            {
+                modelCalls = calls.Count,
+                input,
+                output,
+                cacheRead,
+                cacheWrite,
+                estimatedCostUsd = pricing == null ? (decimal?)null : Math.Round(pricing.Estimate(input, output, cacheRead, cacheWrite), 4)
+            };
+        }
+
+        /// <summary>
+        /// B4: the document as an exercise plan, rendered by the server, never by the model. Returning it shows the
+        /// document (A3), as returning the document itself does.
+        /// </summary>
+        public async Task<string> GetPlanAsync(Guid sessionId, string hash, CancellationToken ct)
+        {
+            hash = hash?.Trim().ToLowerInvariant();
+            var document = await _context.AuthoringDocuments
+                .Where(d => d.SessionId == sessionId && d.Hash == hash)
+                .OrderByDescending(d => d.Id)
+                .FirstOrDefaultAsync(ct);
+            if (document == null) return null;
+
+            if (!document.Shown)
+            {
+                document.Shown = true;
+                await _context.SaveChangesAsync(CancellationToken.None);
+            }
+
+            return ScenarioPlan.Render(JsonNode.Parse(document.Document).AsObject(), $"document `{hash}`");
         }
 
         /// <summary>J2: the text of a chunk a reply cites, when it is one of the session's scenario's sources.</summary>

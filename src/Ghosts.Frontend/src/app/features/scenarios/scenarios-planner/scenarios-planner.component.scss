@@ -42,6 +42,46 @@
       padding: 24px;
     }
 
+    .document-tab {
+      .document-note {
+        color: #666;
+        margin: 0 0 16px;
+      }
+
+      .document-actions {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 24px;
+      }
+
+      .document-unchanged,
+      .document-edited {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0 0 12px;
+      }
+
+      .document-unchanged { color: #2e7d32; }
+      .document-edited { color: #b26a00; }
+
+      .change-list {
+        margin: 0 0 16px;
+        padding-left: 20px;
+
+        li { margin-bottom: 4px; }
+      }
+
+      .document-text {
+        background: #f6f7f9;
+        border-radius: 8px;
+        padding: 12px 16px;
+        font-size: 12px;
+        max-height: 32rem;
+        overflow: auto;
+      }
+    }
+
     .section-title {
       font-size: 20px;
       font-weight: 500;

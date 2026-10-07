@@ -9,12 +9,14 @@ using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Api.Hubs;
-using Ghosts.Api.Infrastructure.ContentServices;
+using Amazon.BedrockRuntime;
+using Amazon.BedrockRuntime.Model;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Infrastructure.Models;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using NLog;
 
 namespace Ghosts.Api.Infrastructure.Services
@@ -25,15 +27,23 @@ namespace Ghosts.Api.Infrastructure.Services
         Task<ExtractionResultDto> ExtractChunkAsync(int chunkId, CancellationToken ct);
     }
 
+    /// <summary>
+    /// Reads a scenario's source chunks into entities and edges. The model is the scenario's Builder model, the
+    /// same one its conversation uses, called on Bedrock the way authoring calls it.
+    /// </summary>
     public class ScenarioExtractionService(
         ApplicationDbContext context,
         IConfiguration configuration,
-        IHubContext<ScenarioBuilderHub> hubContext) : IScenarioExtractionService
+        IHubContext<ScenarioBuilderHub> hubContext,
+        IAuthoringModel model,
+        IOptions<ScenarioAuthoringOptions> options) : IScenarioExtractionService
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         private readonly ApplicationDbContext _context = context;
         private readonly IConfiguration _configuration = configuration;
         private readonly IHubContext<ScenarioBuilderHub> _hubContext = hubContext;
+        private readonly IAuthoringModel _model = model;
+        private readonly ScenarioAuthoringOptions _options = options.Value;
 
         // ── Public API ────────────────────────────────────────────────────────
 
@@ -64,8 +74,8 @@ namespace Ghosts.Api.Infrastructure.Services
             await SendProgressNotification(scenarioId, "started", 0, pendingChunks.Count, 0, 0);
 
             // ── Phase 1: parallel LLM calls ───────────────────────────────────
-            // Concurrency default = 2 (safe for local Ollama; raise for cloud APIs)
-            var concurrency = int.TryParse(_configuration["ScenarioBuilder:ExtractionConcurrency"], out var c) && c > 0 ? c : 2;
+            var modelId = scenario.BuilderModel ?? _options.Model;
+            var concurrency = int.TryParse(_configuration["ScenarioBuilder:ExtractionConcurrency"], out var c) && c > 0 ? c : 6;
             var semaphore = new SemaphoreSlim(concurrency);
 
             var llmTasks = pendingChunks.Select(chunk => Task.Run(async () =>
@@ -75,7 +85,7 @@ namespace Ghosts.Api.Infrastructure.Services
                 {
                     _log.Debug($"LLM call starting for chunk {chunk.Id}");
                     var prompt = await BuildExtractionPromptAsync(chunk, ct);
-                    var llmResponse = await CallLlmAsync(prompt, ct);
+                    var llmResponse = await CallLlmAsync(modelId, prompt, ct);
                     var result = ParseExtractionResponse(llmResponse, out var parseErrors);
                     _log.Debug($"LLM call completed for chunk {chunk.Id}: {result.Entities?.Count ?? 0} entities, {result.Edges?.Count ?? 0} edges");
                     return (chunk, result, parseErrors, failed: false);
@@ -253,6 +263,7 @@ namespace Ghosts.Api.Infrastructure.Services
 
             chunk.ExtractionStatus = "Processing";
             await _context.SaveChangesAsync(ct);
+            var modelId = await _context.Scenarios.Where(s => s.Id == chunk.ScenarioId).Select(s => s.BuilderModel).FirstOrDefaultAsync(ct) ?? _options.Model;
 
             var entitiesCreated = 0;
             var edgesCreated = 0;
@@ -261,7 +272,7 @@ namespace Ghosts.Api.Infrastructure.Services
             try
             {
                 var prompt = await BuildExtractionPromptAsync(chunk, ct);
-                var llmResponse = await CallLlmAsync(prompt, ct);
+                var llmResponse = await CallLlmAsync(modelId, prompt, ct);
 
                 if (string.IsNullOrWhiteSpace(llmResponse))
                     throw new InvalidOperationException("LLM returned empty response");
@@ -449,26 +460,19 @@ Text to analyze:
 Return only valid JSON.";
         }
 
-        private async Task<string> CallLlmAsync(string prompt, CancellationToken ct)
+        /// <summary>One call to the scenario's model with the chunk prompt; the reply's text is the first block that holds any.</summary>
+        private async Task<string> CallLlmAsync(string modelId, string prompt, CancellationToken ct)
         {
-            _log.Debug("Calling LLM for extraction");
-
+            _log.Debug($"Calling {modelId} for extraction");
             try
             {
-                var contentEngineSettings = new ApplicationSettings.AnimatorSettingsDetail.ContentEngineSettings
+                var response = await _model.ConverseAsync(new ConverseRequest
                 {
-                    Source = _configuration["ScenarioBuilder:ContentEngine:Source"] ?? "ollama",
-                    Model = _configuration["ScenarioBuilder:ContentEngine:Model"] ?? "llama3.1",
-                    Host = _configuration["ScenarioBuilder:ContentEngine:Host"] ?? "http://localhost:11434",
-                    AwsRegion = _configuration["ScenarioBuilder:ContentEngine:AwsRegion"]
-                };
-
-                var contentService = new ContentCreationService(contentEngineSettings);
-
-                if (contentService.FormatterService == null)
-                    throw new InvalidOperationException("Content service formatter is not available");
-
-                var result = await contentService.FormatterService.ExecuteQuery(prompt);
+                    ModelId = modelId,
+                    Messages = [new Message { Role = ConversationRole.User, Content = [new ContentBlock { Text = prompt }] }],
+                    InferenceConfig = new InferenceConfiguration { MaxTokens = 8192 }
+                }, ct);
+                var result = response.Output?.Message?.Content?.FirstOrDefault(b => b.Text != null)?.Text;
                 _log.Debug($"LLM returned {result?.Length ?? 0} characters");
                 return result;
             }

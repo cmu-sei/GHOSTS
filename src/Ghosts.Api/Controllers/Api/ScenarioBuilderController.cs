@@ -8,12 +8,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Packaging;
+using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using NLog;
 using UglyToad.PdfPig;
 
@@ -21,15 +23,63 @@ namespace Ghosts.Api.Controllers.Api
 {
     [Route("api/scenarios/{scenarioId}/builder")]
     [ApiController]
+    [ServiceFilter(typeof(ScenarioVisibilityFilter))] // J7: a scenario's sources and graph are shown to whoever the scenario is
     public class ScenarioBuilderController(
         IScenarioSourceService sourceService,
         IScenarioGraphService graphService,
         IScenarioExtractionService extractionService,
         IScenarioEnrichmentService enrichmentService,
         IScenarioCompilerService compilerService,
+        ScenarioExtractionRunner extractionRunner,
+        IOptions<ScenarioAuthoringOptions> authoringOptions,
         ApplicationDbContext dbContext) : ControllerBase
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
+
+        public class ModelRequest
+        {
+            public string Model { get; set; }
+
+            /// <summary>One of the model's effort levels, or empty for the model's default.</summary>
+            public string Effort { get; set; }
+        }
+
+        // ──────────────────────────────────────────────
+        // The model: one per scenario, for extraction and the conversation
+        // ──────────────────────────────────────────────
+
+        /// <summary>The model and effort level this scenario's Builder uses, and the configured models it may pick from.</summary>
+        [HttpGet("model")]
+        public async Task<ActionResult> GetModel(int scenarioId, CancellationToken ct)
+        {
+            var scenario = await dbContext.Scenarios.AsNoTracking().FirstOrDefaultAsync(s => s.Id == scenarioId, ct);
+            if (scenario == null) return NotFound();
+            return Ok(new { model = scenario.BuilderModel ?? authoringOptions.Value.Model, effort = scenario.BuilderEffort, models = authoringOptions.Value.Models });
+        }
+
+        /// <summary>
+        /// Picks one of the configured models, and one of its effort levels or none, for this scenario. New sessions
+        /// and extraction runs use them; a running session keeps its own.
+        /// </summary>
+        [HttpPut("model")]
+        public async Task<ActionResult> SetModel(int scenarioId, [FromBody] ModelRequest request, CancellationToken ct)
+        {
+            var options = authoringOptions.Value;
+            var model = request?.Model?.Trim();
+            if (string.IsNullOrEmpty(model) || (model != options.Model && options.Models.All(m => m.Id != model)))
+                return BadRequest(new { error = $"{model} is not one of the configured models." });
+            var effort = string.IsNullOrWhiteSpace(request.Effort) ? null : request.Effort.Trim();
+            var efforts = options.Models.FirstOrDefault(m => m.Id == model)?.Efforts ?? [];
+            if (effort != null && !efforts.Contains(effort))
+                return BadRequest(new { error = $"{effort} is not an effort level of {model}." });
+
+            var scenario = await dbContext.Scenarios.FirstOrDefaultAsync(s => s.Id == scenarioId, ct);
+            if (scenario == null) return NotFound();
+            scenario.BuilderModel = model;
+            scenario.BuilderEffort = effort;
+            await dbContext.SaveChangesAsync(ct);
+            return Ok(new { model, effort, models = options.Models });
+        }
 
         // ──────────────────────────────────────────────
         // Sources
@@ -41,12 +91,7 @@ namespace Ghosts.Api.Controllers.Api
             try
             {
                 var sources = await sourceService.GetByScenarioAsync(scenarioId, ct);
-                var dtos = sources.ConvertAll(s => new ScenarioSourceDto(
-                    s.Id, s.Name, s.SourceType, s.MimeType,
-                    s.OriginalFileName, s.FileSizeBytes, s.Status,
-                    s.ErrorMessage, s.CreatedAt, s.Chunks?.Count ?? 0,
-                    s.SourceType == "Url" ? s.OriginalFileName : (s.Content?.Length > 100 ? s.Content[..100] + "…" : s.Content ?? "")));
-                return Ok(dtos);
+                return Ok(sources.ConvertAll(ToDto));
             }
             catch (Exception ex)
             {
@@ -60,12 +105,7 @@ namespace Ghosts.Api.Controllers.Api
         {
             try
             {
-                var source = await sourceService.GetByIdAsync(id, ct);
-                return Ok(new ScenarioSourceDto(
-                    source.Id, source.Name, source.SourceType, source.MimeType,
-                    source.OriginalFileName, source.FileSizeBytes, source.Status,
-                    source.ErrorMessage, source.CreatedAt, source.Chunks?.Count ?? 0,
-                    source.SourceType == "Url" ? source.OriginalFileName : (source.Content?.Length > 100 ? source.Content[..100] + "…" : source.Content ?? "")));
+                return Ok(ToDto(await sourceService.GetByIdAsync(id, ct)));
             }
             catch (InvalidOperationException)
             {
@@ -73,17 +113,24 @@ namespace Ghosts.Api.Controllers.Api
             }
         }
 
+        /// <summary>A source with its chunk counts: how many chunks it has, how many extraction has read, and how many wait.</summary>
+        private static ScenarioSourceDto ToDto(ScenarioSource s) => new(
+            s.Id, s.Name, s.SourceType, s.MimeType,
+            s.OriginalFileName, s.FileSizeBytes, s.Status,
+            s.ErrorMessage, s.CreatedAt, s.Chunks?.Count ?? 0,
+            s.SourceType == "Url" ? s.OriginalFileName ?? "" : (s.Content?.Length > 100 ? s.Content[..100] + "…" : s.Content ?? ""),
+            s.Chunks?.Count(c => c.ExtractionStatus == "Completed") ?? 0,
+            s.Chunks?.Count(c => c.ExtractionStatus == "Pending") ?? 0);
+
         [HttpPost("sources/text")]
         public async Task<ActionResult> AddTextSource(int scenarioId, [FromBody] CreateScenarioSourceTextDto dto, CancellationToken ct)
         {
             try
             {
                 var source = await sourceService.AddTextAsync(scenarioId, dto, ct);
+                extractionRunner.Start(scenarioId);
                 return CreatedAtAction(nameof(GetSource), new { scenarioId, id = source.Id },
-                    new ScenarioSourceDto(source.Id, source.Name, source.SourceType, source.MimeType,
-                        source.OriginalFileName, source.FileSizeBytes, source.Status,
-                        source.ErrorMessage, source.CreatedAt, source.Chunks?.Count ?? 0,
-                        source.Content?.Length > 100 ? source.Content[..100] + "…" : source.Content ?? ""));
+                    ToDto(source));
             }
             catch (Exception ex)
             {
@@ -98,11 +145,9 @@ namespace Ghosts.Api.Controllers.Api
             try
             {
                 var source = await sourceService.AddUrlAsync(scenarioId, dto, ct);
+                extractionRunner.Start(scenarioId);
                 return CreatedAtAction(nameof(GetSource), new { scenarioId, id = source.Id },
-                    new ScenarioSourceDto(source.Id, source.Name, source.SourceType, source.MimeType,
-                        source.OriginalFileName, source.FileSizeBytes, source.Status,
-                        source.ErrorMessage, source.CreatedAt, source.Chunks?.Count ?? 0,
-                        source.OriginalFileName ?? ""));
+                    ToDto(source));
             }
             catch (Exception ex)
             {
@@ -128,12 +173,10 @@ namespace Ghosts.Api.Controllers.Api
 
                 var source = await sourceService.UploadFileAsync(
                     scenarioId, file.FileName, file.ContentType, fileData, textContent, ct);
+                extractionRunner.Start(scenarioId);
 
                 return CreatedAtAction(nameof(GetSource), new { scenarioId, id = source.Id },
-                    new ScenarioSourceDto(source.Id, source.Name, source.SourceType, source.MimeType,
-                        source.OriginalFileName, source.FileSizeBytes, source.Status,
-                        source.ErrorMessage, source.CreatedAt, source.Chunks?.Count ?? 0,
-                        source.Content?.Length > 100 ? source.Content[..100] + "…" : source.Content ?? ""));
+                    ToDto(source));
             }
             catch (Exception ex)
             {

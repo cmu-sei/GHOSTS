@@ -22,6 +22,7 @@ namespace Ghosts.Api.Infrastructure.Services
     {
         Task<List<Scenario>> GetAllAsync(CancellationToken ct);
         Task<Scenario> GetByIdAsync(int id, CancellationToken ct);
+        Task<bool> IsVisibleAsync(int id, string user, CancellationToken ct);
         Task<Scenario> CreateAsync(CreateScenarioDto dto, CancellationToken ct);
         Task<Scenario> ImportDocumentAsync(JsonObject document, IReadOnlyList<ScenarioFinding> findings, CancellationToken ct);
         Task<Scenario> ReplaceFromDocumentAsync(int id, JsonObject document, IReadOnlyList<ScenarioFinding> findings, CancellationToken ct);
@@ -98,6 +99,10 @@ namespace Ghosts.Api.Infrastructure.Services
 
             return scenario;
         }
+
+        /// <summary>Whether the scenario exists and is shown to this user: published, or their own draft (I2).</summary>
+        public async Task<bool> IsVisibleAsync(int id, string user, CancellationToken ct) =>
+            await _context.Scenarios.AnyAsync(s => s.Id == id && (s.PublishedAt != null || s.Author == user), ct);
 
         /// <summary>
         /// The scenario as canonical scenario-document text: the document it was imported from when
@@ -451,54 +456,67 @@ namespace Ghosts.Api.Infrastructure.Services
             {
                 if (scenario.ScenarioParameters != null)
                 {
-                    // Remove old collections
-                    _context.Nations.RemoveRange(scenario.ScenarioParameters.Nations);
-                    _context.ThreatActors.RemoveRange(scenario.ScenarioParameters.ThreatActors);
-                    _context.Injects.RemoveRange(scenario.ScenarioParameters.Injects);
-                    _context.UserPools.RemoveRange(scenario.ScenarioParameters.UserPools);
+                    var current = scenario.ScenarioParameters;
+                    current.Objectives = dto.ScenarioParameters.Objectives;
+                    current.PoliticalContext = dto.ScenarioParameters.PoliticalContext;
+                    current.RulesOfEngagement = dto.ScenarioParameters.RulesOfEngagement;
+                    current.VictoryConditions = dto.ScenarioParameters.VictoryConditions;
 
-                    // Update properties
-                    scenario.ScenarioParameters.Objectives = dto.ScenarioParameters.Objectives;
-                    scenario.ScenarioParameters.PoliticalContext = dto.ScenarioParameters.PoliticalContext;
-                    scenario.ScenarioParameters.RulesOfEngagement = dto.ScenarioParameters.RulesOfEngagement;
-                    scenario.ScenarioParameters.VictoryConditions = dto.ScenarioParameters.VictoryConditions;
-
-                    // Add new collections
-                    scenario.ScenarioParameters.Nations = dto.ScenarioParameters.Nations.Select(n => new Nation
+                    // Each list is replaced only when the caller sends it, as workflow bindings always were, and an
+                    // item sent without extras keeps the extras of the row it replaces, matched by name. So a caller
+                    // that does not know a list, or extras, cannot wipe what the document said (A5).
+                    if (dto.ScenarioParameters.Nations != null)
                     {
-                        Name = n.Name,
-                        Alignment = n.Alignment
-                    }).ToList();
+                        _context.Nations.RemoveRange(current.Nations);
+                        current.Nations = dto.ScenarioParameters.Nations.Select(n => new Nation
+                        {
+                            Name = n.Name,
+                            Alignment = n.Alignment
+                        }).ToList();
+                    }
 
-                    scenario.ScenarioParameters.ThreatActors = dto.ScenarioParameters.ThreatActors.Select(ta => new ThreatActor
+                    if (dto.ScenarioParameters.ThreatActors != null)
                     {
-                        Name = ta.Name,
-                        Type = ta.Type,
-                        Capability = ta.Capability,
-                        Ttps = string.Join(",", ta.Ttps),
-                        Extras = ScenarioExtras.Write(ta.Extras)
-                    }).ToList();
+                        var before = current.ThreatActors;
+                        _context.ThreatActors.RemoveRange(before);
+                        current.ThreatActors = dto.ScenarioParameters.ThreatActors.Select(ta => new ThreatActor
+                        {
+                            Name = ta.Name,
+                            Type = ta.Type,
+                            Capability = ta.Capability,
+                            Ttps = string.Join(",", ta.Ttps),
+                            Extras = Keep(ta.Extras, before.FirstOrDefault(x => x.Name == ta.Name)?.Extras)
+                        }).ToList();
+                    }
 
-                    scenario.ScenarioParameters.Injects = dto.ScenarioParameters.Injects.Select(i => new Inject
+                    if (dto.ScenarioParameters.Injects != null)
                     {
-                        Trigger = i.Trigger,
-                        Title = i.Title,
-                        Extras = ScenarioExtras.Write(i.Extras)
-                    }).ToList();
+                        var before = current.Injects;
+                        _context.Injects.RemoveRange(before);
+                        current.Injects = dto.ScenarioParameters.Injects.Select(i => new Inject
+                        {
+                            Trigger = i.Trigger,
+                            Title = i.Title,
+                            Extras = Keep(i.Extras, before.FirstOrDefault(x => x.Title == i.Title)?.Extras)
+                        }).ToList();
+                    }
 
-                    scenario.ScenarioParameters.UserPools = dto.ScenarioParameters.UserPools.Select(up => new UserPool
+                    if (dto.ScenarioParameters.UserPools != null)
                     {
-                        Role = up.Role,
-                        Count = up.Count,
-                        Extras = ScenarioExtras.Write(up.Extras)
-                    }).ToList();
+                        var before = current.UserPools;
+                        _context.UserPools.RemoveRange(before);
+                        current.UserPools = dto.ScenarioParameters.UserPools.Select(up => new UserPool
+                        {
+                            Role = up.Role,
+                            Count = up.Count,
+                            Extras = Keep(up.Extras, before.FirstOrDefault(x => x.Role == up.Role)?.Extras)
+                        }).ToList();
+                    }
 
-                    // Only replace workflow bindings when the client explicitly supplies them,
-                    // so an older client omitting the field doesn't wipe seeded defaults.
                     if (dto.ScenarioParameters.WorkflowBindings != null)
                     {
-                        _context.ScenarioWorkflowBindings.RemoveRange(scenario.ScenarioParameters.WorkflowBindings);
-                        scenario.ScenarioParameters.WorkflowBindings = MapWorkflowBindings(dto.ScenarioParameters.WorkflowBindings);
+                        _context.ScenarioWorkflowBindings.RemoveRange(current.WorkflowBindings);
+                        current.WorkflowBindings = MapWorkflowBindings(dto.ScenarioParameters.WorkflowBindings);
                     }
                 }
                 else
@@ -512,20 +530,23 @@ namespace Ghosts.Api.Infrastructure.Services
             {
                 if (scenario.TechnicalEnvironment != null)
                 {
-                    _context.Vulnerabilities.RemoveRange(scenario.TechnicalEnvironment.Vulnerabilities);
-
                     scenario.TechnicalEnvironment.NetworkTopology = dto.TechnicalEnvironment.NetworkTopology;
                     scenario.TechnicalEnvironment.Services = dto.TechnicalEnvironment.Services;
                     scenario.TechnicalEnvironment.Assets = dto.TechnicalEnvironment.Assets;
                     scenario.TechnicalEnvironment.Defenses = System.Text.Json.JsonSerializer.Serialize(dto.TechnicalEnvironment.Defenses);
 
-                    scenario.TechnicalEnvironment.Vulnerabilities = dto.TechnicalEnvironment.Vulnerabilities.Select(v => new Vulnerability
+                    if (dto.TechnicalEnvironment.Vulnerabilities != null)
                     {
-                        Asset = v.Asset,
-                        Cve = v.Cve,
-                        Severity = v.Severity,
-                        Extras = ScenarioExtras.Write(v.Extras)
-                    }).ToList();
+                        var before = scenario.TechnicalEnvironment.Vulnerabilities;
+                        _context.Vulnerabilities.RemoveRange(before);
+                        scenario.TechnicalEnvironment.Vulnerabilities = dto.TechnicalEnvironment.Vulnerabilities.Select(v => new Vulnerability
+                        {
+                            Asset = v.Asset,
+                            Cve = v.Cve,
+                            Severity = v.Severity,
+                            Extras = Keep(v.Extras, before.FirstOrDefault(x => x.Asset == v.Asset && x.Cve == v.Cve)?.Extras)
+                        }).ToList();
+                    }
                 }
                 else
                 {
@@ -558,9 +579,10 @@ namespace Ghosts.Api.Infrastructure.Services
             // Update Timeline
             if (dto.Timeline != null)
             {
-                if (scenario.ScenarioTimeline != null)
+                if (scenario.ScenarioTimeline != null && dto.Timeline.Events != null)
                 {
-                    _context.ScenarioTimelineEvents.RemoveRange(scenario.ScenarioTimeline.ScenarioTimelineEvents);
+                    var before = scenario.ScenarioTimeline.ScenarioTimelineEvents;
+                    _context.ScenarioTimelineEvents.RemoveRange(before);
 
                     scenario.ScenarioTimeline.ExerciseDuration = dto.Timeline.ExerciseDuration;
                     scenario.ScenarioTimeline.ScenarioTimelineEvents = dto.Timeline.Events.Select(e => new ScenarioTimelineEvent
@@ -576,8 +598,12 @@ namespace Ghosts.Api.Infrastructure.Services
                         TriggerCondition = e.TriggerCondition,
                         ExecutionType = Enum.TryParse<ExecutionType>(e.ExecutionType, true, out var et) ? et : ExecutionType.Manual,
                         WorkflowId = e.WorkflowId,
-                        Extras = ScenarioExtras.Write(e.Extras)
+                        Extras = Keep(e.Extras, before.FirstOrDefault(x => x.Number == e.Number)?.Extras)
                     }).ToList();
+                }
+                else if (scenario.ScenarioTimeline != null)
+                {
+                    scenario.ScenarioTimeline.ExerciseDuration = dto.Timeline.ExerciseDuration;
                 }
                 else
                 {
@@ -591,6 +617,10 @@ namespace Ghosts.Api.Infrastructure.Services
 
             return scenario;
         }
+
+        /// <summary>The extras an updated row gets: what the caller sent, or what the row it replaces held.</summary>
+        private static string Keep<T>(T sent, string replaced) where T : class =>
+            sent != null ? ScenarioExtras.Write(sent) : replaced;
 
         public async Task DeleteAsync(int id, CancellationToken ct)
         {

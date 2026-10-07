@@ -132,6 +132,7 @@ public class Program
         builder.Services.AddScoped<IScenarioSourceService, ScenarioSourceService>();
         builder.Services.AddScoped<IScenarioGraphService, ScenarioGraphService>();
         builder.Services.AddScoped<IScenarioExtractionService, ScenarioExtractionService>();
+        builder.Services.AddSingleton<ScenarioExtractionRunner>(); // J9: extraction runs when a source is added
         builder.Services.AddScoped<IScenarioEnrichmentService, ScenarioEnrichmentService>();
         builder.Services.AddScoped<IScenarioCompilerService, ScenarioCompilerService>();
         builder.Services.AddScoped<IEvidenceProcessor, EvidenceProcessorService>();
@@ -146,8 +147,9 @@ public class Program
         builder.Services.AddSingleton<IAuthoringProgress, HubAuthoringProgress>();
         builder.Services.AddSingleton<ScenarioAuthoringRunner>();
 
-        // The user named by the auth proxy's header, for drafts and publishing
+        // The user named by the auth proxy's header, for drafts and publishing, and the filter that hides drafts
         builder.Services.AddScoped<Ghosts.Api.Infrastructure.CurrentUser>();
+        builder.Services.AddScoped<Ghosts.Api.Infrastructure.ScenarioVisibilityFilter>();
 
         builder.Services.AddScoped<IClientResultsService, ClientResultsService>();
         builder.Services.AddScoped<IClientIdService, ClientIdService>();
@@ -196,11 +198,19 @@ public class Program
                 var context = services.GetRequiredService<ApplicationDbContext>();
                 var dbInitializerLogger = services.GetRequiredService<ILogger<DbInitializer>>();
 
-                DbInitializer.Initialize(context, dbInitializerLogger, services).Wait();
+                DbInitializer.Initialize(context, dbInitializerLogger, services).GetAwaiter().GetResult();
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                _log.Fatal(ex, "An error occurred while seeding the GHOSTS database");
+                _log.Fatal(ex, "An invalid operation occurred while seeding the GHOSTS database");
+            }
+            catch (DbUpdateException ex)
+            {
+                _log.Fatal(ex, "A database update error occurred while seeding the GHOSTS database");
+            }
+            catch (IOException ex)
+            {
+                _log.Fatal(ex, "An I/O error occurred while seeding the GHOSTS database");
             }
         }
 

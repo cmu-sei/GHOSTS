@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Services;
 using Microsoft.AspNetCore.Http;
@@ -14,13 +15,14 @@ namespace Ghosts.Api.Controllers.Api;
 
 /// <summary>
 /// Scenario authoring: a session, its turns, its record, and the import. No more open than the rest of the
-/// API (I1). A turn runs in the background and reports through the Scenario Builder's hub; the session's
-/// record is what the page reads when the turn ends.
+/// API (I1): a scenario's sessions are shown to whoever the scenario is shown to (I2). A turn runs in the
+/// background and reports through the Scenario Builder's hub; the session's record is what the page reads
+/// when the turn ends.
 /// </summary>
 [ApiController]
 [Route("api/scenario-authoring")]
 public class ScenarioAuthoringController(IScenarioAuthoringService authoring, ScenarioAuthoringRunner runner,
-    IOptions<ScenarioAuthoringOptions> options) : ControllerBase
+    IOptions<ScenarioAuthoringOptions> options, IScenarioService scenarios, CurrentUser user) : ControllerBase
 {
     public class SessionRequest
     {
@@ -29,6 +31,9 @@ public class ScenarioAuthoringController(IScenarioAuthoringService authoring, Sc
 
         /// <summary>One of the configured models' ids. Without one, the session uses the default.</summary>
         public string Model { get; set; }
+
+        /// <summary>One of the model's effort levels (H3). Without one, the model's default.</summary>
+        public string Effort { get; set; }
     }
 
     public class TurnRequest
@@ -54,8 +59,10 @@ public class ScenarioAuthoringController(IScenarioAuthoringService authoring, Sc
     {
         try
         {
-            var session = await authoring.CreateSessionAsync(request?.ScenarioId, request?.Model, ct);
-            return Ok(new { id = session.Id, model = session.Model, scenarioId = session.ScenarioId });
+            if (request?.ScenarioId is int scenarioId && !await scenarios.IsVisibleAsync(scenarioId, user.Name, ct))
+                return NotFound(new { error = $"No scenario {scenarioId}." });
+            var session = await authoring.CreateSessionAsync(request?.ScenarioId, request?.Model, request?.Effort, ct);
+            return Ok(new { id = session.Id, model = session.Model, effort = session.Effort, scenarioId = session.ScenarioId });
         }
         catch (KeyNotFoundException ex)
         {
@@ -71,7 +78,9 @@ public class ScenarioAuthoringController(IScenarioAuthoringService authoring, Sc
     // GET: api/scenario-authoring/sessions?scenarioId=5
     [HttpGet("sessions")]
     public async Task<IActionResult> GetSessions([FromQuery] int scenarioId, CancellationToken ct) =>
-        Ok(await authoring.SessionsAsync(scenarioId, ct));
+        await scenarios.IsVisibleAsync(scenarioId, user.Name, ct)
+            ? Ok(await authoring.SessionsAsync(scenarioId, ct))
+            : NotFound(new { error = $"No scenario {scenarioId}." });
 
     /// <summary>
     /// Starts one turn and returns at once. The turn is not tied to the request: a browser that goes away
@@ -109,6 +118,19 @@ public class ScenarioAuthoringController(IScenarioAuthoringService authoring, Sc
     {
         var document = await authoring.GetDocumentAsync(id, hash, ct);
         return document == null ? NotFound() : Ok(document);
+    }
+
+    /// <summary>
+    /// One validated document as an exercise plan in Markdown, rendered by the server from the document (B4).
+    /// Returning it records that the developer was shown the document (A3), as the document endpoint does.
+    /// </summary>
+    // GET: api/scenario-authoring/sessions/{id}/documents/{hash}/plan
+    [HttpGet("sessions/{id:guid}/documents/{hash}/plan")]
+    [Produces("text/markdown")]
+    public async Task<IActionResult> GetPlan(Guid id, string hash, CancellationToken ct)
+    {
+        var plan = await authoring.GetPlanAsync(id, hash, ct);
+        return plan == null ? NotFound() : Content(plan, "text/markdown");
     }
 
     /// <summary>The text of a source chunk a reply cites (J2).</summary>

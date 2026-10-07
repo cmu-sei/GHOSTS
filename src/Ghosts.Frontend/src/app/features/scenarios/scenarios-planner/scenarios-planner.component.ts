@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -15,7 +15,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { ChangeDetectionStrategy } from '@angular/core';
 import { ScenarioService, ScenarioHubService, ObjectiveService, N8nWorkflowService } from '../../../core/services';
-import { CreateScenario, ScenarioTimelineEvent, Objective, N8nWorkflow, ScenarioExtras } from '../../../core/models';
+import { CreateScenario, ScenarioTimelineEvent, Objective, N8nWorkflow, ScenarioExtras, ApprovedScenarioDocument } from '../../../core/models';
 import { BuilderEntitiesComponent } from '../../scenario-builder/builder-entities/builder-entities.component';
 import { BuilderGraphComponent } from '../../scenario-builder/builder-graph/builder-graph.component';
 
@@ -59,7 +59,18 @@ export class ScenariosPlannerComponent implements OnInit, OnDestroy {
   protected builderStatus = signal<string>('None');
   protected selectedTabIndex = 0;
 
-  private readonly tabSlugs = ['parameters', 'technical-environment', 'simulation-mechanics', 'timeline', 'graph'];
+  private readonly tabSlugs = ['parameters', 'technical-environment', 'simulation-mechanics', 'timeline', 'graph', 'document'];
+
+  /** The scenario as last saved, as JSON; a tab switch saves only when the scenario differs from it. */
+  private lastSaved = '';
+
+  /** The approved version (A5): undefined until read, null when the scenario was never imported from a document. */
+  protected readonly approved = signal<ApprovedScenarioDocument | null | undefined>(undefined);
+  protected readonly approvedOpen = signal(false);
+  protected readonly approvedText = computed(() => {
+    const text = this.approved()?.document;
+    return text ? JSON.stringify(JSON.parse(text), null, 2) : '';
+  });
 
   protected scenario: CreateScenario = {
     name: '',
@@ -201,6 +212,11 @@ export class ScenariosPlannerComponent implements OnInit, OnDestroy {
         const idx = this.tabSlugs.indexOf(tab);
         if (idx >= 0) this.selectedTabIndex = idx;
       }
+      if (tab === 'document') this.loadApproved();
+    });
+    // A save changes what the approved version is compared against.
+    this.scenarioHub.saved$.subscribe(() => {
+      if (this.tabSlugs[this.selectedTabIndex] === 'document') this.loadApproved();
     });
     this.loadWorkflows();
   }
@@ -223,6 +239,43 @@ export class ScenariosPlannerComponent implements OnInit, OnDestroy {
     const slug = this.tabSlugs[index] || this.tabSlugs[0];
     const id = this.scenarioId ?? 'new';
     this.router.navigate(['/scenarios', id, slug], { replaceUrl: true });
+    if (slug === 'document') this.loadApproved();
+  }
+
+  private loadApproved(): void {
+    if (!this.scenarioId) return;
+    this.scenarioService.getApprovedDocument(this.scenarioId).subscribe({
+      next: (approved) => this.approved.set(approved),
+      error: () => this.approved.set(null)
+    });
+  }
+
+  /**
+   * Downloads the current document, the approved version it was imported from, or the current document
+   * rendered as an exercise plan in Markdown.
+   */
+  protected downloadDocument(version: 'current' | 'approved' | 'plan'): void {
+    if (!this.scenarioId) return;
+    const name = this.scenario.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'scenario';
+    const save = (text: string, suffix: string, type: string) => {
+      const url = URL.createObjectURL(new Blob([text], { type }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${name}${suffix}`;
+      link.click();
+      URL.revokeObjectURL(url);
+    };
+    if (version === 'approved') {
+      const approved = this.approved();
+      if (approved) save(this.approvedText(), '.approved.scenario.json', 'application/json');
+      return;
+    }
+    const plan = version === 'plan';
+    const text$ = plan ? this.scenarioService.getScenarioPlan(this.scenarioId) : this.scenarioService.getScenarioDocument(this.scenarioId);
+    text$.subscribe({
+      next: (text) => save(text, plan ? '.plan.md' : '.scenario.json', plan ? 'text/markdown' : 'application/json'),
+      error: () => alert('The scenario document could not be exported.')
+    });
   }
 
   private loadAllObjectives(): void {
@@ -294,6 +347,7 @@ export class ScenariosPlannerComponent implements OnInit, OnDestroy {
           }));
         }
 
+        this.lastSaved = JSON.stringify(this.scenario);
         this.loading.set(false);
       },
       error: (error) => {
@@ -505,24 +559,32 @@ export class ScenariosPlannerComponent implements OnInit, OnDestroy {
     this.autoSaveScenario();
   }
 
+  /** Saves on a tab switch, and only when something changed since the last save or load. */
   private autoSaveScenario(): void {
     if (!this.isEditMode || !this.scenarioId) return;
-    const scenarioToSave = { ...this.scenario };
-    if (scenarioToSave.scenarioParameters) {
-      scenarioToSave.scenarioParameters.threatActors = scenarioToSave.scenarioParameters.threatActors.map(actor => {
-        const ttpsString = (actor as any).ttpsString || '';
-        return {
-          name: actor.name,
-          type: actor.type,
-          capability: actor.capability,
-          ttps: ttpsString ? ttpsString.split(',').map((t: string) => t.trim()).filter((t: string) => t) : [],
-          extras: actor.extras
-        };
-      });
-    }
     this.syncDefenseNames();
-    scenarioToSave.gameMechanics = scenarioToSave.simulationMechanics;
+    const snapshot = JSON.stringify(this.scenario);
+    if (snapshot === this.lastSaved) return;
+
+    // The payload is built beside the edited scenario, not from it, so the TTPs stay editable as text.
+    const scenarioToSave = { ...this.scenario, gameMechanics: this.scenario.simulationMechanics };
+    if (this.scenario.scenarioParameters) {
+      scenarioToSave.scenarioParameters = {
+        ...this.scenario.scenarioParameters,
+        threatActors: this.scenario.scenarioParameters.threatActors.map(actor => {
+          const ttpsString = (actor as any).ttpsString || '';
+          return {
+            name: actor.name,
+            type: actor.type,
+            capability: actor.capability,
+            ttps: ttpsString ? ttpsString.split(',').map((t: string) => t.trim()).filter((t: string) => t) : [],
+            extras: actor.extras
+          };
+        })
+      };
+    }
     this.scenarioHub.updateScenario(this.scenarioId, scenarioToSave);
+    this.lastSaved = snapshot;
   }
 
   // What the scenario document says that no column holds (extras), with every nested part present
@@ -610,7 +672,12 @@ export class ScenariosPlannerComponent implements OnInit, OnDestroy {
     list.splice(index, 1);
   }
 
+  /** A saved scenario exports as its scenario document; one not yet saved exports what the form holds. */
   protected exportScenario(): void {
+    if (this.isEditMode && this.scenarioId) {
+      this.downloadDocument('current');
+      return;
+    }
     const dataStr = JSON.stringify(this.scenario, null, 2);
     const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
     const exportFileDefaultName = 'cyber-exercise-scenario.json';

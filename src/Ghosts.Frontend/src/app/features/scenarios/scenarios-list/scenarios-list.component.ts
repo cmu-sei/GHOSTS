@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { Observable } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -143,18 +144,30 @@ export class ScenariosListComponent implements OnInit {
     });
   }
 
+  /** Downloads the scenario as its scenario document, the form the validator checks and the import reads. */
   protected exportScenario(scenario: Scenario, event: Event): void {
     event.stopPropagation();
+    this.download(this.scenarioService.getScenarioDocument(scenario.id), `${this.slugify(scenario.name)}.scenario.json`, 'application/json');
+  }
 
-    const markdown = this.buildScenarioMarkdown(scenario);
-    const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${this.slugify(scenario.name)}.md`;
-    link.click();
-    URL.revokeObjectURL(url);
-    link.remove();
+  /** Downloads the scenario as an exercise plan: the document rendered as Markdown by the server. */
+  protected exportPlan(scenario: Scenario, event: Event): void {
+    event.stopPropagation();
+    this.download(this.scenarioService.getScenarioPlan(scenario.id), `${this.slugify(scenario.name)}.plan.md`, 'text/markdown');
+  }
+
+  private download(text$: Observable<string>, filename: string, type: string): void {
+    text$.subscribe({
+      next: (text) => {
+        const url = URL.createObjectURL(new Blob([text], { type }));
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        link.click();
+        URL.revokeObjectURL(url);
+      },
+      error: () => this.snackBar.open(`${filename} could not be exported.`, 'Close', { duration: 5000 })
+    });
   }
 
   protected formatDate(date: Date): string {
@@ -165,79 +178,6 @@ export class ScenariosListComponent implements OnInit {
       hour: '2-digit',
       minute: '2-digit'
     });
-  }
-
-  private buildScenarioMarkdown(scenario: Scenario): string {
-    const lines: string[] = [];
-    lines.push(`# ${scenario.name}`);
-    lines.push('');
-    lines.push(scenario.description || 'No description provided.');
-    lines.push('');
-    lines.push(`- **Updated:** ${this.formatDate(scenario.updatedAt)}`);
-    lines.push('');
-
-    if (scenario.scenarioParameters) {
-      lines.push('## Scenario Parameters');
-      lines.push('');
-      const { nations = [], threatActors = [], injects = [], userPools = [] } = scenario.scenarioParameters;
-
-      if (nations.length) {
-        lines.push('### Nations');
-        nations.forEach(nation => lines.push(`- ${nation.name} (${nation.alignment})`));
-        lines.push('');
-      }
-
-      if (threatActors.length) {
-        lines.push('### Threat Actors');
-        threatActors.forEach(actor => {
-          const ttps = actor.ttps?.length ? ` | TTPs: ${actor.ttps.join(', ')}` : '';
-          lines.push(`- ${actor.name} (${actor.type}) - Capability ${actor.capability}${ttps}`);
-        });
-        lines.push('');
-      }
-
-      if (injects.length) {
-        lines.push('### Injects');
-        injects.forEach(inject => lines.push(`- **${inject.trigger}**: ${inject.title}`));
-        lines.push('');
-      }
-
-      if (userPools.length) {
-        lines.push('### User Pools');
-        userPools.forEach(pool => lines.push(`- ${pool.role}: ${pool.count}`));
-        lines.push('');
-      }
-    }
-
-    if (scenario.simulationMechanics) {
-      const sim = scenario.simulationMechanics;
-      lines.push('## Simulation Mechanics');
-      lines.push('');
-      lines.push(`- Timeline: ${sim.timelineType}`);
-      lines.push(`- Duration: ${sim.durationHours} hours`);
-      lines.push(`- Adjudication: ${sim.adjudicationType}`);
-      if (sim.escalationLadder) {
-        lines.push(`- Escalation Ladder: ${sim.escalationLadder}`);
-      }
-      if (sim.branchingLogic) {
-        lines.push(`- Branching Logic: ${sim.branchingLogic}`);
-      }
-      if (sim.performanceMetrics) {
-        lines.push(`- Performance Metrics: ${sim.performanceMetrics}`);
-      }
-      lines.push('');
-    }
-
-    if (scenario.timeline?.events?.length) {
-      lines.push('## Timeline Events');
-      lines.push('');
-      scenario.timeline.events.forEach(event => {
-        lines.push(`- **${event.time}** (${event.assigned}) - ${event.description} [${event.status}]`);
-      });
-      lines.push('');
-    }
-
-    return lines.join('\n').trim() + '\n';
   }
 
   private slugify(value: string): string {

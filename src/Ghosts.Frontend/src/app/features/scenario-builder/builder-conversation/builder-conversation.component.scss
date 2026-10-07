@@ -68,12 +68,6 @@ $column: 76rem;
     font-size: 0.85rem;
   }
 
-  .model-picker {
-    width: 9rem;
-    font-size: 0.85rem;
-    // Default density is 56px tall; this keeps it inside the bar's 40px.
-    @include mat.form-field-overrides((container-height: 32px, container-vertical-padding: 4px));
-  }
 
   .spacer {
     flex: 1 1 auto;
@@ -274,6 +268,22 @@ $column: 76rem;
 
 // ───────────── citations, server notes, actions ─────────────
 
+// J8: that the sources were used, said once at the top of the reply, before the ledger buries the chips.
+.sources-line {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.78rem;
+  color: $muted;
+
+  mat-icon {
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
+  }
+}
+
 .chunk-chips {
   display: flex;
   flex-wrap: wrap;
@@ -398,6 +408,17 @@ $column: 76rem;
   margin: 0.75rem 0 0;
 }
 
+// B4: the server's plan, in the reply's own typography, boxed so it reads as a document and not as the model's prose.
+.plan-panel {
+  margin-top: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid $line;
+  border-radius: 8px;
+  background: $surface;
+  max-height: 32rem;
+  overflow-y: auto;
+}
+
 .document-panel {
   margin-top: 0.75rem;
 
@@ -494,7 +515,15 @@ $column: 76rem;
 }
 
 .composer-hint {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
   font-size: 0.75rem;
   color: #9ca3af;
-  text-align: center;
+
+  // The session's tokens and estimated cost, where the developer is looking when they decide to send more.
+  .token-line {
+    white-space: nowrap;
+    cursor: help;
+  }
 }

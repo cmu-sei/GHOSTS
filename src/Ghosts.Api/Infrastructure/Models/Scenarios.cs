@@ -35,6 +35,14 @@ public class Scenario
 
     // Scenario Builder navigation properties
     public string BuilderStatus { get; set; } = "None"; // None, Sources, Extracted, Enriched, Compiled
+
+    /// <summary>The model the Scenario Builder uses for this scenario, for extraction and the conversation alike; null for the default.</summary>
+    [System.ComponentModel.DataAnnotations.MaxLength(200)]
+    public string BuilderModel { get; set; }
+
+    /// <summary>The model's effort level for this scenario's conversations (H3); null for the model's default.</summary>
+    [System.ComponentModel.DataAnnotations.MaxLength(20)]
+    public string BuilderEffort { get; set; }
     public ICollection<ScenarioSource> Sources { get; set; } = new List<ScenarioSource>();
     public ICollection<ScenarioEntity> Entities { get; set; } = new List<ScenarioEntity>();
     public ICollection<ScenarioEdge> Edges { get; set; } = new List<ScenarioEdge>();

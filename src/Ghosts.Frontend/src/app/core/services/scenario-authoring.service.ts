@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ConfigService } from './config.service';
 import {
-  AuthoringSession, AuthoringSessionSummary, AuthoringSessionRecord, AuthoringModels,
+  AuthoringSession, AuthoringSessionSummary, AuthoringSessionRecord,
   AuthoringDocumentDetail, AuthoringChunk,
   StartAuthoringSessionRequest, AuthoringTurnRequest, AuthoringImportRequest, AuthoringImportResult,
 } from '../models/scenario-authoring.model';
@@ -17,12 +17,9 @@ export class ScenarioAuthoringService {
     return `${this.config.apiUrl}/scenario-authoring`;
   }
 
-  getModels(): Observable<AuthoringModels> {
-    return this.http.get<AuthoringModels>(`${this.apiUrl}/models`);
-  }
-
-  startSession(scenarioId: number | null, model: string): Observable<AuthoringSession> {
-    const body: StartAuthoringSessionRequest = { scenarioId, model };
+  /** A session on the scenario's Builder model and effort level, picked on the Sources step. */
+  startSession(scenarioId: number | null): Observable<AuthoringSession> {
+    const body: StartAuthoringSessionRequest = { scenarioId };
     return this.http.post<AuthoringSession>(`${this.apiUrl}/sessions`, body);
   }
 
@@ -38,6 +35,11 @@ export class ScenarioAuthoringService {
   runTurn(id: string, message: string): Observable<{ sessionId: string }> {
     const body: AuthoringTurnRequest = { message };
     return this.http.post<{ sessionId: string }>(`${this.apiUrl}/sessions/${id}/turns`, body);
+  }
+
+  /** The document as an exercise plan in Markdown, rendered by the server (B4); returning it shows the document (A3). */
+  getPlan(id: string, hash: string): Observable<string> {
+    return this.http.get(`${this.apiUrl}/sessions/${id}/documents/${hash}/plan`, { responseType: 'text' });
   }
 
   /** Returns the document and records that the developer was shown it (A3). */

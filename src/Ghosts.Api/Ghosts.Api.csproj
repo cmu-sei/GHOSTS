@@ -31,15 +31,15 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Playwright" Version="1.62.0" />
+    <PackageReference Include="Microsoft.Playwright" Version="1.63.0" />
     <PackageReference Include="NLog" Version="6.2.1" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.Design" Version="1.1.1" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="10.2.3" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="10.2.3" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="10.2.3" />
-    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="10.2.3" />
-    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.2.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="10.3.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="10.3.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="10.3.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="10.3.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.3.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="10.0.1" />
     <PackageReference Include="Faker.Net" Version="2.0.163" />
     <PackageReference Include="AutoMapper" Version="16.2.0" />

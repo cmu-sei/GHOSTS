@@ -69,6 +69,42 @@ public class ScenarioExtrasTests
     }
 
     /// <summary>
+    /// A caller that does not know extras, or a list, must not wipe what the document said: a list it leaves
+    /// out stays, and an item it sends without extras keeps the extras of the row it replaces.
+    /// </summary>
+    [Fact]
+    public async Task A_save_that_leaves_out_lists_or_extras_keeps_them()
+    {
+        var document = Example("meridian-hybrid.scenario.json");
+        await using var context = NewContext();
+        var service = new ScenarioService(context);
+        var scenario = await service.ImportDocumentAsync(document, [], CancellationToken.None);
+
+        var read = Assert.IsType<OkObjectResult>((await Controller(context).GetScenario(scenario.Id, default)).Result).Value;
+        var update = Newtonsoft.Json.JsonConvert.DeserializeObject<UpdateScenarioDto>(
+            Newtonsoft.Json.JsonConvert.SerializeObject(read, AspNetNewtonsoft), AspNetNewtonsoft)!;
+        var parameters = update.ScenarioParameters;
+        var stripped = update with
+        {
+            Name = "Edited",
+            Extras = null,
+            ScenarioParameters = parameters with
+            {
+                ThreatActors = parameters.ThreatActors.ConvertAll(a => a with { Extras = null }),
+                Injects = null,
+                UserPools = parameters.UserPools.ConvertAll(p => p with { Extras = null })
+            },
+            TechnicalEnvironment = update.TechnicalEnvironment with { Vulnerabilities = null },
+            Timeline = update.Timeline with { Events = update.Timeline.Events.ConvertAll(e => e with { Extras = null }) }
+        };
+        await service.UpdateAsync(scenario.Id, stripped, CancellationToken.None);
+
+        document["name"] = "Edited";
+        Assert.Equal(ScenarioDocumentMapper.Serialize(document),
+            await service.ExportDocumentAsync(scenario.Id, true, CancellationToken.None));
+    }
+
+    /// <summary>
     /// An example as the test imports it. Two examples state durations the hour columns cannot hold, which
     /// import refuses, so they are given whole hours. Every document-only path no example uses is added, so
     /// each one is exercised.

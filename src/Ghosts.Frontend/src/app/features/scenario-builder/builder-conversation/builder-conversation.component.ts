@@ -19,13 +19,17 @@ import MarkdownIt from 'markdown-it';
 import { ScenarioAuthoringService } from '../../../core/services/scenario-authoring.service';
 import { ScenarioHubService } from '../../../core/services/scenario-hub.service';
 import {
-  AuthoringSessionRecord, AuthoringSessionSummary, AuthoringTurnRecord, AuthoringChunk, AuthoringModelChoice,
+  AuthoringSessionRecord, AuthoringSessionSummary, AuthoringTurnRecord, AuthoringChunk,
 } from '../../../core/models/scenario-authoring.model';
+import { BuilderModel } from '../../../core/models/scenario-builder.model';
+import { ScenarioBuilderService } from '../../../core/services/scenario-builder.service';
 
 /** One turn as the page renders it: the developer's message, and the agent's post once it ends. */
 interface ConversationTurn extends AuthoringTurnRecord {
   html: string;
   chunkIds: number[];
+  /** How many times the turn searched the scenario's sources (J8). */
+  searches: number;
 }
 
 @Component({
@@ -53,6 +57,7 @@ export class BuilderConversationComponent implements OnInit, OnDestroy {
   @Input({ required: true }) scenarioId!: number;
 
   private readonly authoring = inject(ScenarioAuthoringService);
+  private readonly builderService = inject(ScenarioBuilderService);
   private readonly hub = inject(ScenarioHubService);
   private readonly router = inject(Router);
   private readonly snackBar = inject(MatSnackBar);
@@ -62,9 +67,12 @@ export class BuilderConversationComponent implements OnInit, OnDestroy {
   protected readonly loading = signal(true);
   protected readonly sessions = signal<AuthoringSessionSummary[]>([]);
   protected readonly session = signal<AuthoringSessionRecord | null>(null);
-  /** The models a new session may use, and the one picked for it; a session keeps its model (C5). */
-  protected readonly models = signal<AuthoringModelChoice[]>([]);
-  protected readonly model = signal('');
+  /** The scenario's Builder model and effort, picked on the Sources step; a new session starts on them and keeps them (C5, H3). */
+  protected readonly builderModel = signal<BuilderModel | null>(null);
+  protected readonly modelName = computed(() => {
+    const choice = this.builderModel();
+    return choice?.models.find((m) => m.id === choice.model)?.name ?? choice?.model ?? '';
+  });
   protected readonly turns = signal<ConversationTurn[]>([]);
   protected readonly message = signal('');
   protected readonly busy = signal(false);
@@ -73,10 +81,12 @@ export class BuilderConversationComponent implements OnInit, OnDestroy {
   /** The message just sent, shown at once; the server's turn record replaces it on the next read. */
   protected readonly pending = signal<string | null>(null);
   protected readonly openDocument = signal<{ hash: string; text: string; findings: string } | null>(null);
+  protected readonly openPlan = signal<{ hash: string; html: string } | null>(null);
   protected readonly openDetails = signal<Set<number>>(new Set());
   protected readonly openChunks = signal<Map<number, string>>(new Map());
 
   protected readonly canImport = computed(() => this.session()?.canImport ?? false);
+  protected readonly importedBefore = computed(() => this.session()?.importedBefore ?? false);
 
   // The posts list scrolls within itself; it follows the bottom when a post is added or a reply lands,
   // not on every poll, so reading back through the thread is not interrupted.
@@ -109,9 +119,9 @@ export class BuilderConversationComponent implements OnInit, OnDestroy {
         this.progressLine.set(this.describeProgress(event));
       }
     });
-    this.authoring.getModels().subscribe((choices) => {
-      this.models.set(choices.models);
-      this.model.set(choices.model);
+    this.builderService.getModel(this.scenarioId).subscribe({
+      next: (choice) => this.builderModel.set(choice),
+      error: () => this.snackBar.open('Could not read the scenario\'s model; the conversation will use the default.', 'Close', { duration: 5000 }),
     });
     this.loadSessions();
   }
@@ -176,7 +186,25 @@ export class BuilderConversationComponent implements OnInit, OnDestroy {
     this.turns.set([]);
     this.error.set(null);
     this.openDocument.set(null);
+    this.openPlan.set(null);
     this.composerEl()?.nativeElement.focus();
+  }
+
+  /** B4: the plan is the server's rendering of the document, not the model's prose; opening it shows the document (A3). */
+  protected togglePlan(hash: string | null): void {
+    const id = this.session()?.id;
+    if (!id || !hash) return;
+    if (this.openPlan()?.hash === hash) {
+      this.openPlan.set(null);
+      return;
+    }
+    this.authoring.getPlan(id, hash).subscribe({
+      next: (markdown) => {
+        this.openPlan.set({ hash, html: this.sanitizer.sanitize(SecurityContext.HTML, this.md.render(markdown)) ?? '' });
+        this.refresh(id);
+      },
+      error: () => this.snackBar.open('Could not render the plan.', 'Close', { duration: 3000 }),
+    });
   }
 
   /** The first message makes the session, then runs as its first turn. */
@@ -184,7 +212,7 @@ export class BuilderConversationComponent implements OnInit, OnDestroy {
     this.error.set(null);
     this.busy.set(true);
     this.pending.set(text);
-    this.authoring.startSession(this.scenarioId, this.model()).subscribe({
+    this.authoring.startSession(this.scenarioId).subscribe({
       next: (session) => {
         this.sessions.update((list) => [{ id: session.id, model: session.model, turns: 0, importedScenarioId: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }, ...list]);
         // The turn first, so the session read that follows sees it running and keeps sending locked. A
@@ -291,7 +319,16 @@ export class BuilderConversationComponent implements OnInit, OnDestroy {
     const reply = turn.result?.reply ?? '';
     const html = reply ? this.sanitizer.sanitize(SecurityContext.HTML, this.md.render(reply)) ?? '' : '';
     const chunkIds = [...new Set([...reply.matchAll(/\[chunk (\d+)\]/gi)].map((m) => Number(m[1])))];
-    return { ...turn, html, chunkIds };
+    const searches = turn.result?.toolCalls.filter((c) => c.name === 'scenario_source_search').length ?? 0;
+    return { ...turn, html, chunkIds, searches };
+  }
+
+  /** 14200 reads as 14.2k, 257256 as 257k: a glance, not a ledger. */
+  protected compact(n: number): string {
+    if (n < 1000) return `${n}`;
+    if (n < 10000) return `${(n / 1000).toFixed(1)}k`;
+    if (n < 1000000) return `${Math.round(n / 1000)}k`;
+    return `${(n / 1000000).toFixed(1)}M`;
   }
 
   protected toggleDetails(turnNumber: number): void {

@@ -5,6 +5,8 @@
 export interface AuthoringSession {
   id: string;
   model: string;
+  /** The model's effort level for the whole session (H3), or null for the model's default. */
+  effort: string | null;
   scenarioId: number | null;
 }
 
@@ -12,11 +14,8 @@ export interface AuthoringSession {
 export interface AuthoringModelChoice {
   name: string;
   id: string;
-}
-
-export interface AuthoringModels {
-  model: string;
-  models: AuthoringModelChoice[];
+  /** The effort levels the model takes; empty when it takes none. */
+  efforts: string[];
 }
 
 export interface AuthoringSessionSummary {
@@ -52,7 +51,8 @@ export interface AuthoringFailure {
 /**
  * One turn's result. On a failure, reply is empty and failure names the cause; the gate report still
  * lists what the turn did. statusLine, attention, changes and gaps are the server's own lines (B2, B3,
- * D2, E5) — never the model's prose.
+ * D2, E5) — never the model's prose. canImport says the import rule holds; importedBefore says the
+ * import will ask first (A4).
  */
 export interface AuthoringTurnResult {
   turn: number;
@@ -62,8 +62,10 @@ export interface AuthoringTurnResult {
   validations: AuthoringDocumentStatus[];
   latestDocument: AuthoringDocumentStatus | null;
   canImport: boolean;
+  importedBefore: boolean;
   failure: AuthoringFailure | null;
-  statusLine: string | null;
+  /** The server's status line for this turn (B2); the record's property is "status". */
+  status: string | null;
   attention: string[] | null;
   changes: string[] | null;
   gaps: string[] | null;
@@ -112,11 +114,14 @@ export interface AuthoringTokenTotals {
   output: number;
   cacheRead: number;
   cacheWrite: number;
+  /** What the session cost so far at the model's configured list prices; null when none are configured. */
+  estimatedCostUsd: number | null;
 }
 
 export interface AuthoringSessionRecord {
   id: string;
   model: string;
+  effort: string | null;
   status: string;
   scenarioId: number | null;
   importedScenarioId: number | null;
@@ -126,6 +131,7 @@ export interface AuthoringSessionRecord {
   turns: AuthoringTurnRecord[];
   latestDocument: AuthoringDocumentStatus | null;
   canImport: boolean;
+  importedBefore: boolean;
   statusLine: string;
   gaps: string[];
   documents: AuthoringDocumentSummary[];
@@ -167,6 +173,7 @@ export interface AuthoringChunk {
 export interface StartAuthoringSessionRequest {
   scenarioId?: number | null;
   model?: string;
+  effort?: string | null;
 }
 
 export interface AuthoringTurnRequest {

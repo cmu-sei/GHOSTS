@@ -144,10 +144,15 @@
       <button
         mat-button
         color="accent"
-        (click)="exportScenario(scenario, $event)">
+        [matMenuTriggerFor]="exportMenu"
+        (click)="$event.stopPropagation()">
         <i class="fas fa-file-export"></i>
         Export
       </button>
+      <mat-menu #exportMenu="matMenu">
+        <button mat-menu-item (click)="exportScenario(scenario, $event)">Scenario document (.json)</button>
+        <button mat-menu-item (click)="exportPlan(scenario, $event)">Exercise plan (.md)</button>
+      </mat-menu>
       <button mat-button color="warn" (click)="deleteScenario(scenario, $event)">
         <i class="fas fa-trash"></i>
         Delete
