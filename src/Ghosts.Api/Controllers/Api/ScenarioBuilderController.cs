@@ -68,7 +68,7 @@ namespace Ghosts.Api.Controllers.Api
             var model = request?.Model?.Trim();
             if (string.IsNullOrEmpty(model) || (model != options.Model && options.Models.All(m => m.Id != model)))
                 return BadRequest(new { error = $"{model} is not one of the configured models." });
-            var effort = string.IsNullOrWhiteSpace(request?.Effort) ? null : request.Effort.Trim();
+            var effort = string.IsNullOrWhiteSpace(request.Effort) ? null : request.Effort.Trim();
             var efforts = options.Models.FirstOrDefault(m => m.Id == model)?.Efforts ?? [];
             if (effort != null && !efforts.Contains(effort))
                 return BadRequest(new { error = $"{effort} is not an effort level of {model}." });
