@@ -151,7 +151,17 @@ public class ScenariosController : ControllerBase
         {
             return NotFound();
         }
-        catch (Exception ex)
+        catch (JsonException ex)
+        {
+            _logger.LogError(ex, "Error rendering the plan of scenario {ScenarioId}", id);
+            return StatusCode(500, new { error = "Error rendering the exercise plan" });
+        }
+        catch (FormatException ex)
+        {
+            _logger.LogError(ex, "Error rendering the plan of scenario {ScenarioId}", id);
+            return StatusCode(500, new { error = "Error rendering the exercise plan" });
+        }
+        catch (NotSupportedException ex)
         {
             _logger.LogError(ex, "Error rendering the plan of scenario {ScenarioId}", id);
             return StatusCode(500, new { error = "Error rendering the exercise plan" });
