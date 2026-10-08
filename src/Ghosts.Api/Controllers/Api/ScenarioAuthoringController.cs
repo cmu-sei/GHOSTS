@@ -74,6 +74,14 @@ public class ScenarioAuthoringController(IScenarioAuthoringService authoring, Sc
         }
     }
 
+    /// <summary>The readiness dashboard for a scenario with no session yet: what the conversation will ask.</summary>
+    // GET: api/scenario-authoring/readiness?scenarioId=5
+    [HttpGet("readiness")]
+    public async Task<IActionResult> GetReadiness([FromQuery] int scenarioId, CancellationToken ct) =>
+        await scenarios.IsVisibleAsync(scenarioId, user.Name, ct)
+            ? Ok(await authoring.GetReadinessAsync(scenarioId, ct))
+            : NotFound(new { error = $"No scenario {scenarioId}." });
+
     /// <summary>A scenario's sessions, newest first.</summary>
     // GET: api/scenario-authoring/sessions?scenarioId=5
     [HttpGet("sessions")]

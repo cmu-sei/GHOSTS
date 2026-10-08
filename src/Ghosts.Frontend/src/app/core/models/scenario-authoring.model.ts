@@ -118,6 +118,41 @@ export interface AuthoringTokenTotals {
   estimatedCostUsd: number | null;
 }
 
+/** One of ELICITATION.md's fourteen questions: stated or proposed per the ledger, drafted when only the document answers it, else open. */
+export interface AuthoringReadinessQuestion {
+  tag: string;
+  group: string;
+  label: string;
+  question: string;
+  status: 'stated' | 'proposed' | 'drafted' | 'open';
+  value: string | null;
+}
+
+/** A finding in the prompt's pile: mechanical, judgment (asks names the question it implies), or accepted. */
+export interface AuthoringReadinessFinding {
+  severity: 'error' | 'warning' | 'info';
+  code: string;
+  path: string;
+  kind: 'mechanical' | 'judgment' | 'accepted';
+  asks: string | null;
+}
+
+/** The dashboard beside the conversation, computed by the server from the latest document and reply. */
+export interface AuthoringReadiness {
+  /** How many documents the session has validated. */
+  draft: number;
+  groups: { key: string; label: string }[];
+  questions: AuthoringReadinessQuestion[];
+  answered: number;
+  open: number;
+  ledger: { stated: number; proposed: number; open: number };
+  findings: { errors: number; warnings: number; info: number; items: AuthoringReadinessFinding[] };
+  coverage: { label: string; count: number }[];
+  clock: { duration: string | null; pacing: string | null; deadline: string | null; events: string | null };
+  sources: { name: string; cited: number }[];
+  gate: { ready: boolean; steps: { label: string; done: boolean }[] };
+}
+
 export interface AuthoringSessionRecord {
   id: string;
   model: string;
@@ -137,6 +172,7 @@ export interface AuthoringSessionRecord {
   documents: AuthoringDocumentSummary[];
   messages: AuthoringMessageSummary[];
   tokens: AuthoringTokenTotals;
+  readiness: AuthoringReadiness;
 }
 
 export interface AuthoringScenarioFinding {

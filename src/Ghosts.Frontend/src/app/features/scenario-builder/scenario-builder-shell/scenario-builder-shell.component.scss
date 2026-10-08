@@ -84,6 +84,13 @@
   justify-content: flex-end;
   padding-top: 1rem;
   border-top: 1px solid #e0e0e0;
+
+  // The same control above the sources, so reaching the conversation does not mean scrolling past the graph
+  &.top {
+    margin: -1rem 0 0.5rem;
+    padding-top: 0;
+    border-top: 0;
+  }
 }
 
 .assistant-toggle {

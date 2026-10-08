@@ -42,6 +42,9 @@
     }
   </header>
 
+  <!-- The thread on the left, and the (mock) control dashboard on the right -->
+  <div class="workspace">
+  <div class="thread">
   @if (error()) {
   <div class="error-banner">
     <mat-icon>error_outline</mat-icon>
@@ -252,5 +255,150 @@
       </div>
     </div>
   </footer>
+  </div>
+
+  <!-- The readiness dashboard: the server's reading of the latest document and ledger, refreshed with the session -->
+  <aside class="dashboard">
+    @if (dash(); as dash) {
+    <div class="dash-head">
+      <div class="dash-title">
+        <mat-icon>space_dashboard</mat-icon>
+        <strong>Scenario readiness</strong>
+      </div>
+      <div class="dash-summary">
+        <span class="draft">{{ dash.draft ? 'Draft ' + dash.draft : 'No draft yet' }}</span>
+        <span class="dot">&middot;</span>
+        <span [class.blocked]="!dash.gate.ready">{{ dash.gate.ready ? 'Importable' : 'Not importable' }}</span>
+      </div>
+      <div class="meter" matTooltip="{{ dash.answered }} of {{ dash.questions.length }} interview questions settled">
+        <div class="meter-fill" [style.width.%]="(dash.answered / dash.questions.length) * 100"></div>
+      </div>
+      <div class="meter-label">{{ dash.answered }} / {{ dash.questions.length }} questions settled &middot; {{ dash.open }} open</div>
+    </div>
+
+    <!-- The fourteen questions, by heading -->
+    <section class="dash-section">
+      <div class="section-title">Interview <span class="count">{{ dash.open }} open</span></div>
+      @for (group of dash.groups; track group.key) {
+      <div class="group">
+        <div class="group-title"><span class="group-key">{{ group.key }}</span>{{ group.label }}</div>
+        @for (q of questionsFor(group.key); track q.tag) {
+        <div class="q-row" [class]="'q-row ' + q.status" matTooltip="{{ q.question }}" matTooltipPosition="left">
+          <mat-icon class="q-icon">{{ statusIcon(q.status) }}</mat-icon>
+          <span class="q-tag">{{ q.tag }}</span>
+          <span class="q-label">{{ q.label }}</span>
+          @if (q.value) {
+          <span class="q-value">{{ q.value }}</span>
+          } @else {
+          <span class="q-value empty">must ask</span>
+          }
+        </div>
+        }
+      </div>
+      }
+    </section>
+
+    <!-- Who decided what: the ledger in the agent's latest reply -->
+    <section class="dash-section">
+      <div class="section-title">Decisions ledger</div>
+      @if (dash.ledger.stated + dash.ledger.proposed + dash.ledger.open > 0) {
+      <div class="ledger-bar">
+        <span class="seg stated" [style.flex]="dash.ledger.stated" matTooltip="Stated by you"></span>
+        <span class="seg proposed" [style.flex]="dash.ledger.proposed" matTooltip="Proposed by the agent, not yet accepted"></span>
+        <span class="seg open" [style.flex]="dash.ledger.open" matTooltip="Questions with no answer yet"></span>
+      </div>
+      }
+      <div class="ledger-legend">
+        <span><i class="swatch stated"></i>{{ dash.ledger.stated }} stated</span>
+        <span><i class="swatch proposed"></i>{{ dash.ledger.proposed }} proposed</span>
+        <span><i class="swatch open"></i>{{ dash.ledger.open }} open</span>
+      </div>
+    </section>
+
+    <!-- The validator's view of the latest document -->
+    <section class="dash-section">
+      <div class="section-title">
+        Validator
+        <span class="count">
+          <b class="err">{{ dash.findings.errors }}</b> err &middot;
+          <b class="warn">{{ dash.findings.warnings }}</b> warn &middot;
+          {{ dash.findings.info }} info
+        </span>
+      </div>
+      @if (!dash.findings.items.length) {
+      <div class="dash-note">{{ dash.draft ? 'No findings.' : 'Nothing validated yet.' }}</div>
+      }
+      @for (f of dash.findings.items; track $index) {
+      <div class="finding" [class]="'finding ' + f.severity" matTooltip="{{ f.path }}" matTooltipPosition="left">
+        <span class="f-sev">{{ f.severity === 'error' ? 'E' : f.severity === 'warning' ? 'W' : 'I' }}</span>
+        <code class="f-code">{{ f.code }}</code>
+        <span class="f-kind">{{ f.kind }}</span>
+        @if (f.asks) { <span class="f-asks">&rarr; {{ f.asks }}</span> }
+      </div>
+      }
+    </section>
+
+    <!-- What the document holds -->
+    <section class="dash-section">
+      <div class="section-title">Document</div>
+      <div class="facts">
+        @for (c of dash.coverage; track c.label) {
+        <div class="fact" [class.zero]="c.count === 0">
+          <span class="fact-n">{{ c.count }}</span>
+          <span class="fact-l">{{ c.label }}</span>
+        </div>
+        }
+      </div>
+    </section>
+
+    <!-- The clock, as the document declares it -->
+    <section class="dash-section">
+      <div class="section-title">Clock</div>
+      <dl class="kv">
+        <dt>Duration</dt><dd>{{ dash.clock.duration ?? '—' }}</dd>
+        <dt>Pacing</dt><dd>{{ dash.clock.pacing ?? '—' }}</dd>
+        <dt>Deadline</dt><dd>{{ dash.clock.deadline ?? '—' }}</dd>
+        <dt>Events</dt><dd>{{ dash.clock.events ?? '—' }}</dd>
+      </dl>
+    </section>
+
+    <!-- Sources on the Sources step and whether the replies have cited them -->
+    <section class="dash-section">
+      <div class="section-title">Sources <span class="count">{{ dash.sources.length }} added</span></div>
+      @if (!dash.sources.length) {
+      <div class="dash-note">None added on the Sources step.</div>
+      }
+      @for (src of dash.sources; track src.name) {
+      <div class="source" [class.unused]="src.cited === 0">
+        <mat-icon>{{ src.cited ? 'description' : 'insert_drive_file' }}</mat-icon>
+        <span class="src-name">{{ src.name }}</span>
+        <span class="src-cited">{{ src.cited ? src.cited + ' chunk' + (src.cited === 1 ? '' : 's') + ' cited' : 'unused' }}</span>
+      </div>
+      }
+    </section>
+
+    <!-- What stands between here and Import: the import rule, one step per clause -->
+    <section class="dash-section gate">
+      <div class="section-title">Import gate</div>
+      @for (step of dash.gate.steps; track $index) {
+      <div class="gate-step" [class.done]="step.done">
+        <mat-icon>{{ step.done ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+        <span>{{ step.label }}</span>
+      </div>
+      }
+    </section>
+    } @else {
+    <div class="dash-head">
+      <div class="dash-title">
+        <mat-icon>space_dashboard</mat-icon>
+        <strong>Scenario readiness</strong>
+      </div>
+    </div>
+    <div class="dash-empty">
+      The fourteen interview questions, the decisions ledger, the validator's findings and the import gate appear here.
+    </div>
+    }
+  </aside>
+  </div>
   }
 </div>

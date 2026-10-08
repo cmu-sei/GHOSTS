@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ConfigService } from './config.service';
 import {
-  AuthoringSession, AuthoringSessionSummary, AuthoringSessionRecord,
+  AuthoringSession, AuthoringSessionSummary, AuthoringSessionRecord, AuthoringReadiness,
   AuthoringDocumentDetail, AuthoringChunk,
   StartAuthoringSessionRequest, AuthoringTurnRequest, AuthoringImportRequest, AuthoringImportResult,
 } from '../models/scenario-authoring.model';
@@ -25,6 +25,11 @@ export class ScenarioAuthoringService {
 
   getSessions(scenarioId: number): Observable<AuthoringSessionSummary[]> {
     return this.http.get<AuthoringSessionSummary[]>(`${this.apiUrl}/sessions`, { params: { scenarioId } });
+  }
+
+  /** The dashboard before a session exists; a session's own readiness comes with getSession. */
+  getReadiness(scenarioId: number): Observable<AuthoringReadiness> {
+    return this.http.get<AuthoringReadiness>(`${this.apiUrl}/readiness`, { params: { scenarioId } });
   }
 
   getSession(id: string): Observable<AuthoringSessionRecord> {

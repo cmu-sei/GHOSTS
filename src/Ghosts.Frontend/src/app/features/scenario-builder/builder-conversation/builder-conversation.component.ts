@@ -19,7 +19,7 @@ import MarkdownIt from 'markdown-it';
 import { ScenarioAuthoringService } from '../../../core/services/scenario-authoring.service';
 import { ScenarioHubService } from '../../../core/services/scenario-hub.service';
 import {
-  AuthoringSessionRecord, AuthoringSessionSummary, AuthoringTurnRecord, AuthoringChunk,
+  AuthoringSessionRecord, AuthoringSessionSummary, AuthoringTurnRecord, AuthoringChunk, AuthoringReadiness, AuthoringReadinessQuestion,
 } from '../../../core/models/scenario-authoring.model';
 import { BuilderModel } from '../../../core/models/scenario-builder.model';
 import { ScenarioBuilderService } from '../../../core/services/scenario-builder.service';
@@ -85,6 +85,11 @@ export class BuilderConversationComponent implements OnInit, OnDestroy {
   protected readonly openDetails = signal<Set<number>>(new Set());
   protected readonly openChunks = signal<Map<number, string>>(new Map());
 
+  /** The dashboard for this scenario before any session: every question open, the sources uncited. */
+  private readonly blankReadiness = signal<AuthoringReadiness | null>(null);
+  /** The readiness dashboard beside the thread: the session's own once one exists, else the blank one. */
+  protected readonly dash = computed(() => this.session()?.readiness ?? this.blankReadiness());
+
   protected readonly canImport = computed(() => this.session()?.canImport ?? false);
   protected readonly importedBefore = computed(() => this.session()?.importedBefore ?? false);
 
@@ -117,11 +122,17 @@ export class BuilderConversationComponent implements OnInit, OnDestroy {
         this.refresh(event.sessionId);
       } else {
         this.progressLine.set(this.describeProgress(event));
+        // A validate call has kept its document already (C2), so the dashboard can show it before the turn ends.
+        if (event.kind === 'tool-call' && event.detail?.['hash']) this.refresh(event.sessionId);
       }
     });
     this.builderService.getModel(this.scenarioId).subscribe({
       next: (choice) => this.builderModel.set(choice),
       error: () => this.snackBar.open('Could not read the scenario\'s model; the conversation will use the default.', 'Close', { duration: 5000 }),
+    });
+    this.authoring.getReadiness(this.scenarioId).subscribe({
+      next: (readiness) => this.blankReadiness.set(readiness),
+      error: () => { /* the panel keeps its empty state until a session supplies one */ },
     });
     this.loadSessions();
   }
@@ -321,6 +332,19 @@ export class BuilderConversationComponent implements OnInit, OnDestroy {
     const chunkIds = [...new Set([...reply.matchAll(/\[chunk (\d+)\]/gi)].map((m) => Number(m[1])))];
     const searches = turn.result?.toolCalls.filter((c) => c.name === 'scenario_source_search').length ?? 0;
     return { ...turn, html, chunkIds, searches };
+  }
+
+  protected questionsFor(group: string): AuthoringReadinessQuestion[] {
+    return this.dash()?.questions.filter((q) => q.group === group) ?? [];
+  }
+
+  protected statusIcon(status: AuthoringReadinessQuestion['status']): string {
+    switch (status) {
+      case 'stated': return 'check_circle';
+      case 'proposed': return 'tips_and_updates';
+      case 'drafted': return 'edit_note';
+      case 'open': return 'help_outline';
+    }
   }
 
   /** 14200 reads as 14.2k, 257256 as 257k: a glance, not a ledger. */
