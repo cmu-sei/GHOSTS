@@ -710,6 +710,42 @@ public class ScenarioAuthoringServiceTests
         Assert.Equal(2, await check.ScenarioDocuments.CountAsync());
     }
 
+    [Fact]
+    public async Task Entities_the_sources_step_extracted_do_not_make_the_import_ask()
+    {
+        var db = NewDatabase();
+        await using var context = db();
+        var (service, session, hash) = await BuilderSessionWithADraftAsync(context, ValidDocument());
+        context.ScenarioEntities.Add(new ScenarioEntity
+        {
+            ScenarioId = 7, Name = "substation-gw-01", EntityType = "System", Origin = "Extracted", Confidence = 0.9m
+        });
+        await context.SaveChangesAsync();
+
+        var result = await service.ImportAsync(session, hash, false, false, default);
+
+        Assert.True(result.Imported, result.Reason);
+    }
+
+    [Fact]
+    public async Task A_hand_added_entity_still_makes_the_import_ask_even_with_no_document_yet()
+    {
+        var db = NewDatabase();
+        await using var context = db();
+        var (service, session, hash) = await BuilderSessionWithADraftAsync(context, ValidDocument());
+        context.ScenarioEntities.Add(new ScenarioEntity
+        {
+            ScenarioId = 7, Name = "substation-gw-01", EntityType = "System", Origin = "Operator", Confidence = 1m
+        });
+        await context.SaveChangesAsync();
+
+        var refused = await service.ImportAsync(session, hash, false, false, default);
+
+        Assert.False(refused.Imported);
+        Assert.True(refused.NeedsConfirmation);
+        Assert.Equal("replace", refused.Confirm);
+    }
+
     /// <summary>A blank scenario 7 with a source, as "New scenario" leaves it, and a session that drafted a document for it.</summary>
     private static async Task<(ScenarioAuthoringService Service, Guid Session, string Hash)> BuilderSessionWithADraftAsync(
         ApplicationDbContext context, string document)

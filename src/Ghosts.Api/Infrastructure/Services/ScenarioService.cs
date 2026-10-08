@@ -220,15 +220,23 @@ namespace Ghosts.Api.Infrastructure.Services
             return await GetByIdAsync(id, ct);
         }
 
-        /// <summary>Whether a scenario holds anything an import would replace: events, actors, injects, pools, objectives or a graph.</summary>
+        /// <summary>
+        /// Whether a scenario holds anything an import would replace: events, actors, injects, pools, objectives
+        /// or a graph. Entities the Sources step extracted don't count on their own: extraction runs as soon as a
+        /// source is added, before any draft exists, so a scenario that has never had a document would otherwise
+        /// always look occupied. Once a document (import or compile) has been stored, every entity counts again.
+        /// </summary>
         public async Task<bool> HasContentAsync(int id, CancellationToken ct)
         {
             var scenario = await GetByIdAsync(id, ct);
             var parameters = scenario.ScenarioParameters;
-            return scenario.ScenarioTimeline?.ScenarioTimelineEvents.Count > 0
-                   || parameters != null && parameters.Nations.Count + parameters.ThreatActors.Count + parameters.Injects.Count + parameters.UserPools.Count > 0
-                   || await _context.Objectives.AnyAsync(o => o.ScenarioId == id, ct)
-                   || await _context.ScenarioEntities.AnyAsync(e => e.ScenarioId == id, ct);
+            if (scenario.ScenarioTimeline?.ScenarioTimelineEvents.Count > 0) return true;
+            if (parameters != null && parameters.Nations.Count + parameters.ThreatActors.Count + parameters.Injects.Count + parameters.UserPools.Count > 0) return true;
+            if (await _context.Objectives.AnyAsync(o => o.ScenarioId == id, ct)) return true;
+
+            var everHadDocument = await HasDocumentAsync(id, ct);
+            return await _context.ScenarioEntities.AnyAsync(
+                e => e.ScenarioId == id && (everHadDocument || e.Origin != "Extracted"), ct);
         }
 
         /// <summary>
