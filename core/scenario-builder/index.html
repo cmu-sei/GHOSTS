@@ -2287,12 +2287,24 @@ Sonnet 5.5 runs about ten calls, a few dozen uncached input tokens, a quarter mi
 thousand out, which is roughly twenty cents.</p>
 <h2 id="limits-to-know">Limits to know<a class="headerlink" href="#limits-to-know" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>One API instance.</strong> A session runs one turn or import at a time through a lock held in the API's memory.
-  Two API instances serving the same session could run two turns at once; running one instance, as the Docker
-  Compose stack does, avoids it. A database-held lock would be the fix if that changes.</li>
+<li><strong>One turn at a time, across instances.</strong> A session runs one turn or import at a time through a lease row
+  (<code>authoring_session_leases</code>), so two API instances serving the same session cannot run two turns at once. A
+  lease an instance died holding is taken over once it is older than <code>TurnTimeoutMinutes</code> plus five. The
+  SignalR progress feed still has no backplane: with more than one instance, a page hears only the instance
+  that runs its turn.</li>
 <li><strong>Bedrock only.</strong> Neither the conversation nor extraction has an Ollama provider.</li>
-<li><strong>Citations open the chunk, not the place.</strong> A <code>[chunk N]</code> citation opens the chunk's text; chunks record an
-  index, not a page or character offset.</li>
+<li><strong>Citations open the chunk, and name its place.</strong> A <code>[chunk N]</code> citation opens the chunk's text under the
+  source's name, the PDF page the chunk starts on, and its character offset in the source; the search and read
+  tools give the agent the same, for a reference's <code>locator</code>. Chunks made before this records nothing, until
+  their source is chunked again. A chunk's page is where it starts: with the 500-character overlap, that can be
+  the page before most of its text.</li>
+<li><strong>A dry run leaves id gaps.</strong> Validating with <code>dryRun</code> creates the scenario and its rows inside a transaction
+  that is always rolled back. Postgres sequences are not transactional, so each dry run uses up an id in every
+  table it touched. Accepted: nothing shows those ids as a count, and resetting a sequence would race a real
+  import.</li>
+<li><strong>Compile is held to the import's standard.</strong> <code>POST api/scenarios/{id}/builder/compile</code>, which no screen calls, writes its rows
+  in one transaction, derives the document they make, and keeps them only when it validates with 0 errors;
+  that document is stored beside the rows with origin <code>compile</code>. Compiling again adds nothing it added before.</li>
 <li><strong>The plan is the server's.</strong> The exercise plan under a reply's <strong>Plan</strong> button, and the <code>.plan.md</code> export,
   are rendered by the server from the document; the agent's own summary in the reply is prose.</li>
 </ul>
