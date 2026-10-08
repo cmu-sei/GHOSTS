@@ -17,8 +17,11 @@
   }
 
   @if (!loading() && scenarioId()) {
-  <mat-stepper [linear]="false" #stepper class="builder-stepper">
+  <mat-stepper [linear]="false" [selectedIndex]="selectedIndex()" (selectionChange)="onStepChange($event)" #stepper class="builder-stepper">
     <mat-step label="Sources">
+      <div class="stepper-actions top">
+        <button mat-button matStepperNext>Next: Conversation</button>
+      </div>
       <app-builder-sources [scenarioId]="scenarioId()!"></app-builder-sources>
       <div class="stepper-actions">
         <button mat-button matStepperNext>Next: Conversation</button>

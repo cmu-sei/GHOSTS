@@ -61,12 +61,24 @@ thousand out, which is roughly twenty cents.
 
 ## Limits to know
 
-- **One API instance.** A session runs one turn or import at a time through a lock held in the API's memory.
-  Two API instances serving the same session could run two turns at once; running one instance, as the Docker
-  Compose stack does, avoids it. A database-held lock would be the fix if that changes.
+- **One turn at a time, across instances.** A session runs one turn or import at a time through a lease row
+  (`authoring_session_leases`), so two API instances serving the same session cannot run two turns at once. A
+  lease an instance died holding is taken over once it is older than `TurnTimeoutMinutes` plus five. The
+  SignalR progress feed still has no backplane: with more than one instance, a page hears only the instance
+  that runs its turn.
 - **Bedrock only.** Neither the conversation nor extraction has an Ollama provider.
-- **Citations open the chunk, not the place.** A `[chunk N]` citation opens the chunk's text; chunks record an
-  index, not a page or character offset.
+- **Citations open the chunk, and name its place.** A `[chunk N]` citation opens the chunk's text under the
+  source's name, the PDF page the chunk starts on, and its character offset in the source; the search and read
+  tools give the agent the same, for a reference's `locator`. Chunks made before this records nothing, until
+  their source is chunked again. A chunk's page is where it starts: with the 500-character overlap, that can be
+  the page before most of its text.
+- **A dry run leaves id gaps.** Validating with `dryRun` creates the scenario and its rows inside a transaction
+  that is always rolled back. Postgres sequences are not transactional, so each dry run uses up an id in every
+  table it touched. Accepted: nothing shows those ids as a count, and resetting a sequence would race a real
+  import.
+- **Compile is held to the import's standard.** `POST api/scenarios/{id}/builder/compile`, which no screen calls, writes its rows
+  in one transaction, derives the document they make, and keeps them only when it validates with 0 errors;
+  that document is stored beside the rows with origin `compile`. Compiling again adds nothing it added before.
 - **The plan is the server's.** The exercise plan under a reply's **Plan** button, and the `.plan.md` export,
   are rendered by the server from the document; the agent's own summary in the reply is prose.
 

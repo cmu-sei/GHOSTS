@@ -11,6 +11,7 @@ using DocumentFormat.OpenXml.Packaging;
 using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Infrastructure.Models;
+using Ghosts.Api.Infrastructure.ScenarioDocuments;
 using Ghosts.Api.Infrastructure.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -207,7 +208,8 @@ namespace Ghosts.Api.Controllers.Api
                 var chunks = await sourceService.GetChunksAsync(sourceId, ct);
                 var dtos = chunks.ConvertAll(c => new ScenarioSourceChunkDto(
                     c.Id, c.SourceId, c.ChunkIndex, c.Content,
-                    c.TokenCount, c.ExtractionStatus, c.CreatedAt));
+                    c.TokenCount, c.ExtractionStatus, c.CreatedAt,
+                    c.StartOffset, c.Page));
                 return Ok(dtos);
             }
             catch (Exception ex)
@@ -535,6 +537,18 @@ namespace Ghosts.Api.Controllers.Api
                     compilation.NpcCount, compilation.TimelineEventCount, compilation.InjectCount,
                     compilation.CreatedAt, compilation.CompletedAt, compilation.ErrorMessage));
             }
+            catch (ScenarioCompilationInvalidException ex)
+            {
+                // The same refusal as POST api/scenarios/import: the findings, and nothing written.
+                return BadRequest(new
+                {
+                    error = ex.Message,
+                    valid = false,
+                    errors = ex.Findings.Count(f => f.Severity == ScenarioFinding.Error),
+                    warnings = ex.Findings.Count(f => f.Severity == ScenarioFinding.Warning),
+                    findings = ScenarioDocumentValidator.Ordered(ex.Findings)
+                });
+            }
             catch (Exception ex)
             {
                 _log.Error(ex, $"Error compiling scenario {scenarioId}: {ex.Message}");
@@ -826,6 +840,8 @@ namespace Ghosts.Api.Controllers.Api
             var sb = new StringBuilder();
             foreach (var page in doc.GetPages())
             {
+                // A form feed before every page after the first, so chunking can tell which page a chunk starts on.
+                if (sb.Length > 0) sb.Append('\f');
                 sb.AppendLine(page.Text);
             }
             return sb.ToString();

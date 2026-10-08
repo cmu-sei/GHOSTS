@@ -20,6 +20,8 @@ public class ScenarioDocument
 {
     public const string Imported = "import";
     public const string Backfilled = "backfill";
+    /// <summary>Derived from the rows the Scenario Builder's compile wrote, validated with 0 errors before they were kept.</summary>
+    public const string Compiled = "compile";
 
     public int Id { get; set; }
     public int ScenarioId { get; set; }

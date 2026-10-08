@@ -65,7 +65,10 @@ public class ScenarioDryRunService(
         }
         finally
         {
-            // Always. A dry run that could commit would not be a dry run.
+            // Always. A dry run that could commit would not be a dry run. The rollback leaves gaps in the
+            // identity sequences (a scenario id, and one per child row): Postgres sequences are not
+            // transactional, by design, and any failed insert leaves the same gaps. Accepted: the ids are
+            // never shown as a count, and resetting a sequence would race with a real import.
             await transaction.RollbackAsync(ct);
             // The scratch rows are gone from the database but not from the change tracker, and a
             // later read on this scoped context would still see them.

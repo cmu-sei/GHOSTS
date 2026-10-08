@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Amazon.BedrockRuntime;
@@ -31,10 +32,14 @@ namespace Ghosts.Api.Infrastructure.Services
         Task<AuthoringSession> FindSessionAsync(Guid sessionId, CancellationToken ct);
         Task<AuthoringTurnResult> RunTurnAsync(Guid sessionId, string message, CancellationToken ct);
         Task<object> GetSessionAsync(Guid sessionId, bool running, CancellationToken ct);
+        Task<object> GetReadinessAsync(int scenarioId, CancellationToken ct);
         Task<object> GetDocumentAsync(Guid sessionId, string hash, CancellationToken ct);
         Task<string> GetPlanAsync(Guid sessionId, string hash, CancellationToken ct);
         Task<object> GetChunkAsync(Guid sessionId, int chunkId, CancellationToken ct);
         Task<AuthoringImportResult> ImportAsync(Guid sessionId, string hash, bool again, bool replace, CancellationToken ct);
+
+        /// <summary>Whether a turn or an import holds the session's lease, on any API instance.</summary>
+        Task<bool> IsBusyAsync(Guid sessionId, CancellationToken ct);
     }
 
     /// <summary>Where a turn reports as it runs: each model call and each tool call (section 10). Tests leave it out.</summary>
@@ -89,8 +94,10 @@ namespace Ghosts.Api.Infrastructure.Services
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
-        // One turn or import at a time per session; sessions run side by side (C6).
-        private static readonly ConcurrentDictionary<Guid, SemaphoreSlim> Locks = new();
+        // One turn or import at a time per session; sessions run side by side (C6). The lease is a row
+        // (AuthoringSessionLease), so it holds across API instances too (C7); a lease older than this is
+        // one a crashed instance left, and is taken over.
+        private TimeSpan LeaseLife => TimeSpan.FromMinutes(_options.TurnTimeoutMinutes + 5);
 
         // F4: when a model was last unavailable (HTTP 503). For this long after, a new session that names no
         // model starts on the configured fallback instead; a session that has begun keeps its model (C5).
@@ -191,16 +198,75 @@ namespace Ghosts.Api.Infrastructure.Services
 
         public async Task<AuthoringTurnResult> RunTurnAsync(Guid sessionId, string message, CancellationToken ct)
         {
-            var gate = Locks.GetOrAdd(sessionId, _ => new SemaphoreSlim(1, 1));
-            if (!await gate.WaitAsync(0, ct)) throw new AuthoringSessionBusyException(sessionId);
+            var owner = await TakeLeaseAsync(sessionId, ct);
             try
             {
                 return await RunTurnLockedAsync(sessionId, message, ct);
             }
             finally
             {
-                gate.Release();
+                await DropLeaseAsync(sessionId, owner);
             }
+        }
+
+        // ───────────── the lease ─────────────
+
+        /// <summary>
+        /// Takes the session's lease or throws AuthoringSessionBusyException. The insert is the claim: under
+        /// Postgres two instances inserting the same key leave one with a DbUpdateException, which is "busy".
+        /// </summary>
+        private async Task<string> TakeLeaseAsync(Guid sessionId, CancellationToken ct)
+        {
+            var held = await _context.AuthoringSessionLeases.AsNoTracking().FirstOrDefaultAsync(l => l.SessionId == sessionId, ct);
+            if (held != null)
+            {
+                if (held.TakenAt > DateTime.UtcNow - LeaseLife) throw new AuthoringSessionBusyException(sessionId);
+                _log.Warn($"Taking over the lease on session {sessionId} held by {held.Owner} since {held.TakenAt:u}");
+                _context.AuthoringSessionLeases.Remove(held);
+                try { await _context.SaveChangesAsync(ct); }
+                catch (DbUpdateConcurrencyException) { /* another instance took it over first */ }
+                _context.Entry(held).State = EntityState.Detached;
+            }
+            else if (!await _context.AuthoringSessions.AnyAsync(s => s.Id == sessionId, ct))
+            {
+                throw new KeyNotFoundException($"No authoring session {sessionId}.");
+            }
+
+            var lease = new AuthoringSessionLease { SessionId = sessionId, Owner = Guid.NewGuid().ToString("N"), TakenAt = DateTime.UtcNow };
+            _context.AuthoringSessionLeases.Add(lease);
+            try
+            {
+                await _context.SaveChangesAsync(ct);
+            }
+            catch (DbUpdateException)
+            {
+                _context.Entry(lease).State = EntityState.Detached;
+                throw new AuthoringSessionBusyException(sessionId);
+            }
+            _context.Entry(lease).State = EntityState.Detached;
+            return lease.Owner;
+        }
+
+        /// <summary>Drops the lease when it is still this holder's. Not cancellable: a cancelled turn must still free its session.</summary>
+        private async Task DropLeaseAsync(Guid sessionId, string owner)
+        {
+            try
+            {
+                var lease = await _context.AuthoringSessionLeases.FirstOrDefaultAsync(l => l.SessionId == sessionId && l.Owner == owner);
+                if (lease == null) return;
+                _context.AuthoringSessionLeases.Remove(lease);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _log.Warn(ex, $"Could not drop the lease on session {sessionId}; it expires in {LeaseLife.TotalMinutes:0} minutes");
+            }
+        }
+
+        public async Task<bool> IsBusyAsync(Guid sessionId, CancellationToken ct)
+        {
+            var since = DateTime.UtcNow - LeaseLife;
+            return await _context.AuthoringSessionLeases.AsNoTracking().AnyAsync(l => l.SessionId == sessionId && l.TakenAt > since, ct);
         }
 
         private async Task<AuthoringTurnResult> RunTurnLockedAsync(Guid sessionId, string message, CancellationToken ct)
@@ -625,6 +691,8 @@ namespace Ghosts.Api.Infrastructure.Services
             var calls = messages.Where(m => m.Role == AuthoringMessage.ModelRole).ToList();
             var latest = documents.LastOrDefault();
             var importedBefore = latest != null && await ImportedBeforeAsync(latest.Hash);
+            var results = turns.ToDictionary(t => t.Turn, t => t.Result == null ? null : JsonSerializer.Deserialize<AuthoringTurnResult>(t.Result, Web));
+            var canImport = ImportRefusal(latest) == null;
 
             return new
             {
@@ -645,13 +713,14 @@ namespace Ghosts.Api.Infrastructure.Services
                     t.EndedAt,
                     // A turn with no end that is not running was cut off by a restart.
                     interrupted = t.EndedAt == null && !(running && t.Turn == turns[^1].Turn),
-                    result = t.Result == null ? null : JsonSerializer.Deserialize<AuthoringTurnResult>(t.Result, Web)
+                    result = results[t.Turn]
                 }),
                 latestDocument = latest == null ? null : Status(latest),
-                canImport = ImportRefusal(latest) == null,
+                canImport,
                 importedBefore,
                 statusLine = StatusLine(latest, importedBefore, null),
                 gaps = Gaps(latest),
+                readiness = await ReadinessAsync(session.ScenarioId, results.Values.Where(r => r != null).ToList(), documents, canImport, ct),
                 documents = documents.Select(d => new
                 {
                     d.Turn,
@@ -680,6 +749,57 @@ namespace Ghosts.Api.Infrastructure.Services
                     m.EndedAt
                 }),
                 tokens = Tokens(session.Model, calls)
+            };
+        }
+
+        /// <summary>
+        /// The dashboard beside the conversation: the fourteen questions and the ledger, read from the latest
+        /// document and the latest reply that carries a ledger; the latest document's findings sorted the way the
+        /// prompt sorts them; which sources the replies have cited; and the import rule, step by step.
+        /// </summary>
+        /// <summary>The dashboard before a session exists: every question open, the scenario's sources uncited, the gate shut.</summary>
+        public Task<object> GetReadinessAsync(int scenarioId, CancellationToken ct) => ReadinessAsync(scenarioId, [], [], false, ct);
+
+        private async Task<object> ReadinessAsync(int? scenarioId, List<AuthoringTurnResult> results, List<AuthoringDocument> documents, bool canImport, CancellationToken ct)
+        {
+            var latest = documents.LastOrDefault();
+            var doc = latest == null ? null : JsonNode.Parse(latest.Document) as JsonObject;
+            var findings = latest == null ? [] : JsonSerializer.Deserialize<List<ScenarioFinding>>(latest.Findings, Web) ?? [];
+            var ledger = results.Select(r => r.Reply).LastOrDefault(ScenarioReadiness.HasLedger);
+            var readiness = ScenarioReadiness.Compute(doc, findings, ledger);
+
+            var chunkIds = results.SelectMany(r => Regex.Matches(r.Reply ?? string.Empty, @"\[chunk (\d+)\]", RegexOptions.IgnoreCase))
+                .Select(m => int.Parse(m.Groups[1].Value)).Distinct().ToList();
+            var sources = scenarioId == null ? []
+                : await _context.ScenarioSources.AsNoTracking().Where(s => s.ScenarioId == scenarioId)
+                    .OrderBy(s => s.Id).Select(s => new { s.Id, s.Name }).ToListAsync(ct);
+            var cited = chunkIds.Count == 0 ? new Dictionary<int, int>()
+                : await _context.ScenarioSourceChunks.AsNoTracking().Where(c => chunkIds.Contains(c.Id))
+                    .GroupBy(c => c.SourceId).Select(g => new { g.Key, Count = g.Count() }).ToDictionaryAsync(g => g.Key, g => g.Count, ct);
+
+            return new
+            {
+                draft = documents.Count,
+                readiness.Groups,
+                readiness.Questions,
+                readiness.Answered,
+                readiness.Open,
+                readiness.Ledger,
+                readiness.Findings,
+                readiness.Coverage,
+                readiness.Clock,
+                sources = sources.Select(s => new { s.Name, cited = cited.GetValueOrDefault(s.Id) }),
+                // ImportRefusal's rule, one step per clause
+                gate = new
+                {
+                    ready = canImport,
+                    steps = new[]
+                    {
+                        new { label = latest == null ? "A document validated" : $"Document {latest.Hash} validated", done = latest != null },
+                        new { label = latest is { Errors: > 0 } ? $"0 validator errors ({latest.Errors} remain)" : "0 validator errors", done = latest is { Errors: 0 } },
+                        new { label = "Plan or document opened", done = latest?.Shown == true },
+                    }
+                }
             };
         }
 
@@ -775,6 +895,8 @@ namespace Ghosts.Api.Infrastructure.Services
                 chunk.SourceId,
                 source = chunk.Source?.Name,
                 index = chunk.ChunkIndex,
+                startOffset = chunk.StartOffset,
+                page = chunk.Page,
                 text = chunk.Content
             };
         }
@@ -789,15 +911,14 @@ namespace Ghosts.Api.Infrastructure.Services
         /// </summary>
         public async Task<AuthoringImportResult> ImportAsync(Guid sessionId, string hash, bool again, bool replace, CancellationToken ct)
         {
-            var gate = Locks.GetOrAdd(sessionId, _ => new SemaphoreSlim(1, 1));
-            if (!await gate.WaitAsync(0, ct)) throw new AuthoringSessionBusyException(sessionId);
+            var owner = await TakeLeaseAsync(sessionId, ct);
             try
             {
                 return await ImportLockedAsync(sessionId, hash?.Trim().ToLowerInvariant(), again, replace, ct);
             }
             finally
             {
-                gate.Release();
+                await DropLeaseAsync(sessionId, owner);
             }
         }
 

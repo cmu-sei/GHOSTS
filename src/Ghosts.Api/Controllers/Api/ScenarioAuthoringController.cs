@@ -74,6 +74,14 @@ public class ScenarioAuthoringController(IScenarioAuthoringService authoring, Sc
         }
     }
 
+    /// <summary>The readiness dashboard for a scenario with no session yet: what the conversation will ask.</summary>
+    // GET: api/scenario-authoring/readiness?scenarioId=5
+    [HttpGet("readiness")]
+    public async Task<IActionResult> GetReadiness([FromQuery] int scenarioId, CancellationToken ct) =>
+        await scenarios.IsVisibleAsync(scenarioId, user.Name, ct)
+            ? Ok(await authoring.GetReadinessAsync(scenarioId, ct))
+            : NotFound(new { error = $"No scenario {scenarioId}." });
+
     /// <summary>A scenario's sessions, newest first.</summary>
     // GET: api/scenario-authoring/sessions?scenarioId=5
     [HttpGet("sessions")]
@@ -104,7 +112,7 @@ public class ScenarioAuthoringController(IScenarioAuthoringService authoring, Sc
     [HttpGet("sessions/{id:guid}")]
     public async Task<IActionResult> GetSession(Guid id, CancellationToken ct)
     {
-        var session = await authoring.GetSessionAsync(id, runner.IsRunning(id), ct);
+        var session = await authoring.GetSessionAsync(id, runner.IsRunning(id) || await authoring.IsBusyAsync(id, ct), ct);
         return session == null ? NotFound() : Ok(session);
     }
 
@@ -151,7 +159,7 @@ public class ScenarioAuthoringController(IScenarioAuthoringService authoring, Sc
     [HttpPost("sessions/{id:guid}/import")]
     public async Task<IActionResult> Import(Guid id, [FromBody] ImportRequest request, CancellationToken ct)
     {
-        if (runner.IsRunning(id)) return Conflict(new { error = $"A turn is running in session {id}; import when it ends." });
+        if (runner.IsRunning(id) || await authoring.IsBusyAsync(id, ct)) return Conflict(new { error = $"A turn is running in session {id}; import when it ends." });
         try
         {
             var result = await authoring.ImportAsync(id, request?.Hash, request?.Again ?? false, request?.Replace ?? false, ct);

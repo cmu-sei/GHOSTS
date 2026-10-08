@@ -166,6 +166,25 @@
     font-size: 0.85rem;
     margin: 0 0 1.5rem;
   }
+
+  // The entities and the graph size themselves for their own full-page tab on the planner; here they sit
+  // in one card beneath the sources, so each is capped and scrolls within itself, like the graph's own type list.
+  ::ng-deep .entities-list-card mat-card-content {
+    max-height: 24rem;
+    overflow-y: auto;
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: #fff;
+    }
+  }
+
+  ::ng-deep .graph-workspace {
+    height: 32rem;
+    min-height: 0;
+  }
 }
 
 .preview-cell {

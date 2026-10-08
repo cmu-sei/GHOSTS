@@ -74,6 +74,21 @@ $column: 76rem;
   }
 }
 
+// ───────────── the workspace: thread left, dashboard right ─────────────
+
+.workspace {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+}
+
+.thread {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 .error-banner {
   flex: 0 0 auto;
   display: flex;
@@ -317,6 +332,12 @@ $column: 76rem;
   }
 }
 
+.chunk-where {
+  margin: 0.5rem 0 0;
+  font-size: 0.78rem;
+  color: #6b7280;
+}
+
 .chunk-text {
   background: $surface;
   border-left: 3px solid #9ca3af;
@@ -525,5 +546,307 @@ $column: 76rem;
   .token-line {
     white-space: nowrap;
     cursor: help;
+  }
+}
+
+// ───────────── the (mock) control dashboard ─────────────
+// Information dense by intent: one line per question, finding, source and gate step, in small type.
+
+$stated: #16a34a;
+$proposed: #d97706;
+$open: #dc2626;
+$pending: #9ca3af;
+
+.dashboard {
+  flex: 0 0 21rem;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  border-left: 1px solid $line;
+  background: #fff;
+  font-size: 0.78rem;
+  color: $ink;
+
+  @media (max-width: 1100px) {
+    display: none;
+  }
+
+  mat-icon {
+    font-size: 0.95rem;
+    width: 0.95rem;
+    height: 0.95rem;
+  }
+
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.72rem;
+  }
+}
+
+.dash-head {
+  padding: 0.75rem 0.9rem 0.6rem;
+  border-bottom: 1px solid $line;
+  background: $surface;
+
+  .dash-title {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+
+    mat-icon {
+      color: $accent;
+    }
+  }
+
+  .dash-summary {
+    display: flex;
+    gap: 0.35rem;
+    margin-top: 0.3rem;
+    color: $muted;
+
+    .blocked {
+      color: $open;
+      font-weight: 600;
+    }
+  }
+
+  .meter {
+    height: 0.35rem;
+    margin-top: 0.5rem;
+    border-radius: 999px;
+    background: $line;
+    overflow: hidden;
+    cursor: help;
+
+    .meter-fill {
+      height: 100%;
+      background: $stated;
+    }
+  }
+
+  .meter-label {
+    margin-top: 0.25rem;
+    color: $muted;
+    font-size: 0.72rem;
+  }
+}
+
+.dash-empty,
+.dash-note {
+  padding: 0.75rem 0.9rem;
+  color: $muted;
+  line-height: 1.4;
+}
+
+.dash-note {
+  padding: 0.1rem 0;
+  font-size: 0.72rem;
+}
+
+.dash-section {
+  padding: 0.55rem 0.9rem;
+  border-bottom: 1px solid $line;
+
+  .section-title {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.35rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: $muted;
+
+    .count {
+      font-weight: 400;
+      text-transform: none;
+      letter-spacing: 0;
+
+      .err { color: $open; }
+      .warn { color: $proposed; }
+    }
+  }
+}
+
+// the fourteen
+.group {
+  margin-top: 0.3rem;
+
+  .group-title {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+    font-size: 0.7rem;
+    color: $muted;
+    margin-bottom: 0.1rem;
+  }
+
+  .group-key {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 3px;
+    background: $ink;
+    color: #fff;
+    font-size: 0.6rem;
+    font-weight: 700;
+  }
+}
+
+.q-row {
+  display: grid;
+  grid-template-columns: 1rem 1.4rem minmax(0, 7.5rem) minmax(0, 1fr);
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.12rem 0;
+  line-height: 1.3;
+
+  .q-icon { color: $pending; }
+  .q-tag { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.68rem; color: $muted; }
+  .q-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .q-value {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #4b5563;
+    font-size: 0.72rem;
+
+    &.empty { font-style: italic; color: $open; }
+  }
+
+  &.stated .q-icon { color: $stated; }
+  &.proposed .q-icon { color: $proposed; }
+  &.drafted .q-icon { color: $accent; }
+  &.open .q-icon { color: $open; }
+  &.open .q-label { font-weight: 600; }
+}
+
+// the ledger
+.ledger-bar {
+  display: flex;
+  height: 0.45rem;
+  border-radius: 999px;
+  overflow: hidden;
+  gap: 2px;
+
+  .seg { cursor: help; }
+  .stated { background: $stated; }
+  .proposed { background: $proposed; }
+  .open { background: $open; }
+}
+
+.ledger-legend {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.3rem;
+  color: $muted;
+  font-size: 0.72rem;
+
+  span { display: inline-flex; align-items: center; gap: 0.25rem; }
+
+  .swatch {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 2px;
+
+    &.stated { background: $stated; }
+    &.proposed { background: $proposed; }
+    &.open { background: $open; }
+  }
+}
+
+// the validator
+.finding {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  padding: 0.1rem 0;
+  min-width: 0;
+
+  .f-sev {
+    flex: 0 0 1rem;
+    text-align: center;
+    border-radius: 3px;
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: #fff;
+    background: $pending;
+  }
+  &.error .f-sev { background: $open; }
+  &.warning .f-sev { background: $proposed; }
+
+  .f-code { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .f-kind { flex: 0 0 auto; color: $muted; font-size: 0.68rem; }
+  .f-asks { flex: 0 0 auto; color: $accent; font-size: 0.7rem; white-space: nowrap; }
+}
+
+// the document
+.facts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.3rem 0.5rem;
+
+  .fact {
+    display: flex;
+    align-items: baseline;
+    gap: 0.3rem;
+    padding: 0.2rem 0.4rem;
+    border: 1px solid $line;
+    border-radius: 6px;
+    background: $surface;
+
+    &.zero { border-style: dashed; color: $open; }
+  }
+
+  .fact-n { font-weight: 700; font-size: 0.9rem; }
+  .fact-l { color: $muted; font-size: 0.68rem; }
+}
+
+// the clock
+.kv {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.15rem 0.75rem;
+  margin: 0;
+
+  dt { color: $muted; }
+  dd { margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+}
+
+// sources
+.source {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.1rem 0;
+
+  mat-icon { color: $accent; }
+  .src-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .src-cited { color: $muted; font-size: 0.7rem; }
+
+  &.unused {
+    mat-icon { color: $pending; }
+    .src-cited { color: $proposed; }
+  }
+}
+
+// the gate
+.gate-step {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.1rem 0;
+  color: $ink;
+
+  mat-icon { color: $pending; }
+
+  &.done {
+    color: $muted;
+    mat-icon { color: $stated; }
   }
 }

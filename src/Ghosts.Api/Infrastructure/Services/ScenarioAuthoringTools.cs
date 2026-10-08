@@ -88,7 +88,7 @@ namespace Ghosts.Api.Infrastructure.Services
                     "Lists the sources the developer added to this scenario in the Scenario Builder (text, web pages, files) and the chunk ids of each.",
                     """{"type":"object","properties":{}}"""),
                 Spec(SourceSearch,
-                    "Searches the text of this scenario's sources and returns the best-matching chunks with their ids and text. Use it for anything the developer's documents may say: hosts, segments, people, the adversary, dates.",
+                    "Searches the text of this scenario's sources and returns the best-matching chunks with their ids and text. Use it for anything the developer's documents may say: hosts, segments, people, the adversary, dates. Each chunk names its page (PDF sources) and character offset in the source; put them in a reference's locator.",
                     """{"type":"object","properties":{"query":{"type":"string","description":"Words to look for."},"take":{"type":"integer","description":"Maximum number of chunks to return (default 5)."}},"required":["query"]}"""),
                 Spec(SourceRead,
                     "Returns the full text of one chunk of this scenario's sources.",
@@ -289,7 +289,7 @@ namespace Ghosts.Api.Infrastructure.Services
             var chunks = await context.ScenarioSourceChunks.AsNoTracking()
                 .Where(c => c.ScenarioId == session.ScenarioId)
                 .OrderBy(c => c.ChunkIndex)
-                .Select(c => new { c.Id, c.SourceId, c.ChunkIndex, c.Content.Length })
+                .Select(c => new { c.Id, c.SourceId, c.ChunkIndex, c.Content.Length, c.StartOffset, c.Page })
                 .ToListAsync(turn);
 
             return Ok(JsonSerializer.Serialize(new
@@ -300,7 +300,7 @@ namespace Ghosts.Api.Infrastructure.Services
                     sourceId = s.Id,
                     name = s.Name,
                     type = s.SourceType,
-                    chunks = chunks.Where(c => c.SourceId == s.Id).Select(c => new { chunkId = c.Id, index = c.ChunkIndex, characters = c.Length })
+                    chunks = chunks.Where(c => c.SourceId == s.Id).Select(c => new { chunkId = c.Id, index = c.ChunkIndex, characters = c.Length, offset = c.StartOffset, page = c.Page })
                 })
             }, Web));
         }
@@ -326,7 +326,7 @@ namespace Ghosts.Api.Infrastructure.Services
                 .Where(m => m.Score > 0)
                 .OrderByDescending(m => m.Score).ThenBy(m => m.Chunk.SourceId).ThenBy(m => m.Chunk.ChunkIndex)
                 .Take(Math.Clamp(take, 1, 20))
-                .Select(m => new { chunkId = m.Chunk.Id, sourceId = m.Chunk.SourceId, source = m.Chunk.Source?.Name, index = m.Chunk.ChunkIndex, score = m.Score, text = m.Chunk.Content });
+                .Select(m => new { chunkId = m.Chunk.Id, sourceId = m.Chunk.SourceId, source = m.Chunk.Source?.Name, index = m.Chunk.ChunkIndex, offset = m.Chunk.StartOffset, page = m.Chunk.Page, score = m.Score, text = m.Chunk.Content });
 
             return Ok(JsonSerializer.Serialize(new { note = SourceNote, query, chunks = matches }, Web));
         }
@@ -347,6 +347,8 @@ namespace Ghosts.Api.Infrastructure.Services
                 sourceId = chunk.SourceId,
                 source = chunk.Source?.Name,
                 index = chunk.ChunkIndex,
+                offset = chunk.StartOffset,
+                page = chunk.Page,
                 text = chunk.Content
             }, Web));
         }
