@@ -15,7 +15,8 @@ namespace Ghosts.Api.Infrastructure.Services
     /// <summary>
     /// Runs authoring turns in the background, not inside the browser's request (section 10): a drafting
     /// turn takes minutes, and its own limit, not the request, ends it (G2, G3). One turn per session at a
-    /// time in this process; the service's own lock also keeps an import out while a turn runs.
+    /// time in this process; the service's lease, a database row, keeps a second turn or an import out across
+    /// every instance (C7).
     /// </summary>
     public class ScenarioAuthoringRunner(IServiceScopeFactory scopes, IAuthoringProgress progress)
     {

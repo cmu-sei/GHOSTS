@@ -935,6 +935,43 @@ public class ScenarioAuthoringServiceTests
 
     // ───────── the scripted model and the fixtures ─────────
 
+    // ───────── C7: the lease, across API instances ─────────
+
+    [Fact]
+    public async Task A_turn_is_refused_while_another_instance_holds_the_lease_and_takes_over_a_stale_one()
+    {
+        var db = NewDatabase();
+        await using var context = db();
+        var service = Service(context, new ScriptedModel(_ => Reply(Text("Hello."))));
+        var session = await service.CreateSessionAsync(null, null, null, default);
+
+        // Another instance's lease: a row this process never took.
+        await using (var other = db())
+        {
+            other.AuthoringSessionLeases.Add(new AuthoringSessionLease { SessionId = session.Id, Owner = "other-instance", TakenAt = DateTime.UtcNow });
+            await other.SaveChangesAsync();
+        }
+        await Assert.ThrowsAsync<AuthoringSessionBusyException>(() => service.RunTurnAsync(session.Id, "Hello.", default));
+        await Assert.ThrowsAsync<AuthoringSessionBusyException>(() => service.ImportAsync(session.Id, "abc", false, false, default));
+        Assert.True(await service.IsBusyAsync(session.Id, default));
+
+        // Left by a crashed instance: older than the turn limit, so it is taken over and the turn runs.
+        await using (var other = db())
+        {
+            var stale = await other.AuthoringSessionLeases.SingleAsync(l => l.SessionId == session.Id);
+            stale.TakenAt = DateTime.UtcNow.AddHours(-2);
+            await other.SaveChangesAsync();
+        }
+        Assert.False(await service.IsBusyAsync(session.Id, default));
+        var result = await service.RunTurnAsync(session.Id, "Hello.", default);
+        Assert.Null(result.Failure);
+        Assert.Equal("Hello.", result.Reply);
+
+        // The turn dropped its lease on the way out.
+        await using var after = db();
+        Assert.False(await after.AuthoringSessionLeases.AnyAsync(l => l.SessionId == session.Id));
+    }
+
     private sealed class ScriptedModel : IAuthoringModel
     {
         private readonly Queue<Func<ConverseRequest, CancellationToken, Task<ConverseResponse>>> _steps;

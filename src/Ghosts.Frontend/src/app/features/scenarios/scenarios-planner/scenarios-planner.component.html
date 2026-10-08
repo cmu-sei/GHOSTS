@@ -33,7 +33,7 @@
     <i class="fas fa-project-diagram"></i>
     <div class="banner-text">
       <strong>Pre-populated from Scenario Builder</strong>
-      <span>Threat actors, nations, injects, technical environment, and timeline events were filled in automatically.
+      <span>Threat actors, sides, injects, technical environment, and timeline events were filled in automatically.
         Fields requiring manual completion are marked below.</span>
     </div>
     <button mat-stroked-button (click)="openBuilder()">
@@ -74,9 +74,9 @@
             placeholder="The exercise developer's intent, as written"></textarea>
         </mat-form-field>
 
-        <!-- Nations Section -->
+        <!-- Sides Section: nations or organizations -->
         <div class="form-section">
-          <h3 class="subsection-title">Nations Involved
+          <h3 class="subsection-title">Sides Involved
             @if (builderStatus() === 'Compiled' && scenario.scenarioParameters!.nations.length > 0) {
             <span class="needs-manual-badge" title="Click to dismiss" (click)="dismissBuilderPrompts()"><i
                 class="fas fa-pencil-alt"></i> Review alignments <i class="fas fa-times badge-dismiss"></i></span>
@@ -85,8 +85,8 @@
           <div class="list-manager">
             <div *ngFor="let nation of scenario.scenarioParameters!.nations; let i = index" class="list-item">
               <mat-form-field class="item-field">
-                <mat-label>Nation Name</mat-label>
-                <input matInput [(ngModel)]="nation.name" placeholder="e.g., USA, Nation X">
+                <mat-label>Side (nation or organization)</mat-label>
+                <input matInput [(ngModel)]="nation.name" placeholder="e.g., USA, Utility IT/OT defense cell, Sandworm Team (emulated)">
               </mat-form-field>
               <mat-form-field class="item-field">
                 <mat-label>Alignment</mat-label>
@@ -101,7 +101,7 @@
               </button>
             </div>
             <button mat-raised-button color="primary" (click)="addNation()">
-              <i class="fas fa-plus"></i> Add Nation
+              <i class="fas fa-plus"></i> Add Side
             </button>
           </div>
         </div>

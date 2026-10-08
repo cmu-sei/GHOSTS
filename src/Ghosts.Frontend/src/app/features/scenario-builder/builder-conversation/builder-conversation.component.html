@@ -109,6 +109,7 @@
         </div>
         @for (chunkId of turn.chunkIds; track chunkId) {
         @if (isChunkOpen(chunkId)) {
+        <div class="chunk-where">{{ chunkWhere(chunkId) }}</div>
         <pre class="chunk-text">{{ chunkText(chunkId) }}</pre>
         }
         }

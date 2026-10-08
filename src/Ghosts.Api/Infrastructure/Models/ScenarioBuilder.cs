@@ -61,6 +61,12 @@ public class ScenarioSourceChunk
     public string Content { get; set; } = string.Empty;
     public int TokenCount { get; set; }
 
+    // Where the chunk sits in its source, so a citation can name the place and not only the chunk: the
+    // character offset of Content in the source's text, and for a PDF the 1-based page it starts on.
+    // Null on chunks made before these were recorded.
+    public int? StartOffset { get; set; }
+    public int? Page { get; set; }
+
     [MaxLength(50)]
     public string ExtractionStatus { get; set; } = "Pending"; // Pending, Processing, Completed, Failed
 
@@ -249,7 +255,8 @@ public record ScenarioSourceDto(
 
 public record ScenarioSourceChunkDto(
     int Id, int SourceId, int ChunkIndex, string Content,
-    int TokenCount, string ExtractionStatus, DateTime CreatedAt);
+    int TokenCount, string ExtractionStatus, DateTime CreatedAt,
+    int? StartOffset, int? Page);
 
 // Entity DTOs
 public record ScenarioEntityDto(

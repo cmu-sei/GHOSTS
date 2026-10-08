@@ -101,6 +101,24 @@ public class AuthoringSession
 /// the reply (status, gate report, changes, failure). A turn runs in the background, so this row is what
 /// a reload shows. A row with no EndedAt whose turn is not running was cut off by a restart.
 /// </summary>
+/// <summary>
+/// C7: the row a turn or an import holds while it runs in a session, so one runs at a time across every API
+/// instance, not only within one process. Taken by inserting it (the primary key makes two takers one winner)
+/// and dropped when the work ends; one left by a crashed instance is taken over once it is older than the
+/// turn limit.
+/// </summary>
+[Table("authoring_session_leases")]
+public class AuthoringSessionLease
+{
+    [Key]
+    public Guid SessionId { get; set; }
+
+    [MaxLength(32)]
+    public string Owner { get; set; } = string.Empty;
+
+    public DateTime TakenAt { get; set; }
+}
+
 [Table("authoring_turns")]
 public class AuthoringTurn
 {

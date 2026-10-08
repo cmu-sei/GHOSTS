@@ -83,7 +83,7 @@ export class BuilderConversationComponent implements OnInit, OnDestroy {
   protected readonly openDocument = signal<{ hash: string; text: string; findings: string } | null>(null);
   protected readonly openPlan = signal<{ hash: string; html: string } | null>(null);
   protected readonly openDetails = signal<Set<number>>(new Set());
-  protected readonly openChunks = signal<Map<number, string>>(new Map());
+  protected readonly openChunks = signal<Map<number, AuthoringChunk>>(new Map());
 
   /** The dashboard for this scenario before any session: every question open, the sources uncited. */
   private readonly blankReadiness = signal<AuthoringReadiness | null>(null);
@@ -397,7 +397,7 @@ export class BuilderConversationComponent implements OnInit, OnDestroy {
       return;
     }
     this.authoring.getChunk(id, chunkId).subscribe({
-      next: (chunk: AuthoringChunk) => this.openChunks.update((map) => new Map(map).set(chunkId, chunk.text)),
+      next: (chunk: AuthoringChunk) => this.openChunks.update((map) => new Map(map).set(chunkId, chunk)),
       error: () => this.snackBar.open(`Could not load chunk ${chunkId}.`, 'Close', { duration: 3000 }),
     });
   }
@@ -407,7 +407,17 @@ export class BuilderConversationComponent implements OnInit, OnDestroy {
   }
 
   protected chunkText(chunkId: number): string | undefined {
-    return this.openChunks().get(chunkId);
+    return this.openChunks().get(chunkId)?.text;
+  }
+
+  /** Where the chunk sits in its source, for checking a citation: "source, page 3, from character 8,000". */
+  protected chunkWhere(chunkId: number): string {
+    const chunk = this.openChunks().get(chunkId);
+    if (!chunk) return '';
+    const parts = [chunk.source ?? `source ${chunk.sourceId}`];
+    if (chunk.page != null) parts.push(`page ${chunk.page}`);
+    if (chunk.startOffset != null) parts.push(`from character ${chunk.startOffset.toLocaleString()}`);
+    return parts.join(', ');
   }
 
   protected import(): void {

@@ -3,12 +3,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Animator;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Infrastructure.Models;
+using Ghosts.Api.Infrastructure.ScenarioDocuments;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 
@@ -22,10 +25,19 @@ namespace Ghosts.Api.Infrastructure.Services
         Task DeleteCompilationAsync(int compilationId, CancellationToken ct);
     }
 
-    public class ScenarioCompilerService(ApplicationDbContext context) : IScenarioCompilerService
+    /// <summary>The rows a compile produced derive to a document with errors, so nothing was kept.</summary>
+    public class ScenarioCompilationInvalidException(IReadOnlyList<ScenarioFinding> findings)
+        : Exception($"The compiled scenario's document has {findings.Count(f => f.Severity == ScenarioFinding.Error)} error(s), so nothing was kept.")
+    {
+        public IReadOnlyList<ScenarioFinding> Findings { get; } = findings;
+    }
+
+    public class ScenarioCompilerService(ApplicationDbContext context, IScenarioService scenarios, IHttpClientFactory clients) : IScenarioCompilerService
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         private readonly ApplicationDbContext _context = context;
+        private readonly IScenarioService _scenarios = scenarios;
+        private readonly IHttpClientFactory _clients = clients;
 
         public async Task<ScenarioCompilation> CompileAsync(int scenarioId, CompileScenarioDto dto, CancellationToken ct)
         {
@@ -55,6 +67,10 @@ namespace Ghosts.Api.Infrastructure.Services
                 _log.Error($"Scenario not found: {scenarioId}");
                 throw new InvalidOperationException("Scenario not found");
             }
+
+            // One transaction, as an import's: the rows, the document and the compilation record are kept
+            // together, or none of them is.
+            await using var transaction = await _context.Database.BeginTransactionAsync(ct);
 
             var compilation = new ScenarioCompilation
             {
@@ -198,16 +214,31 @@ namespace Ghosts.Api.Infrastructure.Services
                     CompiledAt = DateTime.UtcNow
                 };
 
-                compilation.PackageData = JsonSerializer.Serialize(packageData);
+                var package = JsonSerializer.Serialize(packageData);
+
+                // Held to the import's standard: the rows derive to a document, which must validate with 0
+                // errors before anything is kept, and is then stored beside the rows as an import's is. The
+                // hash is taken from what the database holds, as ImportDocumentAsync does.
+                await _context.SaveChangesAsync(ct);
+                _context.ChangeTracker.Clear();
+                var document = JsonNode.Parse(await _scenarios.ExportDocumentAsync(scenarioId, true, ct)) as JsonObject;
+                var result = await ScenarioDocumentValidator.ValidateAsync(document, _clients, ct);
+                if (!result.IsValid) throw new ScenarioCompilationInvalidException(result.Findings);
+                await _scenarios.StoreDocumentAsync(scenarioId, document, result.Findings, ct, ScenarioDocument.Compiled);
+
+                compilation = await _context.ScenarioCompilations.FirstAsync(c => c.Id == compilation.Id, ct);
+                compilation.PackageData = package;
                 compilation.NpcCount = npcCount;
                 compilation.TimelineEventCount = timelineEventCount;
                 compilation.InjectCount = injectCount;
                 compilation.Status = "Completed";
                 compilation.CompletedAt = DateTime.UtcNow;
 
-                scenario.BuilderStatus = "Compiled";
+                var compiled = await _context.Scenarios.FirstAsync(s => s.Id == scenarioId, ct);
+                compiled.BuilderStatus = "Compiled";
 
                 await _context.SaveChangesAsync(ct);
+                await transaction.CommitAsync(ct);
 
                 _log.Info($"Compilation completed for scenario {scenarioId}: {npcCount} NPCs, {timelineEventCount} timeline events, {injectCount} injects");
 
@@ -217,9 +248,19 @@ namespace Ghosts.Api.Infrastructure.Services
             {
                 _log.Error(ex, $"Compilation failed for scenario {scenarioId}");
 
-                compilation.Status = "Failed";
-                compilation.ErrorMessage = ex.Message;
-                await _context.SaveChangesAsync(ct);
+                // Nothing of the attempt stays but the record of it.
+                await transaction.RollbackAsync(CancellationToken.None);
+                _context.ChangeTracker.Clear();
+                _context.ScenarioCompilations.Add(new ScenarioCompilation
+                {
+                    ScenarioId = scenarioId,
+                    Name = dto.Name,
+                    Status = "Failed",
+                    ErrorMessage = ex.Message,
+                    CreatedAt = compilation.CreatedAt,
+                    CompletedAt = DateTime.UtcNow
+                });
+                await _context.SaveChangesAsync(CancellationToken.None);
 
                 throw;
             }
@@ -385,6 +426,11 @@ namespace Ghosts.Api.Infrastructure.Services
                 var severity = properties.ContainsKey("severity") ? properties["severity"].GetString() : "medium";
                 var asset = properties.ContainsKey("asset") ? properties["asset"].GetString() : "Unknown";
 
+                // A second compile adds nothing it added before.
+                if (scenario.TechnicalEnvironment.Vulnerabilities.Any(v =>
+                        string.Equals(v.Cve, cve, StringComparison.OrdinalIgnoreCase) && string.Equals(v.Asset, asset, StringComparison.OrdinalIgnoreCase)))
+                    continue;
+
                 scenario.TechnicalEnvironment.Vulnerabilities.Add(new Vulnerability
                 {
                     Asset = asset,
@@ -474,12 +520,20 @@ namespace Ghosts.Api.Infrastructure.Services
                     var techniqueData = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(enrichment.Data ?? "{}");
                     var tactics = techniqueData.ContainsKey("Tactics") ? techniqueData["Tactics"].GetString() : "";
 
+                    var description = $"{enrichment.ExternalId}: {enrichment.Name} - {enrichment.Description}";
+                    // A second compile adds nothing it added before; the slot is kept so a new technique lands after it.
+                    if (scenario.ScenarioTimeline.ScenarioTimelineEvents.Any(e => string.Equals(e.Description, description, StringComparison.Ordinal)))
+                    {
+                        minutesOffset += 15;
+                        continue;
+                    }
+
                     var timelineEvent = new ScenarioTimelineEvent
                     {
                         Number = eventNumber++,
                         Time = $"T+{minutesOffset}m",
                         Assigned = "Red Team",
-                        Description = $"{enrichment.ExternalId}: {enrichment.Name} - {enrichment.Description}",
+                        Description = description,
                         Status = "Pending"
                     };
 
@@ -515,10 +569,17 @@ namespace Ghosts.Api.Infrastructure.Services
             {
                 try
                 {
+                    var title = $"{enrichment.ExternalId}: {enrichment.Name}";
+                    if (scenario.ScenarioParameters.Injects.Any(i => string.Equals(i.Title, title, StringComparison.Ordinal)))
+                    {
+                        minutesOffset += 15;
+                        continue;
+                    }
+
                     var inject = new Inject
                     {
                         Trigger = $"T+{minutesOffset}m",
-                        Title = $"{enrichment.ExternalId}: {enrichment.Name}"
+                        Title = title
                     };
 
                     scenario.ScenarioParameters.Injects.Add(inject);

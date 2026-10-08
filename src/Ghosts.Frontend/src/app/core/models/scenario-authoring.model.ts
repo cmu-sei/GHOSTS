@@ -203,6 +203,9 @@ export interface AuthoringChunk {
   sourceId: number;
   source: string | null;
   index: number;
+  /** Character offset of the text in its source, and the 1-based page for a PDF; null on chunks made before these were recorded. */
+  startOffset: number | null;
+  page: number | null;
   text: string;
 }
 

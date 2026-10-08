@@ -97,6 +97,7 @@ namespace Ghosts.Api.Infrastructure.Data
         public DbSet<AuthoringMessage> AuthoringMessages { get; set; }
         public DbSet<AuthoringDocument> AuthoringDocuments { get; set; }
         public DbSet<AuthoringTurn> AuthoringTurns { get; set; }
+        public DbSet<AuthoringSessionLease> AuthoringSessionLeases { get; set; }
 
         public DbSet<Objective> Objectives { get; set; }
 

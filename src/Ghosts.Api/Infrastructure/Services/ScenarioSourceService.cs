@@ -337,6 +337,7 @@ namespace Ghosts.Api.Infrastructure.Services
             const int overlapSize = 500;
 
             var content = source.Content;
+            var hasPages = content.Contains('\f');
             var chunks = new List<ScenarioSourceChunk>();
             var chunkIndex = 0;
             var position = 0;
@@ -366,6 +367,9 @@ namespace Ghosts.Api.Infrastructure.Services
                     }
                 }
 
+                // The stored text is trimmed, so its offset is past the leading whitespace. Pages are counted
+                // by the form feeds PDF extraction puts between them; text without any has no pages.
+                var startOffset = position + (chunkContent.Length - chunkContent.TrimStart().Length);
                 var chunk = new ScenarioSourceChunk
                 {
                     SourceId = sourceId,
@@ -374,7 +378,9 @@ namespace Ghosts.Api.Infrastructure.Services
                     Content = chunkContent.Trim(),
                     TokenCount = EstimateTokenCount(chunkContent),
                     ExtractionStatus = "Pending",
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.UtcNow,
+                    StartOffset = startOffset,
+                    Page = hasPages ? content.AsSpan(0, Math.Min(startOffset, content.Length)).Count('\f') + 1 : null
                 };
 
                 chunks.Add(chunk);
