@@ -13,6 +13,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
+import { TextFieldModule } from '@angular/cdk/text-field';
 import { ChangeDetectionStrategy } from '@angular/core';
 import { ScenarioService, ScenarioHubService, ObjectiveService, N8nWorkflowService } from '../../../core/services';
 import { CreateScenario, ScenarioTimelineEvent, Objective, N8nWorkflow, ScenarioExtras, ApprovedScenarioDocument } from '../../../core/models';
@@ -37,6 +38,7 @@ import { BuilderGraphComponent } from '../../scenario-builder/builder-graph/buil
     MatProgressSpinnerModule,
     MatExpansionModule,
     DragDropModule,
+    TextFieldModule,
     BuilderEntitiesComponent,
     BuilderGraphComponent
   ],
