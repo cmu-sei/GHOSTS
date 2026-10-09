@@ -259,7 +259,8 @@
   </div>
 
   <!-- The readiness dashboard: the server's reading of the latest document and ledger, refreshed with the session -->
-  <aside class="dashboard">
+  <div class="dash-resizer" (pointerdown)="startResize($event)" title="Drag to resize"></div>
+  <aside class="dashboard" [style.flex-basis.px]="dashWidth()">
     @if (dash(); as dash) {
     <div class="dash-head">
       <div class="dash-title">

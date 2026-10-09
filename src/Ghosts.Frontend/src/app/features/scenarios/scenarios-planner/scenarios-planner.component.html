@@ -59,7 +59,7 @@
 
         <mat-form-field class="full-width">
           <mat-label>Description</mat-label>
-          <textarea matInput [(ngModel)]="scenario.description" rows="3"
+          <textarea matInput [(ngModel)]="scenario.description" cdkTextareaAutosize cdkAutosizeMinRows="2"
             placeholder="Enter scenario description"></textarea>
         </mat-form-field>
 
@@ -70,7 +70,7 @@
 
         <mat-form-field class="full-width">
           <mat-label>Intent</mat-label>
-          <textarea matInput [(ngModel)]="extras.intent" rows="3"
+          <textarea matInput [(ngModel)]="extras.intent" cdkTextareaAutosize cdkAutosizeMinRows="2"
             placeholder="The exercise developer's intent, as written"></textarea>
         </mat-form-field>
 
@@ -131,22 +131,22 @@
                 </mat-form-field>
                 <mat-form-field class="item-field">
                   <mat-label>MITRE TTPs (comma-separated)</mat-label>
-                  <input matInput [(ngModel)]="actor.ttpsString" placeholder="T1059,T1047">
+                  <textarea matInput cdkTextareaAutosize cdkAutosizeMinRows="1" [(ngModel)]="actor.ttpsString" placeholder="T1059,T1047"></textarea>
                 </mat-form-field>
                 <button mat-icon-button color="warn" (click)="removeThreatActor(i)">
                   <i class="fas fa-trash"></i>
                 </button>
               </div>
               <div class="form-row">
-                <mat-form-field class="third-width">
+                <mat-form-field class="narrow-width">
                   <mat-label>Id</mat-label>
                   <input matInput [(ngModel)]="actor.extras!.id">
                 </mat-form-field>
                 <mat-form-field class="half-width">
                   <mat-label>Objective</mat-label>
-                  <input matInput [(ngModel)]="actor.extras!.objective" placeholder="What this adversary is trying to bring about">
+                  <textarea matInput cdkTextareaAutosize cdkAutosizeMinRows="1" [(ngModel)]="actor.extras!.objective" placeholder="What this adversary is trying to bring about"></textarea>
                 </mat-form-field>
-                <mat-form-field class="third-width">
+                <mat-form-field class="narrow-width">
                   <mat-label>Win threshold</mat-label>
                   <input matInput type="number" min="0" [(ngModel)]="actor.extras!.winThreshold">
                 </mat-form-field>
@@ -168,7 +168,7 @@
                     </mat-form-field>
                     <mat-form-field class="item-field">
                       <mat-label>Description</mat-label>
-                      <input matInput [(ngModel)]="move.description">
+                      <textarea matInput cdkTextareaAutosize cdkAutosizeMinRows="1" [(ngModel)]="move.description"></textarea>
                     </mat-form-field>
                     <mat-form-field class="item-field-small">
                       <mat-label>Progress</mat-label>
@@ -191,7 +191,7 @@
                   </div>
                   <mat-form-field class="full-width">
                     <mat-label>Indicators (one per line)</mat-label>
-                    <textarea matInput rows="2" [value]="linesText(move.indicators)"
+                    <textarea matInput cdkTextareaAutosize cdkAutosizeMinRows="2" [value]="linesText(move.indicators)"
                       (change)="setLineList(move, 'indicators', $any($event.target).value)"></textarea>
                   </mat-form-field>
                   <ng-container *ngTemplateOutlet="effectsFields; context: { $implicit: move.effects }"></ng-container>
@@ -220,14 +220,14 @@
                 </mat-form-field>
                 <mat-form-field class="item-field">
                   <mat-label>Title/Description</mat-label>
-                  <input matInput [(ngModel)]="inject.title" placeholder="e.g., Phish email to finance">
+                  <textarea matInput cdkTextareaAutosize cdkAutosizeMinRows="1" [(ngModel)]="inject.title" placeholder="e.g., Phish email to finance"></textarea>
                 </mat-form-field>
                 <button mat-icon-button color="warn" (click)="removeInject(i)">
                   <i class="fas fa-trash"></i>
                 </button>
               </div>
               <div class="form-row">
-                <mat-form-field class="third-width">
+                <mat-form-field class="narrow-width">
                   <mat-label>Id</mat-label>
                   <input matInput [(ngModel)]="inject.extras!.id">
                 </mat-form-field>
@@ -255,7 +255,7 @@
           <h3>User Pools (GHOSTS Integration)</h3>
           <div class="list-manager">
             <div *ngFor="let pool of scenario.scenarioParameters!.userPools; let i = index" class="list-item">
-              <mat-form-field class="item-field">
+              <mat-form-field class="item-field-medium">
                 <mat-label>Role</mat-label>
                 <input matInput [(ngModel)]="pool.role" placeholder="e.g., Logistics, Operations, Med Unit">
               </mat-form-field>
@@ -265,7 +265,7 @@
               </mat-form-field>
               <mat-form-field class="item-field">
                 <mat-label>Description</mat-label>
-                <input matInput [(ngModel)]="pool.extras!.description">
+                <textarea matInput cdkTextareaAutosize cdkAutosizeMinRows="1" [(ngModel)]="pool.extras!.description"></textarea>
               </mat-form-field>
               <button mat-icon-button color="warn" (click)="removeUserPool(i)">
                 <i class="fas fa-trash"></i>
@@ -284,7 +284,7 @@
               <mat-label>Role</mat-label>
               <input matInput [(ngModel)]="extras.audience.role" placeholder="e.g., SOC tier-1 analysts">
             </mat-form-field>
-            <mat-form-field class="third-width">
+            <mat-form-field class="narrow-width">
               <mat-label>Size</mat-label>
               <input matInput type="number" min="1" [(ngModel)]="extras.audience.size">
             </mat-form-field>
@@ -292,11 +292,11 @@
           <div class="form-row">
             <mat-form-field class="half-width">
               <mat-label>Proficiency</mat-label>
-              <textarea matInput [(ngModel)]="extras.audience.proficiency" rows="2"></textarea>
+              <textarea matInput [(ngModel)]="extras.audience.proficiency" cdkTextareaAutosize cdkAutosizeMinRows="2"></textarea>
             </mat-form-field>
             <mat-form-field class="half-width">
               <mat-label>Mandate</mat-label>
-              <textarea matInput [(ngModel)]="extras.audience.mandate" rows="2"></textarea>
+              <textarea matInput [(ngModel)]="extras.audience.mandate" cdkTextareaAutosize cdkAutosizeMinRows="2"></textarea>
             </mat-form-field>
           </div>
         </div>
@@ -312,18 +312,18 @@
           <div class="form-row">
             <mat-form-field class="half-width">
               <mat-label>Strategic Objectives</mat-label>
-              <textarea matInput [(ngModel)]="scenario.scenarioParameters!.objectives" rows="3"></textarea>
+              <textarea matInput [(ngModel)]="scenario.scenarioParameters!.objectives" cdkTextareaAutosize cdkAutosizeMinRows="2"></textarea>
             </mat-form-field>
 
             <mat-form-field class="half-width">
               <mat-label>Political/Economic Context</mat-label>
-              <textarea matInput [(ngModel)]="scenario.scenarioParameters!.politicalContext" rows="3"></textarea>
+              <textarea matInput [(ngModel)]="scenario.scenarioParameters!.politicalContext" cdkTextareaAutosize cdkAutosizeMinRows="2"></textarea>
             </mat-form-field>
           </div>
 
           <mat-form-field class="full-width">
             <mat-label>Situation</mat-label>
-            <textarea matInput [(ngModel)]="extras.context.situation" rows="3"></textarea>
+            <textarea matInput [(ngModel)]="extras.context.situation" cdkTextareaAutosize cdkAutosizeMinRows="2"></textarea>
           </mat-form-field>
         </div>
 
@@ -338,12 +338,12 @@
           <div class="form-row">
             <mat-form-field class="half-width">
               <mat-label>Rules of Engagement</mat-label>
-              <textarea matInput [(ngModel)]="scenario.scenarioParameters!.rulesOfEngagement" rows="3"></textarea>
+              <textarea matInput [(ngModel)]="scenario.scenarioParameters!.rulesOfEngagement" cdkTextareaAutosize cdkAutosizeMinRows="2"></textarea>
             </mat-form-field>
 
             <mat-form-field class="half-width">
               <mat-label>Victory Conditions</mat-label>
-              <textarea matInput [(ngModel)]="scenario.scenarioParameters!.victoryConditions" rows="3"></textarea>
+              <textarea matInput [(ngModel)]="scenario.scenarioParameters!.victoryConditions" cdkTextareaAutosize cdkAutosizeMinRows="2"></textarea>
             </mat-form-field>
           </div>
         </div>
@@ -352,11 +352,11 @@
           <h3>Catalog</h3>
           <div class="form-row">
             <mat-checkbox [(ngModel)]="extras.catalog.listed">Listed</mat-checkbox>
-            <mat-form-field class="third-width">
+            <mat-form-field class="narrow-width">
               <mat-label>Sort order</mat-label>
               <input matInput type="number" [(ngModel)]="extras.catalog.sortOrder">
             </mat-form-field>
-            <mat-form-field class="third-width">
+            <mat-form-field class="narrow-width">
               <mat-label>Estimated minutes</mat-label>
               <input matInput type="number" min="0" [(ngModel)]="extras.catalog.estimatedMinutes">
             </mat-form-field>
@@ -402,13 +402,13 @@
                   <mat-label>URI</mat-label>
                   <input matInput [(ngModel)]="source.uri">
                 </mat-form-field>
-                <mat-form-field class="third-width">
+                <mat-form-field class="narrow-width">
                   <mat-label>MIME type</mat-label>
                   <input matInput [(ngModel)]="source.mimeType">
                 </mat-form-field>
                 <mat-form-field class="half-width">
                   <mat-label>Note</mat-label>
-                  <input matInput [(ngModel)]="source.note">
+                  <textarea matInput cdkTextareaAutosize cdkAutosizeMinRows="1" [(ngModel)]="source.note"></textarea>
                 </mat-form-field>
               </div>
               @if (approved()) {
@@ -451,13 +451,13 @@
                   <mat-label>URI</mat-label>
                   <input matInput [(ngModel)]="reference.uri">
                 </mat-form-field>
-                <mat-form-field class="third-width">
+                <mat-form-field class="narrow-width">
                   <mat-label>Locator</mat-label>
                   <input matInput [(ngModel)]="reference.locator" placeholder="e.g., §3.2">
                 </mat-form-field>
                 <mat-form-field class="half-width">
                   <mat-label>Note</mat-label>
-                  <input matInput [(ngModel)]="reference.note">
+                  <textarea matInput cdkTextareaAutosize cdkAutosizeMinRows="1" [(ngModel)]="reference.note"></textarea>
                 </mat-form-field>
               </div>
             </div>
@@ -479,7 +479,7 @@
           <h3 class="subsection-title">Range Topology</h3>
           <mat-form-field class="full-width">
             <mat-label>Network Topology</mat-label>
-            <textarea matInput [(ngModel)]="scenario.technicalEnvironment!.networkTopology" rows="3"
+            <textarea matInput [(ngModel)]="scenario.technicalEnvironment!.networkTopology" cdkTextareaAutosize cdkAutosizeMinRows="2"
               placeholder="Describe networks, domains, enclaves, cloud/on-prem architecture"></textarea>
           </mat-form-field>
           <div class="form-row">
@@ -499,7 +499,7 @@
           <div class="list-manager">
             @for (segment of terrain.segments; track $index; let i = $index) {
             <div class="list-item">
-              <mat-form-field class="item-field-small">
+              <mat-form-field class="item-field-medium">
                 <mat-label>Name</mat-label>
                 <input matInput [(ngModel)]="segment.name">
               </mat-form-field>
@@ -509,7 +509,7 @@
               </mat-form-field>
               <mat-form-field class="item-field">
                 <mat-label>Description</mat-label>
-                <input matInput [(ngModel)]="segment.description">
+                <textarea matInput cdkTextareaAutosize cdkAutosizeMinRows="1" [(ngModel)]="segment.description"></textarea>
               </mat-form-field>
               <button mat-icon-button color="warn" (click)="removeItem(terrain.segments, i)">
                 <i class="fas fa-trash"></i>
@@ -528,11 +528,11 @@
             @for (host of terrain.hosts; track $index; let i = $index) {
             <div class="list-block">
               <div class="list-item">
-                <mat-form-field class="item-field">
+                <mat-form-field class="item-field-medium">
                   <mat-label>Name</mat-label>
                   <input matInput [(ngModel)]="host.name">
                 </mat-form-field>
-                <mat-form-field class="item-field-small">
+                <mat-form-field class="item-field-medium">
                   <mat-label>Segment</mat-label>
                   <input matInput [(ngModel)]="host.segment">
                 </mat-form-field>
@@ -540,9 +540,9 @@
                   <mat-label>OS</mat-label>
                   <input matInput [(ngModel)]="host.os">
                 </mat-form-field>
-                <mat-form-field class="item-field-small">
+                <mat-form-field class="item-field">
                   <mat-label>Role</mat-label>
-                  <input matInput [(ngModel)]="host.role">
+                  <textarea matInput cdkTextareaAutosize cdkAutosizeMinRows="1" [(ngModel)]="host.role"></textarea>
                 </mat-form-field>
                 <button mat-icon-button color="warn" (click)="removeItem(terrain.hosts, i)">
                   <i class="fas fa-trash"></i>
@@ -551,7 +551,7 @@
               <div class="form-row">
                 <mat-form-field class="half-width">
                   <mat-label>Description</mat-label>
-                  <input matInput [(ngModel)]="host.description">
+                  <textarea matInput cdkTextareaAutosize cdkAutosizeMinRows="1" [(ngModel)]="host.description"></textarea>
                 </mat-form-field>
                 <mat-form-field class="half-width">
                   <mat-label>Services (comma-separated)</mat-label>
@@ -571,18 +571,18 @@
           <h3 class="subsection-title">Services</h3>
           <mat-form-field class="full-width">
             <mat-label>Services summary</mat-label>
-            <textarea matInput [(ngModel)]="scenario.technicalEnvironment!.services" rows="2"></textarea>
+            <textarea matInput [(ngModel)]="scenario.technicalEnvironment!.services" cdkTextareaAutosize cdkAutosizeMinRows="2"></textarea>
           </mat-form-field>
           <div class="list-manager">
             @for (service of terrain.services; track $index; let i = $index) {
             <div class="list-item">
-              <mat-form-field class="item-field-small">
+              <mat-form-field class="item-field-medium">
                 <mat-label>Name</mat-label>
                 <input matInput [(ngModel)]="service.name">
               </mat-form-field>
               <mat-form-field class="item-field">
                 <mat-label>Description</mat-label>
-                <input matInput [(ngModel)]="service.description">
+                <textarea matInput cdkTextareaAutosize cdkAutosizeMinRows="1" [(ngModel)]="service.description"></textarea>
               </mat-form-field>
               <mat-form-field class="item-field">
                 <mat-label>Hosts (comma-separated)</mat-label>
@@ -673,7 +673,7 @@
           <h3 class="subsection-title">Internal Assets</h3>
           <mat-form-field class="full-width">
             <mat-label>Internal Assets</mat-label>
-            <textarea matInput [(ngModel)]="scenario.technicalEnvironment!.assets" rows="3"
+            <textarea matInput [(ngModel)]="scenario.technicalEnvironment!.assets" cdkTextareaAutosize cdkAutosizeMinRows="2"
               placeholder="e.g., Windows/Linux mix, Critical apps, ICS/SCADA systems"></textarea>
           </mat-form-field>
         </div>
@@ -683,11 +683,11 @@
           <div class="form-row">
             <mat-form-field class="half-width">
               <mat-label>Platforms</mat-label>
-              <textarea matInput [(ngModel)]="terrain.informationEnvironment.platforms" rows="2"></textarea>
+              <textarea matInput [(ngModel)]="terrain.informationEnvironment.platforms" cdkTextareaAutosize cdkAutosizeMinRows="2"></textarea>
             </mat-form-field>
             <mat-form-field class="half-width">
               <mat-label>Audience</mat-label>
-              <textarea matInput [(ngModel)]="terrain.informationEnvironment.audience" rows="2"></textarea>
+              <textarea matInput [(ngModel)]="terrain.informationEnvironment.audience" cdkTextareaAutosize cdkAutosizeMinRows="2"></textarea>
             </mat-form-field>
           </div>
         </div>
@@ -697,13 +697,13 @@
           <div class="list-manager">
             @for (defense of terrain.defenses; track $index; let i = $index) {
             <div class="list-item">
-              <mat-form-field class="item-field-small">
+              <mat-form-field class="item-field-medium">
                 <mat-label>Name</mat-label>
                 <input matInput [(ngModel)]="defense.name">
               </mat-form-field>
               <mat-form-field class="item-field">
                 <mat-label>Description</mat-label>
-                <input matInput [(ngModel)]="defense.description">
+                <textarea matInput cdkTextareaAutosize cdkAutosizeMinRows="1" [(ngModel)]="defense.description"></textarea>
               </mat-form-field>
               <mat-form-field class="item-field">
                 <mat-label>Covers (comma-separated)</mat-label>
@@ -726,7 +726,7 @@
           <div class="list-manager">
             @for (vulnerability of scenario.technicalEnvironment!.vulnerabilities; track $index; let i = $index) {
             <div class="list-item">
-              <mat-form-field class="item-field-small">
+              <mat-form-field class="item-field-medium">
                 <mat-label>Asset</mat-label>
                 <input matInput [(ngModel)]="vulnerability.asset">
               </mat-form-field>
@@ -736,7 +736,7 @@
               </mat-form-field>
               <mat-form-field class="item-field">
                 <mat-label>Description</mat-label>
-                <input matInput [(ngModel)]="vulnerability.extras!.description">
+                <textarea matInput cdkTextareaAutosize cdkAutosizeMinRows="1" [(ngModel)]="vulnerability.extras!.description"></textarea>
               </mat-form-field>
               <mat-form-field class="item-field-small">
                 <mat-label>Severity</mat-label>
@@ -836,11 +836,11 @@
           <div class="form-row">
             <mat-form-field class="half-width">
               <mat-label>Warning</mat-label>
-              <textarea matInput [(ngModel)]="rulesOfPlay.deadline.warning" rows="2"></textarea>
+              <textarea matInput [(ngModel)]="rulesOfPlay.deadline.warning" cdkTextareaAutosize cdkAutosizeMinRows="2"></textarea>
             </mat-form-field>
             <mat-form-field class="half-width">
               <mat-label>Failure message</mat-label>
-              <textarea matInput [(ngModel)]="rulesOfPlay.deadline.failureMessage" rows="2"></textarea>
+              <textarea matInput [(ngModel)]="rulesOfPlay.deadline.failureMessage" cdkTextareaAutosize cdkAutosizeMinRows="2"></textarea>
             </mat-form-field>
           </div>
         </div>
@@ -855,7 +855,7 @@
             </mat-form-field>
             <mat-form-field class="half-width">
               <mat-label>Facts (key=value, one per line)</mat-label>
-              <textarea matInput rows="3" [value]="factsText(extras.startingConditions.facts)"
+              <textarea matInput cdkTextareaAutosize cdkAutosizeMinRows="2" [value]="factsText(extras.startingConditions.facts)"
                 (change)="setFacts(extras.startingConditions, 'facts', $any($event.target).value)"></textarea>
             </mat-form-field>
           </div>
@@ -866,13 +866,13 @@
           <div class="form-row">
             <mat-form-field class="half-width">
               <mat-label>Escalation Ladder</mat-label>
-              <textarea matInput [(ngModel)]="scenario.simulationMechanics!.escalationLadder" rows="3"
+              <textarea matInput [(ngModel)]="scenario.simulationMechanics!.escalationLadder" cdkTextareaAutosize cdkAutosizeMinRows="2"
                 placeholder="Define how scenario intensity increases based on player actions"></textarea>
             </mat-form-field>
 
             <mat-form-field class="half-width">
               <mat-label>Branching Logic</mat-label>
-              <textarea matInput [(ngModel)]="scenario.simulationMechanics!.branchingLogic" rows="3"
+              <textarea matInput [(ngModel)]="scenario.simulationMechanics!.branchingLogic" cdkTextareaAutosize cdkAutosizeMinRows="2"
                 placeholder="Describe how scenario branches based on player decisions"></textarea>
             </mat-form-field>
           </div>
@@ -915,7 +915,7 @@
 
           <mat-form-field class="full-width">
             <mat-label>Performance Metrics</mat-label>
-            <textarea matInput [(ngModel)]="scenario.simulationMechanics!.performanceMetrics" rows="2"
+            <textarea matInput [(ngModel)]="scenario.simulationMechanics!.performanceMetrics" cdkTextareaAutosize cdkAutosizeMinRows="2"
               placeholder="e.g., Time-to-detect, Time-to-contain, Accuracy of identification, Communication quality"></textarea>
           </mat-form-field>
         </div>
@@ -928,7 +928,7 @@
         <h2 class="section-title">Exercise Timeline</h2>
 
         <div class="form-row">
-          <mat-form-field class="half-width">
+          <mat-form-field class="narrow-width">
             <mat-label>Exercise Duration (hours)</mat-label>
             <input matInput type="number" [(ngModel)]="scenario.timeline!.exerciseDuration" min="1" max="168">
           </mat-form-field>
@@ -984,7 +984,7 @@
               <th mat-header-cell *matHeaderCellDef>Description / Details</th>
               <td mat-cell *matCellDef="let element">
                 <mat-form-field class="table-input-field">
-                  <input matInput type="text" [(ngModel)]="element.description" placeholder="Event description">
+                  <textarea matInput cdkTextareaAutosize cdkAutosizeMinRows="1" [(ngModel)]="element.description" placeholder="Event description"></textarea>
                 </mat-form-field>
               </td>
             </ng-container>
@@ -1215,11 +1215,11 @@
   <div class="form-row">
     <mat-form-field class="half-width">
       <mat-label>Expected response</mat-label>
-      <textarea matInput rows="2" [(ngModel)]="x.expectedResponse"></textarea>
+      <textarea matInput cdkTextareaAutosize cdkAutosizeMinRows="2" [(ngModel)]="x.expectedResponse"></textarea>
     </mat-form-field>
     <mat-form-field class="half-width">
       <mat-label>Indicators (one per line)</mat-label>
-      <textarea matInput rows="2" [value]="linesText(x.indicators)"
+      <textarea matInput cdkTextareaAutosize cdkAutosizeMinRows="2" [value]="linesText(x.indicators)"
         (change)="setLineList(x, 'indicators', $any($event.target).value)"></textarea>
     </mat-form-field>
   </div>
@@ -1235,7 +1235,7 @@
     </mat-form-field>
     <mat-form-field class="half-width">
       <mat-label>Sets facts (key=value, one per line)</mat-label>
-      <textarea matInput rows="2" [value]="factsText(effects.setFacts)"
+      <textarea matInput cdkTextareaAutosize cdkAutosizeMinRows="2" [value]="factsText(effects.setFacts)"
         (change)="setFacts(effects, 'setFacts', $any($event.target).value)"></textarea>
     </mat-form-field>
   </div>

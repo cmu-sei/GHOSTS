@@ -111,6 +111,10 @@
       .third-width {
         flex: 1;
       }
+
+      .narrow-width {
+        flex: 0 0 10rem;
+      }
     }
 
     .form-section {
@@ -133,7 +137,7 @@
       .list-item {
         display: flex;
         gap: 12px;
-        align-items: center;
+        align-items: flex-start;
         padding: 16px;
         background: #f5f5f5;
         border-radius: 4px;
@@ -142,12 +146,18 @@
           flex: 1;
         }
 
+        .item-field-medium {
+          flex: 0 1 18rem;
+          min-width: 10rem;
+        }
+
         .item-field-small {
           width: 150px;
         }
 
         button[mat-icon-button] {
           flex-shrink: 0;
+          margin-top: 8px;
         }
       }
 
@@ -267,6 +277,24 @@
           padding: 16px 8px;
           vertical-align: top;
         }
+
+        // Narrow, fixed columns for short values; the description takes the rest. Fixed layout, and form
+        // fields free of Material's 180px minimum, so the narrow columns can actually be narrow.
+        table-layout: fixed;
+
+        ::ng-deep .mat-mdc-form-field-infix {
+          width: auto;
+          min-width: 0;
+        }
+
+        .mat-column-drag { width: 2rem; }
+        .mat-column-time { width: 7.5rem; }
+        .mat-column-number { width: 2.5rem; }
+        .mat-column-assigned,
+        .mat-column-executionType,
+        .mat-column-status { width: 9.5rem; }
+        .mat-column-objective { width: 12rem; }
+        .mat-column-actions { width: 5.5rem; }
 
         .drag-handle {
           cursor: move;
