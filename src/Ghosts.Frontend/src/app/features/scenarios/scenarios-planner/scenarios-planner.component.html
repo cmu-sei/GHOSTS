@@ -411,6 +411,15 @@
                   <input matInput [(ngModel)]="source.note">
                 </mat-form-field>
               </div>
+              @if (approved()) {
+              <div class="source-usage">
+                @if (entitiesBySource().get(source.id); as used) {
+                Entities drawn from this source: {{ used.join(', ') }}
+                } @else {
+                No entities drawn from this source.
+                }
+              </div>
+              }
             </div>
             }
             <button mat-raised-button color="primary" (click)="addItem(extras.sources, { id: '', name: '' })">
