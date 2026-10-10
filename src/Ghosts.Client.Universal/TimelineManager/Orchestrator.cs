@@ -237,10 +237,13 @@ public class Orchestrator
                     string processName = null;
                     switch (handler.HandlerType)
                     {
-                        // Chrome/Firefox are only managed when explicitly opted-in: deployments legitimately run
+                        // Browsers are only managed when explicitly opted-in: deployments legitimately run
                         // multiple concurrent browser processes across handler threads (see issue #689).
                         case HandlerType.BrowserChrome:
                             if (manageBrowsers) processName = "chrome";
+                            break;
+                        case HandlerType.BrowserEdge:
+                            if (manageBrowsers) processName = "msedge";
                             break;
                         case HandlerType.BrowserFirefox:
                             if (manageBrowsers) processName = "firefox";

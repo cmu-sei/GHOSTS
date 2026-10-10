@@ -218,7 +218,7 @@ namespace Ghosts.Domain.Code
             public bool NagScreenResolver { get; set; }
 
             /// <summary>
-            /// Should the SafetyNet kill excess Chrome/Firefox processes? Disabled by default because
+            /// Should the SafetyNet kill excess Chrome/Edge/Firefox processes? Disabled by default because
             /// deployments legitimately run multiple concurrent browser processes across handler threads (see issue #689).
             /// </summary>
             public bool ManageBrowserProcesses { get; set; }

@@ -11,6 +11,11 @@ namespace Ghosts.Domain.Code
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
+        /// <summary>
+        /// Set by the client to close a handler's processes before it sleeps through off hours
+        /// </summary>
+        public static Action<TimelineHandler> BeforeSleep { get; set; }
+
         public static void Is(TimelineHandler handler)
         {
             var utcNow = DateTime.UtcNow;
@@ -75,6 +80,7 @@ namespace Ghosts.Domain.Code
         private static void Sleep(TimelineHandler handler, int msToSleep)
         {
             _log.Trace($"{handler} sleeping for {msToSleep} ms");
+            BeforeSleep?.Invoke(handler);
             Thread.Sleep(msToSleep);
         }
     }

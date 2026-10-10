@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
-using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using NLog;
 
@@ -30,47 +29,19 @@ namespace Ghosts.Client.Universal.Infrastructure
                 {
                     foreach (var handler in timeline.TimeLineHandlers)
                     {
-                        switch (handler.HandlerType)
-                        {
-                            case HandlerType.BrowserChrome:
-                                cleanupList.Add(ProcessManager.ProcessNames.Chrome);
-                                cleanupList.Add(ProcessManager.ProcessNames.ChromeDriver);
-                                break;
-                            case HandlerType.BrowserFirefox:
-                                cleanupList.Add(ProcessManager.ProcessNames.Firefox);
-                                cleanupList.Add(ProcessManager.ProcessNames.GeckoDriver);
-                                break;
-                            case HandlerType.Word:
-                                cleanupList.Add(ProcessManager.ProcessNames.Word);
-                                break;
-                            case HandlerType.Excel:
-                                cleanupList.Add(ProcessManager.ProcessNames.Excel);
-                                break;
-                            case HandlerType.PowerPoint:
-                                cleanupList.Add(ProcessManager.ProcessNames.PowerPoint);
-                                break;
-                            case HandlerType.Outlook:
-                            case HandlerType.Outlookv2:
-                                cleanupList.Add(ProcessManager.ProcessNames.Outlook);
-                                break;
-                            case HandlerType.Command:
-                                cleanupList.Add(ProcessManager.ProcessNames.Command);
-                                break;
-                            case HandlerType.PowerShell:
-                                cleanupList.Add(ProcessManager.ProcessNames.PowerShell);
-                                break;
-                            case HandlerType.Curl:
-                                cleanupList.Add(ProcessManager.ProcessNames.Curl);
-                                break;
-                        }
+                        cleanupList.AddRange(ProcessManager.GetProcessNames(handler.HandlerType));
                     }
                 }
 
                 if (!Program.Configuration.AllowMultipleInstances)
                 {
-                    var ghosts = Process.GetCurrentProcess();
-                    cleanupList.Add(ghosts.ProcessName);
-                    _log.Trace($"Got ghosts pid: {ghosts.Id}");
+                    // Other instances run as "Ghosts.Client.Universal", or as "dotnet" when started with "dotnet Ghosts.Client.Universal.dll"
+                    cleanupList.Add(ApplicationDetails.Name);
+                    foreach (var pid in ProcessManager.GetDotnetHostedPids(ApplicationDetails.Name))
+                    {
+                        ProcessManager.KillProcessAndChildrenByPid(pid);
+                    }
+                    _log.Trace($"Got ghosts pid: {Process.GetCurrentProcess().Id}");
                 }
 
                 foreach (var cleanupItem in cleanupList)

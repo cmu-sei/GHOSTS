@@ -182,6 +182,7 @@ class Program
         {
             //add hook to manage processes running in order to never tip a machine over
             StartupTasks.CleanupProcesses();
+            WorkingHours.BeforeSleep = ProcessManager.KillProcessAndChildrenByHandler;
         }
 
         // add this app to windows startup?
