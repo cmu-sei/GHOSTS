@@ -141,8 +141,9 @@ namespace Ghosts.Api.Infrastructure.Services
 
         /// <summary>
         /// The validate endpoint's own sequence, with a timeout of its own (G4). The document text the model
-        /// passed is what is hashed and kept, so an import later uses those exact bytes (A2). It is compared
-        /// with the session's latest validated document, for the change list.
+        /// passed is what is hashed and kept, so an import later uses those exact bytes (A2), except that the
+        /// server first adds any Scenario Builder source its sources[] lacks; the hash is then of that document.
+        /// It is compared with the session's latest validated document, for the change list.
         /// </summary>
         private async Task<AuthoringToolOutcome> ValidateAsync(JsonNode input, AuthoringSession session, CancellationToken turn)
         {
@@ -158,7 +159,7 @@ namespace Ghosts.Api.Infrastructure.Services
                 .Where(d => d.SessionId == session.Id)
                 .OrderByDescending(d => d.Id)
                 .FirstOrDefaultAsync(turn);
-            return await ValidateTextAsync(text, DryRun(input), latest?.Hash, latest?.Document, turn);
+            return await ValidateTextAsync(text, DryRun(input), latest?.Hash, latest?.Document, session.ScenarioId, turn);
         }
 
         /// <summary>
@@ -188,12 +189,13 @@ namespace Ghosts.Api.Infrastructure.Services
             {
                 return new AuthoringToolOutcome(Error($"The patch was not applied, and nothing was validated: {ex.Message}"), false);
             }
-            return await ValidateTextAsync(text, DryRun(input), baseHash, baseDocument, turn);
+            return await ValidateTextAsync(text, DryRun(input), baseHash, baseDocument, session.ScenarioId, turn);
         }
 
-        private async Task<AuthoringToolOutcome> ValidateTextAsync(string text, bool dryRun, string baseHash, string baseDocument, CancellationToken turn)
+        private async Task<AuthoringToolOutcome> ValidateTextAsync(string text, bool dryRun, string baseHash, string baseDocument, int? scenarioId, CancellationToken turn)
         {
             var hash = Hash(text);
+            List<string> sourcesAdded = null;
 
             using var limit = CancellationTokenSource.CreateLinkedTokenSource(turn);
             limit.CancelAfter(validatorTimeout);
@@ -215,6 +217,13 @@ namespace Ghosts.Api.Infrastructure.Services
 
                 if (document != null)
                 {
+                    sourcesAdded = await AddMissingSourcesAsync(document, scenarioId, turn);
+                    if (sourcesAdded != null)
+                    {
+                        text = document.ToJsonString(ScenarioDocumentDiff.Readable);
+                        hash = Hash(text);
+                    }
+
                     var result = await ScenarioDocumentValidator.ValidateAsync(document, clients, limit.Token);
                     findings.AddRange(result.Findings);
 
@@ -250,6 +259,12 @@ namespace Ghosts.Api.Infrastructure.Services
                     body["comparedWith"] = baseHash;
                     body["changes"] = JsonSerializer.SerializeToNode(changes, Web);
                 }
+                if (sourcesAdded != null)
+                {
+                    body["sourcesAdded"] = JsonSerializer.SerializeToNode(sourcesAdded, Web);
+                    body["sourcesNote"] = "The server added these Scenario Builder sources to sources[], so every source the developer " +
+                                          "entered is recorded. The hash is of the document with them; keep them in later versions.";
+                }
                 return new AuthoringToolOutcome(body.ToJsonString(), true, validation);
             }
             catch (OperationCanceledException) when (limit.IsCancellationRequested && !turn.IsCancellationRequested)
@@ -259,6 +274,57 @@ namespace Ghosts.Api.Infrastructure.Services
                     Error($"The validator did not answer within {validatorTimeout.TotalSeconds:0} seconds (waiting on {stage}). Nothing was saved."), false);
             }
         }
+
+        /// <summary>
+        /// Adds a sources[] entry for each Scenario Builder source the document doesn't list, matched by uri or by
+        /// name. Returns the names added, or null when none were missing, so the document keeps the model's bytes.
+        /// </summary>
+        private async Task<List<string>> AddMissingSourcesAsync(JsonObject document, int? scenarioId, CancellationToken turn)
+        {
+            if (scenarioId == null) return null;
+            var builder = await context.ScenarioSources.AsNoTracking()
+                .Where(s => s.ScenarioId == scenarioId)
+                .OrderBy(s => s.CreatedAt)
+                .Select(s => new { s.Name, s.SourceType, s.OriginalFileName })
+                .ToListAsync(turn);
+            if (builder.Count == 0) return null;
+
+            var sources = document["sources"] as JsonArray;
+            if (sources == null && document["sources"] != null) return null; // not an array: the validator reports it
+            var listed = sources?.OfType<JsonObject>().ToList() ?? [];
+            var ids = listed.Select(e => Text(e["id"])).Where(id => id != null).ToHashSet();
+
+            var added = new List<string>();
+            foreach (var source in builder)
+            {
+                var uri = source.SourceType == "Url" ? source.OriginalFileName : null;
+                var name = string.IsNullOrWhiteSpace(source.Name) ? uri ?? "Source" : source.Name.Trim();
+                if (listed.Any(e => (uri != null && string.Equals(Text(e["uri"]), uri, StringComparison.OrdinalIgnoreCase))
+                                    || string.Equals(Text(e["name"])?.Trim(), name, StringComparison.OrdinalIgnoreCase)))
+                    continue;
+
+                var id = ScenarioDocumentMapper.Slugify($"src {name}");
+                for (var n = 2; ids.Contains(id); n++) id = ScenarioDocumentMapper.Slugify($"src {name} {n}");
+                ids.Add(id);
+
+                var entry = new JsonObject
+                {
+                    ["id"] = id,
+                    ["name"] = name,
+                    ["type"] = source.SourceType switch { "Url" => "url", "Document" => "document", _ => "text" }
+                };
+                if (uri != null) entry["uri"] = uri;
+                sources ??= new JsonArray();
+                sources.Add(entry);
+                added.Add(name);
+            }
+
+            if (added.Count == 0) return null;
+            document["sources"] ??= sources;
+            return added;
+        }
+
+        private static string Text(JsonNode node) => node is JsonValue v && v.TryGetValue<string>(out var s) ? s : null;
 
         private static bool DryRun(JsonNode input) => input?["dryRun"] is JsonValue d && d.TryGetValue<bool>(out var b) && b;
 
@@ -284,7 +350,7 @@ namespace Ghosts.Api.Infrastructure.Services
             var sources = await context.ScenarioSources.AsNoTracking()
                 .Where(s => s.ScenarioId == session.ScenarioId)
                 .OrderBy(s => s.CreatedAt)
-                .Select(s => new { s.Id, s.Name, s.SourceType })
+                .Select(s => new { s.Id, s.Name, s.SourceType, s.OriginalFileName })
                 .ToListAsync(turn);
             var chunks = await context.ScenarioSourceChunks.AsNoTracking()
                 .Where(c => c.ScenarioId == session.ScenarioId)
@@ -300,6 +366,8 @@ namespace Ghosts.Api.Infrastructure.Services
                     sourceId = s.Id,
                     name = s.Name,
                     type = s.SourceType,
+                    // A URL source keeps its address in OriginalFileName.
+                    uri = s.SourceType == "Url" ? s.OriginalFileName : null,
                     chunks = chunks.Where(c => c.SourceId == s.Id).Select(c => new { chunkId = c.Id, index = c.ChunkIndex, characters = c.Length, offset = c.StartOffset, page = c.Page })
                 })
             }, Web));

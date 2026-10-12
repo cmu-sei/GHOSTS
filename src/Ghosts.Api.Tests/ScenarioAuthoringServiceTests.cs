@@ -610,6 +610,93 @@ public class ScenarioAuthoringServiceTests
         Assert.Contains($"no chunk {theirs}", results[2]);
     }
 
+    [Fact]
+    public async Task The_sources_tool_gives_a_url_source_its_uri()
+    {
+        var db = NewDatabase();
+        await using var context = db();
+        context.Scenarios.Add(new Scenario { Id = 1, Name = "Mine" });
+        context.ScenarioSources.AddRange(
+            new ScenarioSource { ScenarioId = 1, Name = "Advisory", SourceType = "Url", OriginalFileName = "https://example.org/advisory" },
+            new ScenarioSource { ScenarioId = 1, Name = "Plan", SourceType = "Document", OriginalFileName = "plan.pdf" });
+        await context.SaveChangesAsync();
+
+        var result = "";
+        var service = Service(context, new ScriptedModel(
+            _ => Reply(Use("l", "scenario_sources_list", "{}")),
+            r =>
+            {
+                result = r.Messages[^1].Content.Single(c => c.ToolResult != null).ToolResult.Content.Single().Text;
+                return Reply(Text("Listed them."));
+            }));
+        var session = await service.CreateSessionAsync(1, null, null, default);
+
+        await service.RunTurnAsync(session.Id, "List my sources.", default);
+
+        var sources = JsonNode.Parse(result)!["sources"]!.AsArray();
+        Assert.Equal("https://example.org/advisory", sources[0]!["uri"]!.GetValue<string>());
+        Assert.Null(sources[1]!["uri"]);
+    }
+
+    [Fact]
+    public async Task Validating_adds_every_builder_source_the_document_leaves_out()
+    {
+        var db = NewDatabase();
+        await using var context = db();
+        context.Scenarios.Add(new Scenario { Id = 1, Name = "Mine" });
+        context.ScenarioSources.AddRange(
+            new ScenarioSource { ScenarioId = 1, Name = "Advisory", SourceType = "Url", OriginalFileName = "https://example.org/advisory" },
+            new ScenarioSource { ScenarioId = 1, Name = "Plan", SourceType = "Document", OriginalFileName = "plan.pdf" });
+        await context.SaveChangesAsync();
+
+        var result = "";
+        var service = Service(context, new ScriptedModel(
+            _ => Reply(Use("v", "scenario_document_validate", Input(ValidDocument()))),
+            r =>
+            {
+                result = r.Messages[^1].Content.Single(c => c.ToolResult != null).ToolResult.Content.Single().Text;
+                return Reply(Text("Validated."));
+            }));
+        var session = await service.CreateSessionAsync(1, null, null, default);
+
+        var turn = await service.RunTurnAsync(session.Id, "Draft.", default);
+
+        Assert.Equal(0, turn.LatestDocument!.Errors);
+        Assert.Equal(["Advisory", "Plan"], JsonNode.Parse(result)!["sourcesAdded"]!.AsArray().Select(n => n!.GetValue<string>()));
+        var stored = JsonNode.Parse((await context.AuthoringDocuments.SingleAsync()).Document)!["sources"]!.AsArray();
+        Assert.Equal(["src-advisory", "src-plan"], stored.Select(s => s!["id"]!.GetValue<string>()));
+        Assert.Equal("https://example.org/advisory", stored[0]!["uri"]!.GetValue<string>());
+        Assert.Equal("document", stored[1]!["type"]!.GetValue<string>());
+    }
+
+    [Fact]
+    public async Task A_document_that_lists_every_builder_source_keeps_its_bytes()
+    {
+        var db = NewDatabase();
+        await using var context = db();
+        context.Scenarios.Add(new Scenario { Id = 1, Name = "Mine" });
+        context.ScenarioSources.Add(new ScenarioSource { ScenarioId = 1, Name = "Advisory", SourceType = "Url", OriginalFileName = "https://example.org/advisory" });
+        await context.SaveChangesAsync();
+        var document = JsonNode.Parse(ValidDocument())!.AsObject();
+        document["sources"] = new JsonArray(new JsonObject { ["id"] = "src-cisa", ["name"] = "CISA advisory", ["type"] = "url", ["uri"] = "https://example.org/advisory" });
+        var text = document.ToJsonString();
+
+        var result = "";
+        var service = Service(context, new ScriptedModel(
+            _ => Reply(Use("v", "scenario_document_validate", Input(text))),
+            r =>
+            {
+                result = r.Messages[^1].Content.Single(c => c.ToolResult != null).ToolResult.Content.Single().Text;
+                return Reply(Text("Validated."));
+            }));
+        var session = await service.CreateSessionAsync(1, null, null, default);
+
+        await service.RunTurnAsync(session.Id, "Draft.", default);
+
+        Assert.Null(JsonNode.Parse(result)!["sourcesAdded"]);
+        Assert.Equal(text, (await context.AuthoringDocuments.SingleAsync()).Document);
+    }
+
     // ───────── the scenario's graph as proposals (J3) ─────────
 
     [Fact]
@@ -692,7 +779,9 @@ public class ScenarioAuthoringServiceTests
         var (service, session, hash) = await BuilderSessionWithADraftAsync(context, document);
         Assert.True((await service.ImportAsync(session, hash, false, false, default)).Imported);
 
-        var other = JsonNode.Parse(document)!.ToJsonString(); // the same document, other bytes: another hash
+        var second = JsonNode.Parse(document)!.AsObject(); // a second version: another hash
+        second["description"] = second["description"]!.GetValue<string>() + " Revised.";
+        var other = second.ToJsonString();
         var turn = await Service(context, new ScriptedModel(
                 _ => Reply(Use("v2", "scenario_document_validate", Input(other))),
                 _ => Reply(Text("A second version."))))
@@ -708,6 +797,42 @@ public class ScenarioAuthoringServiceTests
         await using var check = db();
         Assert.Equal(1, await check.Scenarios.CountAsync());
         Assert.Equal(2, await check.ScenarioDocuments.CountAsync());
+    }
+
+    [Fact]
+    public async Task Entities_the_sources_step_extracted_do_not_make_the_import_ask()
+    {
+        var db = NewDatabase();
+        await using var context = db();
+        var (service, session, hash) = await BuilderSessionWithADraftAsync(context, ValidDocument());
+        context.ScenarioEntities.Add(new ScenarioEntity
+        {
+            ScenarioId = 7, Name = "substation-gw-01", EntityType = "System", Origin = "Extracted", Confidence = 0.9m
+        });
+        await context.SaveChangesAsync();
+
+        var result = await service.ImportAsync(session, hash, false, false, default);
+
+        Assert.True(result.Imported, result.Reason);
+    }
+
+    [Fact]
+    public async Task A_hand_added_entity_still_makes_the_import_ask_even_with_no_document_yet()
+    {
+        var db = NewDatabase();
+        await using var context = db();
+        var (service, session, hash) = await BuilderSessionWithADraftAsync(context, ValidDocument());
+        context.ScenarioEntities.Add(new ScenarioEntity
+        {
+            ScenarioId = 7, Name = "substation-gw-01", EntityType = "System", Origin = "Operator", Confidence = 1m
+        });
+        await context.SaveChangesAsync();
+
+        var refused = await service.ImportAsync(session, hash, false, false, default);
+
+        Assert.False(refused.Imported);
+        Assert.True(refused.NeedsConfirmation);
+        Assert.Equal("replace", refused.Confirm);
     }
 
     /// <summary>A blank scenario 7 with a source, as "New scenario" leaves it, and a session that drafted a document for it.</summary>

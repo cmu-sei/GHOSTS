@@ -13,6 +13,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
+import { TextFieldModule } from '@angular/cdk/text-field';
 import { ChangeDetectionStrategy } from '@angular/core';
 import { ScenarioService, ScenarioHubService, ObjectiveService, N8nWorkflowService } from '../../../core/services';
 import { CreateScenario, ScenarioTimelineEvent, Objective, N8nWorkflow, ScenarioExtras, ApprovedScenarioDocument } from '../../../core/models';
@@ -37,6 +38,7 @@ import { BuilderGraphComponent } from '../../scenario-builder/builder-graph/buil
     MatProgressSpinnerModule,
     MatExpansionModule,
     DragDropModule,
+    TextFieldModule,
     BuilderEntitiesComponent,
     BuilderGraphComponent
   ],
@@ -70,6 +72,17 @@ export class ScenariosPlannerComponent implements OnInit, OnDestroy {
   protected readonly approvedText = computed(() => {
     const text = this.approved()?.document;
     return text ? JSON.stringify(JSON.parse(text), null, 2) : '';
+  });
+  /** Each source id → the names of the entities the imported document drew from it (provenance.source). */
+  protected readonly entitiesBySource = computed(() => {
+    const bySource = new Map<string, string[]>();
+    const text = this.approved()?.document;
+    if (!text) return bySource;
+    for (const entity of JSON.parse(text).entities ?? []) {
+      const source = entity?.provenance?.source;
+      if (source) bySource.set(source, [...(bySource.get(source) ?? []), entity.name ?? entity.id]);
+    }
+    return bySource;
   });
 
   protected scenario: CreateScenario = {
@@ -201,6 +214,7 @@ export class ScenariosPlannerComponent implements OnInit, OnDestroy {
         if (this.loadedScenarioId !== this.scenarioId) {
           this.loadedScenarioId = this.scenarioId;
           this.loadScenario(this.scenarioId);
+          this.loadApproved();
         }
       } else if (this.loadedScenarioId === null) {
         this.loadedScenarioId = -1;

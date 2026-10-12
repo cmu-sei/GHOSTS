@@ -89,6 +89,8 @@ export class BuilderConversationComponent implements OnInit, OnDestroy {
   private readonly blankReadiness = signal<AuthoringReadiness | null>(null);
   /** The readiness dashboard beside the thread: the session's own once one exists, else the blank one. */
   protected readonly dash = computed(() => this.session()?.readiness ?? this.blankReadiness());
+  /** The dashboard's width in pixels, dragged from its left edge and kept in the browser between visits. */
+  protected readonly dashWidth = signal(Number(localStorage.getItem('ghosts.readinessWidth')) || 464);
 
   protected readonly canImport = computed(() => this.session()?.canImport ?? false);
   protected readonly importedBefore = computed(() => this.session()?.importedBefore ?? false);
@@ -418,6 +420,21 @@ export class BuilderConversationComponent implements OnInit, OnDestroy {
     if (chunk.page != null) parts.push(`page ${chunk.page}`);
     if (chunk.startOffset != null) parts.push(`from character ${chunk.startOffset.toLocaleString()}`);
     return parts.join(', ');
+  }
+
+  protected startResize(event: PointerEvent): void {
+    const handle = event.currentTarget as HTMLElement;
+    handle.setPointerCapture(event.pointerId);
+    const startX = event.clientX;
+    const startWidth = this.dashWidth();
+    const move = (e: PointerEvent) => this.dashWidth.set(Math.min(640, Math.max(288, startWidth + startX - e.clientX)));
+    const stop = () => {
+      handle.removeEventListener('pointermove', move);
+      handle.removeEventListener('lostpointercapture', stop);
+      localStorage.setItem('ghosts.readinessWidth', String(this.dashWidth()));
+    };
+    handle.addEventListener('pointermove', move);
+    handle.addEventListener('lostpointercapture', stop);
   }
 
   protected import(): void {
