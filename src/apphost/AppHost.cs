@@ -51,6 +51,8 @@ var api = builder.AddProject<Projects.Ghosts_Api>("api")
     .WithReference(db, "DefaultConnection")
     .WithEnvironment("ConnectionStrings__Provider", "PostgreSQL")
     .WithEnvironment("ASPNETCORE_URLS", "http://0.0.0.0:5000")
+    // The frontend runs on 4222 under Aspire (4200 elsewhere), so allow that origin instead
+    .WithEnvironment("CorsPolicy__Origins__0", "http://localhost:4222")
     .WithHttpEndpoint(port: 5000, name: "http", isProxied: false)
     .WithExternalHttpEndpoints()
     .WithUrlForEndpoint("http", url =>
@@ -202,8 +204,8 @@ var client3 = builder.AddDockerfile("ghosts-client-3", "../../", "src/Dockerfile
 
 var frontend = builder.AddJavaScriptApp("frontend", "../Ghosts.Frontend", "start")
     .WaitFor(api)
-    .WithEnvironment("PORT", "4200")
-    .WithHttpEndpoint(port: 4200, name: "frontend-http", isProxied: false)
+    .WithEnvironment("PORT", "4222")
+    .WithHttpEndpoint(port: 4222, name: "frontend-http", isProxied: false)
     .WithExternalHttpEndpoints();
 
 var docs = builder.AddExecutable("docs", "mkdocs", "../../", "serve", "--dev-addr=0.0.0.0:8000")
