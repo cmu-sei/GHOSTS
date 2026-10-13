@@ -2,12 +2,14 @@
 
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Api.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Services;
 using Ghosts.Api.ViewModels;
+using Ghosts.Domain;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -103,6 +105,35 @@ namespace Ghosts.Api.Controllers.Api
         {
             await timelineService.StopAsync(machineId, timelineId, ct);
             return SuccessResponse("Timeline stopped successfully");
+        }
+
+        /// <summary>
+        /// Runs raw terminal commands once on a machine, in order, by wrapping them in a timeline.
+        /// Output comes back through the normal client results reporting.
+        /// </summary>
+        /// <param name="machineId">The unique identifier of the machine.</param>
+        /// <param name="request">The shell (Bash, Command, or PowerShell) and the commands to run.</param>
+        /// <param name="ct">Cancellation token.</param>
+        /// <returns>The timeline id and whether it was pushed to the connected client or queued for its next poll.</returns>
+        [HttpPost("{machineId}/commands")]
+        [ProducesResponseType(typeof(object), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(object), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(object), (int)HttpStatusCode.BadRequest)]
+        [SwaggerOperation(nameof(TimelinesSendCommands))]
+        public async Task<IActionResult> TimelinesSendCommands([FromRoute] Guid machineId, [FromBody, Required] MachineCommandsViewModel request, CancellationToken ct)
+        {
+            if (request?.Shell is not (HandlerType.Bash or HandlerType.Command or HandlerType.PowerShell))
+                return BadRequestResponse("Shell must be Bash, Command, or PowerShell");
+
+            var commands = request.Commands?.Where(c => !string.IsNullOrWhiteSpace(c)).ToList() ?? [];
+            if (commands.Count == 0)
+                return BadRequestResponse("At least one command is required");
+
+            var result = await timelineService.SendCommandsAsync(machineId, request.Shell, commands, ct);
+            if (!result.Found)
+                return NotFoundResponse($"Machine ID {machineId} not found");
+
+            return Ok(new { success = true, timelineId = result.TimelineId, delivery = result.Pushed ? "pushed" : "queued" });
         }
     }
 }
