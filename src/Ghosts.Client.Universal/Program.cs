@@ -98,7 +98,17 @@ internal static class Program
         ListenerManager.Run();
 
         //do we have client id? or is this first run?
-        _log.Trace($"CheckID: {Program.CheckId.Id}");
+        var id = CheckId.Id;
+        _log.Trace($"CheckID: {id}");
+        if (string.IsNullOrEmpty(id))
+        {
+            _log.Error("No client ID was returned; continuing startup and retrying registration every 5 minutes.");
+            _ = Task.Run(async () =>
+            {
+                while (string.IsNullOrEmpty(CheckId.Id))
+                    await Task.Delay(TimeSpan.FromMinutes(5));
+            });
+        }
 
         //connect to command server for updates and sending logs
         Updates.Run();

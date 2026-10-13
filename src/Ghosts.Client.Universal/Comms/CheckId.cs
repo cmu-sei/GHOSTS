@@ -21,13 +21,21 @@ public class CheckId
     /// <summary>
     /// The actual path to the client id file, specified in application config
     /// </summary>
-    private readonly string _idFile = ApplicationDetails.InstanceFiles.Id;
+    private readonly string _idFile;
+    private readonly Func<Task<string>> _getId;
 
-    private DateTime _lastChecked = DateTime.Now;
+    private DateTime _lastChecked = DateTime.MinValue;
     private string _id = string.Empty;
 
     public CheckId()
+        : this(ApplicationDetails.InstanceFiles.Id, null)
     {
+    }
+
+    internal CheckId(string idFile, Func<Task<string>> getId)
+    {
+        _idFile = idFile;
+        _getId = getId ?? Run;
         _log.Info("CheckId instance created");
         _log.Debug($"CheckId instantiated with ID File Path: {_idFile}");
     }
@@ -61,7 +69,7 @@ public class CheckId
 
                     _log.Info("Attempting to retrieve ID from server.");
                     _lastChecked = DateTime.Now;
-                    _id = Task.Run(async () => await Run()).GetAwaiter().GetResult();
+                    _id = _getId().GetAwaiter().GetResult();
 
                     if (string.IsNullOrEmpty(_id))
                     {
