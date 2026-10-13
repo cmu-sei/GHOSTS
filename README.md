@@ -74,7 +74,7 @@ docker compose up -d
 
 | Service | URL | Notes |
 |---------|-----|-------|
-| GHOSTS Frontend | http://localhost:4200 | Angular management UI |
+| GHOSTS Frontend | http://localhost:4200 | Angular management UI (http://localhost:4222 under Aspire) |
 | GHOSTS API | http://localhost:5000 | REST API + Swagger at `/swagger` |
 | Grafana | http://localhost:3000 | Activity dashboards |
 | n8n | http://localhost:5678 | Workflow automation |
