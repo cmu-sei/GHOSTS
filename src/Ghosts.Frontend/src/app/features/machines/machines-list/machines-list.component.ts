@@ -8,10 +8,11 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ChangeDetectionStrategy } from '@angular/core';
-import { Machine, MachineStatus } from '../../../core/models';
+import { Machine, MachineStatus, SendCommandsRequest } from '../../../core/models';
 import { MachineService, TimelineService } from '../../../core/services';
 import { MachineJsonDialogComponent } from '../machine-json-dialog/machine-json-dialog.component';
 import { TimelineSelectorDialogComponent } from '../timeline-selector-dialog/timeline-selector-dialog.component';
+import { SendCommandDialogComponent } from '../send-command-dialog/send-command-dialog.component';
 import { ActivityViewerDialogComponent } from '../activity-viewer-dialog/activity-viewer-dialog.component';
 import { SearchBarComponent } from '../../../shared/components/search-bar/search-bar.component';
 
@@ -92,6 +93,10 @@ import { SearchBarComponent } from '../../../shared/components/search-bar/search
                 <button mat-menu-item (click)="runTimeline(machine)">
                   <i class="fas fa-play"></i>
                   <span>Run Timeline</span>
+                </button>
+                <button mat-menu-item (click)="sendCommand(machine)">
+                  <i class="fas fa-terminal"></i>
+                  <span>Send Command</span>
                 </button>
                 <button mat-menu-item (click)="viewActivity(machine)">
                   <i class="fas fa-chart-line"></i>
@@ -359,6 +364,31 @@ export class MachinesListComponent implements OnInit {
           },
           error: (err) => {
             this.snackBar.open(`Failed to start timeline: ${err.message}`, undefined, { duration: 3500 });
+          }
+        });
+      }
+    });
+  }
+
+  protected sendCommand(machine: Machine): void {
+    const dialogRef = this.dialog.open(SendCommandDialogComponent, {
+      width: '500px',
+      data: { machine },
+      autoFocus: false,
+      restoreFocus: false
+    });
+
+    dialogRef.afterClosed().subscribe((request?: SendCommandsRequest) => {
+      if (request) {
+        this.timelineService.sendCommands(machine.id, request).subscribe({
+          next: (result) => {
+            const message = result.delivery === 'pushed'
+              ? `Commands sent to ${machine.name}`
+              : `Commands queued for ${machine.name}; they run on its next check-in`;
+            this.snackBar.open(message, undefined, { duration: 3500 });
+          },
+          error: (err) => {
+            this.snackBar.open(`Failed to send commands: ${err.error?.message ?? err.message}`, undefined, { duration: 3500 });
           }
         });
       }

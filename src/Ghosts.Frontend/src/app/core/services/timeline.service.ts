@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Timeline, PostTimelineRequest } from '../models';
+import { Timeline, PostTimelineRequest, SendCommandsRequest, SendCommandsResponse } from '../models';
 import { ConfigService } from './config.service';
 
 @Injectable({
@@ -25,5 +25,9 @@ export class TimelineService {
 
   stopTimeline(machineId: string, timelineId: string): Observable<void> {
     return this.http.post<void>(`${this.apiUrl}/${machineId}/${timelineId}/stop`, {});
+  }
+
+  sendCommands(machineId: string, request: SendCommandsRequest): Observable<SendCommandsResponse> {
+    return this.http.post<SendCommandsResponse>(`${this.apiUrl}/${machineId}/commands`, request);
   }
 }

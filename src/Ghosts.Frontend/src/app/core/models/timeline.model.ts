@@ -36,6 +36,19 @@ export interface PostTimelineRequest {
   updateType?: UpdateType;
 }
 
+export type CommandShell = 'Bash' | 'Command' | 'PowerShell';
+
+export interface SendCommandsRequest {
+  shell: CommandShell;
+  commands: string[];
+}
+
+export interface SendCommandsResponse {
+  success: boolean;
+  timelineId: string;
+  delivery: 'pushed' | 'queued';
+}
+
 export enum UpdateType {
   Timeline = 'Timeline',
   TimelinePartial = 'TimelinePartial',
