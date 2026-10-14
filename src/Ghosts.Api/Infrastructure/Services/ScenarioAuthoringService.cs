@@ -76,7 +76,7 @@ namespace Ghosts.Api.Infrastructure.Services
         string Model = null,
         bool ImportedBefore = false);
 
-    /// <summary>Cause is "model error", "timeout" or "empty reply".</summary>
+    /// <summary>Cause is "model error", "timeout", "content filtered" or "empty reply".</summary>
     public record AuthoringFailure(string Cause, string Notice, string Details);
 
     /// <summary>Confirm names what a refusal needs confirmed before the import is sent again: "again" (A4) or "replace".</summary>
@@ -310,12 +310,14 @@ namespace Ghosts.Api.Infrastructure.Services
             limit.CancelAfter(TurnLimitOverride ?? TimeSpan.FromMinutes(_options.TurnTimeoutMinutes));
 
             string reply = null;
+            var filtered = false;
             AuthoringFailure failure = null;
             try
             {
                 while (true)
                 {
                     var response = await CallModelAsync(session.Model, session.Effort, conversation, rows, sessionId, turn, limit.Token);
+                    filtered = IsFiltered(response);
                     var content = response.Output?.Message?.Content ?? [];
                     await ReportAsync(session, turn, "model-reply", new { stopReason = response.StopReason?.Value });
                     conversation.Add(new Message { Role = ConversationRole.Assistant, Content = content });
@@ -358,7 +360,10 @@ namespace Ghosts.Api.Infrastructure.Services
                 }
 
                 if (string.IsNullOrWhiteSpace(reply))
-                    failure = Failed("empty reply", "The model returned an empty reply.");
+                    failure = filtered
+                        ? Failed("content filtered", "The model provider's content filter stopped the response twice. " +
+                                                     "The filter is intermittent: send the message again.")
+                        : Failed("empty reply", "The model returned an empty reply.");
             }
             catch (OperationCanceledException) when (limit.IsCancellationRequested && !ct.IsCancellationRequested)
             {
@@ -440,8 +445,10 @@ namespace Ghosts.Api.Infrastructure.Services
             details);
 
         /// <summary>
-        /// One model call, retried once on HTTP 503 (F4). Every attempt is a row with its usage and stop
-        /// reason from the provider's response (H1); a failed attempt records its error instead.
+        /// One model call, retried once on HTTP 503 (F4) or when the provider's content filter stops the response,
+        /// which is intermittent: the same request often passes on a second try. Every attempt is a row with its
+        /// usage and stop reason from the provider's response (H1); a failed or filtered attempt records an error,
+        /// so it never joins the conversation.
         /// </summary>
         private async Task<ConverseResponse> CallModelAsync(string model, string effort, List<Message> conversation,
             List<AuthoringMessage> rows, Guid sessionId, int turn, CancellationToken limit)
@@ -484,6 +491,12 @@ namespace Ghosts.Api.Infrastructure.Services
                     row.CacheReadTokens = response.Usage?.CacheReadInputTokens;
                     row.CacheWriteTokens = response.Usage?.CacheWriteInputTokens;
                     row.StopReason = response.StopReason?.Value;
+                    if (attempt == 1 && IsFiltered(response))
+                    {
+                        row.Error = "Content filtered: retried.";
+                        _log.Warn($"Authoring model response was content-filtered, session {sessionId}, turn {turn}; retrying once");
+                        continue;
+                    }
                     return response;
                 }
                 catch (OperationCanceledException) when (limit.IsCancellationRequested)
@@ -503,6 +516,8 @@ namespace Ghosts.Api.Infrastructure.Services
                 }
             }
         }
+
+        private static bool IsFiltered(ConverseResponse response) => response.StopReason?.Value == "content_filtered";
 
         private static bool IsUnavailable(Exception ex) =>
             ex is ServiceUnavailableException

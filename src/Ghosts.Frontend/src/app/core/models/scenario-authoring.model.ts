@@ -41,7 +41,7 @@ export interface AuthoringDocumentStatus {
   importedScenarioId: number | null;
 }
 
-/** Cause is "model error", "timeout" or "empty reply" (B5). */
+/** Cause is "model error", "timeout", "content filtered" or "empty reply" (B5). */
 export interface AuthoringFailure {
   cause: string;
   notice: string;

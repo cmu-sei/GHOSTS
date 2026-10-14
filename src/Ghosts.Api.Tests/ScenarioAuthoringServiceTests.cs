@@ -120,6 +120,46 @@ public class ScenarioAuthoringServiceTests
         Assert.Equal(2, second.Turn);
     }
 
+    [Fact]
+    public async Task A_content_filtered_response_is_retried_once_and_kept_out_of_the_history()
+    {
+        var db = NewDatabase();
+        await using var context = db();
+        var service = Service(context, new ScriptedModel(_ => Filtered(), _ => Reply(Text("Here."))));
+        var session = await service.CreateSessionAsync(null, null, null, default);
+
+        var result = await service.RunTurnAsync(session.Id, "Hello.", default);
+
+        Assert.Null(result.Failure);
+        Assert.Equal("Here.", result.Reply);
+        var models = await context.AuthoringMessages.Where(m => m.Role == AuthoringMessage.ModelRole).OrderBy(m => m.Sequence).ToListAsync();
+        Assert.Equal(["content_filtered", "end_turn"], models.Select(m => m.StopReason));
+        Assert.Equal([false, true], models.Select(m => m.InHistory));
+
+        // The next turn's history has one assistant message, not the filtered attempt as well.
+        var next = new ScriptedModel(r =>
+        {
+            Assert.Equal([ConversationRole.User, ConversationRole.Assistant, ConversationRole.User], r.Messages.Select(m => m.Role));
+            return Reply(Text("Again."));
+        });
+        Assert.Null((await Service(context, next).RunTurnAsync(session.Id, "Hello again.", default)).Failure);
+    }
+
+    [Fact]
+    public async Task A_response_filtered_twice_fails_the_turn_as_content_filtered()
+    {
+        var db = NewDatabase();
+        await using var context = db();
+        var service = Service(context, new ScriptedModel(_ => Filtered(), _ => Filtered()));
+        var session = await service.CreateSessionAsync(null, null, null, default);
+
+        var result = await service.RunTurnAsync(session.Id, "Hello.", default);
+
+        Assert.Equal("content filtered", result.Failure?.Cause);
+        Assert.Contains("content filter", result.Failure!.Details);
+        Assert.False(await context.AuthoringMessages.AnyAsync(m => m.InHistory));
+    }
+
     // ───────── d: a provider error after a validation ─────────
 
     [Fact]
@@ -1119,6 +1159,14 @@ public class ScenarioAuthoringServiceTests
     };
 
     private static ContentBlock Text(string text) => new() { Text = text };
+
+    /// <summary>What the provider returns when its content filter stops a response: hidden reasoning only.</summary>
+    private static ConverseResponse Filtered()
+    {
+        var response = Reply(Reasoning("", "sig"));
+        response.StopReason = new StopReason("content_filtered");
+        return response;
+    }
 
     private static ContentBlock Reasoning(string text, string signature) => new()
     {
