@@ -120,6 +120,46 @@ public class ScenarioAuthoringServiceTests
         Assert.Equal(2, second.Turn);
     }
 
+    [Fact]
+    public async Task A_content_filtered_response_is_retried_once_and_kept_out_of_the_history()
+    {
+        var db = NewDatabase();
+        await using var context = db();
+        var service = Service(context, new ScriptedModel(_ => Filtered(), _ => Reply(Text("Here."))));
+        var session = await service.CreateSessionAsync(null, null, null, default);
+
+        var result = await service.RunTurnAsync(session.Id, "Hello.", default);
+
+        Assert.Null(result.Failure);
+        Assert.Equal("Here.", result.Reply);
+        var models = await context.AuthoringMessages.Where(m => m.Role == AuthoringMessage.ModelRole).OrderBy(m => m.Sequence).ToListAsync();
+        Assert.Equal(["content_filtered", "end_turn"], models.Select(m => m.StopReason));
+        Assert.Equal([false, true], models.Select(m => m.InHistory));
+
+        // The next turn's history has one assistant message, not the filtered attempt as well.
+        var next = new ScriptedModel(r =>
+        {
+            Assert.Equal([ConversationRole.User, ConversationRole.Assistant, ConversationRole.User], r.Messages.Select(m => m.Role));
+            return Reply(Text("Again."));
+        });
+        Assert.Null((await Service(context, next).RunTurnAsync(session.Id, "Hello again.", default)).Failure);
+    }
+
+    [Fact]
+    public async Task A_response_filtered_twice_fails_the_turn_as_content_filtered()
+    {
+        var db = NewDatabase();
+        await using var context = db();
+        var service = Service(context, new ScriptedModel(_ => Filtered(), _ => Filtered()));
+        var session = await service.CreateSessionAsync(null, null, null, default);
+
+        var result = await service.RunTurnAsync(session.Id, "Hello.", default);
+
+        Assert.Equal("content filtered", result.Failure?.Cause);
+        Assert.Contains("content filter", result.Failure!.Details);
+        Assert.False(await context.AuthoringMessages.AnyAsync(m => m.InHistory));
+    }
+
     // ───────── d: a provider error after a validation ─────────
 
     [Fact]
@@ -991,6 +1031,35 @@ public class ScenarioAuthoringServiceTests
         await Assert.ThrowsAsync<ArgumentException>(() => service.CreateSessionAsync(null, "plain", "low", default));
     }
 
+    [Fact]
+    public async Task An_openai_model_is_sent_reasoning_effort_and_no_cache_points()
+    {
+        var db = NewDatabase();
+        await using var context = db();
+        var options = new ScenarioAuthoringOptions
+        {
+            Model = "scripted",
+            Models = [new() { Name = "Scripted", Id = "scripted", Efforts = ["high"] }, new() { Name = "Sol", Id = "us.openai.gpt-6.1-sol", Efforts = ["high"] }],
+            ValidatorTimeoutSeconds = 30
+        };
+        var sent = new List<ConverseRequest>();
+        var service = Service(context, new ScriptedModel(
+            r => { sent.Add(r); return Reply(Text("One.")); },
+            r => { sent.Add(r); return Reply(Text("Two.")); }), options);
+
+        var sol = await service.CreateSessionAsync(null, "us.openai.gpt-6.1-sol", "high", default);
+        await service.RunTurnAsync(sol.Id, "Hi.", default);
+        Assert.Equal("high", sent[0].AdditionalModelRequestFields.AsDictionary()["reasoning"].AsDictionary()["effort"].AsString());
+        Assert.DoesNotContain(sent[0].System, b => b.CachePoint != null);
+        Assert.DoesNotContain(sent[0].ToolConfig.Tools, t => t.CachePoint != null);
+        Assert.DoesNotContain(sent[0].Messages.SelectMany(m => m.Content), c => c.CachePoint != null);
+
+        // An Anthropic model keeps its cache points.
+        var scripted = await service.CreateSessionAsync(null, "scripted", "high", default);
+        await service.RunTurnAsync(scripted.Id, "Hi.", default);
+        Assert.Contains(sent[1].ToolConfig.Tools, t => t.CachePoint != null);
+    }
+
     // ───────── the fallback model (F4) ─────────
 
     [Fact]
@@ -1119,6 +1188,14 @@ public class ScenarioAuthoringServiceTests
     };
 
     private static ContentBlock Text(string text) => new() { Text = text };
+
+    /// <summary>What the provider returns when its content filter stops a response: hidden reasoning only.</summary>
+    private static ConverseResponse Filtered()
+    {
+        var response = Reply(Reasoning("", "sig"));
+        response.StopReason = new StopReason("content_filtered");
+        return response;
+    }
 
     private static ContentBlock Reasoning(string text, string signature) => new()
     {
