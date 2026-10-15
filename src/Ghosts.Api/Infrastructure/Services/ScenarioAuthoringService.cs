@@ -457,7 +457,9 @@ namespace Ghosts.Api.Infrastructure.Services
             {
                 var system = new List<SystemContentBlock> { new() { Text = _prompt ?? DefaultPrompt.Value } };
                 var tools = ScenarioAuthoringTools.Configuration();
-                if (_options.PromptCaching)
+                // OpenAI models on Bedrock reject a cachePoint on the tools; Converse caches their prompts implicitly.
+                var caching = _options.PromptCaching && !IsOpenAi(model);
+                if (caching)
                 {
                     system.Add(new SystemContentBlock { CachePoint = CachePoint() });
                     tools.Tools.Add(new Tool { CachePoint = CachePoint() });
@@ -466,14 +468,17 @@ namespace Ghosts.Api.Infrastructure.Services
                 {
                     ModelId = model,
                     System = system,
-                    Messages = _options.PromptCaching ? WithCachePoint(conversation) : conversation,
+                    Messages = caching ? WithCachePoint(conversation) : conversation,
                     ToolConfig = tools,
                     // Temperature is not sent: newer Anthropic models on Bedrock reject it.
                     InferenceConfig = new InferenceConfiguration { MaxTokens = _options.MaxOutputTokens }
                 };
-                // H3: the effort level is an Anthropic request field, output_config.effort, which Converse passes through.
+                // H3: the effort level is a provider request field which Converse passes through: Anthropic's
+                // output_config.effort, OpenAI's reasoning.effort.
                 if (effort != null)
-                    request.AdditionalModelRequestFields = AuthoringBlocks.ToDocument(new JsonObject { ["output_config"] = new JsonObject { ["effort"] = effort } });
+                    request.AdditionalModelRequestFields = AuthoringBlocks.ToDocument(IsOpenAi(model)
+                        ? new JsonObject { ["reasoning"] = new JsonObject { ["effort"] = effort } }
+                        : new JsonObject { ["output_config"] = new JsonObject { ["effort"] = effort } });
 
                 var row = new AuthoringMessage
                 {
@@ -536,6 +541,9 @@ namespace Ghosts.Api.Infrastructure.Services
         }
 
         private static CachePointBlock CachePoint() => new() { Type = CachePointType.Default };
+
+        /// <summary>An OpenAI model id on Bedrock: openai.gpt-6.1-sol, or an inference profile of one such as us.openai.gpt-6.1-sol.</summary>
+        private static bool IsOpenAi(string model) => model.Contains("openai.");
 
         /// <summary>C2: a validation is kept the moment it returns, inside the turn, whatever happens next.</summary>
         private async Task<AuthoringDocument> KeepAsync(Guid sessionId, int turn, AuthoringValidation v)

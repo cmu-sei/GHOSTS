@@ -1031,6 +1031,35 @@ public class ScenarioAuthoringServiceTests
         await Assert.ThrowsAsync<ArgumentException>(() => service.CreateSessionAsync(null, "plain", "low", default));
     }
 
+    [Fact]
+    public async Task An_openai_model_is_sent_reasoning_effort_and_no_cache_points()
+    {
+        var db = NewDatabase();
+        await using var context = db();
+        var options = new ScenarioAuthoringOptions
+        {
+            Model = "scripted",
+            Models = [new() { Name = "Scripted", Id = "scripted", Efforts = ["high"] }, new() { Name = "Sol", Id = "us.openai.gpt-6.1-sol", Efforts = ["high"] }],
+            ValidatorTimeoutSeconds = 30
+        };
+        var sent = new List<ConverseRequest>();
+        var service = Service(context, new ScriptedModel(
+            r => { sent.Add(r); return Reply(Text("One.")); },
+            r => { sent.Add(r); return Reply(Text("Two.")); }), options);
+
+        var sol = await service.CreateSessionAsync(null, "us.openai.gpt-6.1-sol", "high", default);
+        await service.RunTurnAsync(sol.Id, "Hi.", default);
+        Assert.Equal("high", sent[0].AdditionalModelRequestFields.AsDictionary()["reasoning"].AsDictionary()["effort"].AsString());
+        Assert.DoesNotContain(sent[0].System, b => b.CachePoint != null);
+        Assert.DoesNotContain(sent[0].ToolConfig.Tools, t => t.CachePoint != null);
+        Assert.DoesNotContain(sent[0].Messages.SelectMany(m => m.Content), c => c.CachePoint != null);
+
+        // An Anthropic model keeps its cache points.
+        var scripted = await service.CreateSessionAsync(null, "scripted", "high", default);
+        await service.RunTurnAsync(scripted.Id, "Hi.", default);
+        Assert.Contains(sent[1].ToolConfig.Tools, t => t.CachePoint != null);
+    }
+
     // ───────── the fallback model (F4) ─────────
 
     [Fact]

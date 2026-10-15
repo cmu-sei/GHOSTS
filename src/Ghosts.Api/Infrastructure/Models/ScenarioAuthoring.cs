@@ -41,8 +41,8 @@ public class AuthoringModelChoice
     public string Id { get; set; } = string.Empty;
 
     /// <summary>
-    /// H3: the effort levels this model takes (low, medium, high, xhigh, max on current Anthropic models), sent
-    /// as the request's output_config.effort. Empty: the model takes none, and the page offers none.
+    /// H3: the effort levels this model takes (low, medium, high, xhigh, max on current Anthropic and OpenAI models),
+    /// sent as the request's output_config.effort or reasoning.effort. Empty: the model takes none, and the page offers none.
     /// </summary>
     public List<string> Efforts { get; set; } = [];
 
