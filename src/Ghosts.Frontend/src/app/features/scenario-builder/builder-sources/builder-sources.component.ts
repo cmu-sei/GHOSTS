@@ -137,7 +137,7 @@ export class BuilderSourcesComponent implements OnInit, OnDestroy {
     });
 
     this.urlForm = this.fb.group({
-      name: ['', Validators.required],
+      name: [''],
       url: ['', [Validators.required, Validators.pattern(/^https?:\/\/.+/)]],
     });
   }
@@ -179,12 +179,12 @@ export class BuilderSourcesComponent implements OnInit, OnDestroy {
   protected addUrlSource(): void {
     if (this.urlForm.invalid) return;
     const isFirst = this.sources().length === 0;
-    const sourceName = this.urlForm.value.name as string;
 
     this.builderService.addUrl(this.scenarioId, this.urlForm.value).subscribe({
-      next: () => {
+      next: (source) => {
         this.snackBar.open('URL source added', 'Close', { duration: 2000 });
-        if (isFirst) this.renameScenarioFromSource(sourceName);
+        // The server's name: the one typed, or the page's title when the field was left blank.
+        if (isFirst) this.renameScenarioFromSource(source.name);
         this.urlForm.reset();
         this.loadSources();
       },

@@ -13,6 +13,18 @@ namespace Ghosts.Api.Tests;
 /// <summary>A chunk records where it sits in its source, so a citation can name the page or the place, not only the chunk.</summary>
 public class ScenarioSourceServiceTests
 {
+    [Theory]
+    [InlineData("  My name ", "Page title", "https://example.org/a", "My name")]
+    [InlineData("", "  Volt\n Typhoon  | CISA ", "https://example.org/a", "Volt Typhoon | CISA")]
+    [InlineData(null, "", "https://example.org/advisories/aa24-038a/", "example.org/advisories/aa24-038a")]
+    [InlineData(null, null, "https://example.org/", "example.org")]
+    public void A_url_source_is_named_as_given_else_by_its_page_title_else_by_its_address(string? given, string? title, string url, string expected) =>
+        Assert.Equal(expected, ScenarioSourceService.UrlSourceName(given, title, url));
+
+    [Fact]
+    public void A_url_source_name_fits_the_column() =>
+        Assert.Equal(500, ScenarioSourceService.UrlSourceName(null, new string('x', 900), "https://example.org").Length);
+
     [Fact]
     public async Task Chunks_record_their_offset_in_the_source_and_the_pdf_page_they_start_on()
     {
