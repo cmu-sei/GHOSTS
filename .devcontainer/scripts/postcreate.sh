@@ -42,3 +42,9 @@ echo "Installing frontend dependencies..."
 
 echo "Installing Python packages..."
 pip install --no-cache-dir --break-system-packages openai anthropic mkdocs-material
+
+# The API fetches URL sources with Playwright (Microsoft.Playwright in src/Ghosts.Api/Ghosts.Api.csproj), which needs
+# Chromium and its system libraries; the base image has neither, and without them every fetch falls back to plain
+# HTTP. Keep the version in step with that package, so the browser build is the one it expects.
+echo "Installing Chromium for Playwright..."
+npx -y playwright@1.63.0 install --with-deps chromium || echo "postcreate: Chromium install failed (continuing)" >&2
