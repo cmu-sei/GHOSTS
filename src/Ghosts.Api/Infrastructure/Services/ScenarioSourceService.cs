@@ -146,6 +146,31 @@ namespace Ghosts.Api.Infrastructure.Services
             return name.Length > 500 ? name[..500] : name;
         }
 
+        /// <summary>
+        /// Waits until the page's text is the same length on two reads half a second apart, at most ten seconds, so a
+        /// page that renders its text with script is read once it has, without waiting on its unrelated traffic.
+        /// </summary>
+        private static async Task WaitForTextToSettleAsync(IPage page)
+        {
+            var deadline = DateTime.UtcNow.AddSeconds(10);
+            var last = -1;
+            while (DateTime.UtcNow < deadline)
+            {
+                int length;
+                try
+                {
+                    length = (await page.InnerTextAsync("body")).Length;
+                }
+                catch (PlaywrightException)
+                {
+                    length = -1; // mid-navigation: no body to read yet
+                }
+                if (length >= 0 && length == last) return;
+                last = length;
+                await page.WaitForTimeoutAsync(500);
+            }
+        }
+
         private static async Task<(string Text, string Title)> FetchUrlWithBrowserAsync(string url, CancellationToken ct)
         {
             try
@@ -162,11 +187,13 @@ namespace Ghosts.Api.Infrastructure.Services
                 });
                 var page = await context.NewPageAsync();
 
+                // Not NetworkIdle: analytics keep pages like CISA's busy for seconds after the text is there (9.5 s vs 2 s).
                 await page.GotoAsync(url, new PageGotoOptions
                 {
-                    WaitUntil = WaitUntilState.NetworkIdle,
+                    WaitUntil = WaitUntilState.DOMContentLoaded,
                     Timeout = 30000
                 });
+                await WaitForTextToSettleAsync(page);
 
                 // Dismiss common consent/disclaimer modals by clicking visible buttons
                 var dismissSelectors = new[]
@@ -202,8 +229,9 @@ namespace Ghosts.Api.Infrastructure.Services
                             await btn.ClickAsync(new LocatorClickOptions { Timeout = 2000 });
                             _log.Info($"Dismissed modal element matching: {selector}");
                             // Wait for navigation or content to load after click
-                            await page.WaitForLoadStateAsync(LoadState.NetworkIdle,
+                            await page.WaitForLoadStateAsync(LoadState.DOMContentLoaded,
                                 new PageWaitForLoadStateOptions { Timeout = 10000 });
+                            await WaitForTextToSettleAsync(page);
                             break;
                         }
                     }
