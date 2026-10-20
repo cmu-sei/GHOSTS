@@ -91,9 +91,10 @@ namespace Ghosts.Api.Infrastructure.Services
         public async Task<ScenarioSource> AddUrlAsync(int scenarioId, CreateScenarioSourceUrlDto dto, CancellationToken ct)
         {
             var fetchedContent = string.Empty;
+            var title = string.Empty;
             try
             {
-                fetchedContent = await FetchUrlWithBrowserAsync(dto.Url, ct);
+                (fetchedContent, title) = await FetchUrlWithBrowserAsync(dto.Url, ct);
                 _log.Info($"Fetched {fetchedContent.Length} characters from URL: {dto.Url}");
             }
             catch (Exception ex)
@@ -105,7 +106,7 @@ namespace Ghosts.Api.Infrastructure.Services
             var source = new ScenarioSource
             {
                 ScenarioId = scenarioId,
-                Name = dto.Name,
+                Name = UrlSourceName(dto.Name, title, dto.Url),
                 SourceType = "Url",
                 OriginalFileName = dto.Url,
                 Content = fetchedContent,
@@ -132,7 +133,20 @@ namespace Ghosts.Api.Infrastructure.Services
             return await GetByIdAsync(source.Id, ct);
         }
 
-        private static async Task<string> FetchUrlWithBrowserAsync(string url, CancellationToken ct)
+        /// <summary>
+        /// The name the developer gave, or else the page's title, or else the URL's host and path; at most the
+        /// 500 characters the column holds.
+        /// </summary>
+        public static string UrlSourceName(string given, string title, string url)
+        {
+            var name = !string.IsNullOrWhiteSpace(given) ? given.Trim()
+                : !string.IsNullOrWhiteSpace(title) ? Regex.Replace(title, @"\s+", " ").Trim()
+                : Uri.TryCreate(url, UriKind.Absolute, out var uri) ? (uri.Host + uri.AbsolutePath).TrimEnd('/')
+                : url ?? string.Empty;
+            return name.Length > 500 ? name[..500] : name;
+        }
+
+        private static async Task<(string Text, string Title)> FetchUrlWithBrowserAsync(string url, CancellationToken ct)
         {
             try
             {
@@ -205,7 +219,7 @@ namespace Ghosts.Api.Infrastructure.Services
                 text = Regex.Replace(text, @"[ \t]+", " ");
                 text = Regex.Replace(text, @"\n{3,}", "\n\n");
 
-                return text.Trim();
+                return (text.Trim(), await page.TitleAsync());
             }
             catch (PlaywrightException ex)
             {
@@ -214,14 +228,15 @@ namespace Ghosts.Api.Infrastructure.Services
             }
         }
 
-        private static async Task<string> FetchUrlWithHttpClientAsync(string url, CancellationToken ct)
+        private static async Task<(string Text, string Title)> FetchUrlWithHttpClientAsync(string url, CancellationToken ct)
         {
             using var httpClient = new HttpClient();
             httpClient.Timeout = TimeSpan.FromSeconds(30);
             httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent",
                 "Mozilla/5.0 (compatible; GHOSTS/ScenarioBuilder)");
             var html = await httpClient.GetStringAsync(url, ct);
-            return StripHtml(html);
+            var title = Regex.Match(html, @"<title[^>]*>([\s\S]*?)</title>", RegexOptions.IgnoreCase);
+            return (StripHtml(html), title.Success ? WebUtility.HtmlDecode(title.Groups[1].Value) : string.Empty);
         }
 
         private static string StripHtml(string html)

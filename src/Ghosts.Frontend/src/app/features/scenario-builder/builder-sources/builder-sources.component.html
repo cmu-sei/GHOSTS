@@ -67,8 +67,8 @@
       <mat-card-content>
         <form [formGroup]="urlForm" (ngSubmit)="addUrlSource()">
           <mat-form-field appearance="fill" class="full-width">
-            <mat-label>Name</mat-label>
-            <input matInput formControlName="name" placeholder="e.g., Threat Intel Article" />
+            <mat-label>Name (optional)</mat-label>
+            <input matInput formControlName="name" placeholder="Leave blank to use the page's title" />
           </mat-form-field>
 
           <mat-form-field appearance="fill" class="full-width">
