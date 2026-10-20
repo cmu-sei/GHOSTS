@@ -8,6 +8,8 @@ export interface BuilderModel {
   /** The model's effort level for the conversation (H3), or null for the model's default. */
   effort: string | null;
   models: AuthoringModelChoice[];
+  /** The model that reads sources into entities when the server fixes one; null when the pick does both. */
+  extractionModel?: string | null;
 }
 
 export interface ScenarioSource {
