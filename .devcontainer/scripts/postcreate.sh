@@ -43,8 +43,10 @@ echo "Installing frontend dependencies..."
 echo "Installing Python packages..."
 pip install --no-cache-dir --break-system-packages openai anthropic mkdocs-material
 
-# The API fetches URL sources with Playwright (Microsoft.Playwright in src/Ghosts.Api/Ghosts.Api.csproj), which needs
-# Chromium and its system libraries; the base image has neither, and without them every fetch falls back to plain
-# HTTP. Keep the version in step with that package, so the browser build is the one it expects.
-echo "Installing Chromium for Playwright..."
-npx -y playwright@1.63.0 install --with-deps chromium || echo "postcreate: Chromium install failed (continuing)" >&2
+# The API fetches URL sources with headless Playwright (Microsoft.Playwright in src/Ghosts.Api/Ghosts.Api.csproj),
+# which needs the headless shell and its system libraries; the base image has neither, and without them every fetch
+# falls back to plain HTTP. The version is read from that package, not @latest: each Playwright release expects its
+# own browser build, so an npm release ahead of the .NET one installs a build the API won't find.
+PLAYWRIGHT_VERSION=$(sed -n 's/.*"Microsoft.Playwright" Version="\([^"]*\)".*/\1/p' "$SCRIPT_DIR/../../src/Ghosts.Api/Ghosts.Api.csproj")
+echo "Installing the Chromium headless shell for Playwright ${PLAYWRIGHT_VERSION}..."
+npx -y "playwright@${PLAYWRIGHT_VERSION}" install --with-deps chromium-headless-shell || echo "postcreate: Chromium install failed (continuing)" >&2
