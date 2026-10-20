@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, Subject, tap } from 'rxjs';
 import { ConfigService } from './config.service';
 import {
   ScenarioSource, ScenarioEntity, ScenarioEdge,
@@ -17,14 +17,18 @@ export class ScenarioBuilderService {
     return `${this.config.apiUrl}/scenarios/${scenarioId}/builder`;
   }
 
-  // ── The model: one per scenario, for extraction and the conversation ──
+  // ── The model: one per scenario, for the conversation, and for extraction unless the server fixes one ──
 
   getModel(scenarioId: number): Observable<BuilderModel> {
     return this.http.get<BuilderModel>(`${this.builderUrl(scenarioId)}/model`);
   }
 
+  /** Each pick saved, so the Conversation step, created with the Sources step, shows the new model before a session exists. */
+  readonly modelPicked = new Subject<{ scenarioId: number; choice: BuilderModel }>();
+
   setModel(scenarioId: number, model: string, effort: string | null): Observable<BuilderModel> {
-    return this.http.put<BuilderModel>(`${this.builderUrl(scenarioId)}/model`, { model, effort });
+    return this.http.put<BuilderModel>(`${this.builderUrl(scenarioId)}/model`, { model, effort })
+      .pipe(tap((choice) => this.modelPicked.next({ scenarioId, choice })));
   }
 
   // ── Sources ──
