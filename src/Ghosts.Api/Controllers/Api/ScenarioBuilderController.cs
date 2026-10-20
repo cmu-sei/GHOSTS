@@ -114,14 +114,17 @@ namespace Ghosts.Api.Controllers.Api
             }
         }
 
-        /// <summary>A source with its chunk counts: how many chunks it has, how many extraction has read, and how many wait.</summary>
+        /// <summary>
+        /// A source with its chunk counts: how many chunks it has, how many extraction has read, and how many wait,
+        /// counting a failed chunk as waiting, since the next extraction tries it again.
+        /// </summary>
         private static ScenarioSourceDto ToDto(ScenarioSource s) => new(
             s.Id, s.Name, s.SourceType, s.MimeType,
             s.OriginalFileName, s.FileSizeBytes, s.Status,
             s.ErrorMessage, s.CreatedAt, s.Chunks?.Count ?? 0,
             s.SourceType == "Url" ? s.OriginalFileName ?? "" : (s.Content?.Length > 100 ? s.Content[..100] + "…" : s.Content ?? ""),
             s.Chunks?.Count(c => c.ExtractionStatus == "Completed") ?? 0,
-            s.Chunks?.Count(c => c.ExtractionStatus == "Pending") ?? 0);
+            s.Chunks?.Count(c => c.ExtractionStatus is "Pending" or "Failed") ?? 0);
 
         [HttpPost("sources/text")]
         public async Task<ActionResult> AddTextSource(int scenarioId, [FromBody] CreateScenarioSourceTextDto dto, CancellationToken ct)
