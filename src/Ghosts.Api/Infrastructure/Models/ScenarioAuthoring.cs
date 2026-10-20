@@ -22,7 +22,8 @@ public class ScenarioAuthoringOptions
 
     /// <summary>
     /// The model a new session starts on, when it names none, for ten minutes after Model was unavailable
-    /// (F4). A session that has begun keeps its model (C5). Empty: new sessions always start on Model.
+    /// (F4). A session that has begun keeps its model (C5), except that a turn whose response the content filter
+    /// stopped twice continues on this model. Empty: neither.
     /// </summary>
     public string FallbackModel { get; set; } = string.Empty;
 

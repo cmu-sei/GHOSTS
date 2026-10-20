@@ -160,6 +160,64 @@ public class ScenarioAuthoringServiceTests
         Assert.False(await context.AuthoringMessages.AnyAsync(m => m.InHistory));
     }
 
+    private static readonly ScenarioAuthoringOptions WithFallback = new()
+    {
+        Model = "scripted", FallbackModel = "fallback", Models = [new() { Name = "Fallback", Id = "fallback" }], ValidatorTimeoutSeconds = 30
+    };
+
+    [Fact]
+    public async Task A_turn_filtered_twice_continues_on_the_fallback_model_without_the_other_models_reasoning()
+    {
+        var db = NewDatabase();
+        await using var context = db();
+        var first = Service(context, new ScriptedModel(_ => Reply(Reasoning("thinking", "sig"), Text("First."))), WithFallback);
+        var session = await first.CreateSessionAsync(null, "scripted", null, default);
+        await first.RunTurnAsync(session.Id, "One.", default);
+
+        var service = Service(context, new ScriptedModel(
+            r => { Assert.Equal("scripted", r.ModelId); return Filtered(); },
+            _ => Filtered(),
+            r =>
+            {
+                Assert.Equal("fallback", r.ModelId);
+                Assert.DoesNotContain(r.Messages.SelectMany(m => m.Content), b => b.ReasoningContent != null);
+                return Reply(Reasoning("", "theirs"), Text("Second."));
+            }), WithFallback);
+        var result = await service.RunTurnAsync(session.Id, "Two.", default);
+
+        Assert.Null(result.Failure);
+        Assert.Equal("Second.", result.Reply);
+        Assert.Equal("fallback", result.Model);
+
+        // The next turn is the session's model again: its own reasoning from turn 1 stays, the fallback's is gone.
+        var next = new ScriptedModel(r =>
+        {
+            Assert.Equal("scripted", r.ModelId);
+            var assistant = r.Messages.Where(m => m.Role == ConversationRole.Assistant).ToList();
+            Assert.Contains(assistant[0].Content, b => b.ReasoningContent != null);
+            Assert.DoesNotContain(assistant[1].Content, b => b.ReasoningContent != null);
+            Assert.Contains(assistant[1].Content, b => b.Text == "Second.");
+            return Reply(Text("Third."));
+        });
+        Assert.Null((await Service(context, next, WithFallback).RunTurnAsync(session.Id, "Three.", default)).Failure);
+    }
+
+    [Fact]
+    public async Task A_turn_filtered_on_the_fallback_too_fails_and_names_both_models()
+    {
+        var db = NewDatabase();
+        await using var context = db();
+        var service = Service(context, new ScriptedModel(_ => Filtered(), _ => Filtered(), _ => Filtered(), _ => Filtered()), WithFallback);
+        var session = await service.CreateSessionAsync(null, "scripted", null, default);
+
+        var result = await service.RunTurnAsync(session.Id, "Hello.", default);
+
+        Assert.Equal("content filtered", result.Failure?.Cause);
+        Assert.Contains("scripted", result.Failure!.Details);
+        Assert.Contains("fallback", result.Failure.Details);
+        Assert.False(await context.AuthoringMessages.AnyAsync(m => m.InHistory));
+    }
+
     // ───────── d: a provider error after a validation ─────────
 
     [Fact]

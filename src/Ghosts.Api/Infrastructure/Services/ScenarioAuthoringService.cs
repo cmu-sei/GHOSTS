@@ -311,13 +311,28 @@ namespace Ghosts.Api.Infrastructure.Services
 
             string reply = null;
             var filtered = false;
+            // The model answering this turn: the session's, or the fallback once the session's was filtered twice.
+            var turnModel = session.Model;
+            var turnEffort = session.Effort;
+            int? fallbackFrom = null;
             AuthoringFailure failure = null;
             try
             {
                 while (true)
                 {
-                    var response = await CallModelAsync(session.Model, session.Effort, conversation, rows, sessionId, turn, limit.Token);
+                    var response = await CallModelAsync(turnModel, turnEffort, conversation, rows, sessionId, turn, limit.Token);
                     filtered = IsFiltered(response);
+                    if (filtered && fallbackFrom == null && !string.IsNullOrWhiteSpace(_options.FallbackModel) && turnModel != _options.FallbackModel)
+                    {
+                        rows[^1].Error = $"Content filtered twice: the turn continues on {_options.FallbackModel}.";
+                        _log.Warn($"Authoring session {sessionId}, turn {turn}: {turnModel} was content-filtered twice; falling back to {_options.FallbackModel}");
+                        // Each provider's reasoning blocks are its own and signed, so the fallback gets none of them.
+                        StripReasoning(conversation);
+                        turnModel = _options.FallbackModel;
+                        turnEffort = _options.Models.FirstOrDefault(m => m.Id == turnModel)?.Efforts?.Contains(turnEffort) == true ? turnEffort : null;
+                        fallbackFrom = rows.Count;
+                        continue;
+                    }
                     var content = response.Output?.Message?.Content ?? [];
                     await ReportAsync(session, turn, "model-reply", new { stopReason = response.StopReason?.Value });
                     conversation.Add(new Message { Role = ConversationRole.Assistant, Content = content });
@@ -361,8 +376,9 @@ namespace Ghosts.Api.Infrastructure.Services
 
                 if (string.IsNullOrWhiteSpace(reply))
                     failure = filtered
-                        ? Failed("content filtered", "The model provider's content filter stopped the response twice. " +
-                                                     "The filter is intermittent: send the message again.")
+                        ? Failed("content filtered", fallbackFrom != null
+                            ? $"The content filter stopped the response twice on {session.Model} and twice on the fallback, {turnModel}. Send the message again, or reword it."
+                            : "The model provider's content filter stopped the response twice. The filter is intermittent: send the message again.")
                         : Failed("empty reply", "The model returned an empty reply.");
             }
             catch (OperationCanceledException) when (limit.IsCancellationRequested && !ct.IsCancellationRequested)
@@ -378,6 +394,10 @@ namespace Ghosts.Api.Infrastructure.Services
             // Kept for the record either way (H1); only a turn that succeeded joins the conversation (C4). A model
             // call that failed and was retried has no reply to send back, so it never joins.
             foreach (var row in rows) row.InHistory = failure == null && row.Error == null;
+            // The next turn goes back to the session's model, which can't read the fallback's reasoning blocks.
+            if (fallbackFrom is int from)
+                foreach (var row in rows.Skip(from).Where(r => r.Role == AuthoringMessage.ModelRole && r.Content != null))
+                    row.Content = AuthoringBlocks.ToJson(WithoutReasoning(AuthoringBlocks.FromJson(row.Content))).ToJsonString();
             _context.AuthoringMessages.AddRange(rows);
 
             var documents = await _context.AuthoringDocuments.Where(d => d.SessionId == sessionId)
@@ -423,7 +443,7 @@ namespace Ghosts.Api.Infrastructure.Services
                 Attention(last),
                 last == null ? [] : JsonSerializer.Deserialize<List<string>>(last.Changes) ?? [],
                 gaps,
-                session.Model,
+                turnModel,
                 importedBefore);
 
             record.Result = JsonSerializer.Serialize(result, Web);
@@ -523,6 +543,16 @@ namespace Ghosts.Api.Infrastructure.Services
         }
 
         private static bool IsFiltered(ConverseResponse response) => response.StopReason?.Value == "content_filtered";
+
+        private static List<ContentBlock> WithoutReasoning(List<ContentBlock> blocks) =>
+            blocks.Where(b => b.ReasoningContent == null).ToList();
+
+        private static void StripReasoning(List<Message> conversation)
+        {
+            for (var i = 0; i < conversation.Count; i++)
+                if (conversation[i].Content.Any(b => b.ReasoningContent != null))
+                    conversation[i] = new Message { Role = conversation[i].Role, Content = WithoutReasoning(conversation[i].Content) };
+        }
 
         private static bool IsUnavailable(Exception ex) =>
             ex is ServiceUnavailableException
