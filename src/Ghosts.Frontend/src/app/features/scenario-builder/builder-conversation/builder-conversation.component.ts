@@ -111,6 +111,7 @@ export class BuilderConversationComponent implements OnInit, OnDestroy {
   protected readonly latestHash = computed(() => this.session()?.latestDocument?.hash ?? null);
 
   private progressSub?: Subscription;
+  private modelSub?: Subscription;
   private pollSub?: Subscription;
   private elapsedSub?: Subscription;
   private turnStartedAt = 0;
@@ -132,6 +133,9 @@ export class BuilderConversationComponent implements OnInit, OnDestroy {
       next: (choice) => this.builderModel.set(choice),
       error: () => this.snackBar.open('Could not read the scenario\'s model; the conversation will use the default.', 'Close', { duration: 5000 }),
     });
+    this.modelSub = this.builderService.modelPicked.subscribe(({ scenarioId, choice }) => {
+      if (scenarioId === this.scenarioId) this.builderModel.set(choice);
+    });
     this.authoring.getReadiness(this.scenarioId).subscribe({
       next: (readiness) => this.blankReadiness.set(readiness),
       error: () => { /* the panel keeps its empty state until a session supplies one */ },
@@ -141,6 +145,7 @@ export class BuilderConversationComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.progressSub?.unsubscribe();
+    this.modelSub?.unsubscribe();
     this.pollSub?.unsubscribe();
     this.elapsedSub?.unsubscribe();
   }

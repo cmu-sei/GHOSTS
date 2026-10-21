@@ -59,6 +59,10 @@ export class BuilderSourcesComponent implements OnInit, OnDestroy {
   /** The scenario's model and effort level for extraction and the conversation, and the configured choices. */
   protected readonly builderModel = signal<BuilderModel | null>(null);
   protected readonly efforts = computed(() => this.builderModel()?.models.find((m) => m.id === this.builderModel()?.model)?.efforts ?? []);
+
+  protected modelName(choice: BuilderModel, id: string): string {
+    return choice.models.find((m) => m.id === id)?.name ?? id;
+  }
   protected readonly displayedColumns = ['name', 'type', 'preview', 'status', 'chunks', 'extracted', 'actions'];
   protected readonly dragOver = signal(false);
 

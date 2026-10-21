@@ -27,6 +27,12 @@ public class ScenarioAuthoringOptions
     /// </summary>
     public string FallbackModel { get; set; } = string.Empty;
 
+    /// <summary>
+    /// The model that reads sources into entities, whatever model a scenario picked; the pick then serves only the
+    /// conversation. Empty: extraction uses the scenario's pick, as the conversation does.
+    /// </summary>
+    public string ExtractionModel { get; set; } = string.Empty;
+
     public int MaxOutputTokens { get; set; } = 64000;
 
     /// <summary>H2: cache points on the system prompt, the tools and the conversation. Off for a model that rejects them.</summary>

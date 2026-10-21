@@ -52,6 +52,22 @@ public class ScenarioExtractionServiceTests
     }
 
     [Fact]
+    public async Task A_fixed_extraction_model_reads_the_sources_whatever_the_scenario_picked()
+    {
+        await using var context = NewContext();
+        context.Scenarios.Add(new Scenario { Id = 1, Name = "Mine", BuilderModel = "picked-model", Sources = [new ScenarioSource { ScenarioId = 1, Name = "Notes", Chunks = [new ScenarioSourceChunk { ScenarioId = 1, Content = "Nothing much." }] }] });
+        await context.SaveChangesAsync();
+        string? called = null;
+        var model = new ScriptedModel(request => { called = request.ModelId; return """{"entities":[],"edges":[]}"""; });
+        var service = new ScenarioExtractionService(context, new ConfigurationBuilder().Build(), null!, model,
+            Options.Create(new ScenarioAuthoringOptions { Model = "default-model", ExtractionModel = "fast-model" }));
+
+        await service.ExtractAllAsync(1, default);
+
+        Assert.Equal("fast-model", called);
+    }
+
+    [Fact]
     public async Task A_scenario_with_no_model_picked_extracts_on_the_default()
     {
         await using var context = NewContext();

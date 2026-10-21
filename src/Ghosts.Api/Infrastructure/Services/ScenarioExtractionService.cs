@@ -74,7 +74,7 @@ namespace Ghosts.Api.Infrastructure.Services
             await SendProgressNotification(scenarioId, "started", 0, pendingChunks.Count, 0, 0);
 
             // ── Phase 1: parallel LLM calls ───────────────────────────────────
-            var modelId = scenario.BuilderModel ?? _options.Model;
+            var modelId = ExtractionModelFor(scenario.BuilderModel);
             var concurrency = int.TryParse(_configuration["ScenarioBuilder:ExtractionConcurrency"], out var c) && c > 0 ? c : 6;
             var semaphore = new SemaphoreSlim(concurrency);
 
@@ -264,7 +264,7 @@ namespace Ghosts.Api.Infrastructure.Services
 
             chunk.ExtractionStatus = "Processing";
             await _context.SaveChangesAsync(ct);
-            var modelId = await _context.Scenarios.Where(s => s.Id == chunk.ScenarioId).Select(s => s.BuilderModel).FirstOrDefaultAsync(ct) ?? _options.Model;
+            var modelId = ExtractionModelFor(await _context.Scenarios.Where(s => s.Id == chunk.ScenarioId).Select(s => s.BuilderModel).FirstOrDefaultAsync(ct));
 
             var entitiesCreated = 0;
             var edgesCreated = 0;
@@ -416,6 +416,10 @@ namespace Ghosts.Api.Infrastructure.Services
 
             return Guid.Empty;
         }
+
+        /// <summary>ExtractionModel when it is set; otherwise the scenario's pick, or the default.</summary>
+        private string ExtractionModelFor(string builderModel) =>
+            !string.IsNullOrWhiteSpace(_options.ExtractionModel) ? _options.ExtractionModel : builderModel ?? _options.Model;
 
         private async Task<string> BuildExtractionPromptAsync(ScenarioSourceChunk chunk, CancellationToken ct)
         {

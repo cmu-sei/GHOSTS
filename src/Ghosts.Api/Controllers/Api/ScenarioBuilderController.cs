@@ -55,7 +55,13 @@ namespace Ghosts.Api.Controllers.Api
         {
             var scenario = await dbContext.Scenarios.AsNoTracking().FirstOrDefaultAsync(s => s.Id == scenarioId, ct);
             if (scenario == null) return NotFound();
-            return Ok(new { model = scenario.BuilderModel ?? authoringOptions.Value.Model, effort = scenario.BuilderEffort, models = authoringOptions.Value.Models });
+            var options = authoringOptions.Value;
+            return Ok(new
+            {
+                model = scenario.BuilderModel ?? options.Model, effort = scenario.BuilderEffort, models = options.Models,
+                // Set: extraction always uses this model, and the pick serves only the conversation.
+                extractionModel = string.IsNullOrWhiteSpace(options.ExtractionModel) ? null : options.ExtractionModel
+            });
         }
 
         /// <summary>

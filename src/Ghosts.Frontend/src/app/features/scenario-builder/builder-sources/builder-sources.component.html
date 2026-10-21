@@ -2,7 +2,7 @@
   <h2>Add Sources</h2>
   <p class="subtitle">Add documents, URLs, or text for the conversation to search and cite, and to extract scenario entities from</p>
 
-  <!-- One model and effort level per scenario: the model reads the sources into entities and runs the conversation -->
+  <!-- One model and effort level per scenario: it runs the conversation, and reads the sources into entities unless the server fixes an extraction model -->
   @if (builderModel(); as choice) {
   <div class="model-row">
     <mat-form-field appearance="outline" class="model-field" subscriptSizing="dynamic">
@@ -12,7 +12,11 @@
         <mat-option [value]="m.id">{{ m.name }}</mat-option>
         }
       </mat-select>
+      @if (choice.extractionModel; as reader) {
+      <mat-hint>Runs the conversation. Sources are read by {{ modelName(choice, reader) }}</mat-hint>
+      } @else {
       <mat-hint>Reads the sources into entities, and runs the conversation</mat-hint>
+      }
     </mat-form-field>
     <!-- H3: the effort level, from the model's own list; a model with none has the control greyed out -->
     <mat-form-field appearance="outline" class="effort-field" subscriptSizing="dynamic"
