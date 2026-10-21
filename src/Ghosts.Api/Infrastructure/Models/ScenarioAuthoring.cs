@@ -22,9 +22,16 @@ public class ScenarioAuthoringOptions
 
     /// <summary>
     /// The model a new session starts on, when it names none, for ten minutes after Model was unavailable
-    /// (F4). A session that has begun keeps its model (C5). Empty: new sessions always start on Model.
+    /// (F4). A session that has begun keeps its model (C5), except that a turn whose response the content filter
+    /// stopped twice continues on this model. Empty: neither.
     /// </summary>
     public string FallbackModel { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The model that reads sources into entities, whatever model a scenario picked; the pick then serves only the
+    /// conversation. Empty: extraction uses the scenario's pick, as the conversation does.
+    /// </summary>
+    public string ExtractionModel { get; set; } = string.Empty;
 
     public int MaxOutputTokens { get; set; } = 64000;
 

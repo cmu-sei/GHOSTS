@@ -31,7 +31,8 @@ The `ScenarioAuthoring` section of `appsettings.json`:
 | `Region` | The Bedrock region. | `us-east-1` |
 | `Model` | The model a scenario uses until one is picked on its Sources step. | Sonnet 5.5 |
 | `Models[]` | The models the Sources step offers, each with `Name`, `Id`, `Efforts`, the effort levels it takes (`low`, `medium`, `high`, `xhigh`, `max` on current Anthropic and OpenAI models), and `Pricing`, US dollars per million input, output, cache-read and cache-write tokens. A model with no `Efforts` has the Sources step's effort control greyed out; one with no `Pricing` shows token counts but no cost. | three Anthropic models and GPT-6.1 Sol, at their providers' list prices |
-| `FallbackModel` | For ten minutes after `Model` returned HTTP 503, a new session that names no model starts here. A session that has begun keeps its model. Empty: no fallback. | empty |
+| `FallbackModel` | For ten minutes after `Model` returned HTTP 503, a new session that names no model starts here. A session that has begun keeps its model, except that a turn whose response the content filter stopped twice continues on this model, without the other model's reasoning; the next turn goes back to the session's model. Empty: no fallback. | `us.openai.gpt-6.1-sol` |
+| `ExtractionModel` | The model that reads sources into entities, whatever model the Sources step picked; the pick then serves only the conversation. Extraction makes one call per chunk, so a fast model here keeps a large source from taking minutes. Empty: extraction uses the scenario's pick. | `us.anthropic.claude-sonnet-5-5` |
 | `MaxOutputTokens` | The output limit of each model call. A full draft needs at least 64,000. | `64000` |
 | `PromptCaching` | Cache points on the system prompt, the tools and the conversation. Turn off for a model that rejects them. | `true` |
 | `RequestTimeoutSeconds` | Each model call's request timeout. | `300` |

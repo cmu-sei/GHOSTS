@@ -59,6 +59,10 @@ export class BuilderSourcesComponent implements OnInit, OnDestroy {
   /** The scenario's model and effort level for extraction and the conversation, and the configured choices. */
   protected readonly builderModel = signal<BuilderModel | null>(null);
   protected readonly efforts = computed(() => this.builderModel()?.models.find((m) => m.id === this.builderModel()?.model)?.efforts ?? []);
+
+  protected modelName(choice: BuilderModel, id: string): string {
+    return choice.models.find((m) => m.id === id)?.name ?? id;
+  }
   protected readonly displayedColumns = ['name', 'type', 'preview', 'status', 'chunks', 'extracted', 'actions'];
   protected readonly dragOver = signal(false);
 
@@ -137,7 +141,7 @@ export class BuilderSourcesComponent implements OnInit, OnDestroy {
     });
 
     this.urlForm = this.fb.group({
-      name: ['', Validators.required],
+      name: [''],
       url: ['', [Validators.required, Validators.pattern(/^https?:\/\/.+/)]],
     });
   }
@@ -179,12 +183,12 @@ export class BuilderSourcesComponent implements OnInit, OnDestroy {
   protected addUrlSource(): void {
     if (this.urlForm.invalid) return;
     const isFirst = this.sources().length === 0;
-    const sourceName = this.urlForm.value.name as string;
 
     this.builderService.addUrl(this.scenarioId, this.urlForm.value).subscribe({
-      next: () => {
+      next: (source) => {
         this.snackBar.open('URL source added', 'Close', { duration: 2000 });
-        if (isFirst) this.renameScenarioFromSource(sourceName);
+        // The server's name: the one typed, or the page's title when the field was left blank.
+        if (isFirst) this.renameScenarioFromSource(source.name);
         this.urlForm.reset();
         this.loadSources();
       },

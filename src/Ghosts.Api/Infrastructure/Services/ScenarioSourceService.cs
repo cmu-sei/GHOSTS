@@ -91,9 +91,10 @@ namespace Ghosts.Api.Infrastructure.Services
         public async Task<ScenarioSource> AddUrlAsync(int scenarioId, CreateScenarioSourceUrlDto dto, CancellationToken ct)
         {
             var fetchedContent = string.Empty;
+            var title = string.Empty;
             try
             {
-                fetchedContent = await FetchUrlWithBrowserAsync(dto.Url, ct);
+                (fetchedContent, title) = await FetchUrlWithBrowserAsync(dto.Url, ct);
                 _log.Info($"Fetched {fetchedContent.Length} characters from URL: {dto.Url}");
             }
             catch (Exception ex)
@@ -105,7 +106,7 @@ namespace Ghosts.Api.Infrastructure.Services
             var source = new ScenarioSource
             {
                 ScenarioId = scenarioId,
-                Name = dto.Name,
+                Name = UrlSourceName(dto.Name, title, dto.Url),
                 SourceType = "Url",
                 OriginalFileName = dto.Url,
                 Content = fetchedContent,
@@ -132,7 +133,45 @@ namespace Ghosts.Api.Infrastructure.Services
             return await GetByIdAsync(source.Id, ct);
         }
 
-        private static async Task<string> FetchUrlWithBrowserAsync(string url, CancellationToken ct)
+        /// <summary>
+        /// The name the developer gave, or else the page's title, or else the URL's host and path; at most the
+        /// 500 characters the column holds.
+        /// </summary>
+        public static string UrlSourceName(string given, string title, string url)
+        {
+            var name = !string.IsNullOrWhiteSpace(given) ? given.Trim()
+                : !string.IsNullOrWhiteSpace(title) ? Regex.Replace(title, @"\s+", " ").Trim()
+                : Uri.TryCreate(url, UriKind.Absolute, out var uri) ? (uri.Host + uri.AbsolutePath).TrimEnd('/')
+                : url ?? string.Empty;
+            return name.Length > 500 ? name[..500] : name;
+        }
+
+        /// <summary>
+        /// Waits until the page's text is the same length on two reads half a second apart, at most ten seconds, so a
+        /// page that renders its text with script is read once it has, without waiting on its unrelated traffic.
+        /// </summary>
+        private static async Task WaitForTextToSettleAsync(IPage page)
+        {
+            var deadline = DateTime.UtcNow.AddSeconds(10);
+            var last = -1;
+            while (DateTime.UtcNow < deadline)
+            {
+                int length;
+                try
+                {
+                    length = (await page.InnerTextAsync("body")).Length;
+                }
+                catch (PlaywrightException)
+                {
+                    length = -1; // mid-navigation: no body to read yet
+                }
+                if (length >= 0 && length == last) return;
+                last = length;
+                await page.WaitForTimeoutAsync(500);
+            }
+        }
+
+        private static async Task<(string Text, string Title)> FetchUrlWithBrowserAsync(string url, CancellationToken ct)
         {
             try
             {
@@ -148,11 +187,13 @@ namespace Ghosts.Api.Infrastructure.Services
                 });
                 var page = await context.NewPageAsync();
 
+                // Not NetworkIdle: analytics keep pages like CISA's busy for seconds after the text is there (9.5 s vs 2 s).
                 await page.GotoAsync(url, new PageGotoOptions
                 {
-                    WaitUntil = WaitUntilState.NetworkIdle,
+                    WaitUntil = WaitUntilState.DOMContentLoaded,
                     Timeout = 30000
                 });
+                await WaitForTextToSettleAsync(page);
 
                 // Dismiss common consent/disclaimer modals by clicking visible buttons
                 var dismissSelectors = new[]
@@ -188,8 +229,9 @@ namespace Ghosts.Api.Infrastructure.Services
                             await btn.ClickAsync(new LocatorClickOptions { Timeout = 2000 });
                             _log.Info($"Dismissed modal element matching: {selector}");
                             // Wait for navigation or content to load after click
-                            await page.WaitForLoadStateAsync(LoadState.NetworkIdle,
+                            await page.WaitForLoadStateAsync(LoadState.DOMContentLoaded,
                                 new PageWaitForLoadStateOptions { Timeout = 10000 });
+                            await WaitForTextToSettleAsync(page);
                             break;
                         }
                     }
@@ -205,7 +247,7 @@ namespace Ghosts.Api.Infrastructure.Services
                 text = Regex.Replace(text, @"[ \t]+", " ");
                 text = Regex.Replace(text, @"\n{3,}", "\n\n");
 
-                return text.Trim();
+                return (text.Trim(), await page.TitleAsync());
             }
             catch (PlaywrightException ex)
             {
@@ -214,14 +256,15 @@ namespace Ghosts.Api.Infrastructure.Services
             }
         }
 
-        private static async Task<string> FetchUrlWithHttpClientAsync(string url, CancellationToken ct)
+        private static async Task<(string Text, string Title)> FetchUrlWithHttpClientAsync(string url, CancellationToken ct)
         {
             using var httpClient = new HttpClient();
             httpClient.Timeout = TimeSpan.FromSeconds(30);
             httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent",
                 "Mozilla/5.0 (compatible; GHOSTS/ScenarioBuilder)");
             var html = await httpClient.GetStringAsync(url, ct);
-            return StripHtml(html);
+            var title = Regex.Match(html, @"<title[^>]*>([\s\S]*?)</title>", RegexOptions.IgnoreCase);
+            return (StripHtml(html), title.Success ? WebUtility.HtmlDecode(title.Groups[1].Value) : string.Empty);
         }
 
         private static string StripHtml(string html)
