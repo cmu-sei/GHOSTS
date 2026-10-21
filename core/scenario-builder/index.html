@@ -2239,8 +2239,13 @@ The <code>ScenarioAuthoring</code> section of <code>appsettings.json</code>:</p>
 </tr>
 <tr>
 <td><code>FallbackModel</code></td>
-<td>For ten minutes after <code>Model</code> returned HTTP 503, a new session that names no model starts here. A session that has begun keeps its model. Empty: no fallback.</td>
-<td>empty</td>
+<td>For ten minutes after <code>Model</code> returned HTTP 503, a new session that names no model starts here. A session that has begun keeps its model, except that a turn whose response the content filter stopped twice continues on this model, without the other model's reasoning; the next turn goes back to the session's model. Empty: no fallback.</td>
+<td><code>us.openai.gpt-6.1-sol</code></td>
+</tr>
+<tr>
+<td><code>ExtractionModel</code></td>
+<td>The model that reads sources into entities, whatever model the Sources step picked; the pick then serves only the conversation. Extraction makes one call per chunk, so a fast model here keeps a large source from taking minutes. Empty: extraction uses the scenario's pick.</td>
+<td><code>us.anthropic.claude-sonnet-5-5</code></td>
 </tr>
 <tr>
 <td><code>MaxOutputTokens</code></td>
