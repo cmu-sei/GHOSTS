@@ -61,7 +61,7 @@ namespace Ghosts.Api.Infrastructure.Services
 
             var pendingChunks = scenario.Sources
                 .SelectMany(s => s.Chunks)
-                .Where(c => c.ExtractionStatus == "Pending")
+                .Where(c => c.ExtractionStatus is "Pending" or "Failed")
                 .OrderBy(c => c.SourceId)
                 .ThenBy(c => c.ChunkIndex)
                 .ToList();
@@ -88,7 +88,8 @@ namespace Ghosts.Api.Infrastructure.Services
                     var llmResponse = await CallLlmAsync(modelId, prompt, ct);
                     var result = ParseExtractionResponse(llmResponse, out var parseErrors);
                     _log.Debug($"LLM call completed for chunk {chunk.Id}: {result.Entities?.Count ?? 0} entities, {result.Edges?.Count ?? 0} edges");
-                    return (chunk, result, parseErrors, failed: false);
+                    // A reply that didn't parse found nothing: fail the chunk, so the next run tries it again.
+                    return (chunk, result, parseErrors, failed: parseErrors.Count > 0);
                 }
                 catch (Exception ex)
                 {
@@ -278,7 +279,8 @@ namespace Ghosts.Api.Infrastructure.Services
                     throw new InvalidOperationException("LLM returned empty response");
 
                 var extractionResult = ParseExtractionResponse(llmResponse, out var parseErrors);
-                errors.AddRange(parseErrors);
+                if (parseErrors.Count > 0)
+                    throw new InvalidOperationException(string.Join("; ", parseErrors));
 
                 // Load all existing entities once for this scenario
                 var existingEntities = await _context.ScenarioEntities
@@ -460,27 +462,35 @@ Text to analyze:
 Return only valid JSON.";
         }
 
+        /// <summary>Room for the longest replies seen: GPT 6.1 Sol returned about 9,000 tokens for one dense chunk.</summary>
+        private const int ExtractionMaxTokens = 32000;
+
         /// <summary>One call to the scenario's model with the chunk prompt; the reply's text is the first block that holds any.</summary>
         private async Task<string> CallLlmAsync(string modelId, string prompt, CancellationToken ct)
         {
             _log.Debug($"Calling {modelId} for extraction");
+            ConverseResponse response;
             try
             {
-                var response = await _model.ConverseAsync(new ConverseRequest
+                response = await _model.ConverseAsync(new ConverseRequest
                 {
                     ModelId = modelId,
                     Messages = [new Message { Role = ConversationRole.User, Content = [new ContentBlock { Text = prompt }] }],
-                    InferenceConfig = new InferenceConfiguration { MaxTokens = 8192 }
+                    InferenceConfig = new InferenceConfiguration { MaxTokens = ExtractionMaxTokens }
                 }, ct);
-                var result = response.Output?.Message?.Content?.FirstOrDefault(b => b.Text != null)?.Text;
-                _log.Debug($"LLM returned {result?.Length ?? 0} characters");
-                return result;
             }
             catch (Exception ex)
             {
                 _log.Error(ex, "Failed to call LLM");
                 throw new InvalidOperationException("Failed to call LLM for extraction", ex);
             }
+
+            var result = response.Output?.Message?.Content?.FirstOrDefault(b => b.Text != null)?.Text;
+            _log.Debug($"LLM returned {result?.Length ?? 0} characters");
+            // Cut off at the limit, the reply is unfinished JSON; some of it may parse, but it isn't the whole chunk.
+            if (response.StopReason?.Value == "max_tokens")
+                throw new InvalidOperationException($"The model's reply was cut off at the {ExtractionMaxTokens}-token output limit.");
+            return result;
         }
 
         private ExtractionResponse ParseExtractionResponse(string llmResponse, out List<string> errors)
