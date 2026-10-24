@@ -39,7 +39,7 @@
     "@types/d3": "^7.4.3",
     "d3": "^7.9.0",
     "maplibre-gl": "^6.13.0",
-    "markdown-it": "^15.0.2",
+    "markdown-it": "^15.0.3",
     "material-icons": "^1.13.14",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
