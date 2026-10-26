@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Ghosts.Animator;
 using Ghosts.Api.Hubs;
 using Ghosts.Api.Infrastructure.Models;
+using Ghosts.Api.Infrastructure.ScenarioDocuments;
 using Ghosts.Api.Infrastructure.Services.ClientServices;
 using Ghosts.Domain;
 using Microsoft.AspNetCore.SignalR;
@@ -610,10 +611,11 @@ namespace Ghosts.Api.Infrastructure.Services
             };
         }
 
-        /// <summary>Parses "T+15m" → 900000 ms. Returns 0 for any unparseable input.</summary>
+        /// <summary>Parses "T+15m" → 900000 ms, and the schema's "T+2d9h40m" form the way the validator does. Returns 0 for any unparseable input.</summary>
         public static int ParseTimeOffsetMs(string? time)
         {
             if (string.IsNullOrWhiteSpace(time)) return 0;
+            if (ScenarioDocumentMapper.TryOffsetMinutes(time.Trim(), out var minutes)) return minutes * 60_000;
             var m = Regex.Match(time, @"T\+(\d+)m", RegexOptions.IgnoreCase);
             if (!m.Success) return 0;
             return int.Parse(m.Groups[1].Value) * 60_000;
