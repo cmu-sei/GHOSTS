@@ -1,0 +1,6 @@
+out/
+.env
+__pycache__/
+.pytest_cache/
+# Human-subject data: never committed. Copy the two spreadsheets here to run normalize.
+data/*.xlsx

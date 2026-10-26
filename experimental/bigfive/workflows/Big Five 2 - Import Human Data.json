@@ -1,0 +1,1079 @@
+{
+  "name": "Big Five 2 - Import Human Data",
+  "id": "bigFiveImportHumanData",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Big Five 2 - Import Human Data\nUpload the two study spreadsheets:\n- **Personality Data.xlsx** — sheets `Human Responses` (Participant ID, age, Gender, ethnicity, bfi1..bfi60) and `bfi lookup` (bfiN → item text)\n- **Human Mini-Marker Results.xlsx** — sheet `Sheet1` (Participant ID, tda1..tda40)\n\nWrites participants (with the BFI-2 persona text), items (the instrument keying), human_bfi2, human_mini_markers and the human rows of scores. Re-running creates nothing twice: rows are matched by `key`, new ones are created, changed ones updated.\n\nThe spreadsheets are human-subject data: they pass through this n8n only and are never written back to git.",
+        "width": 560,
+        "height": 360,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "name": "About",
+      "position": [
+        -660,
+        -260
+      ],
+      "id": "about"
+    },
+    {
+      "parameters": {
+        "path": "bigfive-import-human-data",
+        "formTitle": "Big Five · Import Human Data",
+        "formDescription": "Upload the two study spreadsheets. Rows are matched by participant id; re-importing is safe.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Personality Data",
+              "fieldType": "file",
+              "requiredField": true,
+              "multipleFiles": false,
+              "acceptFileTypes": ".xlsx"
+            },
+            {
+              "fieldLabel": "Mini-Marker Results",
+              "fieldType": "file",
+              "requiredField": true,
+              "multipleFiles": false,
+              "acceptFileTypes": ".xlsx"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "name": "Import form",
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "bigfive-import-human-data",
+      "id": "import-form"
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "binaryPropertyName": "Personality_Data",
+        "options": {
+          "headerRow": true,
+          "sheetName": "Human Responses"
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "name": "Extract: Human Responses sheet",
+      "position": [
+        240,
+        0
+      ],
+      "id": "extract-human-responses-sheet"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Import Human Data: hand the uploaded spreadsheets to the next Extract node (Extract From File outputs\n// rows without the binary, so each sheet extraction starts again from the form submission).\nreturn [{ json: {}, binary: $('Import form').first().binary }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "Form again (lookup)",
+      "position": [
+        460,
+        0
+      ],
+      "id": "form-again-lookup"
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "binaryPropertyName": "Personality_Data",
+        "options": {
+          "headerRow": true,
+          "sheetName": "bfi lookup"
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "name": "Extract: bfi lookup sheet",
+      "position": [
+        680,
+        0
+      ],
+      "id": "extract-bfi-lookup-sheet"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Import Human Data: hand the uploaded spreadsheets to the next Extract node (Extract From File outputs\n// rows without the binary, so each sheet extraction starts again from the form submission).\nreturn [{ json: {}, binary: $('Import form').first().binary }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "Form again (Mini-Markers)",
+      "position": [
+        900,
+        0
+      ],
+      "id": "form-again-mini-markers"
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "binaryPropertyName": "Mini_Marker_Results",
+        "options": {
+          "headerRow": true
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "name": "Extract: Mini-Marker sheet",
+      "position": [
+        1120,
+        0
+      ],
+      "id": "extract-mini-marker-sheet"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Import Human Data: turn the two spreadsheets into the rows of participants, items, human_bfi2,\n// human_mini_markers and the human rows of scores. Output: ONE item holding an array per table.\n// The instrument keying (facet + reverse flag per item) lives here and nowhere else; it is written to\n// the `items` table and every other workflow reads it from there.\n// ---- lib/scoring.js ----\n// Shared scoring (spliced into Code nodes by build.mjs via `// @include lib/scoring.js`).\n// facet = mean of its items; a reverse item is scale_max + 1 - value; BFI-2 negative emotionality is\n// reported as emotional_stability = 6 - NE. `items` are rows of the `items` table.\nconst FACETS = ['extraversion', 'agreeableness', 'conscientiousness', 'emotional_stability', 'openness'];\nconst SCALE_MAX = { bfi2: 5, mini_markers: 9 };\n\nfunction toNumber(v) {\n  if (v === null || v === undefined || v === '') return null;\n  const n = Number(v);\n  return Number.isFinite(n) ? n : null;\n}\n\nfunction isTrue(v) {\n  return v === true || v === 'true' || v === 1 || v === '1';\n}\n\n// answers: { item_key: value }. Returns { facet: mean } with null for a facet that has no answers.\nfunction facetScores(items, instrument, answers) {\n  const max = SCALE_MAX[instrument];\n  const sums = {};\n  for (const it of items) {\n    if (it.instrument !== instrument) continue;\n    const v = toNumber(answers[it.item_key]);\n    if (v === null) continue;\n    const scored = isTrue(it.reverse) ? max + 1 - v : v;\n    (sums[it.facet] = sums[it.facet] || []).push(scored);\n  }\n  const out = {};\n  for (const f of FACETS) out[f] = null;\n  for (const [facet, vals] of Object.entries(sums)) {\n    const mean = vals.reduce((a, b) => a + b, 0) / vals.length;\n    if (facet === 'negative_emotionality') out.emotional_stability = 6 - mean;\n    else if (FACETS.includes(facet)) out[facet] = mean;\n  }\n  return out;\n}\n\nfunction hasAllFacets(scores) {\n  return FACETS.every((f) => scores[f] !== null && scores[f] !== undefined);\n}\n\nfunction round3(x) {\n  return x === null || x === undefined ? null : Math.round(x * 1000) / 1000;\n}\n// ---- end lib/scoring.js ----\n\nconst ADJECTIVES = ['Bashful', 'Bold', 'Careless', 'Cold', 'Complex', 'Cooperative', 'Creative', 'Deep', 'Disorganized', 'Efficient',\n  'Energetic', 'Envious', 'Extraverted', 'Fretful', 'Harsh', 'Imaginative', 'Inefficient', 'Intellectual', 'Jealous', 'Kind',\n  'Moody', 'Organized', 'Philosophical', 'Practical', 'Quiet', 'Relaxed', 'Rude', 'Shy', 'Sloppy', 'Sympathetic',\n  'Systematic', 'Talkative', 'Temperamental', 'Touchy', 'Uncreative', 'Unenvious', 'Unintellectual', 'Unsympathetic', 'Warm', 'Withdrawn'];\n// Saucier (1994) Mini-Marker keying, tda1..tda40 in ADJECTIVES order: [facet, reverse].\nconst MM_KEYING = [\n  ['extraversion', true], ['extraversion', false], ['conscientiousness', true], ['agreeableness', true], ['openness', false],\n  ['agreeableness', false], ['openness', false], ['openness', false], ['conscientiousness', true], ['conscientiousness', false],\n  ['extraversion', false], ['emotional_stability', true], ['extraversion', false], ['emotional_stability', true], ['agreeableness', true],\n  ['openness', false], ['conscientiousness', true], ['openness', false], ['emotional_stability', true], ['agreeableness', false],\n  ['emotional_stability', true], ['conscientiousness', false], ['openness', false], ['conscientiousness', false], ['extraversion', true],\n  ['emotional_stability', false], ['agreeableness', true], ['extraversion', true], ['conscientiousness', true], ['agreeableness', false],\n  ['conscientiousness', false], ['extraversion', false], ['emotional_stability', true], ['emotional_stability', true], ['openness', true],\n  ['emotional_stability', false], ['openness', true], ['agreeableness', true], ['agreeableness', false], ['extraversion', true]];\n// BFI-2 (Soto & John, 2017) keying, bfi1..bfi60: [facet, reverse]. Negative emotionality is reported as\n// emotional_stability = 6 - NE by the scorer.\nconst BFI2_KEYING = [\n  ['extraversion', false], ['agreeableness', false], ['conscientiousness', true], ['negative_emotionality', true], ['openness', true],\n  ['extraversion', false], ['agreeableness', false], ['conscientiousness', true], ['negative_emotionality', true], ['openness', false],\n  ['extraversion', true], ['agreeableness', true], ['conscientiousness', false], ['negative_emotionality', false], ['openness', false],\n  ['extraversion', true], ['agreeableness', true], ['conscientiousness', false], ['negative_emotionality', false], ['openness', false],\n  ['extraversion', false], ['agreeableness', true], ['conscientiousness', true], ['negative_emotionality', true], ['openness', true],\n  ['extraversion', true], ['agreeableness', false], ['conscientiousness', true], ['negative_emotionality', true], ['openness', true],\n  ['extraversion', true], ['agreeableness', false], ['conscientiousness', false], ['negative_emotionality', false], ['openness', false],\n  ['extraversion', true], ['agreeableness', true], ['conscientiousness', false], ['negative_emotionality', false], ['openness', false],\n  ['extraversion', false], ['agreeableness', true], ['conscientiousness', false], ['negative_emotionality', true], ['openness', true],\n  ['extraversion', false], ['agreeableness', true], ['conscientiousness', true], ['negative_emotionality', true], ['openness', true],\n  ['extraversion', true], ['agreeableness', false], ['conscientiousness', false], ['negative_emotionality', false], ['openness', true],\n  ['extraversion', false], ['agreeableness', false], ['conscientiousness', true], ['negative_emotionality', false], ['openness', false]];\n\nconst bfiRows = $('Extract: Human Responses sheet').all().map((i) => i.json);\nconst lookupRows = $('Extract: bfi lookup sheet').all().map((i) => i.json);\nconst mmRows = $('Extract: Mini-Marker sheet').all().map((i) => i.json);\n\n// Column lookup that ignores case and surrounding spaces (\"Participant ID\", \"Gender\", \"bfi1\").\nconst col = (row, name) => {\n  const want = name.toLowerCase().replace(/[\\s_]/g, '');\n  for (const k of Object.keys(row)) if (k.toLowerCase().replace(/[\\s_]/g, '') === want) return row[k];\n  return undefined;\n};\nconst pidOf = (row) => {\n  const v = col(row, 'Participant ID') ?? col(row, 'participant_id') ?? col(row, 'pid');\n  const n = Number(v);\n  return v === null || v === undefined || v === '' || !Number.isInteger(n) ? null : n;\n};\nconst text = (v) => (v === null || v === undefined ? '' : String(v).trim());\n\n// bfi lookup: any row holding a cell \"bfiN\" next to the item text, whatever the headers are.\nconst bfiText = {};\nfor (const row of lookupRows) {\n  const vals = Object.values(row).map(text);\n  const key = vals.find((v) => /^bfi\\d{1,2}$/i.test(v));\n  const t = vals.find((v) => v && !/^bfi\\d{1,2}$/i.test(v));\n  if (key && t) bfiText[key.toLowerCase()] = t;\n}\nconst missingText = BFI2_KEYING.map((_, i) => `bfi${i + 1}`).filter((k) => !bfiText[k]);\nif (missingText.length) throw new Error(`bfi lookup sheet is missing the text for: ${missingText.join(', ')}`);\n\nconst items = [];\nBFI2_KEYING.forEach(([facet, reverse], i) => {\n  const item_key = `bfi${i + 1}`;\n  items.push({ key: `bfi2:${item_key}`, instrument: 'bfi2', item_key, position: i + 1, text: bfiText[item_key], facet, reverse });\n});\nMM_KEYING.forEach(([facet, reverse], i) => {\n  const item_key = `tda${i + 1}`;\n  items.push({ key: `mini_markers:${item_key}`, instrument: 'mini_markers', item_key, position: i + 1, text: ADJECTIVES[i], facet, reverse });\n});\n\nconst mmByPid = new Map();\nfor (const row of mmRows) {\n  const pid = pidOf(row);\n  if (pid === null) continue;\n  const answers = {};\n  let any = false;\n  for (let i = 1; i <= 40; i++) {\n    const v = toNumber(col(row, `tda${i}`));\n    if (v !== null) { answers[`tda${i}`] = v; any = true; }\n  }\n  if (any) mmByPid.set(pid, answers);\n}\n\nconst participants = [];\nconst human_bfi2 = [];\nconst human_mini_markers = [];\nconst scores = [];\nconst seen = new Set();\nfor (const row of bfiRows) {\n  const pid = pidOf(row);\n  if (pid === null || seen.has(pid)) continue;\n  seen.add(pid);\n  const answers = {};\n  const parts = [];\n  for (let i = 1; i <= 60; i++) {\n    const k = `bfi${i}`;\n    const v = toNumber(col(row, k));\n    if (v !== null) { answers[k] = v; parts.push(`${bfiText[k]}: ${v}`); }\n  }\n  const mm = mmByPid.get(pid) || null;\n  participants.push({\n    key: String(pid),\n    participant_id: pid,\n    age: toNumber(col(row, 'age')),\n    gender: text(col(row, 'Gender')),\n    ethnicity: text(col(row, 'ethnicity')),\n    persona: parts.length ? `${parts.join('; ')}.` : '',\n    has_mini_markers: mm !== null,\n  });\n  human_bfi2.push({ key: String(pid), participant_id: pid, ...answers });\n  const bfiScores = facetScores(items, 'bfi2', answers);\n  if (hasAllFacets(bfiScores)) {\n    scores.push({ key: `human_bfi2::${pid}`, subject: 'human_bfi2', run_id: '', participant_id: pid, ...Object.fromEntries(FACETS.map((f) => [f, round3(bfiScores[f])])) });\n  }\n  if (mm) {\n    human_mini_markers.push({ key: String(pid), participant_id: pid, ...mm });\n    const mmScores = facetScores(items, 'mini_markers', mm);\n    if (hasAllFacets(mmScores)) {\n      scores.push({ key: `human_mini_markers::${pid}`, subject: 'human_mini_markers', run_id: '', participant_id: pid, ...Object.fromEntries(FACETS.map((f) => [f, round3(mmScores[f])])) });\n    }\n  }\n}\nif (!participants.length) throw new Error('Human Responses sheet produced no participants; check the sheet name and the \"Participant ID\" column');\n\nreturn [{\n  json: {\n    summary: `${participants.length} participants (${human_mini_markers.length} with Mini-Markers), ${items.length} items, ${scores.length} human score rows`,\n    participants,\n    items,\n    human_bfi2,\n    human_mini_markers,\n    scores,\n  },\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "Normalize",
+      "position": [
+        1340,
+        0
+      ],
+      "id": "normalize"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "getAll",
+        "databaseId": "",
+        "tableId": "",
+        "returnAll": true,
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Read: participants",
+      "position": [
+        1600,
+        300
+      ],
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "id": "read-participants"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Upsert helper, one node per table and mode. build.mjs replaces Normalize (the node whose single\n// output item holds the staged rows under participants), participants (table name, also the \"Read: <table>\"\n// node that fetched the existing rows) and new (\"new\" or \"changed\").\n//  new:     staged rows whose key is not in the table yet  -> Batch Create\n//  changed: existing rows whose staged values differ, as { id, ...staged } -> Update\n// Values are compared loosely (Baserow returns numbers as strings; '' and null are the same).\nconst staged = $('Normalize').first().json['participants'] || [];\nconst existing = $('Read: participants').all().map((i) => i.json).filter((r) => r && r.id !== undefined && r.key !== undefined);\nconst byKey = new Map(existing.map((r) => [String(r.key), r]));\n\nconst norm = (v) => {\n  if (v === null || v === undefined || v === '') return '';\n  if (typeof v === 'boolean') return v ? 'true' : 'false';\n  if (v === 'true' || v === 'false') return v;\n  const n = Number(v);\n  if (typeof v === 'number' || (typeof v === 'string' && v.trim() !== '' && Number.isFinite(n))) return String(Number(n.toFixed(6)));\n  return String(v).trim();\n};\nconst differs = (row, cur) => Object.keys(row).some((k) => norm(row[k]) !== norm(cur[k]));\n\nconst out = [];\nfor (const row of staged) {\n  const cur = byKey.get(String(row.key));\n  if ('new' === 'new' && !cur) out.push({ json: row });\n  if ('new' === 'changed' && cur && differs(row, cur)) out.push({ json: { id: cur.id, ...row } });\n}\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "New rows: participants",
+      "position": [
+        1820,
+        240
+      ],
+      "id": "new-rows-participants"
+    },
+    {
+      "parameters": {
+        "batchSize": 200,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "name": "200 at a time: participants",
+      "position": [
+        2040,
+        240
+      ],
+      "id": "200-at-a-time-participants"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "batchCreate",
+        "databaseId": "={{ $('Read: participants').params.databaseId }}",
+        "tableId": "={{ $('Read: participants').params.tableId }}",
+        "dataToSend": "autoMapInputData",
+        "inputsToIgnore": ""
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Batch Create: participants",
+      "position": [
+        2260,
+        260
+      ],
+      "id": "batch-create-participants"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Upsert helper, one node per table and mode. build.mjs replaces Normalize (the node whose single\n// output item holds the staged rows under participants), participants (table name, also the \"Read: <table>\"\n// node that fetched the existing rows) and changed (\"new\" or \"changed\").\n//  new:     staged rows whose key is not in the table yet  -> Batch Create\n//  changed: existing rows whose staged values differ, as { id, ...staged } -> Update\n// Values are compared loosely (Baserow returns numbers as strings; '' and null are the same).\nconst staged = $('Normalize').first().json['participants'] || [];\nconst existing = $('Read: participants').all().map((i) => i.json).filter((r) => r && r.id !== undefined && r.key !== undefined);\nconst byKey = new Map(existing.map((r) => [String(r.key), r]));\n\nconst norm = (v) => {\n  if (v === null || v === undefined || v === '') return '';\n  if (typeof v === 'boolean') return v ? 'true' : 'false';\n  if (v === 'true' || v === 'false') return v;\n  const n = Number(v);\n  if (typeof v === 'number' || (typeof v === 'string' && v.trim() !== '' && Number.isFinite(n))) return String(Number(n.toFixed(6)));\n  return String(v).trim();\n};\nconst differs = (row, cur) => Object.keys(row).some((k) => norm(row[k]) !== norm(cur[k]));\n\nconst out = [];\nfor (const row of staged) {\n  const cur = byKey.get(String(row.key));\n  if ('changed' === 'new' && !cur) out.push({ json: row });\n  if ('changed' === 'changed' && cur && differs(row, cur)) out.push({ json: { id: cur.id, ...row } });\n}\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "Changed rows: participants",
+      "position": [
+        1820,
+        400
+      ],
+      "id": "changed-rows-participants"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "update",
+        "databaseId": "={{ $('Read: participants').params.databaseId }}",
+        "tableId": "={{ $('Read: participants').params.tableId }}",
+        "rowId": "={{ $json.id }}",
+        "dataToSend": "autoMapInputData",
+        "inputsToIgnore": "id"
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Update: participants",
+      "position": [
+        2040,
+        400
+      ],
+      "id": "update-participants"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "getAll",
+        "databaseId": "",
+        "tableId": "",
+        "returnAll": true,
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Read: items",
+      "position": [
+        1600,
+        620
+      ],
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "id": "read-items"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Upsert helper, one node per table and mode. build.mjs replaces Normalize (the node whose single\n// output item holds the staged rows under items), items (table name, also the \"Read: <table>\"\n// node that fetched the existing rows) and new (\"new\" or \"changed\").\n//  new:     staged rows whose key is not in the table yet  -> Batch Create\n//  changed: existing rows whose staged values differ, as { id, ...staged } -> Update\n// Values are compared loosely (Baserow returns numbers as strings; '' and null are the same).\nconst staged = $('Normalize').first().json['items'] || [];\nconst existing = $('Read: items').all().map((i) => i.json).filter((r) => r && r.id !== undefined && r.key !== undefined);\nconst byKey = new Map(existing.map((r) => [String(r.key), r]));\n\nconst norm = (v) => {\n  if (v === null || v === undefined || v === '') return '';\n  if (typeof v === 'boolean') return v ? 'true' : 'false';\n  if (v === 'true' || v === 'false') return v;\n  const n = Number(v);\n  if (typeof v === 'number' || (typeof v === 'string' && v.trim() !== '' && Number.isFinite(n))) return String(Number(n.toFixed(6)));\n  return String(v).trim();\n};\nconst differs = (row, cur) => Object.keys(row).some((k) => norm(row[k]) !== norm(cur[k]));\n\nconst out = [];\nfor (const row of staged) {\n  const cur = byKey.get(String(row.key));\n  if ('new' === 'new' && !cur) out.push({ json: row });\n  if ('new' === 'changed' && cur && differs(row, cur)) out.push({ json: { id: cur.id, ...row } });\n}\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "New rows: items",
+      "position": [
+        1820,
+        560
+      ],
+      "id": "new-rows-items"
+    },
+    {
+      "parameters": {
+        "batchSize": 200,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "name": "200 at a time: items",
+      "position": [
+        2040,
+        560
+      ],
+      "id": "200-at-a-time-items"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "batchCreate",
+        "databaseId": "={{ $('Read: items').params.databaseId }}",
+        "tableId": "={{ $('Read: items').params.tableId }}",
+        "dataToSend": "autoMapInputData",
+        "inputsToIgnore": ""
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Batch Create: items",
+      "position": [
+        2260,
+        580
+      ],
+      "id": "batch-create-items"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Upsert helper, one node per table and mode. build.mjs replaces Normalize (the node whose single\n// output item holds the staged rows under items), items (table name, also the \"Read: <table>\"\n// node that fetched the existing rows) and changed (\"new\" or \"changed\").\n//  new:     staged rows whose key is not in the table yet  -> Batch Create\n//  changed: existing rows whose staged values differ, as { id, ...staged } -> Update\n// Values are compared loosely (Baserow returns numbers as strings; '' and null are the same).\nconst staged = $('Normalize').first().json['items'] || [];\nconst existing = $('Read: items').all().map((i) => i.json).filter((r) => r && r.id !== undefined && r.key !== undefined);\nconst byKey = new Map(existing.map((r) => [String(r.key), r]));\n\nconst norm = (v) => {\n  if (v === null || v === undefined || v === '') return '';\n  if (typeof v === 'boolean') return v ? 'true' : 'false';\n  if (v === 'true' || v === 'false') return v;\n  const n = Number(v);\n  if (typeof v === 'number' || (typeof v === 'string' && v.trim() !== '' && Number.isFinite(n))) return String(Number(n.toFixed(6)));\n  return String(v).trim();\n};\nconst differs = (row, cur) => Object.keys(row).some((k) => norm(row[k]) !== norm(cur[k]));\n\nconst out = [];\nfor (const row of staged) {\n  const cur = byKey.get(String(row.key));\n  if ('changed' === 'new' && !cur) out.push({ json: row });\n  if ('changed' === 'changed' && cur && differs(row, cur)) out.push({ json: { id: cur.id, ...row } });\n}\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "Changed rows: items",
+      "position": [
+        1820,
+        720
+      ],
+      "id": "changed-rows-items"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "update",
+        "databaseId": "={{ $('Read: items').params.databaseId }}",
+        "tableId": "={{ $('Read: items').params.tableId }}",
+        "rowId": "={{ $json.id }}",
+        "dataToSend": "autoMapInputData",
+        "inputsToIgnore": "id"
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Update: items",
+      "position": [
+        2040,
+        720
+      ],
+      "id": "update-items"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "getAll",
+        "databaseId": "",
+        "tableId": "",
+        "returnAll": true,
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Read: human_bfi2",
+      "position": [
+        1600,
+        940
+      ],
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "id": "read-human-bfi2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Upsert helper, one node per table and mode. build.mjs replaces Normalize (the node whose single\n// output item holds the staged rows under human_bfi2), human_bfi2 (table name, also the \"Read: <table>\"\n// node that fetched the existing rows) and new (\"new\" or \"changed\").\n//  new:     staged rows whose key is not in the table yet  -> Batch Create\n//  changed: existing rows whose staged values differ, as { id, ...staged } -> Update\n// Values are compared loosely (Baserow returns numbers as strings; '' and null are the same).\nconst staged = $('Normalize').first().json['human_bfi2'] || [];\nconst existing = $('Read: human_bfi2').all().map((i) => i.json).filter((r) => r && r.id !== undefined && r.key !== undefined);\nconst byKey = new Map(existing.map((r) => [String(r.key), r]));\n\nconst norm = (v) => {\n  if (v === null || v === undefined || v === '') return '';\n  if (typeof v === 'boolean') return v ? 'true' : 'false';\n  if (v === 'true' || v === 'false') return v;\n  const n = Number(v);\n  if (typeof v === 'number' || (typeof v === 'string' && v.trim() !== '' && Number.isFinite(n))) return String(Number(n.toFixed(6)));\n  return String(v).trim();\n};\nconst differs = (row, cur) => Object.keys(row).some((k) => norm(row[k]) !== norm(cur[k]));\n\nconst out = [];\nfor (const row of staged) {\n  const cur = byKey.get(String(row.key));\n  if ('new' === 'new' && !cur) out.push({ json: row });\n  if ('new' === 'changed' && cur && differs(row, cur)) out.push({ json: { id: cur.id, ...row } });\n}\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "New rows: human_bfi2",
+      "position": [
+        1820,
+        880
+      ],
+      "id": "new-rows-human-bfi2"
+    },
+    {
+      "parameters": {
+        "batchSize": 200,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "name": "200 at a time: human_bfi2",
+      "position": [
+        2040,
+        880
+      ],
+      "id": "200-at-a-time-human-bfi2"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "batchCreate",
+        "databaseId": "={{ $('Read: human_bfi2').params.databaseId }}",
+        "tableId": "={{ $('Read: human_bfi2').params.tableId }}",
+        "dataToSend": "autoMapInputData",
+        "inputsToIgnore": ""
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Batch Create: human_bfi2",
+      "position": [
+        2260,
+        900
+      ],
+      "id": "batch-create-human-bfi2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Upsert helper, one node per table and mode. build.mjs replaces Normalize (the node whose single\n// output item holds the staged rows under human_bfi2), human_bfi2 (table name, also the \"Read: <table>\"\n// node that fetched the existing rows) and changed (\"new\" or \"changed\").\n//  new:     staged rows whose key is not in the table yet  -> Batch Create\n//  changed: existing rows whose staged values differ, as { id, ...staged } -> Update\n// Values are compared loosely (Baserow returns numbers as strings; '' and null are the same).\nconst staged = $('Normalize').first().json['human_bfi2'] || [];\nconst existing = $('Read: human_bfi2').all().map((i) => i.json).filter((r) => r && r.id !== undefined && r.key !== undefined);\nconst byKey = new Map(existing.map((r) => [String(r.key), r]));\n\nconst norm = (v) => {\n  if (v === null || v === undefined || v === '') return '';\n  if (typeof v === 'boolean') return v ? 'true' : 'false';\n  if (v === 'true' || v === 'false') return v;\n  const n = Number(v);\n  if (typeof v === 'number' || (typeof v === 'string' && v.trim() !== '' && Number.isFinite(n))) return String(Number(n.toFixed(6)));\n  return String(v).trim();\n};\nconst differs = (row, cur) => Object.keys(row).some((k) => norm(row[k]) !== norm(cur[k]));\n\nconst out = [];\nfor (const row of staged) {\n  const cur = byKey.get(String(row.key));\n  if ('changed' === 'new' && !cur) out.push({ json: row });\n  if ('changed' === 'changed' && cur && differs(row, cur)) out.push({ json: { id: cur.id, ...row } });\n}\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "Changed rows: human_bfi2",
+      "position": [
+        1820,
+        1040
+      ],
+      "id": "changed-rows-human-bfi2"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "update",
+        "databaseId": "={{ $('Read: human_bfi2').params.databaseId }}",
+        "tableId": "={{ $('Read: human_bfi2').params.tableId }}",
+        "rowId": "={{ $json.id }}",
+        "dataToSend": "autoMapInputData",
+        "inputsToIgnore": "id"
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Update: human_bfi2",
+      "position": [
+        2040,
+        1040
+      ],
+      "id": "update-human-bfi2"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "getAll",
+        "databaseId": "",
+        "tableId": "",
+        "returnAll": true,
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Read: human_mini_markers",
+      "position": [
+        1600,
+        1260
+      ],
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "id": "read-human-mini-markers"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Upsert helper, one node per table and mode. build.mjs replaces Normalize (the node whose single\n// output item holds the staged rows under human_mini_markers), human_mini_markers (table name, also the \"Read: <table>\"\n// node that fetched the existing rows) and new (\"new\" or \"changed\").\n//  new:     staged rows whose key is not in the table yet  -> Batch Create\n//  changed: existing rows whose staged values differ, as { id, ...staged } -> Update\n// Values are compared loosely (Baserow returns numbers as strings; '' and null are the same).\nconst staged = $('Normalize').first().json['human_mini_markers'] || [];\nconst existing = $('Read: human_mini_markers').all().map((i) => i.json).filter((r) => r && r.id !== undefined && r.key !== undefined);\nconst byKey = new Map(existing.map((r) => [String(r.key), r]));\n\nconst norm = (v) => {\n  if (v === null || v === undefined || v === '') return '';\n  if (typeof v === 'boolean') return v ? 'true' : 'false';\n  if (v === 'true' || v === 'false') return v;\n  const n = Number(v);\n  if (typeof v === 'number' || (typeof v === 'string' && v.trim() !== '' && Number.isFinite(n))) return String(Number(n.toFixed(6)));\n  return String(v).trim();\n};\nconst differs = (row, cur) => Object.keys(row).some((k) => norm(row[k]) !== norm(cur[k]));\n\nconst out = [];\nfor (const row of staged) {\n  const cur = byKey.get(String(row.key));\n  if ('new' === 'new' && !cur) out.push({ json: row });\n  if ('new' === 'changed' && cur && differs(row, cur)) out.push({ json: { id: cur.id, ...row } });\n}\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "New rows: human_mini_markers",
+      "position": [
+        1820,
+        1200
+      ],
+      "id": "new-rows-human-mini-markers"
+    },
+    {
+      "parameters": {
+        "batchSize": 200,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "name": "200 at a time: human_mini_markers",
+      "position": [
+        2040,
+        1200
+      ],
+      "id": "200-at-a-time-human-mini-markers"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "batchCreate",
+        "databaseId": "={{ $('Read: human_mini_markers').params.databaseId }}",
+        "tableId": "={{ $('Read: human_mini_markers').params.tableId }}",
+        "dataToSend": "autoMapInputData",
+        "inputsToIgnore": ""
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Batch Create: human_mini_markers",
+      "position": [
+        2260,
+        1220
+      ],
+      "id": "batch-create-human-mini-markers"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Upsert helper, one node per table and mode. build.mjs replaces Normalize (the node whose single\n// output item holds the staged rows under human_mini_markers), human_mini_markers (table name, also the \"Read: <table>\"\n// node that fetched the existing rows) and changed (\"new\" or \"changed\").\n//  new:     staged rows whose key is not in the table yet  -> Batch Create\n//  changed: existing rows whose staged values differ, as { id, ...staged } -> Update\n// Values are compared loosely (Baserow returns numbers as strings; '' and null are the same).\nconst staged = $('Normalize').first().json['human_mini_markers'] || [];\nconst existing = $('Read: human_mini_markers').all().map((i) => i.json).filter((r) => r && r.id !== undefined && r.key !== undefined);\nconst byKey = new Map(existing.map((r) => [String(r.key), r]));\n\nconst norm = (v) => {\n  if (v === null || v === undefined || v === '') return '';\n  if (typeof v === 'boolean') return v ? 'true' : 'false';\n  if (v === 'true' || v === 'false') return v;\n  const n = Number(v);\n  if (typeof v === 'number' || (typeof v === 'string' && v.trim() !== '' && Number.isFinite(n))) return String(Number(n.toFixed(6)));\n  return String(v).trim();\n};\nconst differs = (row, cur) => Object.keys(row).some((k) => norm(row[k]) !== norm(cur[k]));\n\nconst out = [];\nfor (const row of staged) {\n  const cur = byKey.get(String(row.key));\n  if ('changed' === 'new' && !cur) out.push({ json: row });\n  if ('changed' === 'changed' && cur && differs(row, cur)) out.push({ json: { id: cur.id, ...row } });\n}\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "Changed rows: human_mini_markers",
+      "position": [
+        1820,
+        1360
+      ],
+      "id": "changed-rows-human-mini-markers"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "update",
+        "databaseId": "={{ $('Read: human_mini_markers').params.databaseId }}",
+        "tableId": "={{ $('Read: human_mini_markers').params.tableId }}",
+        "rowId": "={{ $json.id }}",
+        "dataToSend": "autoMapInputData",
+        "inputsToIgnore": "id"
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Update: human_mini_markers",
+      "position": [
+        2040,
+        1360
+      ],
+      "id": "update-human-mini-markers"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "getAll",
+        "databaseId": "",
+        "tableId": "",
+        "returnAll": true,
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Read: scores",
+      "position": [
+        1600,
+        1580
+      ],
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "id": "read-scores"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Upsert helper, one node per table and mode. build.mjs replaces Normalize (the node whose single\n// output item holds the staged rows under scores), scores (table name, also the \"Read: <table>\"\n// node that fetched the existing rows) and new (\"new\" or \"changed\").\n//  new:     staged rows whose key is not in the table yet  -> Batch Create\n//  changed: existing rows whose staged values differ, as { id, ...staged } -> Update\n// Values are compared loosely (Baserow returns numbers as strings; '' and null are the same).\nconst staged = $('Normalize').first().json['scores'] || [];\nconst existing = $('Read: scores').all().map((i) => i.json).filter((r) => r && r.id !== undefined && r.key !== undefined);\nconst byKey = new Map(existing.map((r) => [String(r.key), r]));\n\nconst norm = (v) => {\n  if (v === null || v === undefined || v === '') return '';\n  if (typeof v === 'boolean') return v ? 'true' : 'false';\n  if (v === 'true' || v === 'false') return v;\n  const n = Number(v);\n  if (typeof v === 'number' || (typeof v === 'string' && v.trim() !== '' && Number.isFinite(n))) return String(Number(n.toFixed(6)));\n  return String(v).trim();\n};\nconst differs = (row, cur) => Object.keys(row).some((k) => norm(row[k]) !== norm(cur[k]));\n\nconst out = [];\nfor (const row of staged) {\n  const cur = byKey.get(String(row.key));\n  if ('new' === 'new' && !cur) out.push({ json: row });\n  if ('new' === 'changed' && cur && differs(row, cur)) out.push({ json: { id: cur.id, ...row } });\n}\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "New rows: scores",
+      "position": [
+        1820,
+        1520
+      ],
+      "id": "new-rows-scores"
+    },
+    {
+      "parameters": {
+        "batchSize": 200,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "name": "200 at a time: scores",
+      "position": [
+        2040,
+        1520
+      ],
+      "id": "200-at-a-time-scores"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "batchCreate",
+        "databaseId": "={{ $('Read: scores').params.databaseId }}",
+        "tableId": "={{ $('Read: scores').params.tableId }}",
+        "dataToSend": "autoMapInputData",
+        "inputsToIgnore": ""
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Batch Create: scores",
+      "position": [
+        2260,
+        1540
+      ],
+      "id": "batch-create-scores"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Upsert helper, one node per table and mode. build.mjs replaces Normalize (the node whose single\n// output item holds the staged rows under scores), scores (table name, also the \"Read: <table>\"\n// node that fetched the existing rows) and changed (\"new\" or \"changed\").\n//  new:     staged rows whose key is not in the table yet  -> Batch Create\n//  changed: existing rows whose staged values differ, as { id, ...staged } -> Update\n// Values are compared loosely (Baserow returns numbers as strings; '' and null are the same).\nconst staged = $('Normalize').first().json['scores'] || [];\nconst existing = $('Read: scores').all().map((i) => i.json).filter((r) => r && r.id !== undefined && r.key !== undefined);\nconst byKey = new Map(existing.map((r) => [String(r.key), r]));\n\nconst norm = (v) => {\n  if (v === null || v === undefined || v === '') return '';\n  if (typeof v === 'boolean') return v ? 'true' : 'false';\n  if (v === 'true' || v === 'false') return v;\n  const n = Number(v);\n  if (typeof v === 'number' || (typeof v === 'string' && v.trim() !== '' && Number.isFinite(n))) return String(Number(n.toFixed(6)));\n  return String(v).trim();\n};\nconst differs = (row, cur) => Object.keys(row).some((k) => norm(row[k]) !== norm(cur[k]));\n\nconst out = [];\nfor (const row of staged) {\n  const cur = byKey.get(String(row.key));\n  if ('changed' === 'new' && !cur) out.push({ json: row });\n  if ('changed' === 'changed' && cur && differs(row, cur)) out.push({ json: { id: cur.id, ...row } });\n}\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "Changed rows: scores",
+      "position": [
+        1820,
+        1680
+      ],
+      "id": "changed-rows-scores"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "update",
+        "databaseId": "={{ $('Read: scores').params.databaseId }}",
+        "tableId": "={{ $('Read: scores').params.tableId }}",
+        "rowId": "={{ $json.id }}",
+        "dataToSend": "autoMapInputData",
+        "inputsToIgnore": "id"
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Update: scores",
+      "position": [
+        2040,
+        1680
+      ],
+      "id": "update-scores"
+    },
+    {
+      "parameters": {
+        "content": "## Baserow tables to pick\nAfter importing, open each node below and choose the Big Five database and the named table from the dropdowns (and the Baserow Token credential):\n\n- **Read: participants** → table `participants`\n- **Read: items** → table `items`\n- **Read: human_bfi2** → table `human_bfi2`\n- **Read: human_mini_markers** → table `human_mini_markers`\n- **Read: scores** → table `scores`\n\nThese nodes follow the pick above for the same table by expression; nothing to choose, only the credential:\n- Batch Create: participants\n- Update: participants\n- Batch Create: items\n- Update: items\n- Batch Create: human_bfi2\n- Update: human_bfi2\n- Batch Create: human_mini_markers\n- Update: human_mini_markers\n- Batch Create: scores\n- Update: scores",
+        "width": 520,
+        "height": 480,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "name": "Tables",
+      "position": [
+        -660,
+        140
+      ],
+      "id": "tables"
+    }
+  ],
+  "connections": {
+    "Import form": {
+      "main": [
+        [
+          {
+            "node": "Extract: Human Responses sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract: Human Responses sheet": {
+      "main": [
+        [
+          {
+            "node": "Form again (lookup)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Form again (lookup)": {
+      "main": [
+        [
+          {
+            "node": "Extract: bfi lookup sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract: bfi lookup sheet": {
+      "main": [
+        [
+          {
+            "node": "Form again (Mini-Markers)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Form again (Mini-Markers)": {
+      "main": [
+        [
+          {
+            "node": "Extract: Mini-Marker sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract: Mini-Marker sheet": {
+      "main": [
+        [
+          {
+            "node": "Normalize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read: participants": {
+      "main": [
+        [
+          {
+            "node": "New rows: participants",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Changed rows: participants",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New rows: participants": {
+      "main": [
+        [
+          {
+            "node": "200 at a time: participants",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "200 at a time: participants": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Batch Create: participants",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Batch Create: participants": {
+      "main": [
+        [
+          {
+            "node": "200 at a time: participants",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Changed rows: participants": {
+      "main": [
+        [
+          {
+            "node": "Update: participants",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize": {
+      "main": [
+        [
+          {
+            "node": "Read: participants",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Read: items",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Read: human_bfi2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Read: human_mini_markers",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Read: scores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read: items": {
+      "main": [
+        [
+          {
+            "node": "New rows: items",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Changed rows: items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New rows: items": {
+      "main": [
+        [
+          {
+            "node": "200 at a time: items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "200 at a time: items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Batch Create: items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Batch Create: items": {
+      "main": [
+        [
+          {
+            "node": "200 at a time: items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Changed rows: items": {
+      "main": [
+        [
+          {
+            "node": "Update: items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read: human_bfi2": {
+      "main": [
+        [
+          {
+            "node": "New rows: human_bfi2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Changed rows: human_bfi2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New rows: human_bfi2": {
+      "main": [
+        [
+          {
+            "node": "200 at a time: human_bfi2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "200 at a time: human_bfi2": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Batch Create: human_bfi2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Batch Create: human_bfi2": {
+      "main": [
+        [
+          {
+            "node": "200 at a time: human_bfi2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Changed rows: human_bfi2": {
+      "main": [
+        [
+          {
+            "node": "Update: human_bfi2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read: human_mini_markers": {
+      "main": [
+        [
+          {
+            "node": "New rows: human_mini_markers",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Changed rows: human_mini_markers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New rows: human_mini_markers": {
+      "main": [
+        [
+          {
+            "node": "200 at a time: human_mini_markers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "200 at a time: human_mini_markers": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Batch Create: human_mini_markers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Batch Create: human_mini_markers": {
+      "main": [
+        [
+          {
+            "node": "200 at a time: human_mini_markers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Changed rows: human_mini_markers": {
+      "main": [
+        [
+          {
+            "node": "Update: human_mini_markers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read: scores": {
+      "main": [
+        [
+          {
+            "node": "New rows: scores",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Changed rows: scores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New rows: scores": {
+      "main": [
+        [
+          {
+            "node": "200 at a time: scores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "200 at a time: scores": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Batch Create: scores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Batch Create: scores": {
+      "main": [
+        [
+          {
+            "node": "200 at a time: scores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Changed rows: scores": {
+      "main": [
+        [
+          {
+            "node": "Update: scores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true
+  },
+  "active": false,
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

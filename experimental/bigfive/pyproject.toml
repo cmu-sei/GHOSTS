@@ -1,0 +1,13 @@
+[project]
+name = "bigfive"
+version = "0.1.0"
+description = "Human vs. LLM-agent Big Five study: normalize, import, score, compare, report"
+requires-python = ">=3.12"
+dependencies = ["openpyxl>=3.1"]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
