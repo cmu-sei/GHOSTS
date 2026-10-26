@@ -1,0 +1,395 @@
+{
+  "name": "Big Five 3 - Add Run",
+  "id": "bigFiveAddRun",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Big Five 3 - Add Run\nOne form, two uses:\n- **Queue an LLM run**: give a new Run ID, the provider (ollama or bedrock), the model id, temperature and batch size, no file. \"Big Five 4 - Run Agents\" picks the run up.\n- **Import agent answers made elsewhere**: additionally upload a sheet with `Participant ID` and `tda1..tda40` (same layout as the human Mini-Marker sheet). The run is stored finished and can be analyzed right away.\n\nModel ids: Bedrock takes an inference-profile id such as `us.anthropic.claude-haiku-4-5-20251001-v1:0`; Ollama takes a tag such as `llama3:70b`. A Run ID that already exists is refused.",
+        "width": 560,
+        "height": 340,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "name": "About",
+      "position": [
+        -660,
+        -260
+      ],
+      "id": "about"
+    },
+    {
+      "parameters": {
+        "path": "bigfive-add-run",
+        "formTitle": "Big Five · Add Run",
+        "formDescription": "Queue a model run, or upload agent answers produced elsewhere. Leave the file empty to queue.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Run ID",
+              "fieldType": "text",
+              "requiredField": true,
+              "placeholder": "run-002"
+            },
+            {
+              "fieldLabel": "Provider",
+              "fieldType": "dropdown",
+              "requiredField": true,
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "bedrock"
+                  },
+                  {
+                    "option": "ollama"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Model",
+              "fieldType": "text",
+              "requiredField": true,
+              "placeholder": "us.anthropic.claude-haiku-4-5-20251001-v1:0"
+            },
+            {
+              "fieldLabel": "Temperature",
+              "fieldType": "number",
+              "placeholder": "0.7"
+            },
+            {
+              "fieldLabel": "Batch size",
+              "fieldType": "number",
+              "placeholder": "25 (Ollama) · 100 (Bedrock)"
+            },
+            {
+              "fieldLabel": "Agent answers",
+              "fieldType": "file",
+              "multipleFiles": false,
+              "acceptFileTypes": ".xlsx"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "name": "Add run form",
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "bigfive-add-run",
+      "id": "add-run-form"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "Answers file attached?-cond",
+              "leftValue": "={{ Object.keys($binary || {}).length > 0 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "name": "Answers file attached?",
+      "position": [
+        240,
+        0
+      ],
+      "id": "answers-file-attached"
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "binaryPropertyName": "Agent_answers",
+        "options": {
+          "headerRow": true
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "name": "Extract: agent answers sheet",
+      "position": [
+        480,
+        -120
+      ],
+      "id": "extract-agent-answers-sheet"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Add Run: read an uploaded sheet of agent answers (Participant ID, tda1..tda40) into one item\n// { answers: [{ participant_id, values: { tda1.. }, ok, parsed_count, error }] }.\nconst rows = $input.all().map((i) => i.json);\nconst col = (row, name) => {\n  const want = name.toLowerCase().replace(/[\\s_]/g, '');\n  for (const k of Object.keys(row)) if (k.toLowerCase().replace(/[\\s_]/g, '') === want) return row[k];\n  return undefined;\n};\nconst answers = [];\nfor (const row of rows) {\n  const raw = col(row, 'Participant ID') ?? col(row, 'participant_id') ?? col(row, 'pid');\n  const pid = Number(raw);\n  if (raw === null || raw === undefined || raw === '' || !Number.isInteger(pid)) continue;\n  const values = {};\n  const problems = [];\n  for (let i = 1; i <= 40; i++) {\n    const v = col(row, `tda${i}`);\n    if (v === null || v === undefined || v === '') continue;\n    const n = Number(v);\n    if (!Number.isInteger(n) || n < 1 || n > 9) { problems.push(`out of range: tda${i} = ${v}`); continue; }\n    values[`tda${i}`] = n;\n  }\n  const parsed_count = Object.keys(values).length;\n  if (parsed_count === 0) continue;\n  const missing = [];\n  for (let i = 1; i <= 40; i++) if (values[`tda${i}`] === undefined) missing.push(`tda${i}`);\n  if (missing.length) problems.push(`missing: ${missing.join(', ')}`);\n  answers.push({ participant_id: pid, values, ok: problems.length === 0, parsed_count, error: problems.join('; ').slice(0, 2000) });\n}\nif (!answers.length) throw new Error('The agent answers file has no rows with a Participant ID and tda1..tda40 columns');\nreturn [{ json: { answers, count: answers.length, ok: answers.filter((a) => a.ok).length } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "Parse agent answers",
+      "position": [
+        720,
+        -120
+      ],
+      "id": "parse-agent-answers"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "getAll",
+        "databaseId": "",
+        "tableId": "",
+        "returnAll": true,
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Read: runs",
+      "position": [
+        960,
+        0
+      ],
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "id": "read-runs"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Add Run: validate the form and produce the `runs` row. Input: every existing runs row (Read: runs).\n// With an uploaded answers file (Parse agent answers ran) the run is stored finished, source \"import\";\n// otherwise it is queued for Run Agents.\nconst form = $('Add run form').first().json;\nconst existing = $input.all().map((i) => i.json).filter((r) => r && r.run_id);\nconst imported = $('Parse agent answers').isExecuted ? $('Parse agent answers').first().json : null;\n\nconst field = (name) => {\n  const want = name.toLowerCase().replace(/[^a-z0-9]/g, '');\n  for (const k of Object.keys(form)) if (k.toLowerCase().replace(/[^a-z0-9]/g, '').startsWith(want)) return form[k];\n  return undefined;\n};\nconst run_id = String(field('Run ID') ?? '').trim();\nconst provider = String(field('Provider') ?? '').trim().toLowerCase();\nconst model = String(field('Model') ?? '').trim();\nconst temperature = field('Temperature') === '' || field('Temperature') === undefined || field('Temperature') === null ? 0.7 : Number(field('Temperature'));\nconst batch_size = Math.max(1, Math.floor(Number(field('Batch size')) || 25));\n\nif (!run_id) throw new Error('Run ID is required');\nif (!/^[A-Za-z0-9._-]+$/.test(run_id)) throw new Error(`Run ID \"${run_id}\" may only contain letters, digits, \".\", \"_\" and \"-\"`);\nif (existing.some((r) => String(r.run_id) === run_id)) throw new Error(`Run \"${run_id}\" already exists; pick another Run ID`);\nif (!['ollama', 'bedrock'].includes(provider)) throw new Error(`Provider must be ollama or bedrock, got \"${provider}\"`);\nif (!model) throw new Error('Model is required');\nif (!Number.isFinite(temperature)) throw new Error(`Temperature must be a number, got \"${field('Temperature')}\"`);\n\nconst iso = new Date().toISOString().replace(/\\.\\d{3}Z$/, '+00:00');\nconst row = {\n  key: run_id,\n  run_id,\n  source: imported ? 'import' : 'llm',\n  provider,\n  model,\n  temperature,\n  prompt_version: imported ? '' : 'mm-v1',\n  batch_size,\n  status: imported ? 'done' : 'queued',\n  participants_total: imported ? imported.count : 0,\n  participants_done: imported ? imported.ok : 0,\n  participants_failed: imported ? imported.count - imported.ok : 0,\n  // Date fields take an ISO timestamp or null; Baserow rejects ''.\n  started_at: imported ? iso : null,\n  last_batch_at: imported ? iso : null,\n  finished_at: imported ? iso : null,\n  locked_at: null,\n  locked_by: '',\n  analyzed_at: null,\n};\nreturn [{ json: row }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "Prepare run",
+      "position": [
+        1200,
+        0
+      ],
+      "id": "prepare-run"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "create",
+        "databaseId": "={{ $('Read: runs').params.databaseId }}",
+        "tableId": "={{ $('Read: runs').params.tableId }}",
+        "dataToSend": "autoMapInputData",
+        "inputsToIgnore": ""
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Create: runs",
+      "position": [
+        1440,
+        0
+      ],
+      "id": "create-runs"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Add Run: one agent_turns row per uploaded answer. Nothing when the run was queued without a file.\nif (!$('Parse agent answers').isExecuted) return [];\nconst run = $('Prepare run').first().json;\nconst { answers } = $('Parse agent answers').first().json;\nconst iso = new Date().toISOString().replace(/\\.\\d{3}Z$/, '+00:00');\nreturn answers.map((a) => ({\n  json: {\n    key: `${run.run_id}:${a.participant_id}`,\n    run_id: run.run_id,\n    participant_id: a.participant_id,\n    provider: run.provider,\n    model: run.model,\n    prompt_version: run.prompt_version,\n    raw_output: '',\n    parsed_count: a.parsed_count,\n    ok: a.ok,\n    error: a.error,\n    duration_ms: 0,\n    answered_at: iso,\n    ...a.values,\n  },\n}));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "Turn rows",
+      "position": [
+        1680,
+        0
+      ],
+      "id": "turn-rows"
+    },
+    {
+      "parameters": {
+        "batchSize": 200,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "name": "200 at a time: agent_turns",
+      "position": [
+        1920,
+        0
+      ],
+      "id": "200-at-a-time-agent-turns"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "batchCreate",
+        "databaseId": "",
+        "tableId": "",
+        "dataToSend": "autoMapInputData",
+        "inputsToIgnore": ""
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Batch Create: agent_turns",
+      "position": [
+        2160,
+        20
+      ],
+      "id": "batch-create-agent-turns"
+    },
+    {
+      "parameters": {
+        "content": "## Baserow tables to pick\nAfter importing, open each node below and choose the Big Five database and the named table from the dropdowns (and the Baserow Token credential):\n\n- **Read: runs** → table `runs`\n- **Batch Create: agent_turns** → table `agent_turns`\n\nThese nodes follow the pick above for the same table by expression; nothing to choose, only the credential:\n- Create: runs",
+        "width": 520,
+        "height": 192,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "name": "Tables",
+      "position": [
+        -660,
+        120
+      ],
+      "id": "tables"
+    }
+  ],
+  "connections": {
+    "Add run form": {
+      "main": [
+        [
+          {
+            "node": "Answers file attached?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Answers file attached?": {
+      "main": [
+        [
+          {
+            "node": "Extract: agent answers sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Read: runs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract: agent answers sheet": {
+      "main": [
+        [
+          {
+            "node": "Parse agent answers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse agent answers": {
+      "main": [
+        [
+          {
+            "node": "Read: runs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read: runs": {
+      "main": [
+        [
+          {
+            "node": "Prepare run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare run": {
+      "main": [
+        [
+          {
+            "node": "Create: runs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create: runs": {
+      "main": [
+        [
+          {
+            "node": "Turn rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Turn rows": {
+      "main": [
+        [
+          {
+            "node": "200 at a time: agent_turns",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "200 at a time: agent_turns": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Batch Create: agent_turns",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Batch Create: agent_turns": {
+      "main": [
+        [
+          {
+            "node": "200 at a time: agent_turns",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true
+  },
+  "active": false,
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

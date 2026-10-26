@@ -92,6 +92,8 @@ var n8n = builder.AddContainer("n8n", "docker.n8n.io/n8nio/n8n")
     .WithEnvironment("N8N_DIAGNOSTICS_ENABLED", "false")
     .WithEnvironment("N8N_PORT", "5678")
     .WithEnvironment("N8N_PROTOCOL", "http")
+    // Big Five study reports: the only directory the Read/Write Files node may touch (n8n blocks file access elsewhere by default).
+    .WithEnvironment("N8N_RESTRICT_FILE_ACCESS_TO", "/home/node/bigfive-out")
     .WithContainerName("n8n")
     // Reach the Mac's Ollama from inside this inner DinD container. host.docker.internal
     // points at the devcontainer, so map host.ollama -> Docker Desktop's host-gateway IP.
@@ -110,6 +112,8 @@ var n8n = builder.AddContainer("n8n", "docker.n8n.io/n8nio/n8n")
     .WithBindMount("n8n_data", "/home/node/.n8n", isReadOnly: false)
     .WithBindMount("../../configuration/n8n-workflows", "/bootstrap/workflows", isReadOnly: true)
     .WithBindMount("../../configuration/n8n-bootstrap/scripts", "/bootstrap/scripts", isReadOnly: true)
+    // Big Five study reports (experimental/bigfive) are written here by the "Big Five 5 - Analyze and Report" workflow.
+    .WithBindMount("../../experimental/bigfive/out", "/home/node/bigfive-out", isReadOnly: false)
     .WithLifetime(ContainerLifetime.Persistent)
     .WaitFor(mcp)
     .WaitFor(postgres);

@@ -1,0 +1,793 @@
+{
+  "name": "Big Five 4 - Run Agents",
+  "id": "bigFiveRunAgents",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Big Five 4 - Run Agents\nAnswers the 40 Mini-Markers for one batch of participants of the current run, as the persona of each participant.\n\n- Picks the `running` run, else the oldest `queued` one, and locks it (`locked_at`/`locked_by`; a lock older than 30 min is abandoned).\n- Asks the model for `batch_size` participants that have no agent_turns row yet; prompt **mm-v1** (Build prompt).\n- Writes one agent_turns row per participant: raw reply, parse result, and tda1..tda40 when all 40 came back clean.\n- Refreshes the lock after every participant; when nobody is left sets the run to `done`.\n\nPress **Execute workflow** for one batch, or **activate** for a batch every 10 minutes. Set a run's status to `paused` to stop after the current batch. To re-ask failed participants, delete their agent_turns rows and set the run back to `queued`.\n\nCredentials: Baserow Token on every Baserow node; AWS on the Bedrock model; Ollama (base URL reachable from the n8n container, Aspire: http://host.ollama:11434) on the Ollama model.",
+        "width": 600,
+        "height": 460,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "name": "About",
+      "position": [
+        -700,
+        -420
+      ],
+      "id": "about"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "name": "Manual Trigger",
+      "position": [
+        0,
+        -100
+      ],
+      "id": "manual-trigger"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "*/10 * * * *"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "name": "Every 10 minutes",
+      "position": [
+        0,
+        100
+      ],
+      "id": "every-10-minutes"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Run Agents settings. lockMinutes: a run lock older than this is treated as abandoned.\n// promptVersion must match the header of build_prompt.js; a run row with another prompt_version is refused.\nreturn [{ json: { lockMinutes: 30, promptVersion: 'mm-v1' } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "Configuration",
+      "position": [
+        240,
+        0
+      ],
+      "id": "configuration"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "getAll",
+        "databaseId": "",
+        "tableId": "",
+        "returnAll": true,
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Read: runs",
+      "position": [
+        480,
+        0
+      ],
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "id": "read-runs"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pick the run this execution works on: a running run first, else the oldest queued one.\n// Output: one item with the lock update body for the runs table (locked_at + locked_by = this execution),\n// plus the run itself under `run` (ignored by the Baserow node via Inputs to Ignore). No item when\n// there is nothing to do.\nconst config = $('Configuration').first().json;\nconst runs = $input.all().map((i) => i.json).filter((r) => r && r.run_id);\nconst byAge = (a, b) => String(a.started_at || '').localeCompare(String(b.started_at || '')) || a.id - b.id;\nconst running = runs.filter((r) => r.status === 'running').sort(byAge);\nconst queued = runs.filter((r) => r.status === 'queued').sort((a, b) => a.id - b.id);\nconst run = running[0] || queued[0];\nif (!run) return [];\n\nconst now = new Date();\nconst lockMs = (Number(config.lockMinutes) || 30) * 60 * 1000;\nif (run.locked_at && now.getTime() - Date.parse(run.locked_at) < lockMs) {\n  // Another execution is still working on this run; leave it alone.\n  return [];\n}\n\nconst provider = String(run.provider || '').trim().toLowerCase();\nif (!['ollama', 'bedrock'].includes(provider)) throw new Error(`run ${run.run_id}: provider must be ollama or bedrock, got \"${run.provider}\"`);\nif (!String(run.model || '').trim()) throw new Error(`run ${run.run_id}: model is required`);\nif (run.prompt_version && run.prompt_version !== config.promptVersion) {\n  throw new Error(`run ${run.run_id}: prompt_version \"${run.prompt_version}\" does not match this workflow's prompt \"${config.promptVersion}\"`);\n}\nconst batchSize = Math.max(1, Math.floor(Number(run.batch_size) || 25));\nconst temperature = run.temperature === '' || run.temperature === null || run.temperature === undefined ? null : Number(run.temperature);\n\nconst iso = now.toISOString().replace(/\\.\\d{3}Z$/, '+00:00');\nreturn [{\n  json: {\n    run: { ...run, provider, model: String(run.model).trim(), batch_size: batchSize, temperature, prompt_version: config.promptVersion },\n    status: 'running',\n    locked_at: iso,\n    locked_by: $execution.id,\n    started_at: run.started_at || iso,\n    prompt_version: config.promptVersion,\n    batch_size: batchSize,\n  },\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "Pick run",
+      "position": [
+        720,
+        0
+      ],
+      "id": "pick-run"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "update",
+        "databaseId": "={{ $('Read: runs').params.databaseId }}",
+        "tableId": "={{ $('Read: runs').params.tableId }}",
+        "rowId": "={{ $json.run.id }}",
+        "dataToSend": "autoMapInputData",
+        "inputsToIgnore": "run"
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Update: runs (lock)",
+      "position": [
+        960,
+        0
+      ],
+      "id": "update-runs-lock"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "getAll",
+        "databaseId": "",
+        "tableId": "",
+        "returnAll": true,
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Read: participants",
+      "position": [
+        1200,
+        0
+      ],
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "id": "read-participants"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "getAll",
+        "databaseId": "",
+        "tableId": "",
+        "returnAll": true,
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Read: agent_turns",
+      "position": [
+        1440,
+        0
+      ],
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "id": "read-agent-turns"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Decide which participants this execution asks. Input: every agent_turns row (Read: agent_turns).\n// Output: up to batch_size items, one per participant still unanswered for the picked run,\n// or a single { noWork: true } item when the run has nobody left.\nconst run = $('Pick run').first().json.run;\nconst participants = $('Read: participants').all().map((i) => i.json);\nconst turns = $input.all().map((i) => i.json).filter((t) => t && t.run_id === run.run_id);\nconst answered = new Set(turns.map((t) => String(t.participant_id)));\n\nconst todo = participants\n  .filter((p) => p && p.persona && !answered.has(String(p.participant_id)))\n  .sort((a, b) => Number(a.participant_id) - Number(b.participant_id));\n\nif (todo.length === 0) return [{ json: { noWork: true, remaining: 0, run_id: run.run_id } }];\n\nreturn todo.slice(0, run.batch_size).map((p) => ({\n  json: {\n    noWork: false,\n    remaining: todo.length,\n    run_id: run.run_id,\n    provider: run.provider,\n    model: run.model,\n    temperature: run.temperature,\n    prompt_version: run.prompt_version,\n    participant_id: Number(p.participant_id),\n    persona: p.persona,\n  },\n}));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "Prepare batch",
+      "position": [
+        1680,
+        0
+      ],
+      "id": "prepare-batch"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "No work?-cond",
+              "leftValue": "={{ $json.noWork }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "name": "No work?",
+      "position": [
+        1920,
+        0
+      ],
+      "id": "no-work"
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "name": "Loop Over Items",
+      "position": [
+        2160,
+        100
+      ],
+      "id": "loop-over-items"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prompt version mm-v1. The 40 Saucier Mini-Marker adjectives in tda1..tda40 order; this list must\n// match the ADJECTIVES list in normalize_humans.js (code_nodes.test.mjs checks it).\nconst ADJECTIVES = ['Bashful', 'Bold', 'Careless', 'Cold', 'Complex', 'Cooperative', 'Creative', 'Deep', 'Disorganized', 'Efficient',\n  'Energetic', 'Envious', 'Extraverted', 'Fretful', 'Harsh', 'Imaginative', 'Inefficient', 'Intellectual', 'Jealous', 'Kind',\n  'Moody', 'Organized', 'Philosophical', 'Practical', 'Quiet', 'Relaxed', 'Rude', 'Shy', 'Sloppy', 'Sympathetic',\n  'Systematic', 'Talkative', 'Temperamental', 'Touchy', 'Uncreative', 'Unenvious', 'Unintellectual', 'Unsympathetic', 'Warm', 'Withdrawn'];\n\nconst item = $input.first().json;\nconst list = ADJECTIVES.map((a, i) => `${i + 1}. ${a}: <score>`).join('\\n');\nconst prompt = `You are answering a personality questionnaire as the person described below. Stay in character and answer about yourself as that person would.\n\nAbout you. These are your own answers to a personality questionnaire, where 1 = disagree strongly and 5 = agree strongly:\n${item.persona}\n\nRate how accurately each of the following adjectives describes you, as that person, using this scale:\n1 = Extremely inaccurate\n2 = Very inaccurate\n3 = Moderately inaccurate\n4 = Slightly inaccurate\n5 = Neither accurate nor inaccurate\n6 = Slightly accurate\n7 = Moderately accurate\n8 = Very accurate\n9 = Extremely accurate\n\nReply with exactly 40 lines, one per adjective, in this order and format, and nothing else:\n${list}`;\n\nreturn [{ json: { ...item, prompt, adjectives: ADJECTIVES, startedAt: Date.now() } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "Build prompt",
+      "position": [
+        2400,
+        200
+      ],
+      "id": "build-prompt"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "Bedrock?-cond",
+              "leftValue": "={{ $json.provider === 'bedrock' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "name": "Bedrock?",
+      "position": [
+        2640,
+        200
+      ],
+      "id": "bedrock"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.prompt }}",
+        "hasOutputParser": false,
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "name": "Ask Bedrock",
+      "position": [
+        2880,
+        100
+      ],
+      "onError": "continueRegularOutput",
+      "id": "ask-bedrock"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.prompt }}",
+        "hasOutputParser": false,
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "name": "Ask Ollama",
+      "position": [
+        2880,
+        320
+      ],
+      "onError": "continueRegularOutput",
+      "id": "ask-ollama"
+    },
+    {
+      "parameters": {
+        "model": "={{ $('Build prompt').first().json.model }}",
+        "options": {
+          "temperature": "={{ $('Build prompt').first().json.temperature ?? 0.7 }}",
+          "maxTokensToSample": 1500,
+          "timeout": 180000,
+          "maxRetries": 2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAwsBedrock",
+      "typeVersion": 1.2,
+      "name": "AWS Bedrock Chat Model",
+      "position": [
+        2900,
+        260
+      ],
+      "id": "aws-bedrock-chat-model"
+    },
+    {
+      "parameters": {
+        "model": "={{ $('Build prompt').first().json.model }}",
+        "options": {
+          "temperature": "={{ $('Build prompt').first().json.temperature ?? 0.7 }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "name": "Ollama Chat Model",
+      "position": [
+        2900,
+        480
+      ],
+      "id": "ollama-chat-model"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Turn the model's reply into one agent_turns row: the bookkeeping columns plus tda1..tda40 when the\n// reply parsed cleanly. ok is true only when every adjective appears exactly once with an integer 1-9.\nconst ctx = $('Build prompt').first().json;\nconst reply = $input.first().json || {};\nconst text = typeof reply.text === 'string' ? reply.text : typeof reply.output === 'string' ? reply.output : '';\nconst now = new Date();\nconst iso = now.toISOString().replace(/\\.\\d{3}Z$/, '+00:00');\n\nconst byAdjective = new Map(ctx.adjectives.map((a, i) => [a.toLowerCase(), { item_key: `tda${i + 1}`, text: a }]));\nconst found = new Map();\nconst problems = [];\n\nif (!text) {\n  problems.push(`llm: ${reply.error || 'empty reply'}`);\n} else {\n  const linePattern = /^\\s*(?:[-*•]\\s*)?(?:\\d{1,2}\\s*[.)]\\s*)?[*_]*([A-Za-z][A-Za-z\\- ]*?)[*_]*\\s*(?:[:\\-–—]|\\s)\\s*[*_]*(\\d{1,2})[*_]*\\s*[.)]?\\s*$/;\n  for (const raw of text.split(/\\r?\\n/)) {\n    const m = raw.match(linePattern);\n    if (!m) continue;\n    const entry = byAdjective.get(m[1].trim().toLowerCase());\n    if (!entry) continue;\n    const value = Number(m[2]);\n    if (found.has(entry.item_key)) {\n      problems.push(`duplicate: ${entry.text}`);\n      continue;\n    }\n    if (!Number.isInteger(value) || value < 1 || value > 9) {\n      problems.push(`out of range: ${entry.text} = ${value}`);\n      continue;\n    }\n    found.set(entry.item_key, value);\n  }\n  const missing = ctx.adjectives.filter((a) => !found.has(byAdjective.get(a.toLowerCase()).item_key));\n  if (missing.length) problems.push(`missing: ${missing.join(', ')}`);\n}\n\nconst ok = problems.length === 0 && found.size === ctx.adjectives.length;\nconst values = ok ? Object.fromEntries(found) : {};\n\nreturn [{\n  json: {\n    key: `${ctx.run_id}:${ctx.participant_id}`,\n    run_id: ctx.run_id,\n    participant_id: ctx.participant_id,\n    provider: ctx.provider,\n    model: ctx.model,\n    prompt_version: ctx.prompt_version,\n    raw_output: text,\n    parsed_count: found.size,\n    ok,\n    error: problems.join('; ').slice(0, 2000),\n    duration_ms: Math.max(0, now.getTime() - Number(ctx.startedAt || now.getTime())),\n    answered_at: iso,\n    ...values,\n  },\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "Parse answer",
+      "position": [
+        3220,
+        200
+      ],
+      "onError": "continueRegularOutput",
+      "id": "parse-answer"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "create",
+        "databaseId": "={{ $('Read: agent_turns').params.databaseId }}",
+        "tableId": "={{ $('Read: agent_turns').params.tableId }}",
+        "dataToSend": "autoMapInputData",
+        "inputsToIgnore": ""
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Create: agent_turns",
+      "position": [
+        3460,
+        200
+      ],
+      "id": "create-agent-turns"
+    },
+    {
+      "parameters": {
+        "jsCode": "// After every participant: refresh the run's lock so a long batch is never mistaken for a dead one.\n// Output: the update body for the runs table (Touch lock ignores `id` and uses it as the row id).\nconst run = $('Pick run').first().json.run;\nconst iso = new Date().toISOString().replace(/\\.\\d{3}Z$/, '+00:00');\nreturn [{ json: { id: run.id, locked_at: iso, locked_by: $execution.id } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "Heartbeat",
+      "position": [
+        3700,
+        200
+      ],
+      "id": "heartbeat"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "update",
+        "databaseId": "={{ $('Read: runs').params.databaseId }}",
+        "tableId": "={{ $('Read: runs').params.tableId }}",
+        "rowId": "={{ $json.id }}",
+        "dataToSend": "autoMapInputData",
+        "inputsToIgnore": "id"
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Update: runs (heartbeat)",
+      "position": [
+        3940,
+        200
+      ],
+      "id": "update-runs-heartbeat"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "getAll",
+        "databaseId": "={{ $('Read: agent_turns').params.databaseId }}",
+        "tableId": "={{ $('Read: agent_turns').params.tableId }}",
+        "returnAll": true,
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Read: agent_turns (recount)",
+      "position": [
+        2400,
+        -200
+      ],
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "id": "read-agent-turns-recount"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "getAll",
+        "databaseId": "={{ $('Read: runs').params.databaseId }}",
+        "tableId": "={{ $('Read: runs').params.tableId }}",
+        "returnAll": true,
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Read: runs (recheck)",
+      "position": [
+        2640,
+        -200
+      ],
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "id": "read-runs-recheck"
+    },
+    {
+      "parameters": {
+        "jsCode": "// After the batch: recount from the re-read agent_turns and produce the runs-table update body.\n// Input: the re-read runs rows (so a status change made during the batch, e.g. paused, is respected).\n// The run is done when every participant with a persona has a turn (ok or failed); otherwise it stays\n// running and the schedule trigger picks it up again. The lock is released only if this execution\n// still owns it; another execution's lock is left untouched.\nconst run = $('Pick run').first().json.run;\nconst participants = $('Read: participants').all().map((i) => i.json).filter((p) => p && p.persona);\nconst turns = $('Read: agent_turns (recount)').all().map((i) => i.json).filter((t) => t && t.run_id === run.run_id);\nconst current = $input.all().map((i) => i.json).find((r) => r && r.id === run.id) || run;\n\nconst latest = new Map();\nfor (const t of turns) {\n  const pid = String(t.participant_id);\n  const prev = latest.get(pid);\n  if (!prev || String(t.answered_at || '') >= String(prev.answered_at || '')) latest.set(pid, t);\n}\nconst done = [...latest.values()].filter((t) => t.ok === true).length;\nconst failed = latest.size - done;\nconst remaining = participants.filter((p) => !latest.has(String(p.participant_id))).length;\nconst iso = new Date().toISOString().replace(/\\.\\d{3}Z$/, '+00:00');\n\nlet status = remaining === 0 ? 'done' : 'running';\nif (current.status === 'paused') status = 'paused';\n\nconst body = {\n  id: run.id,\n  status,\n  participants_total: participants.length,\n  participants_done: done,\n  participants_failed: failed,\n  last_batch_at: iso,\n  finished_at: status === 'done' ? iso : null,\n};\nif (!current.locked_by || current.locked_by === $execution.id) {\n  body.locked_at = null;\n  body.locked_by = '';\n}\nreturn [{ json: body }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "Finish run",
+      "position": [
+        2880,
+        -200
+      ],
+      "id": "finish-run"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "update",
+        "databaseId": "={{ $('Read: runs').params.databaseId }}",
+        "tableId": "={{ $('Read: runs').params.tableId }}",
+        "rowId": "={{ $json.id }}",
+        "dataToSend": "autoMapInputData",
+        "inputsToIgnore": "id"
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Update: runs (finish)",
+      "position": [
+        3120,
+        -200
+      ],
+      "id": "update-runs-finish"
+    },
+    {
+      "parameters": {
+        "content": "## Baserow tables to pick\nAfter importing, open each node below and choose the Big Five database and the named table from the dropdowns (and the Baserow Token credential):\n\n- **Read: runs** → table `runs`\n- **Read: participants** → table `participants`\n- **Read: agent_turns** → table `agent_turns`\n\nThese nodes follow the pick above for the same table by expression; nothing to choose, only the credential:\n- Update: runs (lock)\n- Create: agent_turns\n- Update: runs (heartbeat)\n- Read: agent_turns (recount)\n- Read: runs (recheck)\n- Update: runs (finish)",
+        "width": 520,
+        "height": 336,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "name": "Tables",
+      "position": [
+        -700,
+        80
+      ],
+      "id": "tables"
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Every 10 minutes": {
+      "main": [
+        [
+          {
+            "node": "Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Configuration": {
+      "main": [
+        [
+          {
+            "node": "Read: runs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read: runs": {
+      "main": [
+        [
+          {
+            "node": "Pick run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pick run": {
+      "main": [
+        [
+          {
+            "node": "Update: runs (lock)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update: runs (lock)": {
+      "main": [
+        [
+          {
+            "node": "Read: participants",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read: participants": {
+      "main": [
+        [
+          {
+            "node": "Read: agent_turns",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read: agent_turns": {
+      "main": [
+        [
+          {
+            "node": "Prepare batch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare batch": {
+      "main": [
+        [
+          {
+            "node": "No work?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No work?": {
+      "main": [
+        [
+          {
+            "node": "Read: agent_turns (recount)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Read: agent_turns (recount)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Build prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build prompt": {
+      "main": [
+        [
+          {
+            "node": "Bedrock?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bedrock?": {
+      "main": [
+        [
+          {
+            "node": "Ask Bedrock",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ask Ollama",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AWS Bedrock Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Ask Bedrock",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Ask Ollama",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ask Bedrock": {
+      "main": [
+        [
+          {
+            "node": "Parse answer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ask Ollama": {
+      "main": [
+        [
+          {
+            "node": "Parse answer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse answer": {
+      "main": [
+        [
+          {
+            "node": "Create: agent_turns",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create: agent_turns": {
+      "main": [
+        [
+          {
+            "node": "Heartbeat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Heartbeat": {
+      "main": [
+        [
+          {
+            "node": "Update: runs (heartbeat)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update: runs (heartbeat)": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read: agent_turns (recount)": {
+      "main": [
+        [
+          {
+            "node": "Read: runs (recheck)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read: runs (recheck)": {
+      "main": [
+        [
+          {
+            "node": "Finish run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Finish run": {
+      "main": [
+        [
+          {
+            "node": "Update: runs (finish)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true
+  },
+  "active": false,
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

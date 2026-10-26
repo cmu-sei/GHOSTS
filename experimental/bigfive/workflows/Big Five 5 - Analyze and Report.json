@@ -1,0 +1,823 @@
+{
+  "name": "Big Five 5 - Analyze and Report",
+  "id": "bigFiveAnalyzeAndReport",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Big Five 5 - Analyze and Report\nScores the agent answers of a run, compares every participant's agent with that participant's own Mini-Markers, and writes the reports.\n\nForm: a **Run ID** to (re)analyze that run, or empty to analyze every `done` run that has no summary yet.\n\nPer run: agent rows in scores, one comparisons row per participant, one run_summaries row (per facet: mean shift with paired-t p and Holm correction, MAE, r with Fisher 95% CI, the BFI-2 baseline r and Steiger's p against it), and `runs.analyzed_at`.\n\nFiles, written to `/home/node/bigfive-out` inside the n8n container (bind-mounted from `experimental/bigfive/out` by the Aspire AppHost):\n- `<run_id>.html` and `<run_id>.csv` for each run analyzed in this execution\n- `all-runs.html` and `all-runs.csv` across every summarized run, regenerated every time",
+        "width": 560,
+        "height": 400,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "name": "About",
+      "position": [
+        -660,
+        -300
+      ],
+      "id": "about"
+    },
+    {
+      "parameters": {
+        "path": "bigfive-analyze",
+        "formTitle": "Big Five · Analyze and Report",
+        "formDescription": "Enter a Run ID to analyze that run, or leave empty to analyze every finished run without a summary. Reports are rewritten either way.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Run ID",
+              "fieldType": "text",
+              "placeholder": "run-001 (optional)"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "name": "Analyze form",
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "bigfive-analyze",
+      "id": "analyze-form"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "getAll",
+        "databaseId": "",
+        "tableId": "",
+        "returnAll": true,
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Read: runs",
+      "position": [
+        240,
+        0
+      ],
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "id": "read-runs"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "getAll",
+        "databaseId": "",
+        "tableId": "",
+        "returnAll": true,
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Read: items",
+      "position": [
+        480,
+        0
+      ],
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "id": "read-items"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "getAll",
+        "databaseId": "",
+        "tableId": "",
+        "returnAll": true,
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Read: scores",
+      "position": [
+        720,
+        0
+      ],
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "id": "read-scores"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "getAll",
+        "databaseId": "",
+        "tableId": "",
+        "returnAll": true,
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Read: agent_turns",
+      "position": [
+        960,
+        0
+      ],
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "id": "read-agent-turns"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "getAll",
+        "databaseId": "",
+        "tableId": "",
+        "returnAll": true,
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Read: comparisons",
+      "position": [
+        1200,
+        0
+      ],
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "id": "read-comparisons"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "getAll",
+        "databaseId": "",
+        "tableId": "",
+        "returnAll": true,
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Read: run_summaries",
+      "position": [
+        1440,
+        0
+      ],
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "id": "read-run-summaries"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Analyze and Report: score the agent answers of the selected runs, compare each participant's agent\n// with their own human Mini-Markers, and summarize the run with its statistics. Output: ONE item with\n// the rows to upsert (scores, comparisons, run_summaries), the runs to stamp, and the list of analyzed runs.\n// Selection: the form's Run ID, or every `done` run without a run_summaries row.\n// ---- lib/scoring.js ----\n// Shared scoring (spliced into Code nodes by build.mjs via `// @include lib/scoring.js`).\n// facet = mean of its items; a reverse item is scale_max + 1 - value; BFI-2 negative emotionality is\n// reported as emotional_stability = 6 - NE. `items` are rows of the `items` table.\nconst FACETS = ['extraversion', 'agreeableness', 'conscientiousness', 'emotional_stability', 'openness'];\nconst SCALE_MAX = { bfi2: 5, mini_markers: 9 };\n\nfunction toNumber(v) {\n  if (v === null || v === undefined || v === '') return null;\n  const n = Number(v);\n  return Number.isFinite(n) ? n : null;\n}\n\nfunction isTrue(v) {\n  return v === true || v === 'true' || v === 1 || v === '1';\n}\n\n// answers: { item_key: value }. Returns { facet: mean } with null for a facet that has no answers.\nfunction facetScores(items, instrument, answers) {\n  const max = SCALE_MAX[instrument];\n  const sums = {};\n  for (const it of items) {\n    if (it.instrument !== instrument) continue;\n    const v = toNumber(answers[it.item_key]);\n    if (v === null) continue;\n    const scored = isTrue(it.reverse) ? max + 1 - v : v;\n    (sums[it.facet] = sums[it.facet] || []).push(scored);\n  }\n  const out = {};\n  for (const f of FACETS) out[f] = null;\n  for (const [facet, vals] of Object.entries(sums)) {\n    const mean = vals.reduce((a, b) => a + b, 0) / vals.length;\n    if (facet === 'negative_emotionality') out.emotional_stability = 6 - mean;\n    else if (FACETS.includes(facet)) out[facet] = mean;\n  }\n  return out;\n}\n\nfunction hasAllFacets(scores) {\n  return FACETS.every((f) => scores[f] !== null && scores[f] !== undefined);\n}\n\nfunction round3(x) {\n  return x === null || x === undefined ? null : Math.round(x * 1000) / 1000;\n}\n// ---- end lib/scoring.js ----\n// ---- lib/stats.js ----\n// Shared statistics (spliced into Code nodes by build.mjs via `// @include lib/stats.js`). No dependencies.\nfunction mean(xs) {\n  return xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null;\n}\n\nfunction pearson(xs, ys) {\n  const n = xs.length;\n  if (n < 3) return null;\n  const mx = mean(xs);\n  const my = mean(ys);\n  let sxy = 0;\n  let sxx = 0;\n  let syy = 0;\n  for (let i = 0; i < n; i++) {\n    const dx = xs[i] - mx;\n    const dy = ys[i] - my;\n    sxy += dx * dy;\n    sxx += dx * dx;\n    syy += dy * dy;\n  }\n  if (sxx === 0 || syy === 0) return null;\n  return sxy / Math.sqrt(sxx * syy);\n}\n\n// Fisher z 95% confidence interval for r at sample size n.\nfunction fisherCI(r, n) {\n  if (r === null || n < 4) return [null, null];\n  const z = Math.atanh(Math.max(-0.999999, Math.min(0.999999, r)));\n  const se = 1 / Math.sqrt(n - 3);\n  return [Math.tanh(z - 1.959964 * se), Math.tanh(z + 1.959964 * se)];\n}\n\n// Standard normal CDF (Abramowitz & Stegun 7.1.26, |error| < 1.5e-7).\nfunction normalCdf(x) {\n  const t = 1 / (1 + 0.3275911 * Math.abs(x) / Math.SQRT2);\n  const y = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-(x * x) / 2);\n  return x >= 0 ? 0.5 * (1 + y) : 0.5 * (1 - y);\n}\n\nfunction lgamma(x) {\n  const c = [76.18009172947146, -86.50532032941677, 24.01409824083091, -1.231739572450155, 0.1208650973866179e-2, -0.5395239384953e-5];\n  let y = x;\n  const tmp = x + 5.5 - (x + 0.5) * Math.log(x + 5.5);\n  let ser = 1.000000000190015;\n  for (const cj of c) ser += cj / ++y;\n  return -tmp + Math.log((2.5066282746310005 * ser) / x);\n}\n\n// Continued fraction for the incomplete beta function (Numerical Recipes betacf).\nfunction betacf(a, b, x) {\n  const MAXIT = 200;\n  const EPS = 3e-14;\n  const FPMIN = 1e-300;\n  const qab = a + b;\n  const qap = a + 1;\n  const qam = a - 1;\n  let c = 1;\n  let d = 1 - (qab * x) / qap;\n  if (Math.abs(d) < FPMIN) d = FPMIN;\n  d = 1 / d;\n  let h = d;\n  for (let m = 1; m <= MAXIT; m++) {\n    const m2 = 2 * m;\n    let aa = (m * (b - m) * x) / ((qam + m2) * (a + m2));\n    d = 1 + aa * d;\n    if (Math.abs(d) < FPMIN) d = FPMIN;\n    c = 1 + aa / c;\n    if (Math.abs(c) < FPMIN) c = FPMIN;\n    d = 1 / d;\n    h *= d * c;\n    aa = (-(a + m) * (qab + m) * x) / ((a + m2) * (qap + m2));\n    d = 1 + aa * d;\n    if (Math.abs(d) < FPMIN) d = FPMIN;\n    c = 1 + aa / c;\n    if (Math.abs(c) < FPMIN) c = FPMIN;\n    d = 1 / d;\n    const del = d * c;\n    h *= del;\n    if (Math.abs(del - 1) < EPS) break;\n  }\n  return h;\n}\n\n// Regularized incomplete beta I_x(a, b).\nfunction betai(a, b, x) {\n  if (x <= 0) return 0;\n  if (x >= 1) return 1;\n  const bt = Math.exp(lgamma(a + b) - lgamma(a) - lgamma(b) + a * Math.log(x) + b * Math.log(1 - x));\n  return x < (a + 1) / (a + b + 2) ? (bt * betacf(a, b, x)) / a : 1 - (bt * betacf(b, a, 1 - x)) / b;\n}\n\n// Two-sided p-value for a t statistic with df degrees of freedom.\nfunction tTwoSidedP(t, df) {\n  if (!Number.isFinite(t) || df < 1) return null;\n  return betai(df / 2, 0.5, df / (df + t * t));\n}\n\n// Paired t-test on differences d = a - b. Returns { mean, t, df, p }.\nfunction pairedT(as, bs) {\n  const n = as.length;\n  if (n < 3) return { mean: n ? mean(as.map((a, i) => a - bs[i])) : null, t: null, df: n - 1, p: null };\n  const d = as.map((a, i) => a - bs[i]);\n  const md = mean(d);\n  const sd = Math.sqrt(d.reduce((s, x) => s + (x - md) * (x - md), 0) / (n - 1));\n  if (sd === 0) return { mean: md, t: md === 0 ? 0 : Infinity, df: n - 1, p: md === 0 ? 1 : 0 };\n  const t = md / (sd / Math.sqrt(n));\n  return { mean: md, t, df: n - 1, p: tTwoSidedP(t, n - 1) };\n}\n\n// Holm step-down adjusted p-values, same order as the input; nulls stay null.\nfunction holm(ps) {\n  const idx = ps.map((p, i) => [p, i]).filter(([p]) => p !== null).sort((a, b) => a[0] - b[0]);\n  const m = idx.length;\n  const out = ps.map(() => null);\n  let running = 0;\n  idx.forEach(([p, i], rank) => {\n    running = Math.max(running, Math.min(1, (m - rank) * p));\n    out[i] = running;\n  });\n  return out;\n}\n\n// Steiger (1980) Z for two dependent correlations sharing one variable: r_jk vs r_jh, with r_kh the\n// correlation between the two non-shared variables. Returns { z, p } (two-sided).\nfunction steiger(rjk, rjh, rkh, n) {\n  if ([rjk, rjh, rkh].some((r) => r === null) || n < 4) return { z: null, p: null };\n  const clamp = (r) => Math.max(-0.999999, Math.min(0.999999, r));\n  const z1 = Math.atanh(clamp(rjk));\n  const z2 = Math.atanh(clamp(rjh));\n  const rbar = (rjk + rjh) / 2;\n  const psi = rkh * (1 - 2 * rbar * rbar) - 0.5 * rbar * rbar * (1 - 2 * rbar * rbar - rkh * rkh);\n  const c = psi / ((1 - rbar * rbar) * (1 - rbar * rbar));\n  const z = ((z1 - z2) * Math.sqrt(n - 3)) / Math.sqrt(2 - 2 * c);\n  return { z, p: 2 * (1 - normalCdf(Math.abs(z))) };\n}\n// ---- end lib/stats.js ----\n\nconst rows = (node) => $(node).all().map((i) => i.json).filter((r) => r && r.id !== undefined);\nconst typed = (r) => Object.fromEntries(Object.entries(r).map(([k, v]) => [k, typeof v === 'string' && /^-?\\d+(\\.\\d+)?$/.test(v) && k !== 'key' && k !== 'run_id' && k !== 'locked_by' ? Number(v) : v]));\nconst form = $('Analyze form').first().json;\nconst requested = String(Object.entries(form).find(([k]) => /run/i.test(k))?.[1] ?? '').trim();\n\nconst runs = rows('Read: runs').map(typed);\nconst items = rows('Read: items');\nconst scores = rows('Read: scores').map(typed);\nconst turns = rows('Read: agent_turns').map(typed);\nconst summaries = rows('Read: run_summaries').map(typed);\n\nlet selected;\nif (requested) {\n  selected = runs.filter((r) => String(r.run_id) === requested);\n  if (!selected.length) throw new Error(`Run \"${requested}\" does not exist in the runs table`);\n} else {\n  // Every done run with no summary, or whose summary predates the run's finish (e.g. analyzed while still running).\n  const summarizedAt = new Map(summaries.map((s) => [String(s.run_id), Date.parse(s.analyzed_at) || 0]));\n  selected = runs.filter((r) => r.status === 'done' && (!summarizedAt.has(String(r.run_id)) || summarizedAt.get(String(r.run_id)) < (Date.parse(r.finished_at) || 0)));\n  if (!selected.length && !summaries.length) throw new Error('Nothing to analyze: no finished run without a summary, and no summaries yet. Enter a Run ID to analyze a run explicitly.');\n}\n\nconst humanMM = new Map(scores.filter((s) => s.subject === 'human_mini_markers').map((s) => [String(s.participant_id), s]));\nconst humanBFI = new Map(scores.filter((s) => s.subject === 'human_bfi2').map((s) => [String(s.participant_id), s]));\nif (!humanMM.size) throw new Error('No human_mini_markers rows in scores; run \"Big Five 2 - Import Human Data\" first');\n\n// p-values are stored with 6 decimals (the run_summaries p columns allow 6); anything smaller reads as 0 = \"< .000001\".\nconst round6 = (x) => (x === null || x === undefined ? null : Math.round(x * 1e6) / 1e6);\nconst iso = new Date().toISOString().replace(/\\.\\d{3}Z$/, '+00:00');\nconst outScores = [];\nconst outComparisons = [];\nconst outSummaries = [];\nconst runUpdates = [];\nconst notes = [];\n\nfor (const run of selected) {\n  const rid = String(run.run_id);\n  const latest = new Map();\n  for (const t of turns) {\n    if (String(t.run_id) !== rid || t.ok !== true) continue;\n    const pid = String(t.participant_id);\n    const prev = latest.get(pid);\n    if (!prev || String(t.answered_at || '') >= String(prev.answered_at || '')) latest.set(pid, t);\n  }\n  if (!latest.size) {\n    notes.push(`${rid}: no usable agent turns, skipped`);\n    continue;\n  }\n  const agent = new Map();\n  for (const [pid, t] of latest) {\n    const answers = {};\n    for (let i = 1; i <= 40; i++) answers[`tda${i}`] = t[`tda${i}`];\n    const s = facetScores(items, 'mini_markers', answers);\n    if (!hasAllFacets(s)) continue;\n    agent.set(pid, s);\n    outScores.push({ key: `agent:${rid}:${pid}`, subject: 'agent', run_id: rid, participant_id: Number(pid), ...Object.fromEntries(FACETS.map((f) => [f, round3(s[f])])) });\n  }\n\n  const pairs = [...agent.keys()].filter((pid) => humanMM.has(pid)).sort((a, b) => Number(a) - Number(b));\n  const comps = pairs.map((pid) => {\n    const a = agent.get(pid);\n    const h = humanMM.get(pid);\n    const row = { key: `${rid}:${pid}`, run_id: rid, participant_id: Number(pid) };\n    const abs = [];\n    for (const f of FACETS) {\n      row[`agent_${f}`] = round3(a[f]);\n      row[`human_${f}`] = round3(Number(h[f]));\n      row[`diff_${f}`] = round3(a[f] - Number(h[f]));\n      abs.push(Math.abs(a[f] - Number(h[f])));\n    }\n    row.mean_abs_diff = round3(mean(abs));\n    return row;\n  });\n  outComparisons.push(...comps);\n\n  const summary = { key: rid, run_id: rid, model: run.model || '', provider: run.provider || '', n: comps.length, mean_abs_diff: round3(mean(comps.map((c) => c.mean_abs_diff))), analyzed_at: iso };\n  const shiftPs = [];\n  for (const f of FACETS) {\n    const a = comps.map((c) => c[`agent_${f}`]);\n    const h = comps.map((c) => c[`human_${f}`]);\n    const r = pearson(a, h);\n    const [lo, hi] = fisherCI(r, comps.length);\n    const t = pairedT(a, h);\n    summary[`${f}_shift`] = round3(mean(comps.map((c) => c[`diff_${f}`])));\n    summary[`${f}_mae`] = round3(mean(comps.map((c) => Math.abs(c[`diff_${f}`]))));\n    summary[`${f}_r`] = round3(r);\n    summary[`${f}_r_ci_low`] = round3(lo);\n    summary[`${f}_r_ci_high`] = round3(hi);\n    summary[`${f}_shift_p`] = round6(t.p);\n    shiftPs.push(t.p);\n    // Baseline: how well the human's own BFI-2 predicts their Mini-Markers, on the same participants.\n    const withBfi = pairs.filter((pid) => humanBFI.has(pid));\n    const bfi = withBfi.map((pid) => Number(humanBFI.get(pid)[f]));\n    const hm = withBfi.map((pid) => Number(humanMM.get(pid)[f]));\n    const ag = withBfi.map((pid) => agent.get(pid)[f]);\n    const baseline = pearson(bfi, hm);\n    summary[`${f}_baseline_r`] = round3(baseline);\n    const st = steiger(pearson(ag, hm), baseline, pearson(ag, bfi), withBfi.length);\n    summary[`${f}_steiger_p`] = round6(st.p);\n  }\n  holm(shiftPs).forEach((p, i) => { summary[`${FACETS[i]}_shift_p_holm`] = round6(p); });\n  outSummaries.push(summary);\n  runUpdates.push({ id: run.id, analyzed_at: iso });\n  notes.push(`${rid}: ${agent.size} agent scores, ${comps.length} compared, MAE ${summary.mean_abs_diff}`);\n}\n\nreturn [{\n  json: {\n    summary: notes.join('; ') || 'no run analyzed; reports regenerated from existing summaries',\n    analyzed: outSummaries.map((s) => s.run_id),\n    scores: outScores,\n    comparisons: outComparisons,\n    run_summaries: outSummaries,\n    runs: runUpdates,\n  },\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "Analyze",
+      "position": [
+        1680,
+        0
+      ],
+      "id": "analyze"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Upsert helper, one node per table and mode. build.mjs replaces Analyze (the node whose single\n// output item holds the staged rows under scores), scores (table name, also the \"Read: <table>\"\n// node that fetched the existing rows) and new (\"new\" or \"changed\").\n//  new:     staged rows whose key is not in the table yet  -> Batch Create\n//  changed: existing rows whose staged values differ, as { id, ...staged } -> Update\n// Values are compared loosely (Baserow returns numbers as strings; '' and null are the same).\nconst staged = $('Analyze').first().json['scores'] || [];\nconst existing = $('Read: scores').all().map((i) => i.json).filter((r) => r && r.id !== undefined && r.key !== undefined);\nconst byKey = new Map(existing.map((r) => [String(r.key), r]));\n\nconst norm = (v) => {\n  if (v === null || v === undefined || v === '') return '';\n  if (typeof v === 'boolean') return v ? 'true' : 'false';\n  if (v === 'true' || v === 'false') return v;\n  const n = Number(v);\n  if (typeof v === 'number' || (typeof v === 'string' && v.trim() !== '' && Number.isFinite(n))) return String(Number(n.toFixed(6)));\n  return String(v).trim();\n};\nconst differs = (row, cur) => Object.keys(row).some((k) => norm(row[k]) !== norm(cur[k]));\n\nconst out = [];\nfor (const row of staged) {\n  const cur = byKey.get(String(row.key));\n  if ('new' === 'new' && !cur) out.push({ json: row });\n  if ('new' === 'changed' && cur && differs(row, cur)) out.push({ json: { id: cur.id, ...row } });\n}\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "New rows: scores",
+      "position": [
+        1900,
+        240
+      ],
+      "id": "new-rows-scores"
+    },
+    {
+      "parameters": {
+        "batchSize": 200,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "name": "200 at a time: scores",
+      "position": [
+        2120,
+        240
+      ],
+      "id": "200-at-a-time-scores"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "batchCreate",
+        "databaseId": "={{ $('Read: scores').params.databaseId }}",
+        "tableId": "={{ $('Read: scores').params.tableId }}",
+        "dataToSend": "autoMapInputData",
+        "inputsToIgnore": ""
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Batch Create: scores",
+      "position": [
+        2340,
+        260
+      ],
+      "id": "batch-create-scores"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Upsert helper, one node per table and mode. build.mjs replaces Analyze (the node whose single\n// output item holds the staged rows under scores), scores (table name, also the \"Read: <table>\"\n// node that fetched the existing rows) and changed (\"new\" or \"changed\").\n//  new:     staged rows whose key is not in the table yet  -> Batch Create\n//  changed: existing rows whose staged values differ, as { id, ...staged } -> Update\n// Values are compared loosely (Baserow returns numbers as strings; '' and null are the same).\nconst staged = $('Analyze').first().json['scores'] || [];\nconst existing = $('Read: scores').all().map((i) => i.json).filter((r) => r && r.id !== undefined && r.key !== undefined);\nconst byKey = new Map(existing.map((r) => [String(r.key), r]));\n\nconst norm = (v) => {\n  if (v === null || v === undefined || v === '') return '';\n  if (typeof v === 'boolean') return v ? 'true' : 'false';\n  if (v === 'true' || v === 'false') return v;\n  const n = Number(v);\n  if (typeof v === 'number' || (typeof v === 'string' && v.trim() !== '' && Number.isFinite(n))) return String(Number(n.toFixed(6)));\n  return String(v).trim();\n};\nconst differs = (row, cur) => Object.keys(row).some((k) => norm(row[k]) !== norm(cur[k]));\n\nconst out = [];\nfor (const row of staged) {\n  const cur = byKey.get(String(row.key));\n  if ('changed' === 'new' && !cur) out.push({ json: row });\n  if ('changed' === 'changed' && cur && differs(row, cur)) out.push({ json: { id: cur.id, ...row } });\n}\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "Changed rows: scores",
+      "position": [
+        1900,
+        400
+      ],
+      "id": "changed-rows-scores"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "update",
+        "databaseId": "={{ $('Read: scores').params.databaseId }}",
+        "tableId": "={{ $('Read: scores').params.tableId }}",
+        "rowId": "={{ $json.id }}",
+        "dataToSend": "autoMapInputData",
+        "inputsToIgnore": "id"
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Update: scores",
+      "position": [
+        2120,
+        400
+      ],
+      "id": "update-scores"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Upsert helper, one node per table and mode. build.mjs replaces Analyze (the node whose single\n// output item holds the staged rows under comparisons), comparisons (table name, also the \"Read: <table>\"\n// node that fetched the existing rows) and new (\"new\" or \"changed\").\n//  new:     staged rows whose key is not in the table yet  -> Batch Create\n//  changed: existing rows whose staged values differ, as { id, ...staged } -> Update\n// Values are compared loosely (Baserow returns numbers as strings; '' and null are the same).\nconst staged = $('Analyze').first().json['comparisons'] || [];\nconst existing = $('Read: comparisons').all().map((i) => i.json).filter((r) => r && r.id !== undefined && r.key !== undefined);\nconst byKey = new Map(existing.map((r) => [String(r.key), r]));\n\nconst norm = (v) => {\n  if (v === null || v === undefined || v === '') return '';\n  if (typeof v === 'boolean') return v ? 'true' : 'false';\n  if (v === 'true' || v === 'false') return v;\n  const n = Number(v);\n  if (typeof v === 'number' || (typeof v === 'string' && v.trim() !== '' && Number.isFinite(n))) return String(Number(n.toFixed(6)));\n  return String(v).trim();\n};\nconst differs = (row, cur) => Object.keys(row).some((k) => norm(row[k]) !== norm(cur[k]));\n\nconst out = [];\nfor (const row of staged) {\n  const cur = byKey.get(String(row.key));\n  if ('new' === 'new' && !cur) out.push({ json: row });\n  if ('new' === 'changed' && cur && differs(row, cur)) out.push({ json: { id: cur.id, ...row } });\n}\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "New rows: comparisons",
+      "position": [
+        1900,
+        560
+      ],
+      "id": "new-rows-comparisons"
+    },
+    {
+      "parameters": {
+        "batchSize": 200,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "name": "200 at a time: comparisons",
+      "position": [
+        2120,
+        560
+      ],
+      "id": "200-at-a-time-comparisons"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "batchCreate",
+        "databaseId": "={{ $('Read: comparisons').params.databaseId }}",
+        "tableId": "={{ $('Read: comparisons').params.tableId }}",
+        "dataToSend": "autoMapInputData",
+        "inputsToIgnore": ""
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Batch Create: comparisons",
+      "position": [
+        2340,
+        580
+      ],
+      "id": "batch-create-comparisons"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Upsert helper, one node per table and mode. build.mjs replaces Analyze (the node whose single\n// output item holds the staged rows under comparisons), comparisons (table name, also the \"Read: <table>\"\n// node that fetched the existing rows) and changed (\"new\" or \"changed\").\n//  new:     staged rows whose key is not in the table yet  -> Batch Create\n//  changed: existing rows whose staged values differ, as { id, ...staged } -> Update\n// Values are compared loosely (Baserow returns numbers as strings; '' and null are the same).\nconst staged = $('Analyze').first().json['comparisons'] || [];\nconst existing = $('Read: comparisons').all().map((i) => i.json).filter((r) => r && r.id !== undefined && r.key !== undefined);\nconst byKey = new Map(existing.map((r) => [String(r.key), r]));\n\nconst norm = (v) => {\n  if (v === null || v === undefined || v === '') return '';\n  if (typeof v === 'boolean') return v ? 'true' : 'false';\n  if (v === 'true' || v === 'false') return v;\n  const n = Number(v);\n  if (typeof v === 'number' || (typeof v === 'string' && v.trim() !== '' && Number.isFinite(n))) return String(Number(n.toFixed(6)));\n  return String(v).trim();\n};\nconst differs = (row, cur) => Object.keys(row).some((k) => norm(row[k]) !== norm(cur[k]));\n\nconst out = [];\nfor (const row of staged) {\n  const cur = byKey.get(String(row.key));\n  if ('changed' === 'new' && !cur) out.push({ json: row });\n  if ('changed' === 'changed' && cur && differs(row, cur)) out.push({ json: { id: cur.id, ...row } });\n}\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "Changed rows: comparisons",
+      "position": [
+        1900,
+        720
+      ],
+      "id": "changed-rows-comparisons"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "update",
+        "databaseId": "={{ $('Read: comparisons').params.databaseId }}",
+        "tableId": "={{ $('Read: comparisons').params.tableId }}",
+        "rowId": "={{ $json.id }}",
+        "dataToSend": "autoMapInputData",
+        "inputsToIgnore": "id"
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Update: comparisons",
+      "position": [
+        2120,
+        720
+      ],
+      "id": "update-comparisons"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Upsert helper, one node per table and mode. build.mjs replaces Analyze (the node whose single\n// output item holds the staged rows under run_summaries), run_summaries (table name, also the \"Read: <table>\"\n// node that fetched the existing rows) and new (\"new\" or \"changed\").\n//  new:     staged rows whose key is not in the table yet  -> Batch Create\n//  changed: existing rows whose staged values differ, as { id, ...staged } -> Update\n// Values are compared loosely (Baserow returns numbers as strings; '' and null are the same).\nconst staged = $('Analyze').first().json['run_summaries'] || [];\nconst existing = $('Read: run_summaries').all().map((i) => i.json).filter((r) => r && r.id !== undefined && r.key !== undefined);\nconst byKey = new Map(existing.map((r) => [String(r.key), r]));\n\nconst norm = (v) => {\n  if (v === null || v === undefined || v === '') return '';\n  if (typeof v === 'boolean') return v ? 'true' : 'false';\n  if (v === 'true' || v === 'false') return v;\n  const n = Number(v);\n  if (typeof v === 'number' || (typeof v === 'string' && v.trim() !== '' && Number.isFinite(n))) return String(Number(n.toFixed(6)));\n  return String(v).trim();\n};\nconst differs = (row, cur) => Object.keys(row).some((k) => norm(row[k]) !== norm(cur[k]));\n\nconst out = [];\nfor (const row of staged) {\n  const cur = byKey.get(String(row.key));\n  if ('new' === 'new' && !cur) out.push({ json: row });\n  if ('new' === 'changed' && cur && differs(row, cur)) out.push({ json: { id: cur.id, ...row } });\n}\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "New rows: run_summaries",
+      "position": [
+        1900,
+        880
+      ],
+      "id": "new-rows-run-summaries"
+    },
+    {
+      "parameters": {
+        "batchSize": 200,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "name": "200 at a time: run_summaries",
+      "position": [
+        2120,
+        880
+      ],
+      "id": "200-at-a-time-run-summaries"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "batchCreate",
+        "databaseId": "={{ $('Read: run_summaries').params.databaseId }}",
+        "tableId": "={{ $('Read: run_summaries').params.tableId }}",
+        "dataToSend": "autoMapInputData",
+        "inputsToIgnore": ""
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Batch Create: run_summaries",
+      "position": [
+        2340,
+        900
+      ],
+      "id": "batch-create-run-summaries"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Upsert helper, one node per table and mode. build.mjs replaces Analyze (the node whose single\n// output item holds the staged rows under run_summaries), run_summaries (table name, also the \"Read: <table>\"\n// node that fetched the existing rows) and changed (\"new\" or \"changed\").\n//  new:     staged rows whose key is not in the table yet  -> Batch Create\n//  changed: existing rows whose staged values differ, as { id, ...staged } -> Update\n// Values are compared loosely (Baserow returns numbers as strings; '' and null are the same).\nconst staged = $('Analyze').first().json['run_summaries'] || [];\nconst existing = $('Read: run_summaries').all().map((i) => i.json).filter((r) => r && r.id !== undefined && r.key !== undefined);\nconst byKey = new Map(existing.map((r) => [String(r.key), r]));\n\nconst norm = (v) => {\n  if (v === null || v === undefined || v === '') return '';\n  if (typeof v === 'boolean') return v ? 'true' : 'false';\n  if (v === 'true' || v === 'false') return v;\n  const n = Number(v);\n  if (typeof v === 'number' || (typeof v === 'string' && v.trim() !== '' && Number.isFinite(n))) return String(Number(n.toFixed(6)));\n  return String(v).trim();\n};\nconst differs = (row, cur) => Object.keys(row).some((k) => norm(row[k]) !== norm(cur[k]));\n\nconst out = [];\nfor (const row of staged) {\n  const cur = byKey.get(String(row.key));\n  if ('changed' === 'new' && !cur) out.push({ json: row });\n  if ('changed' === 'changed' && cur && differs(row, cur)) out.push({ json: { id: cur.id, ...row } });\n}\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "Changed rows: run_summaries",
+      "position": [
+        1900,
+        1040
+      ],
+      "id": "changed-rows-run-summaries"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "update",
+        "databaseId": "={{ $('Read: run_summaries').params.databaseId }}",
+        "tableId": "={{ $('Read: run_summaries').params.tableId }}",
+        "rowId": "={{ $json.id }}",
+        "dataToSend": "autoMapInputData",
+        "inputsToIgnore": "id"
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Update: run_summaries",
+      "position": [
+        2120,
+        1040
+      ],
+      "id": "update-run-summaries"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Analyze and Report: one item per analyzed run with its row id and analyzed_at, for Update: runs.\nreturn $('Analyze').first().json.runs.map((r) => ({ json: r }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "Run stamps",
+      "position": [
+        1900,
+        1200
+      ],
+      "id": "run-stamps"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "update",
+        "databaseId": "={{ $('Read: runs').params.databaseId }}",
+        "tableId": "={{ $('Read: runs').params.tableId }}",
+        "rowId": "={{ $json.id }}",
+        "dataToSend": "autoMapInputData",
+        "inputsToIgnore": "id"
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Update: runs (analyzed_at)",
+      "position": [
+        2120,
+        1200
+      ],
+      "id": "update-runs-analyzed-at"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Analyze and Report: render the per-run report and CSV for every run analyzed in this execution, plus\n// all-runs.html / all-runs.csv across every summarized run. Output: one item per file { fileName, content }.\n// New rows from Analyze override what the Read nodes returned for the same key.\n// ---- lib/scoring.js ----\n// Shared scoring (spliced into Code nodes by build.mjs via `// @include lib/scoring.js`).\n// facet = mean of its items; a reverse item is scale_max + 1 - value; BFI-2 negative emotionality is\n// reported as emotional_stability = 6 - NE. `items` are rows of the `items` table.\nconst FACETS = ['extraversion', 'agreeableness', 'conscientiousness', 'emotional_stability', 'openness'];\nconst SCALE_MAX = { bfi2: 5, mini_markers: 9 };\n\nfunction toNumber(v) {\n  if (v === null || v === undefined || v === '') return null;\n  const n = Number(v);\n  return Number.isFinite(n) ? n : null;\n}\n\nfunction isTrue(v) {\n  return v === true || v === 'true' || v === 1 || v === '1';\n}\n\n// answers: { item_key: value }. Returns { facet: mean } with null for a facet that has no answers.\nfunction facetScores(items, instrument, answers) {\n  const max = SCALE_MAX[instrument];\n  const sums = {};\n  for (const it of items) {\n    if (it.instrument !== instrument) continue;\n    const v = toNumber(answers[it.item_key]);\n    if (v === null) continue;\n    const scored = isTrue(it.reverse) ? max + 1 - v : v;\n    (sums[it.facet] = sums[it.facet] || []).push(scored);\n  }\n  const out = {};\n  for (const f of FACETS) out[f] = null;\n  for (const [facet, vals] of Object.entries(sums)) {\n    const mean = vals.reduce((a, b) => a + b, 0) / vals.length;\n    if (facet === 'negative_emotionality') out.emotional_stability = 6 - mean;\n    else if (FACETS.includes(facet)) out[facet] = mean;\n  }\n  return out;\n}\n\nfunction hasAllFacets(scores) {\n  return FACETS.every((f) => scores[f] !== null && scores[f] !== undefined);\n}\n\nfunction round3(x) {\n  return x === null || x === undefined ? null : Math.round(x * 1000) / 1000;\n}\n// ---- end lib/scoring.js ----\n// ---- lib/stats.js ----\n// Shared statistics (spliced into Code nodes by build.mjs via `// @include lib/stats.js`). No dependencies.\nfunction mean(xs) {\n  return xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null;\n}\n\nfunction pearson(xs, ys) {\n  const n = xs.length;\n  if (n < 3) return null;\n  const mx = mean(xs);\n  const my = mean(ys);\n  let sxy = 0;\n  let sxx = 0;\n  let syy = 0;\n  for (let i = 0; i < n; i++) {\n    const dx = xs[i] - mx;\n    const dy = ys[i] - my;\n    sxy += dx * dy;\n    sxx += dx * dx;\n    syy += dy * dy;\n  }\n  if (sxx === 0 || syy === 0) return null;\n  return sxy / Math.sqrt(sxx * syy);\n}\n\n// Fisher z 95% confidence interval for r at sample size n.\nfunction fisherCI(r, n) {\n  if (r === null || n < 4) return [null, null];\n  const z = Math.atanh(Math.max(-0.999999, Math.min(0.999999, r)));\n  const se = 1 / Math.sqrt(n - 3);\n  return [Math.tanh(z - 1.959964 * se), Math.tanh(z + 1.959964 * se)];\n}\n\n// Standard normal CDF (Abramowitz & Stegun 7.1.26, |error| < 1.5e-7).\nfunction normalCdf(x) {\n  const t = 1 / (1 + 0.3275911 * Math.abs(x) / Math.SQRT2);\n  const y = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-(x * x) / 2);\n  return x >= 0 ? 0.5 * (1 + y) : 0.5 * (1 - y);\n}\n\nfunction lgamma(x) {\n  const c = [76.18009172947146, -86.50532032941677, 24.01409824083091, -1.231739572450155, 0.1208650973866179e-2, -0.5395239384953e-5];\n  let y = x;\n  const tmp = x + 5.5 - (x + 0.5) * Math.log(x + 5.5);\n  let ser = 1.000000000190015;\n  for (const cj of c) ser += cj / ++y;\n  return -tmp + Math.log((2.5066282746310005 * ser) / x);\n}\n\n// Continued fraction for the incomplete beta function (Numerical Recipes betacf).\nfunction betacf(a, b, x) {\n  const MAXIT = 200;\n  const EPS = 3e-14;\n  const FPMIN = 1e-300;\n  const qab = a + b;\n  const qap = a + 1;\n  const qam = a - 1;\n  let c = 1;\n  let d = 1 - (qab * x) / qap;\n  if (Math.abs(d) < FPMIN) d = FPMIN;\n  d = 1 / d;\n  let h = d;\n  for (let m = 1; m <= MAXIT; m++) {\n    const m2 = 2 * m;\n    let aa = (m * (b - m) * x) / ((qam + m2) * (a + m2));\n    d = 1 + aa * d;\n    if (Math.abs(d) < FPMIN) d = FPMIN;\n    c = 1 + aa / c;\n    if (Math.abs(c) < FPMIN) c = FPMIN;\n    d = 1 / d;\n    h *= d * c;\n    aa = (-(a + m) * (qab + m) * x) / ((a + m2) * (qap + m2));\n    d = 1 + aa * d;\n    if (Math.abs(d) < FPMIN) d = FPMIN;\n    c = 1 + aa / c;\n    if (Math.abs(c) < FPMIN) c = FPMIN;\n    d = 1 / d;\n    const del = d * c;\n    h *= del;\n    if (Math.abs(del - 1) < EPS) break;\n  }\n  return h;\n}\n\n// Regularized incomplete beta I_x(a, b).\nfunction betai(a, b, x) {\n  if (x <= 0) return 0;\n  if (x >= 1) return 1;\n  const bt = Math.exp(lgamma(a + b) - lgamma(a) - lgamma(b) + a * Math.log(x) + b * Math.log(1 - x));\n  return x < (a + 1) / (a + b + 2) ? (bt * betacf(a, b, x)) / a : 1 - (bt * betacf(b, a, 1 - x)) / b;\n}\n\n// Two-sided p-value for a t statistic with df degrees of freedom.\nfunction tTwoSidedP(t, df) {\n  if (!Number.isFinite(t) || df < 1) return null;\n  return betai(df / 2, 0.5, df / (df + t * t));\n}\n\n// Paired t-test on differences d = a - b. Returns { mean, t, df, p }.\nfunction pairedT(as, bs) {\n  const n = as.length;\n  if (n < 3) return { mean: n ? mean(as.map((a, i) => a - bs[i])) : null, t: null, df: n - 1, p: null };\n  const d = as.map((a, i) => a - bs[i]);\n  const md = mean(d);\n  const sd = Math.sqrt(d.reduce((s, x) => s + (x - md) * (x - md), 0) / (n - 1));\n  if (sd === 0) return { mean: md, t: md === 0 ? 0 : Infinity, df: n - 1, p: md === 0 ? 1 : 0 };\n  const t = md / (sd / Math.sqrt(n));\n  return { mean: md, t, df: n - 1, p: tTwoSidedP(t, n - 1) };\n}\n\n// Holm step-down adjusted p-values, same order as the input; nulls stay null.\nfunction holm(ps) {\n  const idx = ps.map((p, i) => [p, i]).filter(([p]) => p !== null).sort((a, b) => a[0] - b[0]);\n  const m = idx.length;\n  const out = ps.map(() => null);\n  let running = 0;\n  idx.forEach(([p, i], rank) => {\n    running = Math.max(running, Math.min(1, (m - rank) * p));\n    out[i] = running;\n  });\n  return out;\n}\n\n// Steiger (1980) Z for two dependent correlations sharing one variable: r_jk vs r_jh, with r_kh the\n// correlation between the two non-shared variables. Returns { z, p } (two-sided).\nfunction steiger(rjk, rjh, rkh, n) {\n  if ([rjk, rjh, rkh].some((r) => r === null) || n < 4) return { z: null, p: null };\n  const clamp = (r) => Math.max(-0.999999, Math.min(0.999999, r));\n  const z1 = Math.atanh(clamp(rjk));\n  const z2 = Math.atanh(clamp(rjh));\n  const rbar = (rjk + rjh) / 2;\n  const psi = rkh * (1 - 2 * rbar * rbar) - 0.5 * rbar * rbar * (1 - 2 * rbar * rbar - rkh * rkh);\n  const c = psi / ((1 - rbar * rbar) * (1 - rbar * rbar));\n  const z = ((z1 - z2) * Math.sqrt(n - 3)) / Math.sqrt(2 - 2 * c);\n  return { z, p: 2 * (1 - normalCdf(Math.abs(z))) };\n}\n// ---- end lib/stats.js ----\n// ---- lib/report.js ----\n// Report rendering (spliced into Code nodes by build.mjs via `// @include lib/report.js`).\n// Self-contained HTML, inline SVG, no JavaScript. Editorial look: serif display headings, mono coral\n// eyebrows, hairline rules, direct labels instead of legends, a facts sidebar, captioned figures.\nconst FACET_LABEL = { extraversion: 'Extraversion', agreeableness: 'Agreeableness', conscientiousness: 'Conscientiousness', emotional_stability: 'Emotional stability', openness: 'Openness' };\nconst INK = '#0F172A';\nconst SLATE = '#64748B';\nconst RULE = '#E2E8F0';\nconst CORAL = '#F0524D';\nconst SERIES = '#94A3B8';\n\nconst esc = (s) => String(s ?? '').replace(/[&<>\"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;', \"'\": '&#x27;' }[c]));\nconst fmt = (x, d = 2) => (x === null || x === undefined || Number.isNaN(Number(x)) ? '—' : Number(x).toFixed(d));\nconst signed = (x, d = 2) => (x === null || x === undefined ? '—' : `${Number(x) > 0 ? '+' : Number(x) < 0 ? '−' : ''}${Math.abs(Number(x)).toFixed(d)}`);\nconst pfmt = (p) => (p === null || p === undefined ? '—' : Number(p) < 0.001 ? '< .001' : `${Number(p).toFixed(3).replace(/^0/, '')}`);\nconst shortModel = (model) => {\n  const m = String(model || '');\n  if (/anthropic\\./.test(m)) return m.replace(/^.*anthropic\\./, '').replace(/-\\d{8}.*$/, '');\n  return m;\n};\nconst csvLine = (vals) => vals.map((v) => {\n  const s = v === null || v === undefined ? '' : String(v);\n  return /[\",\\n]/.test(s) ? `\"${s.replace(/\"/g, '\"\"')}\"` : s;\n}).join(',');\nconst toCsv = (rows, columns) => [csvLine(columns), ...rows.map((r) => csvLine(columns.map((c) => r[c])))].join('\\n') + '\\n';\n\nconst CSS = `\n:root{--ink:${INK};--slate:${SLATE};--rule:${RULE};--coral:${CORAL}}\n*{box-sizing:border-box}body{margin:0;background:#fff;color:var(--ink);font:16px/1.6 Inter,system-ui,-apple-system,\"Segoe UI\",sans-serif}\n.page{max-width:1120px;margin:0 auto;padding:72px 40px 96px}\n.eyebrow{font:500 12px/1 \"JetBrains Mono\",ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--coral)}\nh1{font:400 52px/1.1 Newsreader,Georgia,\"Times New Roman\",serif;letter-spacing:-.01em;margin:18px 0 12px;max-width:820px}\nh1 em{font-style:italic;color:var(--coral)}\nh2{font:400 30px/1.2 Newsreader,Georgia,serif;margin:64px 0 10px}\n.lede{font-size:19px;color:var(--slate);max-width:720px;margin:0 0 48px}\n.grid{display:grid;grid-template-columns:1fr 240px;gap:56px;align-items:start}\naside{border-top:1px solid var(--ink);padding-top:16px;position:sticky;top:24px}\naside .fact{padding:12px 0;border-bottom:1px solid var(--rule)}\naside .label{font:500 11px/1 \"JetBrains Mono\",ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--slate)}\naside .value{font:400 26px/1.2 Newsreader,Georgia,serif;margin-top:6px;word-break:break-word}\naside .value small{font-size:15px;color:var(--slate);font-family:Inter,system-ui,sans-serif}\nfigure{margin:28px 0 0}figure svg{display:block;width:100%;height:auto}\nfigcaption{margin-top:14px;font-size:14px;color:var(--slate);max-width:720px}\nfigcaption .fig{font:500 11px/1 \"JetBrains Mono\",ui-monospace,monospace;letter-spacing:.12em;color:var(--coral);margin-right:10px}\nfigcaption b{color:var(--ink);font-weight:600}\np{max-width:720px}\ntable{width:100%;border-collapse:collapse;margin-top:20px;font-size:14px;font-variant-numeric:tabular-nums}\nth{text-align:left;font:500 11px/1.4 \"JetBrains Mono\",ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--slate);padding:10px 12px 10px 0;border-bottom:1px solid var(--ink)}\ntd{padding:10px 12px 10px 0;border-bottom:1px solid var(--rule);vertical-align:top}\ntd.num,th.num{text-align:right;padding-right:0;padding-left:12px}\ntr.hi td{color:var(--coral);font-weight:600}\n.svg-label{font:12px Inter,system-ui,sans-serif;fill:${SLATE}}\n.svg-mono{font:11px \"JetBrains Mono\",ui-monospace,monospace;fill:${SLATE};letter-spacing:.08em}\n.svg-value{font:13px Inter,system-ui,sans-serif;fill:${INK};font-weight:600}\n.svg-serif{font:22px Newsreader,Georgia,serif;fill:${INK}}\nfooter{margin-top:80px;padding-top:16px;border-top:1px solid var(--rule);font-size:13px;color:var(--slate)}\n@media print{.page{padding:24px}aside{position:static}}\n`;\n\nfunction page({ eyebrow, title, lede, facts, sections, footer }) {\n  const factHtml = facts.map((f) => `<div class=\"fact\"><div class=\"label\">${esc(f.label)}</div><div class=\"value\">${f.html || esc(f.value)}</div></div>`).join('');\n  return `<!doctype html>\n<html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n<title>${esc(title.replace(/<[^>]+>/g, ''))}</title>\n<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\"><link href=\"https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap\" rel=\"stylesheet\">\n<style>${CSS}</style></head>\n<body><div class=\"page\">\n<div class=\"eyebrow\">${esc(eyebrow)}</div>\n<h1>${title}</h1>\n<p class=\"lede\">${lede}</p>\n<div class=\"grid\"><main>${sections}</main><aside>${factHtml}</aside></div>\n<footer>${footer}</footer>\n</div></body></html>`;\n}\n\nconst figure = (n, finding, explanation, svg) => `<figure>${svg}<figcaption><span class=\"fig\">FIG. ${n}</span><b>${finding}</b> ${explanation}</figcaption></figure>`;\n\n// --- SVG helpers -------------------------------------------------------------------------------\nconst sv = (w, h, inner) => `<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 ${w} ${h}\" width=\"${w}\" height=\"${h}\" role=\"img\">${inner}</svg>`;\nconst T = (x, y, s, cls = 'svg-label', anchor = 'start', extra = '') => `<text x=\"${x.toFixed(1)}\" y=\"${y.toFixed(1)}\" class=\"${cls}\" text-anchor=\"${anchor}\" ${extra}>${esc(s)}</text>`;\nconst L = (x1, y1, x2, y2, stroke = RULE, extra = '') => `<line x1=\"${x1.toFixed(1)}\" y1=\"${y1.toFixed(1)}\" x2=\"${x2.toFixed(1)}\" y2=\"${y2.toFixed(1)}\" stroke=\"${stroke}\" ${extra}/>`;\n\n// Five small agent-vs-human scatter panels on a 1-9 scale with the identity line and r.\nfunction scatterPanels(comps, summary) {\n  const P = 196;\n  const pad = { l: 30, r: 10, t: 42, b: 30 };\n  const inner = P - pad.l - pad.r;\n  const W = FACETS.length * P + 10;\n  const H = P + 8;\n  const scale = (v) => ((v - 1) / 8) * inner;\n  let out = '';\n  FACETS.forEach((f, i) => {\n    const ox = i * P + pad.l;\n    const oy = pad.t;\n    const x0 = ox;\n    const y0 = oy + inner;\n    out += `<rect x=\"${x0}\" y=\"${oy}\" width=\"${inner}\" height=\"${inner}\" fill=\"none\" stroke=\"${RULE}\"/>`;\n    out += L(x0, y0, x0 + inner, oy, '#CBD5E1', 'stroke-dasharray=\"3 3\"');\n    for (const c of comps) {\n      const x = x0 + scale(Number(c[`human_${f}`]));\n      const y = y0 - scale(Number(c[`agent_${f}`]));\n      out += `<circle cx=\"${x.toFixed(1)}\" cy=\"${y.toFixed(1)}\" r=\"2.2\" fill=\"${CORAL}\" fill-opacity=\"0.35\"/>`;\n    }\n    out += T(x0, oy - 26, FACET_LABEL[f], 'svg-mono');\n    out += T(x0, oy - 8, `r = ${fmt(summary[`${f}_r`])}  [${fmt(summary[`${f}_r_ci_low`])}, ${fmt(summary[`${f}_r_ci_high`])}]`, 'svg-value');\n    out += T(x0, y0 + 14, '1', 'svg-label');\n    out += T(x0 + inner, y0 + 14, '9', 'svg-label', 'end');\n    out += T(x0 + inner / 2, y0 + 26, 'human', 'svg-label', 'middle');\n    if (i === 0) out += T(x0 - 6, oy + inner / 2, 'agent', 'svg-label', 'end', 'transform=\"rotate(-90 ' + (x0 - 6).toFixed(1) + ' ' + (oy + inner / 2).toFixed(1) + ')\"');\n  });\n  return sv(W, H, out);\n}\n\n// Horizontal mean-shift bars per facet (agent minus human); the largest |shift| is highlighted.\nfunction shiftBars(summary) {\n  const W = 760;\n  const rowH = 38;\n  const H = FACETS.length * rowH + 44;\n  const labelW = 170;\n  const mid = labelW + (W - labelW - 60) / 2;\n  const half = (W - labelW - 60) / 2;\n  const shifts = FACETS.map((f) => Number(summary[`${f}_shift`] ?? 0));\n  const maxAbs = Math.max(0.5, ...shifts.map(Math.abs));\n  const px = (v) => (v / maxAbs) * half;\n  const largest = shifts.reduce((bi, s, i) => (Math.abs(s) > Math.abs(shifts[bi]) ? i : bi), 0);\n  let out = L(mid, 10, mid, H - 30, INK);\n  out += T(mid, H - 10, '0', 'svg-mono', 'middle');\n  out += T(mid - half, H - 10, `−${maxAbs.toFixed(1)}`, 'svg-mono', 'middle');\n  out += T(mid + half, H - 10, `+${maxAbs.toFixed(1)}`, 'svg-mono', 'middle');\n  FACETS.forEach((f, i) => {\n    const y = 16 + i * rowH;\n    const w = px(shifts[i]);\n    const color = i === largest ? CORAL : SERIES;\n    out += T(0, y + 16, FACET_LABEL[f], 'svg-label');\n    out += `<rect x=\"${(w < 0 ? mid + w : mid).toFixed(1)}\" y=\"${y}\" width=\"${Math.abs(w).toFixed(1)}\" height=\"22\" fill=\"${color}\"/>`;\n    out += T(w < 0 ? mid + w - 8 : mid + w + 8, y + 16, signed(shifts[i]), 'svg-value', w < 0 ? 'end' : 'start');\n  });\n  return sv(W, H, out);\n}\n\n// One stacked bar: participants answered ok / failed / answered but not comparable (no human Mini-Markers).\nfunction qualityBar(run, compared) {\n  const W = 760;\n  const H = 86;\n  const ok = Number(run.participants_done || 0);\n  const failed = Number(run.participants_failed || 0);\n  const total = Math.max(1, ok + failed);\n  const notComparable = Math.max(0, ok - compared);\n  const segs = [\n    ['compared', compared, CORAL],\n    ['answered, no human Mini-Markers', notComparable, SERIES],\n    ['failed to parse', failed, '#CBD5E1'],\n  ];\n  let x = 0;\n  let out = '';\n  segs.forEach(([label, n, color], i) => {\n    const w = (n / total) * W;\n    if (w > 0) {\n      out += `<rect x=\"${x.toFixed(1)}\" y=\"20\" width=\"${w.toFixed(1)}\" height=\"28\" fill=\"${color}\"/>`;\n      if (w > 60) out += T(x + 8, 39, `${n}`, 'svg-value', 'start', 'fill=\"#fff\"');\n    }\n    const lx = i * 260;\n    out += `<rect x=\"${lx}\" y=\"64\" width=\"10\" height=\"10\" fill=\"${color}\"/>`;\n    out += T(lx + 16, 73, `${label}: ${n}`, 'svg-label');\n    x += Math.max(w, 0);\n  });\n  return sv(W, H, out);\n}\n\n// Ranked mean absolute difference per run, best first.\nfunction rankedBars(summaries) {\n  const W = 760;\n  const rowH = 36;\n  const labelW = 230;\n  const H = summaries.length * rowH + 30;\n  const maxV = Math.max(1, ...summaries.map((s) => Number(s.mean_abs_diff)));\n  let out = '';\n  summaries.forEach((s, i) => {\n    const y = 8 + i * rowH;\n    const w = (Number(s.mean_abs_diff) / maxV) * (W - labelW - 80);\n    out += T(0, y + 16, shortModel(s.model) || s.run_id, 'svg-label');\n    out += T(0, y + 28, s.run_id, 'svg-mono');\n    out += `<rect x=\"${labelW}\" y=\"${y}\" width=\"${w.toFixed(1)}\" height=\"22\" fill=\"${i === 0 ? CORAL : SERIES}\"/>`;\n    out += T(labelW + w + 8, y + 16, `${fmt(s.mean_abs_diff, 3)}  (n = ${s.n})`, 'svg-value');\n  });\n  return sv(W, H, out);\n}\n\n// Per-facet r for every run (gray), the best run in coral, the BFI-2 baseline as a dashed reference.\nfunction facetLines(summaries, best, baselineFrom) {\n  const W = 760;\n  const H = 300;\n  const pad = { l: 44, r: 150, t: 20, b: 40 };\n  const iw = W - pad.l - pad.r;\n  const ih = H - pad.t - pad.b;\n  const xs = FACETS.map((_, i) => pad.l + (i / (FACETS.length - 1)) * iw);\n  const y = (r) => pad.t + (1 - Math.max(0, Math.min(1, r))) * ih;\n  let out = '';\n  for (const g of [0, 0.25, 0.5, 0.75, 1]) {\n    out += L(pad.l, y(g), pad.l + iw, y(g), RULE);\n    out += T(pad.l - 8, y(g) + 4, g.toFixed(2), 'svg-mono', 'end');\n  }\n  FACETS.forEach((f, i) => { out += T(xs[i], H - 14, FACET_LABEL[f], 'svg-label', 'middle'); });\n  const baseline = FACETS.map((f) => Number(baselineFrom[`${f}_baseline_r`]));\n  const bestLast = y(Number(best[`${FACETS[FACETS.length - 1]}_r`]));\n  if (baseline.every((v) => Number.isFinite(v))) {\n    out += `<polyline fill=\"none\" stroke=\"${INK}\" stroke-dasharray=\"4 4\" points=\"${FACETS.map((_, i) => `${xs[i].toFixed(1)},${y(baseline[i]).toFixed(1)}`).join(' ')}\"/>`;\n    let ly = y(baseline[baseline.length - 1]) + 4;\n    if (Math.abs(ly - (bestLast + 4)) < 16) ly = bestLast + 4 + (ly >= bestLast + 4 ? 16 : -16); // keep clear of the best run's label\n    out += T(pad.l + iw + 8, ly, 'BFI-2 baseline', 'svg-label');\n  }\n  for (const s of summaries) {\n    const isBest = s.run_id === best.run_id;\n    const pts = FACETS.map((f, i) => `${xs[i].toFixed(1)},${y(Number(s[`${f}_r`])).toFixed(1)}`).join(' ');\n    out += `<polyline fill=\"none\" stroke=\"${isBest ? CORAL : SERIES}\" stroke-width=\"${isBest ? 2.5 : 1.5}\" points=\"${pts}\"/>`;\n    const last = Number(s[`${FACETS[FACETS.length - 1]}_r`]);\n    if (isBest) out += T(pad.l + iw + 8, y(last) + 4, shortModel(s.model) || s.run_id, 'svg-value', 'start', `fill=\"${CORAL}\"`);\n  }\n  return sv(W, H, out);\n}\n\n// Shift table shaded relative to the largest |shift| across runs and facets.\nfunction shiftHeat(summaries) {\n  const vals = summaries.flatMap((s) => FACETS.map((f) => Math.abs(Number(s[`${f}_shift`] ?? 0))));\n  const maxAbs = Math.max(0.01, ...vals);\n  const cell = (v) => {\n    const a = Math.min(1, Math.abs(Number(v ?? 0)) / maxAbs);\n    const bg = Number(v) >= 0 ? `rgba(240,82,77,${(a * 0.55).toFixed(2)})` : `rgba(15,23,42,${(a * 0.45).toFixed(2)})`;\n    return `<td class=\"num\" style=\"background:${bg}\">${signed(v)}</td>`;\n  };\n  return `<table><thead><tr><th>run</th>${FACETS.map((f) => `<th class=\"num\">${FACET_LABEL[f]}</th>`).join('')}</tr></thead><tbody>${summaries\n    .map((s) => `<tr><td>${esc(shortModel(s.model) || s.run_id)}<br><span class=\"eyebrow\" style=\"color:${SLATE}\">${esc(s.run_id)}</span></td>${FACETS.map((f) => cell(s[`${f}_shift`])).join('')}</tr>`)\n    .join('')}</tbody></table>`;\n}\n\n// --- Reports -----------------------------------------------------------------------------------\nfunction shiftFinding(over, under) {\n  const list = (xs) => xs.map(([f, s]) => `${FACET_LABEL[f].toLowerCase()} (${signed(s)})`).join(', ');\n  if (over.length && under.length) return `Agents overshoot ${list(over)} and undershoot ${list(under)}.`;\n  if (over.length) return `Agents overshoot ${list(over)}.`;\n  if (under.length) return `Agents undershoot ${list(under)}.`;\n  return 'Agents stay within ±0.1 of their humans on every facet.';\n}\n\nfunction runReport(summary, comps, run) {\n  const name = shortModel(summary.model) || summary.run_id;\n  const rs = FACETS.map((f) => [f, Number(summary[`${f}_r`])]).filter(([, r]) => Number.isFinite(r));\n  const bestR = rs.reduce((a, b) => (b[1] > a[1] ? b : a), rs[0] || ['—', NaN]);\n  const worstR = rs.reduce((a, b) => (b[1] < a[1] ? b : a), rs[0] || ['—', NaN]);\n  const shifts = FACETS.map((f) => [f, Number(summary[`${f}_shift`])]).sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]));\n  const over = shifts.filter(([, s]) => s > 0.1);\n  const under = shifts.filter(([, s]) => s < -0.1);\n  const beats = FACETS.filter((f) => Number(summary[`${f}_r`]) > Number(summary[`${f}_baseline_r`]) && Number(summary[`${f}_steiger_p`]) < 0.05);\n  const total = Number(run?.participants_done || 0) + Number(run?.participants_failed || 0);\n\n  const sections = `\n<h2>Does the agent move with its human?</h2>\n<p>Each dot is one participant: their own Mini-Marker facet score against the score of the agent that was given their BFI-2 answers. The dashed line is perfect agreement; r is the Pearson correlation with its Fisher 95% interval.</p>\n${figure(1, `Agents track humans best on ${FACET_LABEL[bestR[0]]?.toLowerCase() ?? '—'} (r = ${fmt(bestR[1])}) and worst on ${FACET_LABEL[worstR[0]]?.toLowerCase() ?? '—'} (r = ${fmt(worstR[1])}).`, `${summary.n} participants with both an agent answer and a human Mini-Marker row. The dashed BFI-2 baseline in the table below is how well each person's own BFI-2 predicts their Mini-Markers.`, scatterPanels(comps, summary))}\n<h2>Where do the agents run hot or cold?</h2>\n<p>Mean shift is agent minus human on the 1–9 Mini-Marker scale, averaged over participants. Positive means the agents describe themselves as more of that trait than their humans did.</p>\n${figure(2, shiftFinding(over, under), `Mean absolute difference across all five facets is ${fmt(summary.mean_abs_diff, 3)}. The largest shift is highlighted; p-values for the shifts are in the table, Holm-corrected across the five facets.`, shiftBars(summary))}\n<h2>How clean was the run itself?</h2>\n${figure(3, `${run?.participants_done ?? '—'} of ${total || '—'} turns parsed cleanly; ${run?.participants_failed ?? 0} failed.`, 'A turn parses cleanly when all 40 adjectives come back exactly once with a value from 1 to 9. Participants whose human Mini-Marker row was blank are answered by the agent but cannot be compared.', qualityBar(run || {}, summary.n))}\n<h2>By the numbers</h2>\n<table><thead><tr><th>facet</th><th class=\"num\">shift</th><th class=\"num\">p (Holm)</th><th class=\"num\">MAE</th><th class=\"num\">r [95% CI]</th><th class=\"num\">BFI-2 baseline r</th><th class=\"num\">Steiger p</th></tr></thead><tbody>\n${FACETS.map((f) => `<tr${beats.includes(f) ? ' class=\"hi\"' : ''}><td>${FACET_LABEL[f]}</td><td class=\"num\">${signed(summary[`${f}_shift`])}</td><td class=\"num\">${pfmt(summary[`${f}_shift_p_holm`])}</td><td class=\"num\">${fmt(summary[`${f}_mae`])}</td><td class=\"num\">${fmt(summary[`${f}_r`])} [${fmt(summary[`${f}_r_ci_low`])}, ${fmt(summary[`${f}_r_ci_high`])}]</td><td class=\"num\">${fmt(summary[`${f}_baseline_r`])}</td><td class=\"num\">${pfmt(summary[`${f}_steiger_p`])}</td></tr>`).join('')}\n</tbody></table>\n<p style=\"font-size:13px;color:${SLATE}\">Steiger's test compares the agent's r with the BFI-2 baseline r on the same participants (dependent correlations sharing the human Mini-Marker score). ${beats.length ? `Highlighted rows: the agent predicts the human's Mini-Markers better than the human's own BFI-2 does (${beats.map((f) => FACET_LABEL[f].toLowerCase()).join(', ')}).` : 'No facet beats the baseline at p < .05.'}</p>`;\n\n  return page({\n    eyebrow: `Big Five study · run ${summary.run_id}`,\n    title: `How closely does <em>${esc(name)}</em> answer like the person it was given?`,\n    lede: `Each agent was handed one real participant's BFI-2 answers as its persona and asked the 40 Saucier Mini-Markers. Here is how its answers line up with what that participant actually said.`,\n    facts: [\n      { label: 'run', value: summary.run_id },\n      { label: 'model', html: `<small>${esc(summary.model)}</small>` },\n      { label: 'provider', value: summary.provider || '—' },\n      { label: 'compared participants', value: String(summary.n) },\n      { label: 'mean abs. difference', value: fmt(summary.mean_abs_diff, 3) },\n      { label: 'median r across facets', value: fmt(rs.map(([, r]) => r).sort((a, b) => a - b)[Math.floor(rs.length / 2)] ?? null) },\n      { label: 'analyzed', value: String(summary.analyzed_at || '').slice(0, 10) },\n    ],\n    sections,\n    footer: `Generated by the n8n workflow “Big Five 5 - Analyze and Report”. Scoring: facet = mean of its items, reverse items as 10 − value; BFI-2 emotional stability = 6 − negative emotionality.`,\n  });\n}\n\nfunction allRunsReport(summaries, compsByRun) {\n  const ranked = [...summaries].sort((a, b) => Number(a.mean_abs_diff) - Number(b.mean_abs_diff));\n  const best = ranked[0];\n  const largest = [...ranked].sort((a, b) => Number(b.n) - Number(a.n))[0]; // baseline from the run with the most participants\n  const avgR = FACETS.map((f) => [f, mean(ranked.map((s) => Number(s[`${f}_r`])).filter(Number.isFinite))]);\n  const hiR = avgR.reduce((a, b) => (b[1] > a[1] ? b : a));\n  const loR = avgR.reduce((a, b) => (b[1] < a[1] ? b : a));\n  const largestShift = ranked.flatMap((s) => FACETS.map((f) => [s, f, Number(s[`${f}_shift`])])).sort((a, b) => Math.abs(b[2]) - Math.abs(a[2]))[0];\n  const participants = new Set(Object.values(compsByRun).flat().map((c) => String(c.participant_id))).size;\n\n  // Paired comparison of every run against the best, on participants both runs compared.\n  const bestMad = new Map((compsByRun[best.run_id] || []).map((c) => [String(c.participant_id), Number(c.mean_abs_diff)]));\n  const paired = ranked.map((s) => {\n    if (s.run_id === best.run_id) return { n: bestMad.size, diff: null, p: null };\n    const mine = (compsByRun[s.run_id] || []).filter((c) => bestMad.has(String(c.participant_id)));\n    const t = pairedT(mine.map((c) => Number(c.mean_abs_diff)), mine.map((c) => bestMad.get(String(c.participant_id))));\n    return { n: mine.length, diff: t.mean, p: t.p };\n  });\n\n  const sections = `\n<h2>Who lands closest?</h2>\n<p>Mean absolute difference between agent and human facet scores on the 1–9 Mini-Marker scale, averaged over facets and participants. Lower is closer.</p>\n${figure(1, ranked.length > 1 ? `${esc(shortModel(best.model) || best.run_id)} lands closest (${fmt(best.mean_abs_diff, 3)}), ${esc(shortModel(ranked[ranked.length - 1].model) || ranked[ranked.length - 1].run_id)} farthest (${fmt(ranked[ranked.length - 1].mean_abs_diff, 3)}).` : `${esc(shortModel(best.model) || best.run_id)} is the only run so far (${fmt(best.mean_abs_diff, 3)}).`, 'Runs are ordered best to worst. Each run’s n is the number of participants with both an agent answer and a human Mini-Marker row.', rankedBars(ranked))}\n<h2>Do they rank people the same way humans do?</h2>\n<p>Correlation between agent and human facet scores across participants. The dashed reference is the BFI-2 baseline: how well each person’s own BFI-2 predicts their Mini-Markers.</p>\n${figure(2, `Averaged across models, agreement with humans is highest on ${FACET_LABEL[hiR[0]].toLowerCase()} (r = ${fmt(hiR[1])}) and lowest on ${FACET_LABEL[loR[0]].toLowerCase()} (r = ${fmt(loR[1])}).`, `The highlighted line is the run with the lowest mean absolute difference; the baseline is taken from ${esc(largest.run_id)} (n = ${largest.n}).`, facetLines(ranked, best, largest))}\n<h2>Where does each model run hot or cold?</h2>\n<p>Mean shift, agent minus human, per facet. Coral cells overshoot, dark cells undershoot.</p>\n${figure(3, largestShift ? `The largest shift is ${esc(shortModel(largestShift[0].model) || largestShift[0].run_id)} on ${FACET_LABEL[largestShift[1]].toLowerCase()} (${signed(largestShift[2])}).` : 'No shifts yet.', 'Cells are shaded relative to the largest shift in the table.', shiftHeat(ranked))}\n<h2>Ranked runs</h2>\n<table><thead><tr><th>#</th><th>run</th><th>model</th><th class=\"num\">n</th><th class=\"num\">mean abs. diff</th><th class=\"num\">median r</th><th class=\"num\">vs best (paired)</th></tr></thead><tbody>\n${ranked.map((s, i) => {\n    const rs = FACETS.map((f) => Number(s[`${f}_r`])).filter(Number.isFinite).sort((a, b) => a - b);\n    const p = paired[i];\n    return `<tr${i === 0 ? ' class=\"hi\"' : ''}><td>${i + 1}</td><td>${esc(s.run_id)}</td><td>${esc(s.model)}<br><span style=\"color:${SLATE}\">${esc(s.provider || '')}</span></td><td class=\"num\">${s.n}</td><td class=\"num\">${fmt(s.mean_abs_diff, 3)}</td><td class=\"num\">${fmt(rs[Math.floor(rs.length / 2)] ?? null)}</td><td class=\"num\">${i === 0 ? 'best' : `${signed(p.diff, 3)}, p ${pfmt(p.p)} (n = ${p.n})`}</td></tr>`;\n  }).join('')}\n</tbody></table>\n<p style=\"font-size:13px;color:${SLATE}\">“vs best” is a paired t-test on each participant’s mean absolute difference under this run versus under the best run, over the participants both runs compared.</p>`;\n\n  return page({\n    eyebrow: 'Big Five study · all runs',\n    title: 'Which model sounds most like <em>its human</em>?',\n    lede: 'Every run gives each agent one participant’s BFI-2 answers as its persona and asks the 40 Saucier Mini-Markers. The closer the agent’s facet scores to that participant’s own, the more faithfully the model carries a persona.',\n    facts: [\n      { label: 'runs', value: String(ranked.length) },\n      { label: 'participants', value: String(participants) },\n      { label: 'closest model', html: `<small>${esc(best.model)}</small>` },\n      { label: 'its mean abs. difference', value: fmt(best.mean_abs_diff, 3) },\n      { label: 'updated', value: String(ranked.map((s) => s.analyzed_at).sort().pop() || '').slice(0, 10) },\n    ],\n    sections,\n    footer: 'Generated by the n8n workflow “Big Five 5 - Analyze and Report”. One row per run in all-runs.csv; per-participant comparisons in &lt;run_id&gt;.csv.',\n  });\n}\n// ---- end lib/report.js ----\n\nconst rows = (node) => $(node).all().map((i) => i.json).filter((r) => r && r.id !== undefined);\nconst typed = (r) => Object.fromEntries(Object.entries(r).map(([k, v]) => [k, typeof v === 'string' && /^-?\\d+(\\.\\d+)?$/.test(v) && k !== 'key' && k !== 'run_id' && k !== 'locked_by' ? Number(v) : v]));\nconst analysis = $('Analyze').first().json;\n\nconst merge = (existing, fresh) => {\n  const byKey = new Map(existing.map((r) => [String(r.key), typed(r)]));\n  for (const r of fresh) byKey.set(String(r.key), r);\n  return [...byKey.values()];\n};\nconst summaries = merge(rows('Read: run_summaries'), analysis.run_summaries);\nconst comparisons = merge(rows('Read: comparisons'), analysis.comparisons);\nconst runs = rows('Read: runs').map(typed);\nconst compsByRun = {};\nfor (const c of comparisons) (compsByRun[String(c.run_id)] = compsByRun[String(c.run_id)] || []).push(c);\nfor (const list of Object.values(compsByRun)) list.sort((a, b) => Number(a.participant_id) - Number(b.participant_id));\n\nconst COMPARISON_COLUMNS = ['run_id', 'participant_id', ...FACETS.flatMap((f) => [`agent_${f}`, `human_${f}`, `diff_${f}`]), 'mean_abs_diff'];\nconst SUMMARY_COLUMNS = ['run_id', 'model', 'provider', 'n', 'mean_abs_diff',\n  ...FACETS.flatMap((f) => ['shift', 'shift_p', 'shift_p_holm', 'mae', 'r', 'r_ci_low', 'r_ci_high', 'baseline_r', 'steiger_p'].map((s) => `${f}_${s}`)), 'analyzed_at'];\n\nconst files = [];\nfor (const rid of analysis.analyzed) {\n  const summary = summaries.find((s) => String(s.run_id) === rid);\n  const comps = compsByRun[rid] || [];\n  const run = runs.find((r) => String(r.run_id) === rid);\n  files.push({ fileName: `${rid}.html`, content: runReport(summary, comps, run) });\n  files.push({ fileName: `${rid}.csv`, content: toCsv(comps, COMPARISON_COLUMNS) });\n}\nif (summaries.length) {\n  files.push({ fileName: 'all-runs.html', content: allRunsReport(summaries, compsByRun) });\n  const ranked = [...summaries].sort((a, b) => Number(a.mean_abs_diff) - Number(b.mean_abs_diff));\n  files.push({ fileName: 'all-runs.csv', content: toCsv(ranked, SUMMARY_COLUMNS) });\n}\nreturn files.map((f) => ({ json: f }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "Render reports",
+      "position": [
+        1900,
+        1400
+      ],
+      "id": "render-reports"
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "content",
+        "binaryPropertyName": "data",
+        "options": {
+          "fileName": "={{ $json.fileName }}"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "name": "To file",
+      "position": [
+        2120,
+        1400
+      ],
+      "id": "to-file"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "=/home/node/bigfive-out/{{ $('Render reports').item.json.fileName }}",
+        "dataPropertyName": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "name": "Write: out files",
+      "position": [
+        2340,
+        1400
+      ],
+      "id": "write-out-files"
+    },
+    {
+      "parameters": {
+        "content": "## Baserow tables to pick\nAfter importing, open each node below and choose the Big Five database and the named table from the dropdowns (and the Baserow Token credential):\n\n- **Read: runs** → table `runs`\n- **Read: items** → table `items`\n- **Read: scores** → table `scores`\n- **Read: agent_turns** → table `agent_turns`\n- **Read: comparisons** → table `comparisons`\n- **Read: run_summaries** → table `run_summaries`\n\nThese nodes follow the pick above for the same table by expression; nothing to choose, only the credential:\n- Batch Create: scores\n- Update: scores\n- Batch Create: comparisons\n- Update: comparisons\n- Batch Create: run_summaries\n- Update: run_summaries\n- Update: runs (analyzed_at)",
+        "width": 520,
+        "height": 432,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "name": "Tables",
+      "position": [
+        -660,
+        120
+      ],
+      "id": "tables"
+    }
+  ],
+  "connections": {
+    "Analyze form": {
+      "main": [
+        [
+          {
+            "node": "Read: runs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read: runs": {
+      "main": [
+        [
+          {
+            "node": "Read: items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read: items": {
+      "main": [
+        [
+          {
+            "node": "Read: scores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read: scores": {
+      "main": [
+        [
+          {
+            "node": "Read: agent_turns",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read: agent_turns": {
+      "main": [
+        [
+          {
+            "node": "Read: comparisons",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read: comparisons": {
+      "main": [
+        [
+          {
+            "node": "Read: run_summaries",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read: run_summaries": {
+      "main": [
+        [
+          {
+            "node": "Analyze",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze": {
+      "main": [
+        [
+          {
+            "node": "New rows: scores",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Changed rows: scores",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "New rows: comparisons",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Changed rows: comparisons",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "New rows: run_summaries",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Changed rows: run_summaries",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Run stamps",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Render reports",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New rows: scores": {
+      "main": [
+        [
+          {
+            "node": "200 at a time: scores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "200 at a time: scores": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Batch Create: scores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Batch Create: scores": {
+      "main": [
+        [
+          {
+            "node": "200 at a time: scores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Changed rows: scores": {
+      "main": [
+        [
+          {
+            "node": "Update: scores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New rows: comparisons": {
+      "main": [
+        [
+          {
+            "node": "200 at a time: comparisons",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "200 at a time: comparisons": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Batch Create: comparisons",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Batch Create: comparisons": {
+      "main": [
+        [
+          {
+            "node": "200 at a time: comparisons",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Changed rows: comparisons": {
+      "main": [
+        [
+          {
+            "node": "Update: comparisons",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New rows: run_summaries": {
+      "main": [
+        [
+          {
+            "node": "200 at a time: run_summaries",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "200 at a time: run_summaries": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Batch Create: run_summaries",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Batch Create: run_summaries": {
+      "main": [
+        [
+          {
+            "node": "200 at a time: run_summaries",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Changed rows: run_summaries": {
+      "main": [
+        [
+          {
+            "node": "Update: run_summaries",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run stamps": {
+      "main": [
+        [
+          {
+            "node": "Update: runs (analyzed_at)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Render reports": {
+      "main": [
+        [
+          {
+            "node": "To file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "To file": {
+      "main": [
+        [
+          {
+            "node": "Write: out files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true
+  },
+  "active": false,
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}
