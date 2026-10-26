@@ -12,14 +12,15 @@
   "packageManager": "npm@11.16.0",
   "overrides": {
     "@hono/node-server": "2.0.11",
-    "esbuild": "0.28.1"
+    "esbuild": "0.28.1",
+    "vite": "8.3.5"
   },
   "dependencies": {
-    "@angular/common": "22.1.6",
-    "@angular/compiler": "22.1.6",
-    "@angular/core": "22.1.6",
-    "@angular/forms": "22.1.6",
-    "@angular/platform-browser": "22.1.6",
+    "@angular/common": "22.2.1",
+    "@angular/compiler": "22.2.1",
+    "@angular/core": "22.2.1",
+    "@angular/forms": "22.2.1",
+    "@angular/platform-browser": "22.2.1",
     "@angular/router": "22.2.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
@@ -27,7 +28,7 @@
   "devDependencies": {
     "@angular/build": "22.2.1",
     "@angular/cli": "22.2.4",
-    "@angular/compiler-cli": "22.1.6",
+    "@angular/compiler-cli": "22.2.1",
     "@playwright/test": "^1.61.1",
     "prettier": "^3.8.1",
     "typescript": "~6.0.3"

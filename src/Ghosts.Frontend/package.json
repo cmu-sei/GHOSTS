@@ -21,6 +21,9 @@
     ]
   },
   "private": true,
+  "overrides": {
+    "vite": "8.3.5"
+  },
   "dependencies": {
     "@angular/animations": "^22.2.1",
     "@angular/cdk": "^22.2.1",
