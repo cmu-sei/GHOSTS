@@ -35,6 +35,17 @@ public class ExecutionTerrainControllerTests
     }
 
     [Fact]
+    public async Task The_map_is_passed_through_as_geojson()
+    {
+        _service.Setup(s => s.MapAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync("""{"type":"FeatureCollection","features":[]}""");
+
+        var result = await new ExecutionTerrainController(_service.Object).Map(1, default);
+
+        var content = Assert.IsType<ContentResult>(result);
+        Assert.Equal(("application/json", """{"type":"FeatureCollection","features":[]}"""), (content.ContentType, content.Content));
+    }
+
+    [Fact]
     public async Task A_provider_error_is_a_bad_gateway_carrying_the_providers_code()
     {
         _service.Setup(s => s.BuildAsync(1, It.IsAny<BuildTerrainDto>(), It.IsAny<CancellationToken>()))

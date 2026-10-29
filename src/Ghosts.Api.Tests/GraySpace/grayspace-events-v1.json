@@ -1,0 +1,351 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://grayspace/schemas/grayspace-events-v1.json",
+  "title": "GraySpace /api/v1/events messages",
+  "$defs": {
+    "ActionApplied": {
+      "properties": {
+        "type": {
+          "const": "action.applied",
+          "enum": [
+            "action.applied"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "instance": {
+          "title": "Instance",
+          "type": "string"
+        },
+        "action": {
+          "title": "Action",
+          "type": "string"
+        },
+        "target": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Target"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "timestamp": {
+          "title": "Timestamp",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "instance",
+        "action",
+        "target",
+        "message",
+        "timestamp"
+      ],
+      "title": "ActionApplied",
+      "type": "object"
+    },
+    "FeatureUpdate": {
+      "description": "Changed properties of one /map feature. Apply with MapLibre setFeatureState (promoteId: id) or by\nupdating the deck.gl layer's data; no geometry is re-fetched.",
+      "properties": {
+        "type": {
+          "const": "feature.update",
+          "enum": [
+            "feature.update"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "id": {
+          "description": "The feature's id in /map, e.g. lum-chi:are-chi",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "router",
+            "link",
+            "site",
+            "internet-host",
+            "host",
+            "attachment"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "properties": {
+          "type": "object",
+          "description": "Only the properties that changed, e.g. state, color, diagnostics, condition, status",
+          "title": "Properties"
+        },
+        "timestamp": {
+          "title": "Timestamp",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "kind",
+        "properties",
+        "timestamp"
+      ],
+      "title": "FeatureUpdate",
+      "type": "object"
+    },
+    "GuestUpdate": {
+      "description": "A base guest's Proxmox status changed: a router, client or core service of /base/inventory.\nRouters also get a feature.update with the same status, for the map.",
+      "properties": {
+        "type": {
+          "const": "guest.update",
+          "enum": [
+            "guest.update"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "hostname": {
+          "title": "Hostname",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "router",
+            "client",
+            "core-service"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "status": {
+          "description": "running, stopped or missing (no longer in Proxmox)",
+          "title": "Status",
+          "type": "string"
+        },
+        "previous": {
+          "description": "The status before",
+          "title": "Previous",
+          "type": "string"
+        },
+        "timestamp": {
+          "title": "Timestamp",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "hostname",
+        "kind",
+        "status",
+        "previous",
+        "timestamp"
+      ],
+      "title": "GuestUpdate",
+      "type": "object"
+    },
+    "Hello": {
+      "properties": {
+        "type": {
+          "const": "hello",
+          "enum": [
+            "hello"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "schema": {
+          "description": "grayspace-events-v1",
+          "title": "Schema",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "schema"
+      ],
+      "title": "Hello",
+      "type": "object"
+    },
+    "InstanceUpdate": {
+      "properties": {
+        "type": {
+          "const": "instance.update",
+          "enum": [
+            "instance.update"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "state": {
+          "title": "State",
+          "type": "string"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Error"
+        },
+        "timestamp": {
+          "title": "Timestamp",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "state",
+        "error",
+        "timestamp"
+      ],
+      "title": "InstanceUpdate",
+      "type": "object"
+    },
+    "JobUpdate": {
+      "properties": {
+        "type": {
+          "const": "job.update",
+          "enum": [
+            "job.update"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string"
+        },
+        "target": {
+          "title": "Target",
+          "type": "string"
+        },
+        "state": {
+          "title": "State",
+          "type": "string"
+        },
+        "stage": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Stage"
+        },
+        "attempt": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Attempt"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Error"
+        },
+        "timestamp": {
+          "title": "Timestamp",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "kind",
+        "target",
+        "state",
+        "stage",
+        "attempt",
+        "error",
+        "timestamp"
+      ],
+      "title": "JobUpdate",
+      "type": "object"
+    },
+    "Pong": {
+      "properties": {
+        "type": {
+          "const": "pong",
+          "enum": [
+            "pong"
+          ],
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "Pong",
+      "type": "object"
+    }
+  },
+  "discriminator": {
+    "mapping": {
+      "action.applied": "#/$defs/ActionApplied",
+      "feature.update": "#/$defs/FeatureUpdate",
+      "guest.update": "#/$defs/GuestUpdate",
+      "hello": "#/$defs/Hello",
+      "instance.update": "#/$defs/InstanceUpdate",
+      "job.update": "#/$defs/JobUpdate",
+      "pong": "#/$defs/Pong"
+    },
+    "propertyName": "type"
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/Hello"
+    },
+    {
+      "$ref": "#/$defs/Pong"
+    },
+    {
+      "$ref": "#/$defs/FeatureUpdate"
+    },
+    {
+      "$ref": "#/$defs/GuestUpdate"
+    },
+    {
+      "$ref": "#/$defs/JobUpdate"
+    },
+    {
+      "$ref": "#/$defs/InstanceUpdate"
+    },
+    {
+      "$ref": "#/$defs/ActionApplied"
+    }
+  ]
+}

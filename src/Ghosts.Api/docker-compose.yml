@@ -46,10 +46,12 @@ services:
     environment:
       N8N_API_URL: ${N8N_API_URL:-http://ghosts-n8n:5678/api/v1/workflows}
       N8N_API_KEY: ${N8N_API_KEY:-replace-me}
-      # Terrain provider (GraySpace). Unset, Build terrain fails with not_configured. To try GHOSTS's own
-      # stub instead: TERRAIN_STUB=true TERRAIN_BASE_URL=http://localhost:5000/stubs/grayspace TERRAIN_API_KEY=dev-terrain-key
+      # Terrain provider (GraySpace Terrain API 1.3.0). Unset, Build terrain fails with not_configured. To try GHOSTS's
+      # own simulator: TERRAIN_STUB=true TERRAIN_BASE_URL=http://localhost:5000/stubs/grayspace TERRAIN_TOKEN=dev-token
       TerrainProvider__BaseUrl: ${TERRAIN_BASE_URL:-}
-      TerrainProvider__ApiKey: ${TERRAIN_API_KEY:-}
+      TerrainProvider__Token: ${TERRAIN_TOKEN:-}
+      TerrainProvider__ClientUrl: ${TERRAIN_CLIENT_URL:-}
+      TerrainProvider__GhostsApiUrl: ${TERRAIN_GHOSTS_API_URL:-}
       TerrainProvider__EnableStub: ${TERRAIN_STUB:-false}
     restart: unless-stopped
 

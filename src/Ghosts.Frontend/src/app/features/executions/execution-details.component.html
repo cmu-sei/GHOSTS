@@ -596,18 +596,18 @@
           <div class="card-body">
             @if (!t?.status) {
             <p class="text-muted mb-0">
-              No terrain built for this run. Build asks the terrain provider for the enclave the scenario names.
+              No terrain built for this run. Build stores the scenario's enclave in GraySpace and builds it on the deployed base.
             </p>
             } @else {
             <dl class="execution-info mb-0">
-              <dt>Provider:</dt>
-              <dd>{{ t?.provider || 'N/A' }}</dd>
               <dt>Base:</dt>
               <dd>{{ t?.baseId || 'N/A' }}</dd>
               <dt>Enclave:</dt>
-              <dd>{{ t?.enclave || 'N/A' }}</dd>
+              <dd>{{ t?.enclave || 'N/A' }} <span class="text-muted small">{{ t?.version }}</span></dd>
               <dt>Instance:</dt>
               <dd>{{ t?.instanceId || 'N/A' }}</dd>
+              <dt>Job:</dt>
+              <dd>{{ t?.jobId || 'N/A' }} @if (t?.stage) { <span class="text-muted small">· {{ t?.stage }}</span> }</dd>
               <dt>Updated:</dt>
               <dd>{{ formatDate(t?.updatedAt) }}</dd>
             </dl>
@@ -625,6 +625,24 @@
           </div>
         </div>
 
+        @if (t?.findings?.length || t?.notes?.length) {
+        <div class="card mb-3">
+          <div class="card-header">
+            <h5 class="card-title mb-0"><i class="fas fa-clipboard-check"></i> GraySpace findings</h5>
+          </div>
+          <div class="card-body">
+            @for (finding of t?.findings; track $index) {
+            <div class="terrain-finding" [class.error]="finding.severity === 'error'">
+              <strong>{{ finding.code }}</strong> <span class="text-muted small">{{ finding.path }}</span> — {{ finding.message }}
+            </div>
+            }
+            @for (note of t?.notes; track $index) {
+            <div class="terrain-note"><i class="fas fa-info-circle"></i> {{ note }}</div>
+            }
+          </div>
+        </div>
+        }
+
         @if (t?.log?.length) {
         <div class="card mb-3">
           <div class="card-header">
@@ -639,47 +657,60 @@
         @if (t?.manifest; as manifest) {
         <div class="card mb-3">
           <div class="card-header">
-            <h5 class="card-title mb-0">
-              <i class="fas fa-server"></i> Manifest
-              <span class="text-muted small ms-2">{{ manifest.directoryDomain }}</span>
-            </h5>
+            <h5 class="card-title mb-0"><i class="fas fa-server"></i> Manifest</h5>
           </div>
           <div class="card-body p-0">
+            @for (site of manifest.sites; track site.name) {
+            <div class="p-3 pb-0">
+              <strong>Site {{ site.name }}</strong> on {{ site.router }} ({{ site.isp }}{{ site.location ? ', ' + site.location : '' }}),
+              WAN {{ site.wanIp }}
+              @for (segment of site.segments; track segment.name) {
+              <span class="ms-2 text-muted small">{{ segment.name }} {{ segment.cidr }}</span>
+              }
+            </div>
+            }
             <div class="table-responsive">
               <table class="table table-hover mb-0">
                 <thead class="table-light">
                   <tr>
                     <th class="px-3 py-3">Host</th>
+                    <th class="py-3">Hostname</th>
                     <th class="py-3">Segment</th>
-                    <th class="py-3">Range IP</th>
+                    <th class="py-3">IP</th>
+                    <th class="py-3">Public IP</th>
                     <th class="py-3">Management IP</th>
-                    <th class="py-3">OS</th>
-                    <th class="py-3">Role</th>
-                    <th class="py-3">GHOSTS client</th>
-                    <th class="py-3">Participant console</th>
+                    <th class="py-3">Image</th>
+                    <th class="py-3">Roles</th>
+                    <th class="py-3">Use</th>
+                    <th class="py-3">Status</th>
                   </tr>
                 </thead>
                 <tbody>
-                  @for (host of manifest.hosts; track host.name) {
+                  @for (host of manifest.hosts; track host.hostname) {
                   <tr>
                     <td class="px-3 py-3">{{ host.name }}</td>
-                    <td class="py-3">{{ host.segment }}</td>
-                    <td class="py-3">{{ host.rangeIp }}</td>
-                    <td class="py-3">{{ host.managementIp }}</td>
-                    <td class="py-3">{{ host.osFamily }} {{ host.osVersion }}</td>
-                    <td class="py-3">{{ host.role }}</td>
-                    <td class="py-3">{{ host.ghostsClient ? 'Yes' : 'No' }}</td>
-                    <td class="py-3">{{ host.participantWorkstation ? 'Yes' : 'No' }}</td>
+                    <td class="py-3">{{ host.hostname }}</td>
+                    <td class="py-3">{{ host.segment || 'internet' }}</td>
+                    <td class="py-3">{{ host.ip }}</td>
+                    <td class="py-3">{{ host.publicIp || '' }}</td>
+                    <td class="py-3">{{ host.mgmtIp || '' }}</td>
+                    <td class="py-3">{{ host.image }}</td>
+                    <td class="py-3">{{ host.roles.join(', ') }}</td>
+                    <td class="py-3">
+                      @if (host.labels['ghosts.console'] === 'true') { participant console }
+                      @else if (host.labels['ghosts.pool']) { pool {{ host.labels['ghosts.pool'] }} }
+                    </td>
+                    <td class="py-3">{{ host.status }}</td>
                   </tr>
                   }
                 </tbody>
               </table>
             </div>
-            @if (manifest.sites.length > 0) {
+            @if (manifest.dns.length > 0) {
             <div class="p-3">
-              <strong>Sites:</strong>
-              @for (site of manifest.sites; track site.name) {
-              <span class="ms-2">{{ site.name }} ({{ site.kind }}) <a [href]="site.url" target="_blank">{{ site.url }}</a></span>
+              <strong>DNS:</strong>
+              @for (record of manifest.dns; track record.name + record.type) {
+              <span class="ms-2">{{ record.name }} {{ record.type }} {{ record.data }}</span>
               }
             </div>
             }

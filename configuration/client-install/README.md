@@ -1,7 +1,10 @@
 # Installing the GHOSTS client on enclave hosts
 
-These scripts put a GHOSTS NPC client on a freshly built host, pointed at the GHOSTS API. GraySpace can run them
-from its Ansible after it builds an enclave, or bake them into a host image.
+These scripts put a GHOSTS NPC client on a freshly built host, pointed at the GHOSTS API, for hosts GHOSTS doesn't
+build through GraySpace or for baking into a host image. On an enclave GHOSTS builds through GraySpace (Terrain API
+1.3.0), GraySpace's own `ghosts-client` role does this: it downloads the client archive from
+`TerrainProvider:ClientUrl` and reports to `TerrainProvider:GhostsApiUrl` by hostname
+([Terrain (GraySpace)](../../docs/core/api/terrain.md)).
 
 ## What a host needs
 

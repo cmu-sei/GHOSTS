@@ -64,28 +64,52 @@ public class ExecutionBindingTests
     }
 
     [Fact]
-    public async Task Once_the_terrain_is_ready_the_manifests_client_hosts_are_used()
+    public async Task Once_the_terrain_is_ready_npcs_sit_at_the_manifests_client_hosts_by_the_hostname_they_report()
     {
         await using var context = TestDb.New("binding");
         var execution = await Run(context, OfficeTerrain, ("office staff", null));
-        var manifest = new TerrainManifest("inst-1", "office-base", "office-enclave", "office.local",
-        [
-            new TerrainManifestHost("built-07", "Office LAN", "10.20.0.7", "172.30.0.7", "linux", "ubuntu", "workstation", "pve-01", 1007, true, false),
-            new TerrainManifestHost("no-client", "Office LAN", "10.20.0.8", "172.30.0.8", "linux", "ubuntu", "server", "pve-01", 1008, false, false)
-        ], []);
-        execution.TerrainStatus = TerrainStatus.Ready;
-        execution.Terrain = JsonSerializer.Serialize(new ExecutionTerrainDto(execution.Id, "grayspace", "office-base", "office-enclave",
-            "inst-1", TerrainStatus.Ready, 100, [], manifest, null, DateTime.UtcNow), GraySpaceTerrainProvider.Json);
-        await context.SaveChangesAsync();
+        await Ready(context, execution,
+            Built("staff-01", "office-lan", ["ghosts-client"], ("ghosts.pool", "office staff")),
+            Built("file-01", "office-lan", ["file"]),
+            Built("console-01", "office-lan", [], ("ghosts.console", "true")));
         AddNpcs(context, execution.Id, "office staff", 2);
 
         await Service(context).AutoBindAsync(execution.Id, default);
 
         var hosts = context.Npcs.Where(n => n.ExecutionId == execution.Id).Select(n => n.HostName).ToList();
-        Assert.Contains("built-07", hosts);
-        Assert.DoesNotContain("no-client", hosts);
+        Assert.Contains("g1-staff-01", hosts);
+        Assert.DoesNotContain("g1-file-01", hosts);
+        Assert.DoesNotContain("g1-console-01", hosts);
         Assert.DoesNotContain("desk-01", hosts);
     }
+
+    [Fact]
+    public async Task A_pool_takes_the_hosts_graySpace_labelled_with_it()
+    {
+        await using var context = TestDb.New("binding");
+        var execution = await Run(context, OfficeTerrain, ("office staff", null), ("reception", null));
+        await Ready(context, execution,
+            Built("staff-01", "office-lan", ["ghosts-client"], ("ghosts.pool", "office staff")),
+            Built("desk-01", "office-lan", ["ghosts-client"], ("ghosts.pool", "reception")));
+        AddNpcs(context, execution.Id, "reception", 1);
+        AddNpcs(context, execution.Id, "office staff", 1);
+
+        await Service(context).AutoBindAsync(execution.Id, default);
+
+        Assert.Equal("g1-desk-01", context.Npcs.Single(n => n.ExecutionId == execution.Id && n.Team == "reception").HostName);
+        Assert.Equal("g1-staff-01", context.Npcs.Single(n => n.ExecutionId == execution.Id && n.Team == "office staff").HostName);
+    }
+
+    private static async Task Ready(ApplicationDbContext context, Execution execution, params ManifestHost[] hosts)
+    {
+        execution.TerrainStatus = TerrainStatus.Ready;
+        execution.Terrain = JsonSerializer.Serialize(new ExecutionTerrainDto(execution.Id, "grayspace", "grayspace/2026.10", "office-enclave",
+            "g1", TerrainStatus.Ready, 100, [], new TerrainManifest([], [.. hosts], [], []), null, DateTime.UtcNow), TerrainService.Stored);
+        await context.SaveChangesAsync();
+    }
+
+    private static ManifestHost Built(string name, string segment, List<string> roles, params (string Key, string Value)[] labels) =>
+        new(name, $"g1-{name}", "main", segment, "192.168.10.10", null, "10.0.1.10", [], roles, labels.ToDictionary(l => l.Key, l => l.Value), "ubuntu-22.04-lxc", "running");
 
     [Fact]
     public async Task A_binding_can_be_set_and_cleared_by_hand()

@@ -81,6 +81,7 @@ export class ExecutionDetailsComponent implements OnInit, OnDestroy {
   decisionBy = signal('white-cell');
 
   private hubSub?: Subscription;
+  private terrainSub?: Subscription;
   private terrainTimer?: ReturnType<typeof setInterval>;
   private executionId = 0;
 
@@ -125,6 +126,7 @@ export class ExecutionDetailsComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.hubSub?.unsubscribe();
+    this.terrainSub?.unsubscribe();
     this.executionHub.disconnect();
     clearInterval(this.terrainTimer);
   }
@@ -157,6 +159,13 @@ export class ExecutionDetailsComponent implements OnInit, OnDestroy {
         this.loadState(this.executionId);
       } else if (msg.updateType === 'RunStateUpdate') {
         this.state.set(msg.data);
+      }
+    });
+    // GraySpace's job and instance updates for this run's enclave: refresh the Terrain tab now.
+    this.terrainSub = this.executionHub.terrainEvents$.subscribe((event) => {
+      const instance = this.terrain()?.instanceId;
+      if ((event.type === 'instance.update' && event.id === instance) || (event.type === 'job.update' && event.target === instance)) {
+        this.loadTerrain(this.executionId);
       }
     });
   }

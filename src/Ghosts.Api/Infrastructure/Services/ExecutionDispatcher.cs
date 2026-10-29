@@ -208,8 +208,8 @@ public class ExecutionDispatcher(DbContext context, IClientHubService clientHub,
         }
     }
 
-    /// <summary>An NPC on a registered machine: its pool role, the host it sits at, and that host's segment.</summary>
-    private record Seat(Guid MachineId, string Team, string HostName, string Segment);
+    /// <summary>An NPC on a registered machine: its pool role, the host it sits at (as reported, and by the host's own name), and that host's segment.</summary>
+    private record Seat(Guid MachineId, string Team, string HostName, string Segment, string Name = null);
 
     /// <summary>
     /// The NPCs this run can reach: its pool NPCs on a machine, by MachineId or by a host name that a registered
@@ -217,7 +217,7 @@ public class ExecutionDispatcher(DbContext context, IClientHubService clientHub,
     /// </summary>
     private async Task<List<Seat>> SeatsAsync(Execution execution, CancellationToken ct)
     {
-        var segments = await SegmentsByHostAsync(execution, ct);
+        var hosts = await HostsAsync(execution, ct);
         var seats = new List<Seat>();
 
         var npcs = await context.Set<NpcRecord>()
@@ -233,7 +233,8 @@ public class ExecutionDispatcher(DbContext context, IClientHubService clientHub,
                 npc.MachineId = machine.Id;
             }
             var host = npc.HostName ?? await MachineNameAsync(npc.MachineId.Value, ct);
-            seats.Add(new Seat(npc.MachineId.Value, npc.Team, host, host != null && segments.TryGetValue(host, out var seg) ? seg : null));
+            var known = host != null && hosts.TryGetValue(host, out var h) ? h : default;
+            seats.Add(new Seat(npc.MachineId.Value, npc.Team, host, known.Segment, known.Name));
         }
 
         var compilationId = await context.Set<ScenarioCompilation>()
@@ -247,34 +248,38 @@ public class ExecutionDispatcher(DbContext context, IClientHubService clientHub,
             foreach (var machineId in compiled)
             {
                 var host = await MachineNameAsync(machineId, ct);
-                seats.Add(new Seat(machineId, null, host, host != null && segments.TryGetValue(host, out var seg) ? seg : null));
+                var known = host != null && hosts.TryGetValue(host, out var h) ? h : default;
+                seats.Add(new Seat(machineId, null, host, known.Segment, known.Name));
             }
         }
 
         return seats;
     }
 
-    /// <summary>The seats an item's targets name, by pool role, segment or host; every seat when there are no targets.</summary>
+    /// <summary>
+    /// The seats an item's targets name, by pool role, segment or host; every seat when there are no targets. A host is
+    /// named as the document names it, which matches either the hostname it reports or GraySpace's name for it.
+    /// </summary>
     private static IEnumerable<Seat> Targeted(List<Seat> seats, TargetsDto targets)
     {
         if (targets == null || (targets.Pools is not { Count: > 0 } && targets.Segments is not { Count: > 0 } && targets.Hosts is not { Count: > 0 }))
             return seats;
         bool In(List<string> names, string value) => value != null && names is { Count: > 0 } && names.Contains(value, StringComparer.OrdinalIgnoreCase);
-        return seats.Where(s => In(targets.Pools, s.Team) || In(targets.Segments, s.Segment) || In(targets.Hosts, s.HostName));
+        bool Named(List<string> names, string value) =>
+            value != null && names is { Count: > 0 } && names.Any(n => Terrain.EnclaveSliceMapper.Name(n, 40) == value);
+        return seats.Where(s => In(targets.Pools, s.Team) || In(targets.Segments, s.Segment) || In(targets.Hosts, s.HostName) || Named(targets.Hosts, s.Name));
     }
 
-    private async Task<Dictionary<string, string>> SegmentsByHostAsync(Execution execution, CancellationToken ct)
+    /// <summary>Each host by the name a client reports: its own name and its segment as the document names them.</summary>
+    private async Task<Dictionary<string, (string Name, string Segment)>> HostsAsync(Execution execution, CancellationToken ct)
     {
-        var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        if (execution.TerrainStatus == Terrain.TerrainStatus.Ready && !string.IsNullOrEmpty(execution.Terrain))
-        {
-            var manifest = JsonSerializer.Deserialize<Terrain.ExecutionTerrainDto>(execution.Terrain, Terrain.GraySpaceTerrainProvider.Json)?.Manifest;
-            foreach (var h in manifest?.Hosts ?? []) map.TryAdd(h.Name, h.Segment);
-        }
+        var map = new Dictionary<string, (string Name, string Segment)>(StringComparer.OrdinalIgnoreCase);
         var extras = ScenarioExtras.Read<ScenarioExtrasDto>(
             await context.Set<Scenario>().Where(s => s.Id == execution.ScenarioId).Select(s => s.Extras).FirstOrDefaultAsync(ct));
+        if (execution.TerrainStatus == Terrain.TerrainStatus.Ready && Terrain.TerrainService.Read(execution).Manifest is { } manifest)
+            foreach (var seat in Terrain.TerrainService.Seats(manifest, extras?.Terrain)) map.TryAdd(seat.Hostname, (seat.Name, seat.Segment));
         foreach (var h in extras?.Terrain?.Hosts ?? [])
-            if (!string.IsNullOrEmpty(h.Name)) map.TryAdd(h.Name, h.Segment);
+            if (!string.IsNullOrEmpty(h.Name)) map.TryAdd(h.Name, (h.Name, h.Segment));
         return map;
     }
 

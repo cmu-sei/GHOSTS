@@ -19,6 +19,7 @@ import {
   NpcBinding,
   BindingResult,
   ExecutionTerrain,
+  TerrainMapLayer,
 } from '../models/execution.model';
 
 @Injectable({
@@ -220,5 +221,10 @@ export class ExecutionService {
 
   teardownTerrain(executionId: number): Observable<ExecutionTerrain> {
     return this.http.delete<ExecutionTerrain>(`${this.apiUrl}/${executionId}/terrain`);
+  }
+
+  /** GraySpace's map layer (GeoJSON) with this run's enclave. */
+  getTerrainMap(executionId: number): Observable<TerrainMapLayer> {
+    return this.http.get<TerrainMapLayer>(`${this.apiUrl}/${executionId}/terrain/map`);
   }
 }

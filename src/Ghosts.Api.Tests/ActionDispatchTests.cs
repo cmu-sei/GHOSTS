@@ -6,6 +6,7 @@ using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Services;
 using Ghosts.Api.Infrastructure.Services.ClientServices;
+using Ghosts.Api.Infrastructure.Terrain;
 using Ghosts.Domain;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -114,6 +115,34 @@ public class ActionDispatchTests
         await Dispatcher(context).DispatchDueAsync(DateTime.UtcNow, default);
 
         Assert.Equal(reached.Order(), _sent.Select(s => machines[s.Machine]).Order());
+    }
+
+    [Theory]
+    [InlineData("""{"hosts":["desk-02"]}""")]
+    [InlineData("""{"segments":["Office LAN"]}""")]
+    public async Task Targets_in_the_documents_names_reach_npcs_on_the_hosts_graySpace_built(string targets)
+    {
+        await using var context = TestDb.New("actions");
+        var execution = await Running(context, Item(1, "Staff print the agenda",
+            "{\"execution\":{\"action\":{\"handler\":\"Print\",\"commandArgs\":[\"agenda.txt\"]},\"targets\":" + targets + "}}"));
+        var tracked = context.Executions.Single(e => e.Id == execution.Id);
+        tracked.TerrainStatus = TerrainStatus.Ready;
+        tracked.Terrain = System.Text.Json.JsonSerializer.Serialize(new ExecutionTerrainDto(execution.Id, "grayspace", "grayspace/2026.10", "office-enclave",
+            "g1", TerrainStatus.Ready, 100, [], new TerrainManifest([], [
+                new ManifestHost("desk-02", "g1-desk-02", "main", "office-lan", "192.168.10.11", null, "10.0.1.11", [], ["ghosts-client"], new Dictionary<string, string>(), "ubuntu-22.04-lxc", "running"),
+                new ManifestHost("lobby-01", "g1-lobby-01", "main", "front-desk", "192.168.11.10", null, "10.0.1.12", [], ["ghosts-client"], new Dictionary<string, string>(), "ubuntu-22.04-lxc", "running")
+            ], [], []), null, DateTime.UtcNow), TerrainService.Stored);
+        context.SaveChanges();
+        var machines = new Dictionary<Guid, string>();
+        foreach (var host in new[] { "g1-desk-02", "g1-lobby-01" })
+        {
+            Npc(context, execution.Id, "office staff", host);
+            machines[Machine(context, host)] = host;
+        }
+
+        await Dispatcher(context).DispatchDueAsync(DateTime.UtcNow, default);
+
+        Assert.Equal(["g1-desk-02"], _sent.Select(s => machines[s.Machine]));
     }
 
     [Fact]

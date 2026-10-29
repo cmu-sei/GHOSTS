@@ -19,7 +19,8 @@ import { ScatterplotLayer, TextLayer } from '@deck.gl/layers';
 
 import { ExecutionService } from '../../core/services/execution.service';
 import { ExecutionMapService } from '../../core/services/execution-map.service';
-import { Execution } from '../../core/models/execution.model';
+import { ExecutionHubService } from '../../core/services/execution-hub.service';
+import { Execution, TerrainEvent, TerrainMapLayer } from '../../core/models/execution.model';
 import {
   GeoJsonFeatureCollection,
   GeoJsonFeature,
@@ -100,6 +101,7 @@ export class ExecutionMapComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly executionService = inject(ExecutionService);
   private readonly mapService = inject(ExecutionMapService);
+  private readonly executionHub = inject(ExecutionHubService);
 
   // ── State ──
   readonly executionId = signal(0);
@@ -114,6 +116,9 @@ export class ExecutionMapComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly liveRefresh = signal(true);
   readonly panelOpen = signal(false);
   readonly showConnections = signal(true);
+  readonly showGraySpace = signal(true);
+  /** What GraySpace's layer holds, for the layer panel: routers, links, links down, enclave sites. */
+  readonly graySpaceSummary = signal<{ routers: number; links: number; down: number; sites: number } | null>(null);
   readonly connectionCount = signal(0);
   readonly timelineIndex = signal(0);
   readonly timelinePlaying = signal(false);
@@ -134,6 +139,11 @@ export class ExecutionMapComponent implements OnInit, AfterViewInit, OnDestroy {
   private map!: maplibregl.Map;
   private deckOverlay!: MapboxOverlay;
   private refreshSub?: Subscription;
+  private terrainSub?: Subscription;
+  private graySpaceLayer: TerrainMapLayer | null = null;
+  private graySpaceLayersAdded = false;
+  // Set on style.load. isStyleLoaded() is false while any source is still loading tiles, so it can't gate this.
+  private styleReady = false;
   private timelineInterval?: ReturnType<typeof setInterval>;
   private searchSubject = new Subject<string>();
   private allFeatures: GeoJsonFeatureCollection = { type: 'FeatureCollection', features: [] };
@@ -170,10 +180,13 @@ export class ExecutionMapComponent implements OnInit, AfterViewInit, OnDestroy {
     this.initMap();
     this.loadData();
     this.startAutoRefresh();
+    this.followTerrainEvents();
   }
 
   ngOnDestroy(): void {
     this.refreshSub?.unsubscribe();
+    this.terrainSub?.unsubscribe();
+    this.executionHub.disconnect();
     this.stopTimelinePlay();
     this.stopGlobeRotation();
     this.stopFlowAnimation();
@@ -197,6 +210,7 @@ export class ExecutionMapComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Wait for the style to finish loading before enabling globe + overlays
     this.map.on('style.load', () => {
+      this.styleReady = true;
       // Globe projection must be set after style loads — the style init
       // defaults to mercator and overwrites any constructor value
       this.map.setProjection({ type: 'globe' });
@@ -217,6 +231,9 @@ export class ExecutionMapComponent implements OnInit, AfterViewInit, OnDestroy {
         this.pendingConnectionUpdate = false;
         this.updateConnectionLines();
       }
+
+      // GraySpace's layer, if it arrived before the style was ready
+      this.updateGraySpaceLayer();
 
       // Globe auto-rotation
       this.startGlobeRotation();
@@ -304,6 +321,80 @@ export class ExecutionMapComponent implements OnInit, AfterViewInit, OnDestroy {
     this.mapService.getTimeline(id, 60).subscribe({
       next: (tl) => this.timelineInfo.set(tl),
     });
+
+    // GraySpace's map layer: the simulated internet and this run's enclave. None when no GraySpace is configured.
+    this.executionService.getTerrainMap(id).subscribe({
+      next: (layer) => {
+        this.graySpaceLayer = layer;
+        this.updateGraySpaceLayer();
+      },
+      error: () => this.graySpaceSummary.set(null),
+    });
+  }
+
+  // ── GraySpace layer ──
+
+  /** Live GraySpace events: a feature update changes that feature's properties; a router's guest update its status. */
+  private followTerrainEvents(): void {
+    this.executionHub.connect(this.executionId());
+    this.terrainSub = this.executionHub.terrainEvents$.subscribe((event: TerrainEvent) => {
+      if (!this.graySpaceLayer) return;
+      const id = event.type === 'feature.update' ? event.id : event.type === 'guest.update' ? event.hostname : null;
+      const feature = id ? this.graySpaceLayer.features.find((f) => f.id === id) : undefined;
+      if (!feature) return;
+      Object.assign(feature.properties, event.type === 'feature.update' ? event.properties : { status: event.status });
+      this.updateGraySpaceLayer();
+    });
+  }
+
+  private updateGraySpaceLayer(): void {
+    const layer = this.graySpaceLayer;
+    if (!layer) return;
+    const kinds = layer.features.map((f) => f.properties['kind']);
+    this.graySpaceSummary.set({
+      routers: kinds.filter((k) => k === 'router').length,
+      links: kinds.filter((k) => k === 'link').length,
+      down: layer.features.filter((f) => f.properties['kind'] === 'link' && f.properties['state'] === 'down').length,
+      sites: kinds.filter((k) => k === 'site' || k === 'internet-host').length,
+    });
+    if (!this.styleReady) return;
+
+    const src = this.map.getSource('grayspace-src') as maplibregl.GeoJSONSource;
+    if (src) src.setData(layer as any);
+    else this.map.addSource('grayspace-src', { type: 'geojson', data: layer as any, promoteId: 'id' });
+
+    if (!this.graySpaceLayersAdded) {
+      const color: maplibregl.ExpressionSpecification = ['coalesce', ['get', 'color'], '#64748b'];
+      this.map.addLayer({
+        id: 'grayspace-links', type: 'line', source: 'grayspace-src',
+        filter: ['==', ['get', 'kind'], 'link'],
+        paint: { 'line-color': ['case', ['==', ['get', 'state'], 'down'], '#ef4444', color], 'line-width': 1.5, 'line-opacity': 0.8 },
+      });
+      this.map.addLayer({
+        id: 'grayspace-attachments', type: 'line', source: 'grayspace-src',
+        filter: ['==', ['get', 'kind'], 'attachment'],
+        paint: { 'line-color': '#22c55e', 'line-width': 1.5, 'line-dasharray': [2, 2] },
+      });
+      this.map.addLayer({
+        id: 'grayspace-routers', type: 'circle', source: 'grayspace-src',
+        filter: ['==', ['get', 'kind'], 'router'],
+        paint: { 'circle-radius': 4, 'circle-color': color, 'circle-stroke-width': 1, 'circle-stroke-color': '#0f172a' },
+      });
+      this.map.addLayer({
+        id: 'grayspace-sites', type: 'circle', source: 'grayspace-src',
+        filter: ['in', ['get', 'kind'], ['literal', ['site', 'internet-host']]],
+        paint: { 'circle-radius': 6, 'circle-color': '#22c55e', 'circle-stroke-width': 2, 'circle-stroke-color': '#ecfdf5' },
+      });
+      this.graySpaceLayersAdded = true;
+    }
+    const visibility = this.showGraySpace() ? 'visible' : 'none';
+    for (const id of ['grayspace-links', 'grayspace-attachments', 'grayspace-routers', 'grayspace-sites'])
+      this.map.setLayoutProperty(id, 'visibility', visibility);
+  }
+
+  toggleGraySpace(): void {
+    this.showGraySpace.set(!this.showGraySpace());
+    this.updateGraySpaceLayer();
   }
 
   refreshData(): void {

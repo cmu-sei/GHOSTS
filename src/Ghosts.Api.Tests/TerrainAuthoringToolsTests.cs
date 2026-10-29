@@ -2,58 +2,100 @@
 
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Ghosts.Api.Infrastructure.Data;
+using Ghosts.Api.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Services;
 using Ghosts.Api.Infrastructure.Terrain;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Moq;
 
 namespace Ghosts.Api.Tests;
 
 /// <summary>
-/// The authoring agent can read the terrain provider: which bases and enclaves exist, and a base's segments and
-/// hosts, so a draft names real hosts instead of inventing them. Both tools only read.
+/// The authoring agent can read what GraySpace offers (the deployed base, images, roles, ISPs, enclave features and
+/// stored enclaves) and check a validated draft's terrain as GraySpace would build it, so the terrain it writes is one
+/// GraySpace can build. Both tools only read: validate stores nothing.
 /// </summary>
 public class TerrainAuthoringToolsTests
 {
-    private readonly Mock<ITerrainProvider> _provider = new();
+    private readonly GraySpaceSimulator _sim = new(() => DateTime.UtcNow, 30);
+    private static readonly TerrainProviderOptions Settings = new() { ClientUrl = "http://ghosts:5000/client.zip", GhostsApiUrl = "http://ghosts:5000/api" };
+
+    private const string Draft = """
+        {"schemaVersion":"1.2.0","slug":"office-day","name":"Office Day","description":"An ordinary day at the office.",
+         "terrain":{"reference":{"provider":"grayspace","enclave":"office-enclave"},"segments":[{"name":"Office LAN"}],
+                    "hosts":[{"name":"desk-01","segment":"Office LAN","os":"ubuntu","role":"workstation"}]},
+         "population":{"pools":[{"role":"office staff","count":2,"segments":["Office LAN"]}]}}
+        """;
 
     [Fact]
-    public async Task Listing_terrain_returns_the_providers_bases_and_enclaves()
+    public async Task Capabilities_say_what_graySpace_can_build_and_which_enclaves_it_holds()
     {
-        _provider.Setup(p => p.ListBasesAsync(It.IsAny<CancellationToken>())).ReturnsAsync([new TerrainBase("office-base", "Office base", "2", "pve-01", "running")]);
-        _provider.Setup(p => p.ListEnclavesAsync(It.IsAny<CancellationToken>())).ReturnsAsync([new TerrainEnclave("office-enclave", "1", "office-base", 5)]);
+        await _sim.PutSliceAsync(new SliceSpec("front-office", "fo", "Reception", "ghosts", [new SliceSite("main", new SliceAttach(Isp: "Lumen"), [new SliceSegment("lan")])], []), default);
 
-        var outcome = await Tools().RunAsync(ScenarioAuthoringTools.TerrainList, new JsonObject(), null!, default);
+        var outcome = await Tools(TestDb.New("tools")).RunAsync(ScenarioAuthoringTools.TerrainCapabilities, new JsonObject(), null!, default);
 
-        Assert.True(outcome.Ok);
+        Assert.True(outcome.Ok, outcome.Text);
         using var doc = JsonDocument.Parse(outcome.Text);
-        Assert.Equal("office-base", doc.RootElement.GetProperty("bases")[0].GetProperty("id").GetString());
-        Assert.Equal("office-enclave", doc.RootElement.GetProperty("enclaves")[0].GetProperty("name").GetString());
+        Assert.Equal("grayspace/2026.10", doc.RootElement.GetProperty("base").GetProperty("version").GetString());
+        Assert.Contains("ubuntu-22.04-lxc", doc.RootElement.GetProperty("images").EnumerateArray().Select(i => i.GetProperty("name").GetString()));
+        Assert.Contains("ghosts-client", doc.RootElement.GetProperty("roles").EnumerateArray().Select(i => i.GetProperty("name").GetString()));
+        Assert.Contains("Lumen", doc.RootElement.GetProperty("isps").EnumerateArray().Select(i => i.GetProperty("name").GetString()));
+        Assert.Contains("front-office", doc.RootElement.GetProperty("enclaves").EnumerateArray().Select(i => i.GetProperty("slug").GetString()));
     }
 
     [Fact]
-    public async Task A_bases_snapshot_returns_its_segments_and_hosts()
+    public async Task A_validated_drafts_terrain_is_checked_as_graySpace_would_build_it_and_nothing_is_stored()
     {
-        _provider.Setup(p => p.GetBaseSnapshotAsync("office-base", It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new TerrainBaseSnapshot("office-base", "2", [new TerrainSegment("Base internet")], [new TerrainHost("mail-01", "Base internet", "linux", "mail")]));
+        await using var context = TestDb.New("tools");
+        var session = await Session(context, Draft.Replace("\"os\":\"ubuntu\"", "\"os\":\"windows\""));
 
-        var outcome = await Tools().RunAsync(ScenarioAuthoringTools.TerrainSnapshot, new JsonObject { ["baseId"] = "office-base" }, null!, default);
+        var outcome = await Tools(context).RunAsync(ScenarioAuthoringTools.TerrainValidate, new JsonObject { ["hash"] = "abc123" }, session, default);
 
-        Assert.True(outcome.Ok);
+        Assert.True(outcome.Ok, outcome.Text);
         using var doc = JsonDocument.Parse(outcome.Text);
-        Assert.Equal("mail-01", doc.RootElement.GetProperty("hosts")[0].GetProperty("name").GetString());
+        Assert.True(doc.RootElement.GetProperty("valid").GetBoolean());
+        Assert.Equal("office-enclave", doc.RootElement.GetProperty("spec").GetProperty("slug").GetString());
+        Assert.Contains(doc.RootElement.GetProperty("notes").EnumerateArray(), n => n.GetString()!.Contains("windows"));
+        Assert.DoesNotContain(await _sim.ListSlicesAsync(default), s => s.Kind == "slice");
     }
 
     [Fact]
-    public async Task A_provider_error_is_a_tool_error_the_model_can_read()
+    public async Task GraySpace_findings_come_back_to_the_model()
     {
-        _provider.Setup(p => p.GetBaseSnapshotAsync("nope", It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new TerrainProviderException(404, "base_not_found", "No base nope"));
+        await using var context = TestDb.New("tools");
+        var session = await Session(context, Draft);
 
-        var outcome = await Tools().RunAsync(ScenarioAuthoringTools.TerrainSnapshot, new JsonObject { ["baseId"] = "nope" }, null!, default);
+        var outcome = await Tools(context, new TerrainProviderOptions()).RunAsync(ScenarioAuthoringTools.TerrainValidate, new JsonObject { ["hash"] = "abc123" }, session, default);
+
+        using var doc = JsonDocument.Parse(outcome.Text);
+        Assert.False(doc.RootElement.GetProperty("valid").GetBoolean());
+        Assert.Contains(doc.RootElement.GetProperty("findings").EnumerateArray(), f => f.GetProperty("code").GetString() == "MISSING_ROLE_VAR");
+    }
+
+    [Fact]
+    public async Task An_unknown_hash_is_a_tool_error()
+    {
+        await using var context = TestDb.New("tools");
+        var session = await Session(context, Draft);
+
+        var outcome = await Tools(context).RunAsync(ScenarioAuthoringTools.TerrainValidate, new JsonObject { ["hash"] = "nope" }, session, default);
 
         Assert.False(outcome.Ok);
-        Assert.Contains("base_not_found", outcome.Text);
+        Assert.Contains("nope", outcome.Text);
+    }
+
+    [Fact]
+    public async Task A_graySpace_error_is_a_tool_error_the_model_can_read()
+    {
+        var graySpace = new Mock<IGraySpace>();
+        graySpace.Setup(g => g.GetBaseAsync(It.IsAny<CancellationToken>())).ThrowsAsync(new TerrainProviderException(0, "unreachable", "GraySpace at http://gs did not answer"));
+
+        var outcome = await Tools(TestDb.New("tools"), graySpace: graySpace.Object).RunAsync(ScenarioAuthoringTools.TerrainCapabilities, new JsonObject(), null!, default);
+
+        Assert.False(outcome.Ok);
+        Assert.Contains("unreachable", outcome.Text);
     }
 
     [Fact]
@@ -61,13 +103,22 @@ public class TerrainAuthoringToolsTests
     {
         var names = ScenarioAuthoringTools.Configuration().Tools.Select(t => t.ToolSpec.Name).ToList();
 
-        Assert.Contains(ScenarioAuthoringTools.TerrainList, names);
-        Assert.Contains(ScenarioAuthoringTools.TerrainSnapshot, names);
+        Assert.Contains(ScenarioAuthoringTools.TerrainCapabilities, names);
+        Assert.Contains(ScenarioAuthoringTools.TerrainValidate, names);
     }
 
-    private ScenarioAuthoringTools Tools()
+    private ScenarioAuthoringTools Tools(ApplicationDbContext context, TerrainProviderOptions? settings = null, IGraySpace? graySpace = null)
     {
-        var services = new ServiceCollection().AddSingleton(_provider.Object).BuildServiceProvider();
-        return new ScenarioAuthoringTools(null!, services.GetRequiredService<IServiceScopeFactory>(), null!, TimeSpan.FromSeconds(5));
+        var services = new ServiceCollection().AddSingleton(graySpace ?? _sim).AddSingleton(Options.Create(settings ?? Settings)).BuildServiceProvider();
+        return new ScenarioAuthoringTools(context, services.GetRequiredService<IServiceScopeFactory>(), null!, TimeSpan.FromSeconds(5));
+    }
+
+    private static async Task<AuthoringSession> Session(ApplicationDbContext context, string document)
+    {
+        var session = new AuthoringSession { Id = Guid.NewGuid(), Model = "test" };
+        context.AuthoringSessions.Add(session);
+        context.AuthoringDocuments.Add(new AuthoringDocument { SessionId = session.Id, Hash = "abc123", Document = document });
+        await context.SaveChangesAsync();
+        return session;
     }
 }

@@ -28,14 +28,14 @@ public interface IExecutionBindingService
 }
 
 /// <summary>
-/// Binds a run's pool NPCs to hosts by name, one NPC per host. The hosts are the terrain manifest's GHOSTS-client
-/// hosts once the terrain is ready, and the document's hosts before that; participant consoles get no NPC. Each
-/// pool goes to its own hosts, else its segments' hosts, else any free host. ExecutionDispatcher resolves a host
-/// name to a machine when a client with that exact name has registered.
+/// Binds a run's pool NPCs to hosts by name, one NPC per host. The hosts are GraySpace's GHOSTS-client hosts once the
+/// terrain is ready, by the hostname they report, and the document's hosts before that; participant consoles get no NPC.
+/// Each pool goes to the hosts GraySpace labelled with it, else its own hosts, else its segments' hosts, else any free
+/// host. ExecutionDispatcher resolves a host name to a machine when a client with that exact name has registered.
 /// </summary>
 public class ExecutionBindingService(DbContext context) : IExecutionBindingService
 {
-    private record HostSeat(string Name, string Segment);
+    private record HostSeat(string Name, string Segment, string DocumentName = null, string Pool = null);
 
     public async Task<List<NpcBindingDto>> ListAsync(int executionId, CancellationToken ct)
     {
@@ -57,8 +57,11 @@ public class ExecutionBindingService(DbContext context) : IExecutionBindingServi
         foreach (var pool in pools)
         {
             var placement = ScenarioExtras.Read<PoolExtrasDto>(pool.Extras);
-            var candidates = placement?.Hosts is { Count: > 0 } hosts
-                ? seats.Where(s => hosts.Contains(s.Name, StringComparer.OrdinalIgnoreCase))
+            var labelled = seats.Where(s => string.Equals(s.Pool, pool.Role, StringComparison.OrdinalIgnoreCase)).ToList();
+            var candidates = labelled.Count > 0
+                ? labelled
+                : placement?.Hosts is { Count: > 0 } hosts
+                ? seats.Where(s => hosts.Contains(s.DocumentName ?? s.Name, StringComparer.OrdinalIgnoreCase))
                 : placement?.Segments is { Count: > 0 } segments
                     ? seats.Where(s => segments.Contains(s.Segment ?? string.Empty, StringComparer.OrdinalIgnoreCase))
                     : seats;
@@ -99,18 +102,15 @@ public class ExecutionBindingService(DbContext context) : IExecutionBindingServi
         }).ToList();
     }
 
-    /// <summary>The hosts NPCs can sit at: the ready manifest's client hosts, else the document's hosts; never a participant console.</summary>
+    /// <summary>The hosts NPCs can sit at: GraySpace's client hosts once ready, else the document's hosts; never a participant console.</summary>
     private async Task<List<HostSeat>> SeatsAsync(Execution execution, CancellationToken ct)
     {
-        if (execution.TerrainStatus == TerrainStatus.Ready && !string.IsNullOrEmpty(execution.Terrain))
-        {
-            var manifest = JsonSerializer.Deserialize<ExecutionTerrainDto>(execution.Terrain, GraySpaceTerrainProvider.Json)?.Manifest;
-            if (manifest?.Hosts?.Count > 0)
-                return manifest.Hosts.Where(h => h.GhostsClient && !h.ParticipantWorkstation).Select(h => new HostSeat(h.Name, h.Segment)).ToList();
-        }
-
         var extras = ScenarioExtras.Read<ScenarioExtrasDto>(
             await context.Set<Scenario>().Where(s => s.Id == execution.ScenarioId).Select(s => s.Extras).FirstOrDefaultAsync(ct));
+        if (execution.TerrainStatus == TerrainStatus.Ready && TerrainService.Read(execution).Manifest is { Hosts.Count: > 0 } manifest)
+            return TerrainService.Seats(manifest, extras?.Terrain).Where(s => s.Client)
+                .Select(s => new HostSeat(s.Hostname, s.Segment, s.Name, s.Pool)).ToList();
+
         return (extras?.Terrain?.Hosts ?? [])
             .Where(h => !string.IsNullOrWhiteSpace(h.Name) && !IsConsole(h.Role))
             .Select(h => new HostSeat(h.Name, h.Segment)).ToList();

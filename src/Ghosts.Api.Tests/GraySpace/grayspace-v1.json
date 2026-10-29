@@ -1,0 +1,5957 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "GraySpace Terrain API",
+    "description": "What the simulated internet offers and how it is doing, and the slices built at its edge: the\ndeployed base version, its inventory (routers, links, clients and core services with their addresses and status)\nand DNS (every zone and record), shipped versions and their snapshots, capabilities, attachment points, slices,\ninstances and their manifests, jobs, images and roles, the CA bundle and the map layer. The base itself is deployed,\nconfigured and destroyed through the API too.\n\nEvery route needs the deployment's bearer token (`GRAYSPACE_API_TOKEN`), sent as `Authorization: Bearer <token>`.\nLive updates come over the `/api/v1/events` websocket (`grayspace-events-v1.json`).\n\n**From nothing deployed to a base and a slice:**\n\n1. `GET /api/v1/base/preflight?version=grayspace/2026.10&scope=tier1`: is the site ready? Fix every `error`.\n2. `POST /api/v1/base/deploy` with `{\"version\": \"grayspace/2026.10\", \"scope\": \"tier1\"}`: returns a job.\n3. `GET /api/v1/jobs/{id}` (or its streamed `/log`, or `/events`) until it succeeds; then `GET /api/v1/base` is `healthy`.\n4. `PUT /api/v1/slices/{slug}` with a slice spec (`grayspace-slice-v1.json`); fix any error findings.\n5. `POST /api/v1/instances` with `{\"slice\": \"<slug>\"}`: returns a job; when it succeeds, `GET /api/v1/instances/{id}` is the manifest.\n\nTear down in reverse: `DELETE /api/v1/instances/{id}`, then `DELETE /api/v1/base`. Long-running work is always a\njob: poll it, read its log, cancel it, or retry it from the stage that failed.",
+    "version": "1.3.0"
+  },
+  "paths": {
+    "/api/v1/base": {
+      "get": {
+        "tags": [
+          "base"
+        ],
+        "summary": "Get Base",
+        "description": "The deployed base version and its health.\n\nThe version comes from the `base` block that `task parse` writes into terraform.tfvars.json.\nHealth compares the routers in the tfvars with what Proxmox reports as running, and counts\nBGP sessions up across all routers from Prometheus.",
+        "operationId": "get_base_api_v1_base_get",
+        "security": [
+          {
+            "GrayspaceToken": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeployedBase"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "base"
+        ],
+        "summary": "Destroy Base",
+        "description": "Destroy the base (task destroy). Refused while slice instances are live, unless\ndestroy_instances is true: then each live instance's destroy job is queued first, and the\nbase's destroy job last, which refuses to run if any instance is still live. Returns the jobs\nin the order they run; the last is the base's.",
+        "operationId": "destroy_base_api_v1_base_delete",
+        "security": [
+          {
+            "GrayspaceToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "destroy_instances",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Destroy every live slice instance first",
+              "default": false,
+              "title": "Destroy Instances"
+            },
+            "description": "Destroy every live slice instance first"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/JobRecord"
+                  },
+                  "title": "Response Destroy Base Api V1 Base Delete"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Live instances exist (pass destroy_instances=true), or another job is active"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/base/inventory": {
+      "get": {
+        "tags": [
+          "base"
+        ],
+        "summary": "Get Inventory",
+        "description": "What the deployed base consists of: ISPs; routers with their interfaces and addresses; links\nwith both ends' addresses and their state; clients (the hosts the base places on customer\nnetworks) and core services (DNS servers and CAs) with their addresses. Read from the deployed\ntfvars, so only what the deployment scope built. Status is Proxmox's, link state comes from\nPrometheus. Slice instances are not included: GET /instances/{id} returns each one's manifest.",
+        "operationId": "get_inventory_api_v1_base_inventory_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Inventory"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "GrayspaceToken": []
+          }
+        ]
+      }
+    },
+    "/api/v1/base/dns": {
+      "get": {
+        "tags": [
+          "base"
+        ],
+        "summary": "Get Dns",
+        "description": "Every zone the simulated DNS serves and its records (all but the SOA), with the resolvers.\nEach zone and record has an origin: base (the root and TLD zones task configure writes),\noverlay (domains and records created in the web UI or by a scenario) or instance (created by a\nslice instance, named in `instance`). Delegations sit in their TLD zone with the origin of the\ndomain they delegate.",
+        "operationId": "get_dns_api_v1_base_dns_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DnsView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "GrayspaceToken": []
+          }
+        ]
+      }
+    },
+    "/api/v1/base/versions": {
+      "get": {
+        "tags": [
+          "base"
+        ],
+        "summary": "List Base Versions",
+        "description": "Shipped base versions under bases/, with a summary of each and which one is deployed.\n\nA version whose CSVs fail to load is listed with its problems instead of a summary.",
+        "operationId": "list_base_versions_api_v1_base_versions_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BaseVersion"
+                  },
+                  "type": "array",
+                  "title": "Response List Base Versions Api V1 Base Versions Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "GrayspaceToken": []
+          }
+        ]
+      }
+    },
+    "/api/v1/base/versions/{name}": {
+      "get": {
+        "tags": [
+          "base"
+        ],
+        "summary": "Get Base Version",
+        "description": "A base version and its topology snapshot: ISPs, locations, routers (with ISP and location)\nand links. Version names contain a slash, e.g. /api/v1/base/versions/grayspace/2026.10.",
+        "operationId": "get_base_version_api_v1_base_versions__name__get",
+        "security": [
+          {
+            "GrayspaceToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseVersionDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/base/preflight": {
+      "get": {
+        "tags": [
+          "base"
+        ],
+        "summary": "Get Preflight",
+        "description": "Whether this site can deploy the base version at the scope: the settings, the Proxmox API and\nnode, storages (and their content types), bridges, SDN, SSH to the Proxmox host, capacity, and\nlive instances that a version change would break. A deploy is refused while any check is an\nerror, and runs these again as its first stage.",
+        "operationId": "get_preflight_api_v1_base_preflight_get",
+        "security": [
+          {
+            "GrayspaceToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "version",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Base version to check; the deployed one by default",
+              "title": "Version"
+            },
+            "description": "Base version to check; the deployed one by default"
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^(full|tier1)$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "full or tier1; the deployed scope, else full",
+              "title": "Scope"
+            },
+            "description": "full or tier1; the deployed scope, else full"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Preflight"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/base/deploy": {
+      "post": {
+        "tags": [
+          "base"
+        ],
+        "summary": "Deploy Base",
+        "description": "Deploy or update the base: preflight, parse, the guards, Terraform until converged, Ansible,\nthen a health check that waits for routers and BGP. Returns a job; poll GET /jobs/{id} or follow\n/events, then GET /base. Deploying the deployed version again changes nothing. Without a\nversion, the deployed one is redeployed; with nothing deployed, a version is required.",
+        "operationId": "deploy_base_api_v1_base_deploy_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeployBaseRequest",
+                "default": {
+                  "configure": true
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobAccepted"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Another base job is queued or running, or live instances would break"
+          },
+          "422": {
+            "description": "Preflight failed; detail.checks lists the errors"
+          }
+        },
+        "security": [
+          {
+            "GrayspaceToken": []
+          }
+        ]
+      }
+    },
+    "/api/v1/base/configure": {
+      "post": {
+        "tags": [
+          "base"
+        ],
+        "summary": "Configure Base",
+        "description": "Run Ansible on the deployed base again (task configure), then the health check. Returns a job.",
+        "operationId": "configure_base_api_v1_base_configure_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfigureBaseRequest",
+                "default": {}
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobAccepted"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Nothing is deployed, or another base job is queued or running"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "GrayspaceToken": []
+          }
+        ]
+      }
+    },
+    "/api/v1/capabilities": {
+      "get": {
+        "tags": [
+          "capabilities"
+        ],
+        "summary": "Get Capabilities",
+        "description": "What a slice can use on a base version: the image catalog and roles, the slice features this\nGraySpace builds, whether it can run jobs, the management subnet and slice pool, DNS (TLDs,\nhosting servers, resolvers), CAs, ISPs and their locations, and the Proxmox node's capacity\n(CPU, memory and the block storage).",
+        "operationId": "get_capabilities_api_v1_capabilities_get",
+        "security": [
+          {
+            "GrayspaceToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "version",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "A shipped base version; defaults to the deployed one",
+              "title": "Version"
+            },
+            "description": "A shipped base version; defaults to the deployed one"
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "full",
+                    "tier1"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Defaults to the deployed scope, or full when a version is named",
+              "title": "Scope"
+            },
+            "description": "Defaults to the deployed scope, or full when a version is named"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Capabilities"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/attachment-points": {
+      "get": {
+        "tags": [
+          "capabilities"
+        ],
+        "summary": "Get Attachment Points",
+        "description": "Routers whose customer network slice sites and internet hosts can join: only routers with a\ncustomer network, with the static addresses free on it. On the deployed version, addresses\nlive instances hold are not free. Also the free space in each ISP's public block, from which\nrouted sites get their /24.",
+        "operationId": "get_attachment_points_api_v1_attachment_points_get",
+        "security": [
+          {
+            "GrayspaceToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "isp",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only routers of this ISP",
+              "title": "Isp"
+            },
+            "description": "Only routers of this ISP"
+          },
+          {
+            "name": "location",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only routers in this location, e.g. Chicago",
+              "title": "Location"
+            },
+            "description": "Only routers in this location, e.g. Chicago"
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "A shipped base version; defaults to the deployed one",
+              "title": "Version"
+            },
+            "description": "A shipped base version; defaults to the deployed one"
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "full",
+                    "tier1"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Defaults to the deployed scope, or full when a version is named",
+              "title": "Scope"
+            },
+            "description": "Defaults to the deployed scope, or full when a version is named"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AttachmentPoint"
+                  },
+                  "title": "Response Get Attachment Points Api V1 Attachment Points Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/slices": {
+      "get": {
+        "tags": [
+          "slices"
+        ],
+        "summary": "List Slices",
+        "description": "The reserved `base` slice, then every stored slice with its versions and live instances.",
+        "operationId": "list_slices_api_v1_slices_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SliceSummary"
+                  },
+                  "type": "array",
+                  "title": "Response List Slices Api V1 Slices Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "GrayspaceToken": []
+          }
+        ]
+      }
+    },
+    "/api/v1/slices/{slug}": {
+      "get": {
+        "tags": [
+          "slices"
+        ],
+        "summary": "Get Slice",
+        "operationId": "get_slice_api_v1_slices__slug__get",
+        "security": [
+          {
+            "GrayspaceToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "sha256:\u2026 ; defaults to the latest",
+              "title": "Version"
+            },
+            "description": "sha256:\u2026 ; defaults to the latest"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SliceDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "slices"
+        ],
+        "summary": "Put Slice",
+        "description": "Store a spec. A new version is stored whenever the content changes; storing the same content\nagain returns the same version (content hash). Returns the findings against the deployed\nbase: a spec with errors is stored, but can't be instantiated until they are resolved.",
+        "operationId": "put_slice_api_v1_slices__slug__put",
+        "security": [
+          {
+            "GrayspaceToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SliceSpec-Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PutSliceResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "slices"
+        ],
+        "summary": "Delete Slice",
+        "description": "Delete a slice and all its versions. Refused while an instance of it exists.",
+        "operationId": "delete_slice_api_v1_slices__slug__delete",
+        "security": [
+          {
+            "GrayspaceToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/slices/{slug}/validate": {
+      "post": {
+        "tags": [
+          "slices"
+        ],
+        "summary": "Validate Slice",
+        "description": "Findings for a spec against the deployed base, live instances and the node's capacity. Nothing is stored.",
+        "operationId": "validate_slice_api_v1_slices__slug__validate_post",
+        "security": [
+          {
+            "GrayspaceToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SliceSpec-Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidateResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/slices/{slug}/plan": {
+      "post": {
+        "tags": [
+          "slices"
+        ],
+        "summary": "Plan Slice",
+        "description": "A plan job: the allocation preview, `terraform plan` in a scratch workspace, and the capacity\nthe instance would need. The job's `result` holds them when it finishes.",
+        "operationId": "plan_slice_api_v1_slices__slug__plan_post",
+        "security": [
+          {
+            "GrayspaceToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlanRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobAccepted"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/instances": {
+      "get": {
+        "tags": [
+          "instances"
+        ],
+        "summary": "List Instances",
+        "operationId": "list_instances_api_v1_instances_get",
+        "security": [
+          {
+            "GrayspaceToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "all",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Include destroyed instances",
+              "default": false,
+              "title": "All"
+            },
+            "description": "Include destroyed instances"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InstanceSummary"
+                  },
+                  "title": "Response List Instances Api V1 Instances Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "instances"
+        ],
+        "summary": "Create Instance",
+        "description": "Create an instance of a stored slice version (the latest unless one is pinned). The instance ID\nis the slice's prefix, or `prefix` to run a second copy. Returns the instance ID and its\ncreate job; poll GET /jobs/{id}, then GET /instances/{id} for the manifest.",
+        "operationId": "create_instance_api_v1_instances_post",
+        "security": [
+          {
+            "GrayspaceToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateInstanceRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobAccepted"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The spec has errors against the deployed base; detail.findings lists them"
+          }
+        }
+      }
+    },
+    "/api/v1/instances/{instance_id}": {
+      "get": {
+        "tags": [
+          "instances"
+        ],
+        "summary": "Get Instance",
+        "description": "The instance's state and manifest: sites, hosts (with management addresses and Proxmox status), DNS records and certificates.",
+        "operationId": "get_instance_api_v1_instances__instance_id__get",
+        "security": [
+          {
+            "GrayspaceToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Instance Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstanceView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "instances"
+        ],
+        "summary": "Destroy Instance",
+        "description": "A destroy job: revoke certificates, delete DNS records and domains, undo link conditions and BGP\nattachments, terraform destroy, delete the workspace, free the allocations. Allowed from any\nstate, including a failed create; a create still queued or running is cancelled first.",
+        "operationId": "destroy_instance_api_v1_instances__instance_id__delete",
+        "security": [
+          {
+            "GrayspaceToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Instance Id"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobAccepted"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/instances/{instance_id}/actions": {
+      "post": {
+        "tags": [
+          "instances"
+        ],
+        "summary": "Act",
+        "description": "A runtime action on a ready instance (Phase C): link.condition, link.clear, link.down, link.up\non base links; dns.record.set and dns.record.delete within the instance's domains; host.start and\nhost.stop. Owned by the instance: quick reset leaves them, destroy undoes them.",
+        "operationId": "act_api_v1_instances__instance_id__actions_post",
+        "security": [
+          {
+            "GrayspaceToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Instance Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionResult"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The instance isn't ready, or another owner holds the link (LINK_OWNED)"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/jobs": {
+      "get": {
+        "tags": [
+          "jobs"
+        ],
+        "summary": "List Jobs",
+        "description": "Jobs, newest first.",
+        "operationId": "list_jobs_api_v1_jobs_get",
+        "security": [
+          {
+            "GrayspaceToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "target",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only jobs for this instance or slice",
+              "title": "Target"
+            },
+            "description": "Only jobs for this instance or slice"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 1000,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/JobRecord"
+                  },
+                  "title": "Response List Jobs Api V1 Jobs Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/jobs/{job_id}": {
+      "get": {
+        "tags": [
+          "jobs"
+        ],
+        "summary": "Get Job",
+        "description": "State, current stage and attempt (e.g. \"apply attempt 3/6\"), error, and plan results.",
+        "operationId": "get_job_api_v1_jobs__job_id__get",
+        "security": [
+          {
+            "GrayspaceToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobRecord"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/jobs/{job_id}/log": {
+      "get": {
+        "tags": [
+          "jobs"
+        ],
+        "summary": "Get Job Log",
+        "operationId": "get_job_log_api_v1_jobs__job_id__log_get",
+        "security": [
+          {
+            "GrayspaceToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Start at this byte",
+              "default": 0,
+              "title": "Offset"
+            },
+            "description": "Start at this byte"
+          },
+          {
+            "name": "follow",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Keep streaming until the job finishes",
+              "default": true,
+              "title": "Follow"
+            },
+            "description": "Keep streaming until the job finishes"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The log; streamed until the job finishes when follow is true",
+            "content": {
+              "text/plain": {}
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/jobs/{job_id}/cancel": {
+      "post": {
+        "tags": [
+          "jobs"
+        ],
+        "summary": "Cancel Job",
+        "description": "Cancel at the next stage boundary. A create that is cancelled leaves the instance failed, to be retried or destroyed.",
+        "operationId": "cancel_job_api_v1_jobs__job_id__cancel_post",
+        "security": [
+          {
+            "GrayspaceToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobRecord"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/jobs/{job_id}/retry": {
+      "post": {
+        "tags": [
+          "jobs"
+        ],
+        "summary": "Retry Job",
+        "description": "Run a failed or cancelled job again. Creates and base jobs resume at the stage that failed; destroys and plans start over, which is safe because every stage is idempotent.",
+        "operationId": "retry_job_api_v1_jobs__job_id__retry_post",
+        "security": [
+          {
+            "GrayspaceToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobAccepted"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/images": {
+      "get": {
+        "tags": [
+          "images"
+        ],
+        "summary": "List Images",
+        "description": "Shipped images (images/images.csv) and this site's local images.",
+        "operationId": "list_images_api_v1_images_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Image"
+                  },
+                  "type": "array",
+                  "title": "Response List Images Api V1 Images Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "GrayspaceToken": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "images"
+        ],
+        "summary": "Add Image",
+        "description": "Register a local image: a download URL, an OCI reference, `template:<vmid>` for a Proxmox VM\ntemplate (such as a Windows template built with packer/windows/), or `volume:<storage>:<path>`\nfor a template already on the node.",
+        "operationId": "add_image_api_v1_images_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Image"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Image"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "GrayspaceToken": []
+          }
+        ]
+      }
+    },
+    "/api/v1/images/{name}": {
+      "delete": {
+        "tags": [
+          "images"
+        ],
+        "summary": "Delete Image",
+        "description": "Remove a local image. Shipped images can't be removed; images live instances use are refused.",
+        "operationId": "delete_image_api_v1_images__name__delete",
+        "security": [
+          {
+            "GrayspaceToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/roles": {
+      "get": {
+        "tags": [
+          "images"
+        ],
+        "summary": "List Roles",
+        "description": "Roles slice hosts can take, with the OS families they support and the role_vars they read.",
+        "operationId": "list_roles_api_v1_roles_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Role"
+                  },
+                  "type": "array",
+                  "title": "Response List Roles Api V1 Roles Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "GrayspaceToken": []
+          }
+        ]
+      }
+    },
+    "/api/v1/map": {
+      "get": {
+        "tags": [
+          "map"
+        ],
+        "summary": "Get Map",
+        "description": "The map as GeoJSON (RFC 7946) with current state: routers (positions already fanned out per\ncity), links (great-circle LineStrings, split at the 180\u00b0 meridian), and slice sites, internet\nhosts and their attachments. Colors and states are properties, so every map draws the same\nthing; updates arrive by feature id over /api/v1/events (feature.update) and /ws.",
+        "operationId": "get_map_api_v1_map_get",
+        "security": [
+          {
+            "GrayspaceToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "instance",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only this instance's slice features",
+              "title": "Instance"
+            },
+            "description": "Only this instance's slice features"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeatureCollection"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ca/bundle": {
+      "get": {
+        "tags": [
+          "ca"
+        ],
+        "summary": "Get Ca Bundle",
+        "description": "The root certificates of every deployed base CA, for hosts outside GraySpace (such as GHOSTS) that must trust them.",
+        "operationId": "get_ca_bundle_api_v1_ca_bundle_get",
+        "responses": {
+          "200": {
+            "description": "Concatenated PEM root certificates",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/x-pem-file": {}
+            }
+          }
+        },
+        "security": [
+          {
+            "GrayspaceToken": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ActionRequest": {
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "link.condition",
+              "link.clear",
+              "link.down",
+              "link.up",
+              "dns.record.set",
+              "dns.record.delete",
+              "host.start",
+              "host.stop"
+            ],
+            "title": "Action"
+          },
+          "target": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target",
+            "description": "Link ID (r1:r2) for link actions; host name or hostname for host actions"
+          },
+          "params": {
+            "type": "object",
+            "title": "Params"
+          }
+        },
+        "type": "object",
+        "required": [
+          "action"
+        ],
+        "title": "ActionRequest"
+      },
+      "ActionResult": {
+        "properties": {
+          "action": {
+            "type": "string",
+            "title": "Action"
+          },
+          "target": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "instance": {
+            "type": "string",
+            "title": "Instance"
+          }
+        },
+        "type": "object",
+        "required": [
+          "action",
+          "target",
+          "message",
+          "instance"
+        ],
+        "title": "ActionResult"
+      },
+      "AddressSpace": {
+        "properties": {
+          "public_block": {
+            "type": "string",
+            "title": "Public Block"
+          },
+          "free_addresses": {
+            "type": "integer",
+            "title": "Free Addresses",
+            "description": "Addresses in the block not used by any link, loopback or network in the base"
+          },
+          "largest_free_prefix": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Largest Free Prefix"
+          }
+        },
+        "type": "object",
+        "required": [
+          "public_block",
+          "free_addresses",
+          "largest_free_prefix"
+        ],
+        "title": "AddressSpace"
+      },
+      "Attach": {
+        "properties": {
+          "isp": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Isp",
+            "description": "ISP name, e.g. Lumen"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location",
+            "description": "Location name, e.g. Chicago"
+          },
+          "router": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Router",
+            "description": "An exact router from /attachment-points, e.g. lum-chi"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "Attach",
+        "description": "Where something joins the base: an ISP and/or location, or an exact router."
+      },
+      "AttachmentPoint": {
+        "properties": {
+          "router": {
+            "type": "string",
+            "title": "Router"
+          },
+          "isp": {
+            "type": "string",
+            "title": "Isp"
+          },
+          "asn": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Asn"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "latitude": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latitude"
+          },
+          "longitude": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Longitude"
+          },
+          "customer_net": {
+            "type": "string",
+            "title": "Customer Net",
+            "description": "The router's customer network, which slice edges and internet hosts join"
+          },
+          "free_static_addresses": {
+            "type": "integer",
+            "title": "Free Static Addresses",
+            "description": "Free static addresses on the customer network (.2 up to the DHCP start), less the base's and live instances'. A site takes one, plus one per published host"
+          },
+          "address_space": {
+            "$ref": "#/components/schemas/AddressSpace",
+            "description": "Free space in the ISP's public block, from which routed sites get their /24"
+          }
+        },
+        "type": "object",
+        "required": [
+          "router",
+          "isp",
+          "asn",
+          "location",
+          "latitude",
+          "longitude",
+          "customer_net",
+          "free_static_addresses",
+          "address_space"
+        ],
+        "title": "AttachmentPoint",
+        "description": "A router whose customer network slice sites and internet hosts can join (v2 \u00a75.1)."
+      },
+      "BaseVersion": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "e.g. grayspace/2026.10"
+          },
+          "csv_sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Csv Sha256",
+            "description": "Null when the version fails to load"
+          },
+          "deployed": {
+            "type": "boolean",
+            "title": "Deployed",
+            "description": "Whether this is the version in the deployed tfvars (matched by csv_sha256)"
+          },
+          "summary": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VersionSummary"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Null when the version fails to load"
+          },
+          "problems": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Problems",
+            "description": "Load errors, if the version's CSVs are invalid"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "csv_sha256",
+          "deployed",
+          "summary"
+        ],
+        "title": "BaseVersion",
+        "description": "A shipped base version under bases/."
+      },
+      "BaseVersionDetail": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "e.g. grayspace/2026.10"
+          },
+          "csv_sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Csv Sha256",
+            "description": "Null when the version fails to load"
+          },
+          "deployed": {
+            "type": "boolean",
+            "title": "Deployed",
+            "description": "Whether this is the version in the deployed tfvars (matched by csv_sha256)"
+          },
+          "summary": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VersionSummary"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Null when the version fails to load"
+          },
+          "problems": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Problems",
+            "description": "Load errors, if the version's CSVs are invalid"
+          },
+          "isps": {
+            "items": {
+              "$ref": "#/components/schemas/SnapshotIsp"
+            },
+            "type": "array",
+            "title": "Isps"
+          },
+          "locations": {
+            "items": {
+              "$ref": "#/components/schemas/SnapshotLocation"
+            },
+            "type": "array",
+            "title": "Locations"
+          },
+          "routers": {
+            "items": {
+              "$ref": "#/components/schemas/SnapshotRouter"
+            },
+            "type": "array",
+            "title": "Routers"
+          },
+          "links": {
+            "items": {
+              "$ref": "#/components/schemas/SnapshotLink"
+            },
+            "type": "array",
+            "title": "Links"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "csv_sha256",
+          "deployed",
+          "summary"
+        ],
+        "title": "BaseVersionDetail",
+        "description": "A base version and its topology snapshot: what slice compatibility is checked against."
+      },
+      "BaseVersionRef": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name",
+            "description": "Shipped base version, e.g. grayspace/2026.10. Null when the CSVs came from another directory"
+          },
+          "csv_sha256": {
+            "type": "string",
+            "title": "Csv Sha256",
+            "description": "sha256 of the base version's CSVs; identifies the version's content"
+          },
+          "scope": {
+            "type": "string",
+            "title": "Scope",
+            "description": "Deployment scope: full or tier1"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "csv_sha256",
+          "scope"
+        ],
+        "title": "BaseVersionRef",
+        "description": "The base version a deployment's tfvars were generated from."
+      },
+      "BgpHealth": {
+        "properties": {
+          "total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total",
+            "description": "BGP sessions reported. Null when Prometheus is unavailable or reports none"
+          },
+          "established": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Established",
+            "description": "Sessions in the up state"
+          },
+          "not_established": {
+            "items": {
+              "$ref": "#/components/schemas/BgpPeer"
+            },
+            "type": "array",
+            "title": "Not Established"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total",
+          "established"
+        ],
+        "title": "BgpHealth",
+        "description": "BGP sessions across all routers, from Prometheus (frr_exporter)."
+      },
+      "BgpPeer": {
+        "properties": {
+          "router": {
+            "type": "string",
+            "title": "Router"
+          },
+          "peer_address": {
+            "type": "string",
+            "title": "Peer Address"
+          },
+          "state": {
+            "type": "string",
+            "title": "State",
+            "description": "down, shutdown or unknown"
+          }
+        },
+        "type": "object",
+        "required": [
+          "router",
+          "peer_address",
+          "state"
+        ],
+        "title": "BgpPeer"
+      },
+      "Capabilities": {
+        "properties": {
+          "base": {
+            "$ref": "#/components/schemas/BaseVersionRef"
+          },
+          "images": {
+            "items": {
+              "$ref": "#/components/schemas/Image"
+            },
+            "type": "array",
+            "title": "Images",
+            "description": "The image catalog slice hosts can use"
+          },
+          "roles": {
+            "items": {
+              "$ref": "#/components/schemas/Role"
+            },
+            "type": "array",
+            "title": "Roles",
+            "description": "Roles slice hosts can take"
+          },
+          "host_features": {
+            "items": {
+              "$ref": "#/components/schemas/HostFeature"
+            },
+            "type": "array",
+            "title": "Host Features",
+            "description": "Features of base clients (clients.csv), not of slice hosts"
+          },
+          "slice_features": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Slice Features",
+            "description": "Slice features this GraySpace builds: nat-site, published-host, internet-host, routed-site, dual-homed-site, oci-host, vm-host, link-conditions"
+          },
+          "jobs": {
+            "type": "boolean",
+            "title": "Jobs",
+            "description": "Whether this GraySpace can run slice jobs (plan, create and destroy instances). False where there is no GraySpace checkout or no deployed base"
+          },
+          "jobs_unavailable_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Jobs Unavailable Reason"
+          },
+          "base_jobs": {
+            "type": "boolean",
+            "title": "Base Jobs",
+            "description": "Whether this GraySpace can deploy, configure and destroy the base (\u00a75.13)",
+            "default": false
+          },
+          "base_jobs_unavailable_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Base Jobs Unavailable Reason"
+          },
+          "management_subnet": {
+            "type": "string",
+            "title": "Management Subnet",
+            "description": "Slice address space never overlaps it"
+          },
+          "slice_pool": {
+            "type": "string",
+            "title": "Slice Pool",
+            "description": "Where segments without an explicit CIDR are allocated from"
+          },
+          "dns": {
+            "$ref": "#/components/schemas/DnsCapabilities"
+          },
+          "cas": {
+            "items": {
+              "$ref": "#/components/schemas/CertificateAuthority"
+            },
+            "type": "array",
+            "title": "Cas"
+          },
+          "isps": {
+            "items": {
+              "$ref": "#/components/schemas/IspCapability"
+            },
+            "type": "array",
+            "title": "Isps"
+          },
+          "capacity": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Capacity"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Null when Proxmox is unavailable"
+          }
+        },
+        "type": "object",
+        "required": [
+          "base",
+          "images",
+          "roles",
+          "host_features",
+          "slice_features",
+          "jobs",
+          "management_subnet",
+          "slice_pool",
+          "dns",
+          "cas",
+          "isps",
+          "capacity"
+        ],
+        "title": "Capabilities",
+        "description": "What a slice can use on a base version."
+      },
+      "Capacity": {
+        "properties": {
+          "node": {
+            "type": "string",
+            "title": "Node"
+          },
+          "cpus": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cpus"
+          },
+          "cpu_usage": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cpu Usage",
+            "description": "Fraction of CPU in use, 0 to 1"
+          },
+          "memory_total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Memory Total",
+            "description": "Bytes"
+          },
+          "memory_free": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Memory Free",
+            "description": "Bytes the node can give guests: Proxmox's available memory (free plus reclaimable cache), or free where it doesn't report available"
+          },
+          "storage": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Storage",
+            "description": "The block storage slice and base disks use (TF_VAR_proxmox_blockstore)"
+          },
+          "storage_total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Storage Total",
+            "description": "Bytes"
+          },
+          "storage_free": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Storage Free",
+            "description": "Bytes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "node",
+          "cpus",
+          "cpu_usage",
+          "memory_total",
+          "memory_free"
+        ],
+        "title": "Capacity",
+        "description": "The Proxmox node's current headroom."
+      },
+      "CertificateAuthority": {
+        "properties": {
+          "hostname": {
+            "type": "string",
+            "title": "Hostname"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "e.g. GrayTrust"
+          },
+          "ip": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ip",
+            "description": "The CA's address (its ACME server and web UI)"
+          },
+          "router": {
+            "type": "string",
+            "title": "Router"
+          },
+          "isp": {
+            "type": "string",
+            "title": "Isp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "hostname",
+          "name",
+          "ip",
+          "router",
+          "isp"
+        ],
+        "title": "CertificateAuthority"
+      },
+      "Conditions": {
+        "properties": {
+          "links": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/LinkCondition"
+            },
+            "type": "object",
+            "title": "Links",
+            "description": "Keyed by link ID (r1:r2), as in /map"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "Conditions"
+      },
+      "ConfigureBaseRequest": {
+        "properties": {
+          "mgmt_gateway": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mgmt Gateway",
+            "description": "As for deploy"
+          }
+        },
+        "type": "object",
+        "title": "ConfigureBaseRequest"
+      },
+      "CreateInstanceRequest": {
+        "properties": {
+          "slice": {
+            "type": "string",
+            "title": "Slice",
+            "description": "Slice slug"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version",
+            "description": "The version to pin; defaults to the latest"
+          },
+          "prefix": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9]{0,7}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prefix",
+            "description": "Override the slice's prefix, to run a second copy"
+          }
+        },
+        "type": "object",
+        "required": [
+          "slice"
+        ],
+        "title": "CreateInstanceRequest"
+      },
+      "DeployBaseRequest": {
+        "properties": {
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version",
+            "description": "Shipped base version, e.g. grayspace/2026.10. Required when nothing is deployed"
+          },
+          "scope": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "full",
+                  "tier1"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scope",
+            "description": "Deployment scope; full when nothing is deployed"
+          },
+          "configure": {
+            "type": "boolean",
+            "title": "Configure",
+            "description": "Run Ansible after the apply. False stops after Terraform",
+            "default": true
+          },
+          "mgmt_gateway": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mgmt Gateway",
+            "description": "The management network's gateway, for hosts deployed before configure recorded it (CLAUDE.md, Ansible Configuration)"
+          }
+        },
+        "type": "object",
+        "title": "DeployBaseRequest",
+        "description": "What to deploy (\u00a75.13). Omitted fields keep the deployed base's.",
+        "examples": [
+          {
+            "scope": "tier1",
+            "version": "grayspace/2026.10"
+          }
+        ]
+      },
+      "DeployedBase": {
+        "properties": {
+          "version": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BaseVersionRef"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Null when the tfvars predate version recording; re-run task parse"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "not_deployed",
+              "healthy",
+              "degraded",
+              "unknown"
+            ],
+            "title": "Status",
+            "description": "not_deployed: no base tfvars (nothing deployed, or destroyed). healthy: every router running and every BGP session up. unknown: Proxmox or Prometheus gave no answer"
+          },
+          "routers": {
+            "$ref": "#/components/schemas/RouterHealth"
+          },
+          "bgp": {
+            "$ref": "#/components/schemas/BgpHealth"
+          }
+        },
+        "type": "object",
+        "required": [
+          "version",
+          "status",
+          "routers",
+          "bgp"
+        ],
+        "title": "DeployedBase",
+        "description": "The deployed base version and its health."
+      },
+      "Dns-Input": {
+        "properties": {
+          "domains": {
+            "items": {
+              "$ref": "#/components/schemas/DnsDomain"
+            },
+            "type": "array",
+            "title": "Domains"
+          },
+          "records": {
+            "items": {
+              "$ref": "#/components/schemas/DnsRecord-Input"
+            },
+            "type": "array",
+            "title": "Records"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "Dns"
+      },
+      "Dns-Output": {
+        "properties": {
+          "domains": {
+            "items": {
+              "$ref": "#/components/schemas/DnsDomain"
+            },
+            "type": "array",
+            "title": "Domains"
+          },
+          "records": {
+            "items": {
+              "$ref": "#/components/schemas/models__slices__DnsRecord"
+            },
+            "type": "array",
+            "title": "Records"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "Dns"
+      },
+      "DnsCapabilities": {
+        "properties": {
+          "tlds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tlds",
+            "description": "Top-level domains served by the base's TLD servers"
+          },
+          "hosting": {
+            "items": {
+              "$ref": "#/components/schemas/DnsServer"
+            },
+            "type": "array",
+            "title": "Hosting",
+            "description": "Servers that can host a slice's zones, e.g. dns-cloudflare"
+          },
+          "resolvers": {
+            "items": {
+              "$ref": "#/components/schemas/DnsServer"
+            },
+            "type": "array",
+            "title": "Resolvers"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tlds",
+          "hosting",
+          "resolvers"
+        ],
+        "title": "DnsCapabilities"
+      },
+      "DnsDomain": {
+        "properties": {
+          "domain": {
+            "type": "string",
+            "maxLength": 253,
+            "pattern": "^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z]{2,63}$",
+            "title": "Domain",
+            "description": "e.g. meridian-bank.com; its TLD must be in the base"
+          },
+          "hosting_server": {
+            "type": "string",
+            "title": "Hosting Server",
+            "description": "A base hosting DNS server, e.g. dns-cloudflare"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "domain",
+          "hosting_server"
+        ],
+        "title": "DnsDomain"
+      },
+      "DnsRecord-Input": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 253,
+            "pattern": "^(\\*\\.)?([a-z0-9_]([a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z]{2,63}$",
+            "title": "Name",
+            "description": "Fully qualified, inside one of the slice's domains"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "A",
+              "CNAME",
+              "TXT",
+              "MX"
+            ],
+            "title": "Type",
+            "default": "A"
+          },
+          "host": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Host",
+            "description": "A records: the slice host it resolves to (its reachable address)"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data",
+            "description": "Record data, for records that don't name a host"
+          },
+          "ttl": {
+            "type": "integer",
+            "maximum": 604800.0,
+            "minimum": 60.0,
+            "title": "Ttl",
+            "default": 3600
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "DnsRecord"
+      },
+      "DnsServer": {
+        "properties": {
+          "hostname": {
+            "type": "string",
+            "title": "Hostname"
+          },
+          "ip": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ip",
+            "description": "The server's address, e.g. 8.8.8.8 for a resolver"
+          },
+          "router": {
+            "type": "string",
+            "title": "Router",
+            "description": "The router the server is hosted on"
+          },
+          "isp": {
+            "type": "string",
+            "title": "Isp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "hostname",
+          "ip",
+          "router",
+          "isp"
+        ],
+        "title": "DnsServer"
+      },
+      "DnsView": {
+        "properties": {
+          "resolvers": {
+            "items": {
+              "$ref": "#/components/schemas/DnsZoneServer"
+            },
+            "type": "array",
+            "title": "Resolvers",
+            "description": "Recursive resolvers hosts can use"
+          },
+          "zones": {
+            "items": {
+              "$ref": "#/components/schemas/DnsZone"
+            },
+            "type": "array",
+            "title": "Zones"
+          }
+        },
+        "type": "object",
+        "required": [
+          "resolvers",
+          "zones"
+        ],
+        "title": "DnsView",
+        "description": "The simulated DNS: the zones the base's root, TLD and hosting servers serve, and resolvers."
+      },
+      "DnsZone": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "'.', a TLD (com) or a domain (dailychronicle.com)"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "root",
+              "tld",
+              "domain"
+            ],
+            "title": "Kind"
+          },
+          "servers": {
+            "items": {
+              "$ref": "#/components/schemas/DnsZoneServer"
+            },
+            "type": "array",
+            "title": "Servers",
+            "description": "The authoritative servers"
+          },
+          "origin": {
+            "type": "string",
+            "enum": [
+              "base",
+              "overlay",
+              "instance"
+            ],
+            "title": "Origin",
+            "description": "base: written by task configure. overlay: created at runtime in the web UI or by a scenario; quick reset removes it. instance: created by a slice instance; destroying it removes it"
+          },
+          "instance": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instance"
+          },
+          "records": {
+            "items": {
+              "$ref": "#/components/schemas/models__base__DnsRecord"
+            },
+            "type": "array",
+            "title": "Records",
+            "description": "Every record except the SOA, including those of other origins in this zone (delegations)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "kind",
+          "servers",
+          "origin",
+          "records"
+        ],
+        "title": "DnsZone"
+      },
+      "DnsZoneServer": {
+        "properties": {
+          "hostname": {
+            "type": "string",
+            "title": "Hostname"
+          },
+          "ip": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ip"
+          }
+        },
+        "type": "object",
+        "required": [
+          "hostname",
+          "ip"
+        ],
+        "title": "DnsZoneServer"
+      },
+      "Feature": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "Feature"
+            ],
+            "const": "Feature",
+            "title": "Type"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "Stable: router hostname, link ID r1:r2, <instance>/<site>, <instance>/<host>, or <from>:<router> for attachments"
+          },
+          "geometry": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Point"
+              },
+              {
+                "$ref": "#/components/schemas/LineString"
+              },
+              {
+                "$ref": "#/components/schemas/MultiLineString"
+              }
+            ],
+            "title": "Geometry",
+            "discriminator": {
+              "propertyName": "type",
+              "mapping": {
+                "LineString": "#/components/schemas/LineString",
+                "MultiLineString": "#/components/schemas/MultiLineString",
+                "Point": "#/components/schemas/Point"
+              }
+            }
+          },
+          "properties": {
+            "type": "object",
+            "title": "Properties",
+            "description": "Always id and kind (router, link, site, internet-host, attachment). router: isp, asn, location, color, status. link: type, state, color, source, target. site: instance, name, router, routers, wan_ip, routed, edge, color, state. internet-host: instance, name, hostname, router, ip, fqdns, color, state. attachment: instance, router, from"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "id",
+          "geometry",
+          "properties"
+        ],
+        "title": "Feature"
+      },
+      "FeatureCollection": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "FeatureCollection"
+            ],
+            "const": "FeatureCollection",
+            "title": "Type"
+          },
+          "features": {
+            "items": {
+              "$ref": "#/components/schemas/Feature"
+            },
+            "type": "array",
+            "title": "Features"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "features"
+        ],
+        "title": "FeatureCollection"
+      },
+      "Finding": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "description": "e.g. NO_STATIC_ADDRESSES; see docs/slices.md"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "error",
+              "warning"
+            ],
+            "title": "Severity"
+          },
+          "path": {
+            "type": "string",
+            "title": "Path",
+            "description": "Where in the spec, e.g. sites[0].attach"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "suggestion": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suggestion",
+            "description": "A value that would resolve the finding if put at path"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "severity",
+          "path",
+          "message"
+        ],
+        "title": "Finding",
+        "description": "A problem or note about a spec. An error blocks an instance; a warning doesn't."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Host": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 40,
+            "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?$",
+            "title": "Name"
+          },
+          "count": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 500.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Count",
+            "description": "Make this many hosts, named <name>-01 \u2026"
+          },
+          "segment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Segment",
+            "description": "The site segment the host joins"
+          },
+          "internet": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Attach"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Place the host directly on a base router's customer network, outside any site"
+          },
+          "image": {
+            "type": "string",
+            "title": "Image",
+            "description": "An image from /capabilities"
+          },
+          "roles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Roles",
+            "description": "Roles from /capabilities"
+          },
+          "size": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Size"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Defaults to the image's size"
+          },
+          "labels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Labels",
+            "description": "Free-form, returned in the manifest (e.g. ghosts.pool)"
+          },
+          "env": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Env",
+            "description": "Environment variables for OCI images"
+          },
+          "publish": {
+            "type": "boolean",
+            "title": "Publish",
+            "description": "Give a site host a public address on its site's WAN (1:1 NAT)",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "image"
+        ],
+        "title": "Host",
+        "description": "A host in a site segment, or an internet host placed on the base itself."
+      },
+      "HostFeature": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "image_type": {
+            "type": "string",
+            "enum": [
+              "lxc",
+              "vm"
+            ],
+            "title": "Image Type",
+            "description": "The image type the feature applies to"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "image_type",
+          "description"
+        ],
+        "title": "HostFeature"
+      },
+      "Image": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._-]{0,62}$",
+            "title": "Name"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "lxc",
+              "vm",
+              "oci"
+            ],
+            "title": "Type"
+          },
+          "os_family": {
+            "type": "string",
+            "title": "Os Family",
+            "description": "alpine, ubuntu, debian, windows, or oci for application containers",
+            "default": "oci"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Download URL, OCI reference, template:<vmid> (a Proxmox VM template to clone) or volume:<storage>:<path> (a template already on the node)"
+          },
+          "cores": {
+            "type": "integer",
+            "maximum": 64.0,
+            "minimum": 1.0,
+            "title": "Cores",
+            "default": 1
+          },
+          "memory": {
+            "type": "integer",
+            "maximum": 262144.0,
+            "minimum": 128.0,
+            "title": "Memory",
+            "description": "MiB",
+            "default": 1024
+          },
+          "disk": {
+            "type": "integer",
+            "maximum": 4096.0,
+            "minimum": 1.0,
+            "title": "Disk",
+            "description": "GiB",
+            "default": 8
+          },
+          "features": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Features",
+            "description": "e.g. tls-kestrel"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": ""
+          },
+          "entrypoint": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entrypoint",
+            "description": "OCI images: the image's command, wrapped to install a certificate (tls-kestrel)"
+          },
+          "origin": {
+            "type": "string",
+            "enum": [
+              "shipped",
+              "local"
+            ],
+            "title": "Origin",
+            "default": "shipped"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "type",
+          "source"
+        ],
+        "title": "Image",
+        "description": "An image slice hosts can use (images/images.csv, plus local images)."
+      },
+      "InstanceSummary": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "slice": {
+            "$ref": "#/components/schemas/SliceRef"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "provisioning",
+              "configuring",
+              "ready",
+              "failed",
+              "destroying",
+              "destroyed"
+            ],
+            "title": "State"
+          },
+          "created": {
+            "type": "string",
+            "title": "Created"
+          },
+          "updated": {
+            "type": "string",
+            "title": "Updated"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "hosts": {
+            "type": "integer",
+            "title": "Hosts"
+          },
+          "sites": {
+            "type": "integer",
+            "title": "Sites"
+          },
+          "last_job": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Job"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "slice",
+          "state",
+          "created",
+          "updated",
+          "error",
+          "hosts",
+          "sites",
+          "last_job"
+        ],
+        "title": "InstanceSummary"
+      },
+      "InstanceView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "slice": {
+            "$ref": "#/components/schemas/SliceRef"
+          },
+          "base": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BaseVersionRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "provisioning",
+              "configuring",
+              "ready",
+              "failed",
+              "destroying",
+              "destroyed"
+            ],
+            "title": "State"
+          },
+          "sites": {
+            "items": {
+              "$ref": "#/components/schemas/ManifestSite"
+            },
+            "type": "array",
+            "title": "Sites"
+          },
+          "hosts": {
+            "items": {
+              "$ref": "#/components/schemas/ManifestHost"
+            },
+            "type": "array",
+            "title": "Hosts"
+          },
+          "dns": {
+            "items": {
+              "$ref": "#/components/schemas/ManifestRecord"
+            },
+            "type": "array",
+            "title": "Dns"
+          },
+          "certificates": {
+            "items": {
+              "$ref": "#/components/schemas/ManifestCertificate"
+            },
+            "type": "array",
+            "title": "Certificates"
+          },
+          "created": {
+            "type": "string",
+            "title": "Created"
+          },
+          "updated": {
+            "type": "string",
+            "title": "Updated"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error",
+            "description": "Why the last job failed"
+          },
+          "stages_done": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Stages Done",
+            "description": "Create stages completed; a retried create resumes after them"
+          },
+          "jobs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Jobs",
+            "description": "The instance's jobs, oldest first"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "slice",
+          "base",
+          "state",
+          "sites",
+          "hosts",
+          "dns",
+          "certificates",
+          "created",
+          "updated",
+          "stages_done",
+          "jobs"
+        ],
+        "title": "InstanceView",
+        "description": "An instance: its manifest (\u00a75.9), complete once ready, plus its lifecycle."
+      },
+      "Inventory": {
+        "properties": {
+          "version": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BaseVersionRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "customer_dhcp_start": {
+            "type": "integer",
+            "title": "Customer Dhcp Start",
+            "description": "Customer networks lease from this host number; below it are static addresses"
+          },
+          "isps": {
+            "items": {
+              "$ref": "#/components/schemas/SnapshotIsp"
+            },
+            "type": "array",
+            "title": "Isps"
+          },
+          "routers": {
+            "items": {
+              "$ref": "#/components/schemas/InventoryRouter"
+            },
+            "type": "array",
+            "title": "Routers"
+          },
+          "links": {
+            "items": {
+              "$ref": "#/components/schemas/InventoryLink"
+            },
+            "type": "array",
+            "title": "Links"
+          },
+          "clients": {
+            "items": {
+              "$ref": "#/components/schemas/InventoryClient"
+            },
+            "type": "array",
+            "title": "Clients"
+          },
+          "core_services": {
+            "items": {
+              "$ref": "#/components/schemas/InventoryCoreService"
+            },
+            "type": "array",
+            "title": "Core Services"
+          }
+        },
+        "type": "object",
+        "required": [
+          "version",
+          "customer_dhcp_start",
+          "isps",
+          "routers",
+          "links",
+          "clients",
+          "core_services"
+        ],
+        "title": "Inventory",
+        "description": "The deployed base: what Terraform built from the tfvars (the scope applied), with live state."
+      },
+      "InventoryClient": {
+        "properties": {
+          "hostname": {
+            "type": "string",
+            "title": "Hostname"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "lxc",
+              "vm",
+              "oci"
+            ],
+            "title": "Type"
+          },
+          "category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category",
+            "description": "e.g. social, other"
+          },
+          "feature": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feature",
+            "description": "desktop, ubuntu-desktop or null (/capabilities host_features)"
+          },
+          "image": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image",
+            "description": "The image source the base deployed"
+          },
+          "ip": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ip",
+            "description": "Null when the client takes a DHCP lease, e.g. after a move"
+          },
+          "subnet": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subnet"
+          },
+          "router": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Router"
+          },
+          "isp": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Isp"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status",
+            "description": "Proxmox status: running, stopped, missing (not in Proxmox), or null when Proxmox is unavailable"
+          }
+        },
+        "type": "object",
+        "required": [
+          "hostname",
+          "type",
+          "category",
+          "feature",
+          "image",
+          "ip",
+          "subnet",
+          "router",
+          "isp",
+          "location",
+          "status"
+        ],
+        "title": "InventoryClient",
+        "description": "A host the base places on a router's customer network (clients.csv)."
+      },
+      "InventoryCoreService": {
+        "properties": {
+          "hostname": {
+            "type": "string",
+            "title": "Hostname"
+          },
+          "role": {
+            "type": "string",
+            "title": "Role",
+            "description": "root-dns, tld, hosting, resolver or ca"
+          },
+          "ip": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ip"
+          },
+          "subnet": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subnet"
+          },
+          "router": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Router"
+          },
+          "isp": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Isp"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "zones": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Zones",
+            "description": "TLD servers: the TLDs they serve. Root servers: [\".\"]"
+          },
+          "ca_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ca Name",
+            "description": "CAs: e.g. GrayTrust"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status",
+            "description": "Proxmox status: running, stopped, missing (not in Proxmox), or null when Proxmox is unavailable"
+          }
+        },
+        "type": "object",
+        "required": [
+          "hostname",
+          "role",
+          "ip",
+          "subnet",
+          "router",
+          "isp",
+          "location",
+          "status"
+        ],
+        "title": "InventoryCoreService",
+        "description": "A DNS server or CA the base hosts on a router (core_dns.csv, core_ca.csv)."
+      },
+      "InventoryInterface": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "eth0, eth1, \u2026 in the order Terraform creates them"
+          },
+          "bridge": {
+            "type": "string",
+            "title": "Bridge",
+            "description": "The base vnet (without environment_id), e.g. v213"
+          },
+          "ip": {
+            "type": "string",
+            "title": "Ip"
+          },
+          "prefix_len": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prefix Len"
+          },
+          "ospf_area": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ospf Area",
+            "description": "Null on the customer network"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "bridge",
+          "ip",
+          "prefix_len",
+          "ospf_area"
+        ],
+        "title": "InventoryInterface"
+      },
+      "InventoryLink": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "r1:r2, as in /map and instance actions"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "target": {
+            "type": "string",
+            "title": "Target"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "description": "INTERNAL_LINK, PEERS_WITH or PROVIDES_TRANSIT_TO"
+          },
+          "bridge": {
+            "type": "string",
+            "title": "Bridge"
+          },
+          "subnet": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subnet"
+          },
+          "source_interface": {
+            "type": "string",
+            "title": "Source Interface"
+          },
+          "source_ip": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Ip"
+          },
+          "target_interface": {
+            "type": "string",
+            "title": "Target Interface"
+          },
+          "target_ip": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Ip"
+          },
+          "latency_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latency Ms",
+            "description": "The latency the base sets on the link (tc), from the distance"
+          },
+          "state": {
+            "type": "string",
+            "title": "State",
+            "description": "up, down or unknown: BGP, OSPF and interface state from Prometheus"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "source",
+          "target",
+          "type",
+          "bridge",
+          "subnet",
+          "source_interface",
+          "source_ip",
+          "target_interface",
+          "target_ip",
+          "latency_ms",
+          "state"
+        ],
+        "title": "InventoryLink"
+      },
+      "InventoryRouter": {
+        "properties": {
+          "hostname": {
+            "type": "string",
+            "title": "Hostname"
+          },
+          "isp": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Isp"
+          },
+          "asn": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Asn"
+          },
+          "public_block": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Public Block"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "latitude": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latitude"
+          },
+          "longitude": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Longitude"
+          },
+          "roles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Roles"
+          },
+          "ospf_areas": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Ospf Areas"
+          },
+          "loopback_ip": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Loopback Ip"
+          },
+          "customer_net": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Net",
+            "description": "The router's customer network; the router is .1 on it"
+          },
+          "interfaces": {
+            "items": {
+              "$ref": "#/components/schemas/InventoryInterface"
+            },
+            "type": "array",
+            "title": "Interfaces"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status",
+            "description": "Proxmox status: running, stopped, missing (not in Proxmox), or null when Proxmox is unavailable"
+          }
+        },
+        "type": "object",
+        "required": [
+          "hostname",
+          "isp",
+          "asn",
+          "public_block",
+          "location",
+          "latitude",
+          "longitude",
+          "roles",
+          "ospf_areas",
+          "loopback_ip",
+          "customer_net",
+          "interfaces",
+          "status"
+        ],
+        "title": "InventoryRouter"
+      },
+      "IspCapability": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "asn": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Asn"
+          },
+          "locations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Locations",
+            "description": "Locations where the ISP has routers"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "asn",
+          "locations"
+        ],
+        "title": "IspCapability"
+      },
+      "JobAccepted": {
+        "properties": {
+          "instance": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instance"
+          },
+          "job": {
+            "$ref": "#/components/schemas/JobRecord"
+          }
+        },
+        "type": "object",
+        "required": [
+          "job"
+        ],
+        "title": "JobAccepted"
+      },
+      "JobRecord": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "create_instance",
+              "destroy_instance",
+              "plan_slice",
+              "deploy_base",
+              "configure_base",
+              "destroy_base"
+            ],
+            "title": "Kind"
+          },
+          "target": {
+            "type": "string",
+            "title": "Target",
+            "description": "Instance ID; slice slug for plan jobs; base for base jobs"
+          },
+          "slice": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SliceRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "running",
+              "succeeded",
+              "failed",
+              "cancelled"
+            ],
+            "title": "State"
+          },
+          "stages": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Stages"
+          },
+          "stage": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stage"
+          },
+          "attempt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Attempt",
+            "description": "e.g. apply attempt 3/6"
+          },
+          "created": {
+            "type": "string",
+            "title": "Created"
+          },
+          "started": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started"
+          },
+          "finished": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "cancel_requested": {
+            "type": "boolean",
+            "title": "Cancel Requested",
+            "default": false
+          },
+          "resume_from": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resume From",
+            "description": "The stage a retried job starts at"
+          },
+          "retry_of": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retry Of"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Result",
+            "description": "Plan jobs: allocation preview, plan summary and capacity. Base jobs: the request (version, scope) and the final health"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "target",
+          "state",
+          "stages",
+          "created"
+        ],
+        "title": "JobRecord"
+      },
+      "LineString": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "LineString"
+            ],
+            "const": "LineString",
+            "title": "Type"
+          },
+          "coordinates": {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Coordinates"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "coordinates"
+        ],
+        "title": "LineString"
+      },
+      "LinkCondition": {
+        "properties": {
+          "latency_ms": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 10000.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latency Ms"
+          },
+          "jitter_ms": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 5000.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Jitter Ms"
+          },
+          "packet_loss_percent": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Packet Loss Percent"
+          },
+          "bandwidth_mbps": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 10000.0,
+                "minimum": 0.1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bandwidth Mbps"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "LinkCondition",
+        "description": "Conditions on a base link, applied while the instance exists (Phase C)."
+      },
+      "ManifestCertificate": {
+        "properties": {
+          "host": {
+            "type": "string",
+            "title": "Host"
+          },
+          "names": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Names"
+          },
+          "ca": {
+            "type": "string",
+            "title": "Ca"
+          },
+          "serial": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Serial"
+          }
+        },
+        "type": "object",
+        "required": [
+          "host",
+          "names",
+          "ca"
+        ],
+        "title": "ManifestCertificate"
+      },
+      "ManifestHost": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "hostname": {
+            "type": "string",
+            "title": "Hostname"
+          },
+          "site": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Site"
+          },
+          "segment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Segment"
+          },
+          "ip": {
+            "type": "string",
+            "title": "Ip"
+          },
+          "public_ip": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Public Ip"
+          },
+          "mgmt_ip": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mgmt Ip"
+          },
+          "fqdns": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Fqdns"
+          },
+          "roles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Roles"
+          },
+          "labels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Labels"
+          },
+          "image": {
+            "type": "string",
+            "title": "Image"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Proxmox status: running, stopped or unknown"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "hostname",
+          "site",
+          "segment",
+          "ip",
+          "public_ip",
+          "mgmt_ip",
+          "fqdns",
+          "roles",
+          "labels",
+          "image",
+          "status"
+        ],
+        "title": "ManifestHost"
+      },
+      "ManifestRecord": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "data": {
+            "type": "string",
+            "title": "Data"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "type",
+          "data"
+        ],
+        "title": "ManifestRecord"
+      },
+      "ManifestSegment": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "cidr": {
+            "type": "string",
+            "title": "Cidr"
+          },
+          "gateway": {
+            "type": "string",
+            "title": "Gateway"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "cidr",
+          "gateway"
+        ],
+        "title": "ManifestSegment"
+      },
+      "ManifestSite": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "router": {
+            "type": "string",
+            "title": "Router",
+            "description": "The base router of the (first) WAN"
+          },
+          "isp": {
+            "type": "string",
+            "title": "Isp"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "wan_ip": {
+            "type": "string",
+            "title": "Wan Ip"
+          },
+          "routed": {
+            "type": "boolean",
+            "title": "Routed",
+            "default": false
+          },
+          "public_prefix": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Public Prefix"
+          },
+          "wans": {
+            "items": {
+              "$ref": "#/components/schemas/Wan"
+            },
+            "type": "array",
+            "title": "Wans",
+            "description": "Every WAN; more than one when dual-homed"
+          },
+          "edge": {
+            "type": "string",
+            "title": "Edge"
+          },
+          "segments": {
+            "items": {
+              "$ref": "#/components/schemas/ManifestSegment"
+            },
+            "type": "array",
+            "title": "Segments"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "router",
+          "isp",
+          "location",
+          "wan_ip",
+          "edge",
+          "segments"
+        ],
+        "title": "ManifestSite"
+      },
+      "MultiLineString": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "MultiLineString"
+            ],
+            "const": "MultiLineString",
+            "title": "Type"
+          },
+          "coordinates": {
+            "items": {
+              "items": {
+                "items": {
+                  "type": "number"
+                },
+                "type": "array"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Coordinates",
+            "description": "A line split at the 180\u00b0 meridian"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "coordinates"
+        ],
+        "title": "MultiLineString"
+      },
+      "PlanRequest": {
+        "properties": {
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version",
+            "description": "Defaults to the latest version"
+          },
+          "prefix": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9]{0,7}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prefix",
+            "description": "Plan as if instantiated with this prefix"
+          }
+        },
+        "type": "object",
+        "title": "PlanRequest"
+      },
+      "Point": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "Point"
+            ],
+            "const": "Point",
+            "title": "Type"
+          },
+          "coordinates": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Coordinates",
+            "description": "[longitude, latitude]"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "coordinates"
+        ],
+        "title": "Point"
+      },
+      "Preflight": {
+        "properties": {
+          "ready": {
+            "type": "boolean",
+            "title": "Ready"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version"
+          },
+          "scope": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scope"
+          },
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/PreflightCheck"
+            },
+            "type": "array",
+            "title": "Checks"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ready",
+          "checks"
+        ],
+        "title": "Preflight",
+        "description": "Whether this site can deploy a base (\u00a75.13). ready is false when any check is an error."
+      },
+      "PreflightCheck": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "e.g. proxmox-api, storage, bridges"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "warning",
+              "error",
+              "unchecked"
+            ],
+            "title": "Status"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "status",
+          "message"
+        ],
+        "title": "PreflightCheck"
+      },
+      "PutSliceResult": {
+        "properties": {
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          },
+          "created": {
+            "type": "boolean",
+            "title": "Created",
+            "description": "False when this exact content was already stored"
+          },
+          "findings": {
+            "items": {
+              "$ref": "#/components/schemas/Finding"
+            },
+            "type": "array",
+            "title": "Findings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "slug",
+          "version",
+          "created",
+          "findings"
+        ],
+        "title": "PutSliceResult"
+      },
+      "Role": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "os_families": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Os Families",
+            "description": "Image OS families the role supports"
+          },
+          "variables": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/RoleVariable"
+            },
+            "type": "object",
+            "title": "Variables",
+            "description": "role_vars the role reads"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "description",
+          "os_families"
+        ],
+        "title": "Role",
+        "description": "An Ansible role a slice host can take (ansible/roles/<name>/meta/grayspace.yml)."
+      },
+      "RoleVariable": {
+        "properties": {
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "required": {
+            "type": "boolean",
+            "title": "Required",
+            "default": false
+          },
+          "default": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default"
+          }
+        },
+        "type": "object",
+        "required": [
+          "description"
+        ],
+        "title": "RoleVariable"
+      },
+      "RouterHealth": {
+        "properties": {
+          "expected": {
+            "type": "integer",
+            "title": "Expected",
+            "description": "Routers in the deployed tfvars"
+          },
+          "running": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Running",
+            "description": "Expected routers Proxmox reports as running. Null when Proxmox is unavailable"
+          },
+          "not_running": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Not Running",
+            "description": "Expected routers that are missing or not running"
+          }
+        },
+        "type": "object",
+        "required": [
+          "expected",
+          "running"
+        ],
+        "title": "RouterHealth",
+        "description": "Routers in the deployed base, as Proxmox sees them."
+      },
+      "Segment": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 24,
+            "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?$",
+            "title": "Name"
+          },
+          "cidr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cidr",
+            "description": "IPv4 network, e.g. 192.168.20.0/24. Omitted or 'auto': allocated by GraySpace"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "Segment"
+      },
+      "Site": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 24,
+            "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?$",
+            "title": "Name"
+          },
+          "attach": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Attach"
+              },
+              {
+                "items": {
+                  "$ref": "#/components/schemas/Attach"
+                },
+                "type": "array"
+              }
+            ],
+            "title": "Attach",
+            "description": "Where the edge's WAN joins the base. A list dual-homes the site (routed sites only)"
+          },
+          "routed": {
+            "type": "boolean",
+            "title": "Routed",
+            "description": "false: the edge NATs the site behind one address on a base customer network. true: the site gets a public /24 from the ISP's block and the edge peers with the base over eBGP",
+            "default": false
+          },
+          "segments": {
+            "items": {
+              "$ref": "#/components/schemas/Segment"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Segments"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "attach",
+          "segments"
+        ],
+        "title": "Site",
+        "description": "An enterprise site: an edge router on the base and the segments behind it."
+      },
+      "Size": {
+        "properties": {
+          "cores": {
+            "type": "integer",
+            "maximum": 64.0,
+            "minimum": 1.0,
+            "title": "Cores"
+          },
+          "memory": {
+            "type": "integer",
+            "maximum": 262144.0,
+            "minimum": 128.0,
+            "title": "Memory",
+            "description": "MiB"
+          },
+          "disk": {
+            "type": "integer",
+            "maximum": 4096.0,
+            "minimum": 1.0,
+            "title": "Disk",
+            "description": "GiB"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "cores",
+          "memory",
+          "disk"
+        ],
+        "title": "Size"
+      },
+      "SliceDetail": {
+        "properties": {
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "base",
+              "slice"
+            ],
+            "title": "Kind"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "owner": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner"
+          },
+          "latest": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest",
+            "description": "The most recently stored version"
+          },
+          "versions": {
+            "items": {
+              "$ref": "#/components/schemas/SliceVersion"
+            },
+            "type": "array",
+            "title": "Versions"
+          },
+          "instances": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Instances",
+            "description": "Live instances of the slice"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version",
+            "description": "The version of `spec`"
+          },
+          "spec": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SliceSpec-Output"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Null for the base slice"
+          },
+          "base": {
+            "anyOf": [
+              {
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Base",
+            "description": "The base slice: the deployed base version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "slug",
+          "kind",
+          "description"
+        ],
+        "title": "SliceDetail",
+        "description": "A slice and one of its versions' spec (the latest unless ?version= names one)."
+      },
+      "SliceRef": {
+        "properties": {
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "slug",
+          "version"
+        ],
+        "title": "SliceRef"
+      },
+      "SliceSpec-Input": {
+        "properties": {
+          "apiVersion": {
+            "type": "string",
+            "enum": [
+              "grayspace/v1"
+            ],
+            "const": "grayspace/v1",
+            "title": "Apiversion"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "Slice"
+            ],
+            "const": "Slice",
+            "title": "Kind"
+          },
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$",
+            "title": "Slug"
+          },
+          "prefix": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9]{0,7}$",
+            "title": "Prefix",
+            "description": "Hostname prefix, unique among instances"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": ""
+          },
+          "owner": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner",
+            "description": "Who manages the slice, e.g. ghosts. Informational"
+          },
+          "sites": {
+            "items": {
+              "$ref": "#/components/schemas/Site"
+            },
+            "type": "array",
+            "title": "Sites"
+          },
+          "hosts": {
+            "items": {
+              "$ref": "#/components/schemas/Host"
+            },
+            "type": "array",
+            "title": "Hosts"
+          },
+          "dns": {
+            "$ref": "#/components/schemas/Dns-Input"
+          },
+          "tls": {
+            "items": {
+              "$ref": "#/components/schemas/Tls"
+            },
+            "type": "array",
+            "title": "Tls"
+          },
+          "conditions": {
+            "$ref": "#/components/schemas/Conditions"
+          },
+          "role_vars": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object",
+            "title": "Role Vars",
+            "description": "Variables per role, passed to the role unchanged (e.g. ghosts-client.api_url)"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "apiVersion",
+          "kind",
+          "slug",
+          "prefix"
+        ],
+        "title": "SliceSpec",
+        "description": "A named, versioned addition to the base."
+      },
+      "SliceSpec-Output": {
+        "properties": {
+          "apiVersion": {
+            "type": "string",
+            "enum": [
+              "grayspace/v1"
+            ],
+            "const": "grayspace/v1",
+            "title": "Apiversion"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "Slice"
+            ],
+            "const": "Slice",
+            "title": "Kind"
+          },
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$",
+            "title": "Slug"
+          },
+          "prefix": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9]{0,7}$",
+            "title": "Prefix",
+            "description": "Hostname prefix, unique among instances"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": ""
+          },
+          "owner": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner",
+            "description": "Who manages the slice, e.g. ghosts. Informational"
+          },
+          "sites": {
+            "items": {
+              "$ref": "#/components/schemas/Site"
+            },
+            "type": "array",
+            "title": "Sites"
+          },
+          "hosts": {
+            "items": {
+              "$ref": "#/components/schemas/Host"
+            },
+            "type": "array",
+            "title": "Hosts"
+          },
+          "dns": {
+            "$ref": "#/components/schemas/Dns-Output"
+          },
+          "tls": {
+            "items": {
+              "$ref": "#/components/schemas/Tls"
+            },
+            "type": "array",
+            "title": "Tls"
+          },
+          "conditions": {
+            "$ref": "#/components/schemas/Conditions"
+          },
+          "role_vars": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object",
+            "title": "Role Vars",
+            "description": "Variables per role, passed to the role unchanged (e.g. ghosts-client.api_url)"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "apiVersion",
+          "kind",
+          "slug",
+          "prefix"
+        ],
+        "title": "SliceSpec",
+        "description": "A named, versioned addition to the base."
+      },
+      "SliceSummary": {
+        "properties": {
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "base",
+              "slice"
+            ],
+            "title": "Kind"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "owner": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner"
+          },
+          "latest": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest",
+            "description": "The most recently stored version"
+          },
+          "versions": {
+            "items": {
+              "$ref": "#/components/schemas/SliceVersion"
+            },
+            "type": "array",
+            "title": "Versions"
+          },
+          "instances": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Instances",
+            "description": "Live instances of the slice"
+          }
+        },
+        "type": "object",
+        "required": [
+          "slug",
+          "kind",
+          "description"
+        ],
+        "title": "SliceSummary"
+      },
+      "SliceVersion": {
+        "properties": {
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "description": "sha256:<hex> of the spec's content"
+          },
+          "created": {
+            "type": "string",
+            "title": "Created"
+          }
+        },
+        "type": "object",
+        "required": [
+          "version",
+          "created"
+        ],
+        "title": "SliceVersion"
+      },
+      "SnapshotIsp": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "asn": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Asn"
+          },
+          "public_block": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Public Block"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "asn",
+          "public_block"
+        ],
+        "title": "SnapshotIsp"
+      },
+      "SnapshotLink": {
+        "properties": {
+          "start": {
+            "type": "string",
+            "title": "Start"
+          },
+          "end": {
+            "type": "string",
+            "title": "End"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "description": "INTERNAL_LINK, PEERS_WITH or PROVIDES_TRANSIT_TO"
+          },
+          "subnet": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subnet"
+          },
+          "ospf_area": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ospf Area"
+          }
+        },
+        "type": "object",
+        "required": [
+          "start",
+          "end",
+          "type",
+          "subnet",
+          "ospf_area"
+        ],
+        "title": "SnapshotLink"
+      },
+      "SnapshotLocation": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "latitude": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latitude"
+          },
+          "longitude": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Longitude"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "latitude",
+          "longitude"
+        ],
+        "title": "SnapshotLocation"
+      },
+      "SnapshotRouter": {
+        "properties": {
+          "hostname": {
+            "type": "string",
+            "title": "Hostname"
+          },
+          "isp": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Isp"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "roles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Roles"
+          },
+          "ospf_areas": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Ospf Areas"
+          },
+          "loopback_ip": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Loopback Ip"
+          },
+          "customer_net": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Net"
+          }
+        },
+        "type": "object",
+        "required": [
+          "hostname",
+          "isp",
+          "location",
+          "roles",
+          "ospf_areas",
+          "loopback_ip",
+          "customer_net"
+        ],
+        "title": "SnapshotRouter"
+      },
+      "Tls": {
+        "properties": {
+          "host": {
+            "type": "string",
+            "title": "Host",
+            "description": "The slice host that serves the certificate"
+          },
+          "names": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Names",
+            "description": "Names on the certificate"
+          },
+          "ca": {
+            "type": "string",
+            "title": "Ca",
+            "description": "A base CA, e.g. ca-graytrust"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "host",
+          "names",
+          "ca"
+        ],
+        "title": "Tls"
+      },
+      "ValidateResult": {
+        "properties": {
+          "valid": {
+            "type": "boolean",
+            "title": "Valid",
+            "description": "No errors (warnings allowed)"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          },
+          "findings": {
+            "items": {
+              "$ref": "#/components/schemas/Finding"
+            },
+            "type": "array",
+            "title": "Findings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "valid",
+          "version",
+          "findings"
+        ],
+        "title": "ValidateResult"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "VersionSummary": {
+        "properties": {
+          "isps": {
+            "type": "integer",
+            "title": "Isps"
+          },
+          "locations": {
+            "type": "integer",
+            "title": "Locations"
+          },
+          "routers": {
+            "type": "integer",
+            "title": "Routers"
+          },
+          "links": {
+            "type": "integer",
+            "title": "Links"
+          },
+          "core_services": {
+            "type": "integer",
+            "title": "Core Services"
+          },
+          "clients": {
+            "type": "integer",
+            "title": "Clients"
+          }
+        },
+        "type": "object",
+        "required": [
+          "isps",
+          "locations",
+          "routers",
+          "links",
+          "core_services",
+          "clients"
+        ],
+        "title": "VersionSummary"
+      },
+      "Wan": {
+        "properties": {
+          "router": {
+            "type": "string",
+            "title": "Router"
+          },
+          "isp": {
+            "type": "string",
+            "title": "Isp"
+          },
+          "asn": {
+            "type": "integer",
+            "title": "Asn"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "customer_net": {
+            "type": "string",
+            "title": "Customer Net"
+          },
+          "bridge": {
+            "type": "string",
+            "title": "Bridge",
+            "description": "The base vnet (without environment_id), e.g. v332"
+          },
+          "ip": {
+            "type": "string",
+            "title": "Ip",
+            "description": "The edge's static address on the customer network"
+          },
+          "gateway": {
+            "type": "string",
+            "title": "Gateway",
+            "description": "The base router, .1"
+          }
+        },
+        "type": "object",
+        "required": [
+          "router",
+          "isp",
+          "asn",
+          "location",
+          "customer_net",
+          "bridge",
+          "ip",
+          "gateway"
+        ],
+        "title": "Wan",
+        "description": "An edge router's WAN on a base router's customer network."
+      },
+      "models__base__DnsRecord": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Fully qualified, with the trailing dot, e.g. www.dailychronicle.com."
+          },
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "data": {
+            "type": "string",
+            "title": "Data"
+          },
+          "ttl": {
+            "type": "integer",
+            "title": "Ttl"
+          },
+          "origin": {
+            "type": "string",
+            "enum": [
+              "base",
+              "overlay",
+              "instance"
+            ],
+            "title": "Origin",
+            "description": "base: written by task configure. overlay: created at runtime in the web UI or by a scenario; quick reset removes it. instance: created by a slice instance; destroying it removes it"
+          },
+          "instance": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instance",
+            "description": "The instance that owns the record"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "type",
+          "data",
+          "ttl",
+          "origin"
+        ],
+        "title": "DnsRecord"
+      },
+      "models__slices__DnsRecord": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 253,
+            "pattern": "^(\\*\\.)?([a-z0-9_]([a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z]{2,63}$",
+            "title": "Name",
+            "description": "Fully qualified, inside one of the slice's domains"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "A",
+              "CNAME",
+              "TXT",
+              "MX"
+            ],
+            "title": "Type",
+            "default": "A"
+          },
+          "host": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Host",
+            "description": "A records: the slice host it resolves to (its reachable address)"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data",
+            "description": "Record data, for records that don't name a host"
+          },
+          "ttl": {
+            "type": "integer",
+            "maximum": 604800.0,
+            "minimum": 60.0,
+            "title": "Ttl",
+            "default": 3600
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "DnsRecord"
+      }
+    },
+    "securitySchemes": {
+      "GrayspaceToken": {
+        "type": "http",
+        "description": "The GRAYSPACE_API_TOKEN of the GraySpace deployment",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "base",
+      "description": "The deployed base: version, health, inventory, DNS and shipped versions; and its lifecycle as jobs: preflight, deploy, configure, destroy"
+    },
+    {
+      "name": "capabilities",
+      "description": "What a slice can use on a base version, and where it can attach"
+    },
+    {
+      "name": "slices",
+      "description": "Stored slice specs, versioned by content: store, validate, plan"
+    },
+    {
+      "name": "instances",
+      "description": "Slices built on the base: create, inspect (the manifest), act on at runtime, destroy"
+    },
+    {
+      "name": "jobs",
+      "description": "Every deploy, create, destroy and plan: progress, streamed log, cancel, retry"
+    },
+    {
+      "name": "images",
+      "description": "The image catalog and the roles slice hosts can take"
+    },
+    {
+      "name": "map",
+      "description": "The map layer as GeoJSON, for any map renderer"
+    },
+    {
+      "name": "ca",
+      "description": "The base CAs' root certificates"
+    }
+  ]
+}

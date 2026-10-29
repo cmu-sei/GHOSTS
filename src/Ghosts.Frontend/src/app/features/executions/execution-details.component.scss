@@ -672,3 +672,17 @@ details {
     padding: 0 8px;
   }
 }
+
+.terrain-finding {
+  font-size: 0.875rem;
+  color: #664d03;
+  margin-bottom: 4px;
+
+  &.error { color: #842029; }
+}
+
+.terrain-note {
+  font-size: 0.8rem;
+  color: #495057;
+  margin-bottom: 4px;
+}

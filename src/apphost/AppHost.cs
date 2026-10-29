@@ -46,8 +46,9 @@ var facebook = builder.AddProject<Projects.Ghosts_Pandora>("facebook")
     .WithHttpEndpoint(port: 8800, name: "http", isProxied: false)
     .WithExternalHttpEndpoints();
 
-// The terrain provider in development is the API's own GraySpace stub; a range points it at a real GraySpace.
-var terrainApiKey = builder.AddParameter("TerrainApiKey", "dev-terrain-key", secret: true);
+// The terrain provider in development is the API's own GraySpace simulator (Terrain API 1.3.0); a range points it at a
+// real GraySpace with its GRAYSPACE_API_TOKEN. The simulator downloads nothing, so ClientUrl here is only a placeholder.
+var terrainToken = builder.AddParameter("TerrainToken", "dev-token", secret: true);
 
 var api = builder.AddProject<Projects.Ghosts_Api>("api")
     .WaitFor(postgres)
@@ -57,7 +58,9 @@ var api = builder.AddProject<Projects.Ghosts_Api>("api")
     // The frontend runs on 4222 under Aspire (4200 elsewhere), so allow that origin instead
     .WithEnvironment("CorsPolicy__Origins__0", "http://localhost:4222")
     .WithEnvironment("TerrainProvider__BaseUrl", "http://localhost:5000/stubs/grayspace")
-    .WithEnvironment("TerrainProvider__ApiKey", terrainApiKey)
+    .WithEnvironment("TerrainProvider__Token", terrainToken)
+    .WithEnvironment("TerrainProvider__GhostsApiUrl", "http://localhost:5000/api")
+    .WithEnvironment("TerrainProvider__ClientUrl", "http://localhost:5000/client/ghosts-client-universal.zip")
     .WithEnvironment("TerrainProvider__EnableStub", "true")
     .WithHttpEndpoint(port: 5000, name: "http", isProxied: false)
     .WithExternalHttpEndpoints()

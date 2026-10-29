@@ -131,13 +131,16 @@ public class Program
         builder.Services.AddScoped<IExecutionStateService, ExecutionStateService>();
         builder.Services.AddScoped<IExecutionBindingService, ExecutionBindingService>();
 
-        // Terrain provider (GraySpace). Unset by default; the Aspire AppHost points BaseUrl at GHOSTS's own in-memory stub (/stubs/grayspace).
+        // Terrain provider (GraySpace Terrain API 1.3.0). Unset by default; the Aspire AppHost points BaseUrl at GHOSTS's own simulator (/stubs/grayspace).
         builder.Services.Configure<TerrainProviderOptions>(builder.Configuration.GetSection(TerrainProviderOptions.Section));
-        builder.Services.AddHttpClient<ITerrainProvider, GraySpaceTerrainProvider>();
-        builder.Services.AddSingleton(sp => new GraySpaceStub(() => DateTime.UtcNow,
+        builder.Services.AddHttpClient<IGraySpace, GraySpaceClient>();
+        builder.Services.AddSingleton(sp => new GraySpaceSimulator(() => DateTime.UtcNow,
             sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<TerrainProviderOptions>>().Value.StubBuildSeconds));
-        builder.Services.AddScoped<ITerrainService>(sp => new TerrainService(sp.GetRequiredService<DbContext>(), sp.GetRequiredService<ITerrainProvider>()));
+        builder.Services.AddScoped<ITerrainService>(sp => new TerrainService(sp.GetRequiredService<DbContext>(), sp.GetRequiredService<IGraySpace>(),
+            sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<TerrainProviderOptions>>()));
         builder.Services.AddHostedService<TerrainStatusPoller>();
+        builder.Services.AddSingleton<GraySpaceEventHandler>();
+        builder.Services.AddHostedService<GraySpaceEventsRelay>();
         builder.Services.AddScoped<IExecutionMapService, ExecutionMapService>();
 
         // Scenario Builder services
@@ -232,6 +235,7 @@ public class Program
             app.UseDeveloperExceptionPage();
         }
 
+        app.UseWebSockets();   // the GraySpace simulator's /api/v1/events
         app.UseRouting();
         app.UseCors("default");
 

@@ -190,46 +190,82 @@ export interface BindingResult {
   hosts: number;
 }
 
+/** A host GraySpace built. hostname is what it (and a GHOSTS client on it) reports; labels carry ghosts.pool and ghosts.console. */
 export interface TerrainManifestHost {
   name: string;
-  segment: string;
-  rangeIp: string;
-  managementIp: string;
-  osFamily: string;
-  osVersion: string;
-  role: string;
-  proxmoxNode: string;
-  vmid: number;
-  ghostsClient: boolean;
-  participantWorkstation: boolean;
+  hostname: string;
+  site?: string;
+  segment?: string;
+  ip: string;
+  publicIp?: string;
+  mgmtIp?: string;
+  fqdns: string[];
+  roles: string[];
+  labels: Record<string, string>;
+  image: string;
+  status: string;
 }
 
-export interface TerrainSite {
+export interface TerrainManifestSite {
   name: string;
-  kind: string;
-  url: string;
+  router: string;
+  isp: string;
+  location?: string;
+  wanIp: string;
+  edge: string;
+  segments: { name: string; cidr: string; gateway: string }[];
 }
 
 export interface TerrainManifest {
-  instanceId: string;
-  baseId: string;
-  enclave: string;
-  directoryDomain: string;
+  sites: TerrainManifestSite[];
   hosts: TerrainManifestHost[];
-  sites: TerrainSite[];
+  dns: { name: string; type: string; data: string }[];
+  certificates: { host: string; names: string[]; ca: string }[];
 }
 
-/** The enclave the terrain provider (GraySpace) builds for a run. */
+/** A problem GraySpace found in the enclave; an error blocks the build. */
+export interface TerrainFinding {
+  code: string;
+  severity: 'error' | 'warning';
+  path: string;
+  message: string;
+}
+
+/** The enclave GraySpace builds for a run (Terrain API 1.3.0). baseId is the deployed base version. */
 export interface ExecutionTerrain {
   executionId: number;
   provider?: string;
   baseId?: string;
   enclave?: string;
+  version?: string;
   instanceId?: string;
+  jobId?: string;
+  stage?: string;
   status?: string;
   progress: number;
   log: string[];
   manifest?: TerrainManifest;
+  findings?: TerrainFinding[];
+  notes?: string[];
   error?: string;
   updatedAt?: string;
+}
+
+/** GraySpace's map layer: routers, links, and enclave sites, internet hosts and attachments, each with a stable id and a kind. */
+export interface TerrainMapLayer {
+  type: 'FeatureCollection';
+  features: { type: 'Feature'; id: string; geometry: any; properties: Record<string, any> }[];
+}
+
+/** A GraySpace /api/v1/events message, relayed by GHOSTS as TerrainEvent. */
+export interface TerrainEvent {
+  type: string;
+  id?: string;
+  kind?: string;
+  target?: string;
+  state?: string;
+  hostname?: string;
+  status?: string;
+  properties?: Record<string, unknown>;
+  timestamp?: string;
 }

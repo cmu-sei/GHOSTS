@@ -36,6 +36,14 @@ public class ExecutionTerrainController(ITerrainService service) : ControllerBas
     public Task<ActionResult<PlayerViewDto>> PlayerView(int executionId, CancellationToken ct) =>
         Handle(() => service.PlayerViewAsync(executionId, ct));
 
+    /// <summary>GraySpace's map layer (GeoJSON: routers, links, and this execution's enclave sites and attachments), relayed as GraySpace serves it.</summary>
+    [HttpGet("map")]
+    public async Task<IActionResult> Map(int executionId, CancellationToken ct)
+    {
+        var result = (await Handle(() => service.MapAsync(executionId, ct))).Result;
+        return result is OkObjectResult { Value: string map } ? new ContentResult { Content = map, ContentType = "application/json", StatusCode = 200 } : result;
+    }
+
     private async Task<ActionResult<T>> Handle<T>(Func<Task<T>> action)
     {
         try
