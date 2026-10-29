@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.1.0",
+  "schemaVersion": "1.2.0",
   "slug": "soc-morning",
   "name": "SOC Morning: Clear the Queue by Lunch",
   "description": "You are the on-shift Blue Team analyst at Meridian Logistics. It's Monday and three tickets are already stacked in your queue: a phishing report, an EDR ransomware alert, and a VPN account lockout from a traveling exec. They're all open at once — you decide the order. The ransomware alert is the one that bites if you dawdle. Clear the queue before it turns into a bad day, and try to make lunch.",

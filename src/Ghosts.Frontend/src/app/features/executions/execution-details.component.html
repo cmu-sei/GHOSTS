@@ -64,6 +64,63 @@
         <span class="badge bg-secondary ms-1">{{ timelineItems().length }}</span>
       </ng-template>
       <div class="content-card">
+        <!-- Run state: White Cell's view of the run's ground truth -->
+        @if (state(); as st) {
+        <div class="run-state">
+          <div class="run-state-block">
+            <span class="run-state-label">Exercise clock</span>
+            <span class="run-clock">T+{{ floor(st.clockMinutes) }}m</span>
+          </div>
+          <div class="run-state-block run-flags">
+            <span class="run-state-label">Flags</span>
+            <div class="flag-list">
+              @for (flag of st.flags; track flag) {
+              <span class="flag">
+                {{ flag }}
+                <button type="button" [title]="'Clear ' + flag" (click)="clearFlag(flag)">
+                  <i class="fas fa-times"></i>
+                </button>
+              </span>
+              } @empty {
+              <span class="run-state-empty">None set</span>
+              }
+            </div>
+            <div class="flag-add">
+              <input class="form-control form-control-sm" placeholder="flag name" [(ngModel)]="newFlag"
+                (keyup.enter)="setFlag()" />
+              <button mat-stroked-button (click)="setFlag()" [disabled]="!newFlag().trim()">
+                <i class="fas fa-flag"></i> Set flag
+              </button>
+            </div>
+          </div>
+          <div class="run-state-block">
+            <span class="run-state-label">Objectives</span>
+            @for (objective of st.objectives; track objective.id) {
+            <div class="objective" [class.met]="objective.met" [title]="objective.metWhen || ''">
+              <i class="fas" [ngClass]="objective.met ? 'fa-check-circle' : 'fa-circle'"></i>
+              {{ objective.name }}
+              @if (objective.metAt) {
+              <span class="run-state-empty">{{ formatDate(objective.metAt) }}</span>
+              }
+            </div>
+            } @empty {
+            <span class="run-state-empty">No objectives</span>
+            }
+          </div>
+          @if (st.decisions.length > 0) {
+          <div class="run-state-block">
+            <span class="run-state-label">Decisions</span>
+            @for (decision of st.decisions; track decision.itemId) {
+            <div class="decision">
+              #{{ decision.itemNumber }} {{ decision.label || decision.choiceId }}
+              <span class="run-state-empty">{{ decision.by }}</span>
+            </div>
+            }
+          </div>
+          }
+        </div>
+        }
+
         @if (timelineItems().length > 0) {
         <h2 class="section-title">Execution Timeline</h2>
 
@@ -89,6 +146,11 @@
             @if (itemCounts().pending > 0) {
             <mat-chip class="chip-pending">
               <i class="fas fa-clock chip-icon"></i> {{ itemCounts().pending }} pending
+            </mat-chip>
+            }
+            @if (itemCounts().ready > 0) {
+            <mat-chip class="chip-ready">
+              <i class="fas fa-bell chip-icon"></i> {{ itemCounts().ready }} ready
             </mat-chip>
             }
             @if (itemCounts().queued > 0) {
@@ -124,6 +186,12 @@
         <div class="manual-alert">
           <i class="fas fa-exclamation-triangle"></i>
           <span>{{ itemCounts().manual }} item(s) require manual completion by an exercise admin.</span>
+        </div>
+        }
+        @if (itemCounts().ready > 0) {
+        <div class="manual-alert">
+          <i class="fas fa-bell"></i>
+          <span>{{ itemCounts().ready }} item(s) are due and waiting for White Cell.</span>
         </div>
         }
 
@@ -164,6 +232,19 @@
                     <i class="fas fa-sticky-note"></i> {{ item.notes }}
                   </div>
                   }
+                  @if (expectedOf(item); as expected) {
+                  <div class="expected-response">
+                    <i class="fas fa-bullseye"></i> Expected: {{ expected }}
+                    @let mark = responseFor(item);
+                    @if (mark) {
+                    <span class="response-mark" [class.met]="mark.met" [class.missed]="!mark.met">
+                      Marked {{ mark.met ? 'met' : 'missed' }} by {{ mark.by }}
+                    </span>
+                    }
+                    <button mat-stroked-button class="mark-btn" (click)="markResponse(item, true)">Met</button>
+                    <button mat-stroked-button class="mark-btn" (click)="markResponse(item, false)">Missed</button>
+                  </div>
+                  }
                 </td>
                 <td class="col-kind">
                   @if (item.automationKind === 'Workflow') {
@@ -194,6 +275,11 @@
                   }
                 </td>
                 <td class="col-actions">
+                  @if (canCompleteItem(item) && choicesOf(item).length > 0) {
+                  <button mat-raised-button color="accent" class="complete-btn" (click)="openDecisionDialog(item)">
+                    <i class="fas fa-code-branch"></i> Decide
+                  </button>
+                  }
                   @if (canCompleteItem(item)) {
                   <button mat-raised-button color="primary" class="complete-btn" (click)="openCompletionDialog(item)">
                     <i class="fas fa-check"></i> Complete
@@ -413,6 +499,195 @@
         </div>
       </div>
     </mat-tab>
+
+    <!-- NPCs Tab -->
+    <mat-tab>
+      <ng-template matTabLabel>
+        <i class="fas fa-users"></i>&nbsp;&nbsp; NPCs &nbsp;(<span class="badge bg-secondary ms-1">{{
+          npcBindings().length }}</span>)
+      </ng-template>
+      <div class="content-card">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0"><i class="fas fa-users"></i> NPC Hosts</h5>
+            <button mat-stroked-button color="primary" (click)="autoBind()">
+              <i class="fas fa-magic"></i> Auto-bind
+            </button>
+          </div>
+          <div class="card-body p-0">
+            @if (npcBindings().length === 0) {
+            <div class="alert alert-info m-3 mb-0">
+              <i class="fas fa-info-circle"></i> This run has no NPCs.
+            </div>
+            } @else {
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th class="px-3 py-3">Name</th>
+                    <th class="py-3">Pool</th>
+                    <th class="py-3">Host</th>
+                    <th class="py-3">Machine</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (npc of npcBindings(); track npc.npcId) {
+                  <tr>
+                    <td class="px-3 py-3">{{ npc.name }}</td>
+                    <td class="py-3">{{ npc.team }}</td>
+                    <td class="py-3">
+                      <div class="host-edit">
+                        <input class="form-control form-control-sm" placeholder="host name" [value]="hostFor(npc)"
+                          (input)="editHost(npc, $any($event.target).value)" />
+                        <button mat-stroked-button [disabled]="!hostChanged(npc)" (click)="saveHost(npc)">Save</button>
+                      </div>
+                    </td>
+                    <td class="py-3">
+                      @if (!npc.hostName) {
+                      <span class="binding-state unbound">Unbound</span>
+                      } @else if (!npc.machineId) {
+                      <span class="binding-state waiting">Waiting for client</span>
+                      } @else {
+                      <span class="binding-state bound" [title]="npc.machineId">On a registered machine</span>
+                      }
+                    </td>
+                  </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            }
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- Terrain Tab -->
+    <mat-tab>
+      <ng-template matTabLabel>
+        <i class="fas fa-network-wired"></i>&nbsp;&nbsp; Terrain
+      </ng-template>
+      <div class="content-card terrain-panel">
+        @let t = terrain();
+        <div class="card mb-3">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+              <i class="fas fa-network-wired"></i> Enclave
+              <span class="badge rounded-pill status-badge ms-2" [ngClass]="getTerrainStatusClass(t?.status)">
+                {{ t?.status || 'not built' }}
+              </span>
+            </h5>
+            <div class="action-buttons mt-0">
+              @if (canBuildTerrain(t)) {
+              <button mat-raised-button color="primary" (click)="buildTerrain()">
+                <i class="fas fa-hammer"></i> Build terrain
+              </button>
+              }
+              @if (canTeardownTerrain(t)) {
+              <button mat-stroked-button color="warn" (click)="teardownTerrain()">
+                <i class="fas fa-trash"></i> Tear down
+              </button>
+              }
+              <button mat-stroked-button (click)="loadTerrain(exec.id)">
+                <i class="fas fa-sync"></i> Refresh
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            @if (!t?.status) {
+            <p class="text-muted mb-0">
+              No terrain built for this run. Build asks the terrain provider for the enclave the scenario names.
+            </p>
+            } @else {
+            <dl class="execution-info mb-0">
+              <dt>Provider:</dt>
+              <dd>{{ t?.provider || 'N/A' }}</dd>
+              <dt>Base:</dt>
+              <dd>{{ t?.baseId || 'N/A' }}</dd>
+              <dt>Enclave:</dt>
+              <dd>{{ t?.enclave || 'N/A' }}</dd>
+              <dt>Instance:</dt>
+              <dd>{{ t?.instanceId || 'N/A' }}</dd>
+              <dt>Updated:</dt>
+              <dd>{{ formatDate(t?.updatedAt) }}</dd>
+            </dl>
+            @if (isTerrainInProgress(t?.status)) {
+            <div class="progress-bar-container terrain-progress">
+              <div class="progress-segment active" [style.width.%]="t?.progress"></div>
+            </div>
+            }
+            @if (t?.error) {
+            <div class="alert alert-danger mt-3 mb-0">
+              <i class="fas fa-exclamation-triangle"></i> {{ t?.error }}
+            </div>
+            }
+            }
+          </div>
+        </div>
+
+        @if (t?.log?.length) {
+        <div class="card mb-3">
+          <div class="card-header">
+            <h5 class="card-title mb-0"><i class="fas fa-stream"></i> Job Log</h5>
+          </div>
+          <div class="card-body">
+            <pre class="mb-0"><code>{{ t?.log.join('\n') }}</code></pre>
+          </div>
+        </div>
+        }
+
+        @if (t?.manifest; as manifest) {
+        <div class="card mb-3">
+          <div class="card-header">
+            <h5 class="card-title mb-0">
+              <i class="fas fa-server"></i> Manifest
+              <span class="text-muted small ms-2">{{ manifest.directoryDomain }}</span>
+            </h5>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th class="px-3 py-3">Host</th>
+                    <th class="py-3">Segment</th>
+                    <th class="py-3">Range IP</th>
+                    <th class="py-3">Management IP</th>
+                    <th class="py-3">OS</th>
+                    <th class="py-3">Role</th>
+                    <th class="py-3">GHOSTS client</th>
+                    <th class="py-3">Participant console</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (host of manifest.hosts; track host.name) {
+                  <tr>
+                    <td class="px-3 py-3">{{ host.name }}</td>
+                    <td class="py-3">{{ host.segment }}</td>
+                    <td class="py-3">{{ host.rangeIp }}</td>
+                    <td class="py-3">{{ host.managementIp }}</td>
+                    <td class="py-3">{{ host.osFamily }} {{ host.osVersion }}</td>
+                    <td class="py-3">{{ host.role }}</td>
+                    <td class="py-3">{{ host.ghostsClient ? 'Yes' : 'No' }}</td>
+                    <td class="py-3">{{ host.participantWorkstation ? 'Yes' : 'No' }}</td>
+                  </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            @if (manifest.sites.length > 0) {
+            <div class="p-3">
+              <strong>Sites:</strong>
+              @for (site of manifest.sites; track site.name) {
+              <span class="ms-2">{{ site.name }} ({{ site.kind }}) <a [href]="site.url" target="_blank">{{ site.url }}</a></span>
+              }
+            </div>
+            }
+          </div>
+        </div>
+        }
+      </div>
+    </mat-tab>
   </mat-tab-group>
   } @else {
   <div class="alert alert-danger">
@@ -451,6 +726,38 @@
       <button mat-button (click)="closeCompletionDialog()">Cancel</button>
       <button mat-raised-button color="primary" (click)="submitCompletion()">
         <i class="fas fa-check"></i> Submit
+      </button>
+    </div>
+  </div>
+</div>
+}
+
+<!-- Decision Dialog (overlay) -->
+@if (decisionItem(); as item) {
+<div class="completion-overlay" (click)="closeDecisionDialog()">
+  <div class="completion-dialog" (click)="$event.stopPropagation()">
+    <h3>Decision for Timeline Item #{{ item.number }}</h3>
+    <p class="text-muted mb-3">{{ item.description }}</p>
+
+    <div class="choice-list">
+      @for (choice of choicesOf(item); track choice.id) {
+      <label class="choice">
+        <input type="radio" name="decision-choice" [value]="choice.id" [checked]="decisionChoice() === choice.id"
+          (change)="decisionChoice.set(choice.id)" />
+        {{ choice.label || choice.id }}
+      </label>
+      }
+    </div>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Decided By</mat-label>
+      <input matInput [(ngModel)]="decisionBy" placeholder="white-cell" />
+    </mat-form-field>
+
+    <div class="dialog-actions">
+      <button mat-button (click)="closeDecisionDialog()">Cancel</button>
+      <button mat-raised-button color="primary" [disabled]="!decisionChoice()" (click)="submitDecision()">
+        <i class="fas fa-check"></i> Record decision
       </button>
     </div>
   </div>

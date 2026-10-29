@@ -22,7 +22,7 @@ namespace Ghosts.Api.Infrastructure.Services;
 
 /// <summary>
 /// Monitors running executions and fires workflow timeline items when their time offset expires.
-/// For PointInTime items: triggers when elapsed time since execution start >= parsed "T+Xm" offset.
+/// For PointInTime items: triggers when the exercise clock (paused time excluded) reaches the item's offset.
 /// For Scheduled items: triggers on cron schedule (delegated to AnimationsManager).
 /// </summary>
 public class ExecutionWorkflowScheduler : BackgroundService
@@ -77,6 +77,9 @@ public class ExecutionWorkflowScheduler : BackgroundService
         using var scope = _scopeFactory.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
+        // NPC and White Cell items, and the end of a run at its duration, are decided here first.
+        await scope.ServiceProvider.GetRequiredService<IExecutionDispatcher>().DispatchDueAsync(DateTime.UtcNow, ct);
+
         var runningExecutions = await context.Set<Execution>()
             .Where(e => e.Status == ExecutionStatus.Running && e.StartedAt != null)
             .ToListAsync(ct);
@@ -103,12 +106,11 @@ public class ExecutionWorkflowScheduler : BackgroundService
         foreach (var item in pendingWorkflowItems)
         {
             var execution = runningExecutions.First(e => e.Id == item.ExecutionId);
-            var elapsed = now - execution.StartedAt!.Value;
+            var elapsedMinutes = ExecutionClock.ElapsedMinutes(execution, now);
 
             if (item.TriggerKind == TriggerKind.PointInTime)
             {
-                var offsetMs = ExecutionService.ParseTimeOffsetMs(item.Time);
-                if (elapsed.TotalMilliseconds >= offsetMs)
+                if (elapsedMinutes >= ExecutionService.ParseTimeOffsetMinutes(item.Time))
                 {
                     await FireWorkflowItemAsync(context, item, execution, ct);
                 }
@@ -117,8 +119,7 @@ public class ExecutionWorkflowScheduler : BackgroundService
             {
                 if (!_scheduledItemsStarted.ContainsKey(item.Id))
                 {
-                    var offsetMs = ExecutionService.ParseTimeOffsetMs(item.Time);
-                    if (elapsed.TotalMilliseconds >= offsetMs)
+                    if (elapsedMinutes >= ExecutionService.ParseTimeOffsetMinutes(item.Time))
                     {
                         await StartScheduledWorkflowItemAsync(item, ct);
                         _scheduledItemsStarted.TryAdd(item.Id, WorkflowJobKey(item));
@@ -134,7 +135,7 @@ public class ExecutionWorkflowScheduler : BackgroundService
         Execution execution,
         CancellationToken ct)
     {
-        _log.Info($"[Execution {execution.Id}] Firing workflow item #{item.Number} (workflow {item.WorkflowId}) at elapsed {(DateTime.UtcNow - execution.StartedAt!.Value).TotalMinutes:F1}m");
+        _log.Info($"[Execution {execution.Id}] Firing workflow item #{item.Number} (workflow {item.WorkflowId}) at T+{ExecutionClock.ElapsedMinutes(execution, DateTime.UtcNow):F1}m");
 
         item.Status = "Deployed";
         item.LastFiredAt = DateTime.UtcNow;
@@ -170,7 +171,7 @@ public class ExecutionWorkflowScheduler : BackgroundService
                 return;
             }
 
-            var webhookUrl = webhookInfo.Url;
+            var webhookUrl = Animations.AnimationDefinitions.WorkflowJob.AppendQuery(webhookInfo.Url, ExecutionQuery(item));
 
             using var http = _httpClientFactory.CreateClient();
             http.DefaultRequestHeaders.Clear();
@@ -210,6 +211,7 @@ public class ExecutionWorkflowScheduler : BackgroundService
                 item.CompletedAt = DateTime.UtcNow;
                 item.CompletedBy = "workflow-scheduler";
                 item.ResultData = body.Length > 4000 ? body[..4000] : body;
+                await RunState.ApplyItemEffectsAsync(context, execution, item, ct);
 
                 context.Set<ExecutionEvent>().Add(new ExecutionEvent
                 {
@@ -286,8 +288,11 @@ public class ExecutionWorkflowScheduler : BackgroundService
         }
 
         _log.Info($"[Execution {item.ExecutionId}] Scheduled workflow item #{item.Number} will use {webhookInfo.HttpMethod} {webhookInfo.Url}");
-        await _animationsManager.StartWorkflowJob(item.WorkflowId!, webhookInfo.Url, item.Schedule!, ct, WorkflowJobKey(item));
+        await _animationsManager.StartWorkflowJob(item.WorkflowId!, webhookInfo.Url, item.Schedule!, ct, WorkflowJobKey(item), ExecutionQuery(item));
     }
+
+    /// <summary>The query string that tells a GET webhook which run and item it serves, so a workflow can list that run's NPCs only.</summary>
+    public static string ExecutionQuery(ExecutionTimelineItem item) => $"executionId={item.ExecutionId}&timelineItemId={item.Id}";
 
     /// <summary>Per-execution job key so concurrent runs of the same workflow don't collide.</summary>
     private static string WorkflowJobKey(ExecutionTimelineItem item) => $"exec-{item.ExecutionId}-item-{item.Id}";

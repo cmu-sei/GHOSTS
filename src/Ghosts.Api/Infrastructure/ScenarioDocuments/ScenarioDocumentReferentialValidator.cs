@@ -45,6 +45,7 @@ internal static class ScenarioDocumentReferentialValidator
         await Workflows(f, events, workflows, clients, ct);
         Techniques(f, adversaries);
         Terrain(f, terrain, events);
+        Placement(f, doc, terrain, events);
         Time(f, rop, events, objectives, adversaries);
         Citations(f, doc, references);
 
@@ -206,6 +207,12 @@ internal static class ScenarioDocumentReferentialValidator
         for (var i = 0; i < events.Count; i++)
         {
             Sets(Obj(events[i] as JsonObject, "effects")?["setFlags"] as JsonArray, $"/timeline/events/{i}/effects/setFlags");
+            var choices = Items(events[i] as JsonObject, "choices");
+            for (var c = 0; c < choices.Count; c++)
+            {
+                Sets(Obj(choices[c] as JsonObject, "effects")?["setFlags"] as JsonArray,
+                    $"/timeline/events/{i}/choices/{c}/effects/setFlags");
+            }
         }
         for (var i = 0; i < adversaries.Count; i++)
         {
@@ -376,6 +383,43 @@ internal static class ScenarioDocumentReferentialValidator
                         "It still means what it meant, but new authoring should not use it."));
                 }
             }
+        }
+    }
+
+    // ───────── (g) placement: the pools, segments and hosts an event targets or a pool sits on ─────────
+
+    private static void Placement(List<ScenarioFinding> f, JsonObject doc, JsonObject terrain, List<JsonNode> events)
+    {
+        var pools = Items(Obj(doc, "population"), "pools");
+        var poolRoles = pools.Select(p => Str(p, "role")).Where(s => s.Length > 0).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var hostNames = Items(terrain, "hosts").Select(h => Str(h, "name")).Where(s => s.Length > 0).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var segmentNames = Items(terrain, "segments").Select(s => Str(s, "name")).Where(s => s.Length > 0).ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        void Check(JsonArray names, string path, HashSet<string> declared, string code, string what)
+        {
+            for (var i = 0; i < (names?.Count ?? 0); i++)
+            {
+                if (names[i] is not JsonValue v || !v.TryGetValue<string>(out var name) || name.Length == 0 || declared.Contains(name)) continue;
+                f.Add(ScenarioFinding.Err(Tier, code, $"{path}/{i}",
+                    $"Names {what} \"{name}\", which this document does not declare.",
+                    declared.Count == 0 ? $"The document declares no {what}s." : $"Declared: {Sample(declared)}."));
+            }
+        }
+
+        for (var i = 0; i < pools.Count; i++)
+        {
+            Check(pools[i]?["segments"] as JsonArray, $"/population/pools/{i}/segments", segmentNames, "REF_UNKNOWN_SEGMENT", "segment");
+            Check(pools[i]?["hosts"] as JsonArray, $"/population/pools/{i}/hosts", hostNames, "REF_UNKNOWN_HOST", "host");
+        }
+
+        for (var i = 0; i < events.Count; i++)
+        {
+            var targets = Obj(Obj(events[i] as JsonObject, "execution"), "targets");
+            if (targets == null) continue;
+            var path = $"/timeline/events/{i}/execution/targets";
+            Check(targets["pools"] as JsonArray, $"{path}/pools", poolRoles, "REF_UNKNOWN_POOL", "pool");
+            Check(targets["segments"] as JsonArray, $"{path}/segments", segmentNames, "REF_UNKNOWN_SEGMENT", "segment");
+            Check(targets["hosts"] as JsonArray, $"{path}/hosts", hostNames, "REF_UNKNOWN_HOST", "host");
         }
     }
 

@@ -46,6 +46,11 @@ services:
     environment:
       N8N_API_URL: ${N8N_API_URL:-http://ghosts-n8n:5678/api/v1/workflows}
       N8N_API_KEY: ${N8N_API_KEY:-replace-me}
+      # Terrain provider (GraySpace). Unset, Build terrain fails with not_configured. To try GHOSTS's own
+      # stub instead: TERRAIN_STUB=true TERRAIN_BASE_URL=http://localhost:5000/stubs/grayspace TERRAIN_API_KEY=dev-terrain-key
+      TerrainProvider__BaseUrl: ${TERRAIN_BASE_URL:-}
+      TerrainProvider__ApiKey: ${TERRAIN_API_KEY:-}
+      TerrainProvider__EnableStub: ${TERRAIN_STUB:-false}
     restart: unless-stopped
 
   ghosts-n8n:
@@ -58,6 +63,9 @@ services:
       - N8N_SECURE_COOKIE=false
       - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=false
       - N8N_DIAGNOSTICS_ENABLED=false
+      # The social workflows post to Pandora at $env.PANDORA_URL; point it at your Pandora (no Pandora runs in this file).
+      - PANDORA_URL=${PANDORA_URL:-http://host.docker.internal:8000}
+      - N8N_BLOCK_ENV_ACCESS_IN_NODE=false
     # Wrapper entrypoint bundles any custom root CAs mounted at /opt/ghosts-certs into
     # NODE_EXTRA_CA_CERTS, so workflow HTTPS calls through TLS inspection don't fail
     # with "unable to get local issuer certificate".

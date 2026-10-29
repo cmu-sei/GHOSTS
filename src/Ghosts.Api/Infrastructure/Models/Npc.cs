@@ -18,6 +18,9 @@ public class NpcRecord
 
     public Guid? MachineId { get; set; }
 
+    /// <summary>The terrain host this NPC sits at, by name; resolved to MachineId when a client with that name registers.</summary>
+    public string HostName { get; set; }
+
     /// <summary>
     /// Optional association with a scenario for scenario-scoped operations
     /// </summary>

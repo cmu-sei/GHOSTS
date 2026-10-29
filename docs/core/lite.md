@@ -103,6 +103,10 @@ GHOSTS LITE supports the following timeline handlers:
 - **Network Shares**: Accesses network resources
 - **Basic Commands**: Executes lightweight system commands
 
+### Scenario executions
+
+Bind scenario NPCs to hosts running the full client, not GHOSTS LITE. LITE runs only the BrowserChrome, BrowserFirefox, Word, Excel and PowerPoint handlers and ignores every other handler type, including NpcSystem. A scenario execution learns that an NPC carried out a timeline item from the NpcSystem report sent after the action, so a LITE client never reports one: items sent to NPCs on LITE clients stay Deployed until White Cell completes them or the run ends. LITE does carry out browser, Word, Excel and PowerPoint actions from their `commandArgs`; it just never says so.
+
 ### Sample Timeline
 
 Here's a basic timeline configuration for GHOSTS LITE:

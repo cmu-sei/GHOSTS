@@ -17,12 +17,18 @@ public class WorkflowJobConfiguration
     public string WorkflowId { get; set; }
     public string WebhookUrl { get; set; }
     public string Schedule { get; set; }
+    /// <summary>Appended to the webhook URL on every call, e.g. the execution it serves.</summary>
+    public string Query { get; set; }
     public string N8nApiUrl { get; set; }
     public string N8nApiKey { get; set; }
 }
 
 public class WorkflowJob
 {
+    /// <summary>Adds a query string to a webhook URL, after any query it already has.</summary>
+    public static string AppendQuery(string url, string query) =>
+        string.IsNullOrEmpty(query) ? url : url + (url.Contains('?') ? "&" : "?") + query;
+
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
     private readonly WorkflowJobConfiguration _configuration;
     private readonly CancellationToken _cancellationToken;
@@ -184,7 +190,7 @@ public class WorkflowJob
             http.DefaultRequestHeaders.Clear();
             http.DefaultRequestHeaders.Add("accept", "application/json");
 
-            var response = await http.GetAsync(webhookUrl, _cancellationToken);
+            var response = await http.GetAsync(AppendQuery(webhookUrl, _configuration.Query), _cancellationToken);
             var statusCode = (int)response.StatusCode;
 
             if (response.IsSuccessStatusCode)

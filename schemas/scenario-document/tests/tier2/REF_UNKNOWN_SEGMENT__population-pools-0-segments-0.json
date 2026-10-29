@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "1.2.0",
+  "slug": "ref-unknown-pool-segment",
+  "name": "Pool placed on a segment that is not declared",
+  "description": "Office staff sit on the Basement segment, and the terrain declares only Office LAN.",
+  "terrain": {
+    "segments": [ { "name": "Office LAN" } ],
+    "hosts": [ { "name": "desk-01", "segment": "Office LAN" } ]
+  },
+  "population": { "pools": [ { "role": "office staff", "count": 1, "segments": ["Basement"] } ] }
+}

@@ -19,6 +19,11 @@ import {
   ExecutionEvent,
   ExecutionMetricSnapshot,
   ExecutionTimelineItem,
+  ExecutionState,
+  DecisionChoice,
+  ResponseMark,
+  NpcBinding,
+  ExecutionTerrain,
 } from '../../core/models/execution.model';
 import { N8nWorkflow } from '../../core/models';
 import { Subscription } from 'rxjs';
@@ -56,7 +61,12 @@ export class ExecutionDetailsComponent implements OnInit, OnDestroy {
   metrics = signal<ExecutionMetricSnapshot[]>([]);
   timelineItems = signal<ExecutionTimelineItem[]>([]);
   workflows = signal<N8nWorkflow[]>([]);
+  state = signal<ExecutionState | null>(null);
+  npcBindings = signal<NpcBinding[]>([]);
+  terrain = signal<ExecutionTerrain | null>(null);
   loading = signal(false);
+  newFlag = signal('');
+  hostEdits = signal<Record<string, string>>({});
 
   // Manual completion dialog state
   completionDialogOpen = signal(false);
@@ -65,7 +75,13 @@ export class ExecutionDetailsComponent implements OnInit, OnDestroy {
   completionNotes = signal('');
   completionBy = signal('exercise-admin');
 
+  // Decision dialog state
+  decisionItem = signal<ExecutionTimelineItem | null>(null);
+  decisionChoice = signal('');
+  decisionBy = signal('white-cell');
+
   private hubSub?: Subscription;
+  private terrainTimer?: ReturnType<typeof setInterval>;
   private executionId = 0;
 
   protected itemCounts = computed(() => {
@@ -73,6 +89,7 @@ export class ExecutionDetailsComponent implements OnInit, OnDestroy {
     return {
       total: items.length,
       pending: items.filter(i => i.status === 'Pending').length,
+      ready: items.filter(i => i.status === 'Ready').length,
       queued: items.filter(i => i.status === 'Queued' || i.status === 'Deployed').length,
       completed: items.filter(i => i.status === 'Completed').length,
       failed: items.filter(i => i.status === 'Failed').length,
@@ -109,6 +126,7 @@ export class ExecutionDetailsComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.hubSub?.unsubscribe();
     this.executionHub.disconnect();
+    clearInterval(this.terrainTimer);
   }
 
   private loadAll(): void {
@@ -116,6 +134,9 @@ export class ExecutionDetailsComponent implements OnInit, OnDestroy {
     this.loadEvents(this.executionId);
     this.loadMetrics(this.executionId);
     this.loadTimelineItems(this.executionId);
+    this.loadState(this.executionId);
+    this.loadNpcBindings(this.executionId);
+    this.loadTerrain(this.executionId);
   }
 
   private connectWebSocket(): void {
@@ -133,6 +154,9 @@ export class ExecutionDetailsComponent implements OnInit, OnDestroy {
         this.snackBar.open(`Timeline item updated: ${msg.data.status}`, 'Close', { duration: 2000 });
         this.loadTimelineItems(this.executionId);
         this.loadEvents(this.executionId);
+        this.loadState(this.executionId);
+      } else if (msg.updateType === 'RunStateUpdate') {
+        this.state.set(msg.data);
       }
     });
   }
@@ -166,6 +190,42 @@ export class ExecutionDetailsComponent implements OnInit, OnDestroy {
     this.executionService.getTimelineItems(id).subscribe({
       next: (items) => this.timelineItems.set(items),
     });
+  }
+
+  loadState(id: number): void {
+    this.executionService.getState(id).subscribe({
+      next: (state) => this.state.set(state),
+      error: () => this.state.set(null),
+    });
+  }
+
+  loadNpcBindings(id: number): void {
+    this.executionService.getNpcBindings(id).subscribe({
+      next: (npcs) => {
+        this.npcBindings.set(npcs);
+        this.hostEdits.set({});
+      },
+    });
+  }
+
+  loadTerrain(id: number): void {
+    this.executionService.getTerrain(id).subscribe({
+      next: (terrain) => {
+        this.terrain.set(terrain);
+        this.watchTerrain();
+      },
+    });
+  }
+
+  /** Refreshes the terrain every few seconds while the provider is still building or tearing it down. */
+  private watchTerrain(): void {
+    const inProgress = this.isTerrainInProgress(this.terrain()?.status);
+    if (inProgress && !this.terrainTimer) {
+      this.terrainTimer = setInterval(() => this.loadTerrain(this.executionId), 3000);
+    } else if (!inProgress && this.terrainTimer) {
+      clearInterval(this.terrainTimer);
+      this.terrainTimer = undefined;
+    }
   }
 
   startExecution(): void {
@@ -287,7 +347,187 @@ export class ExecutionDetailsComponent implements OnInit, OnDestroy {
       });
   }
 
+  // Run state: White Cell sets and clears flags by hand
+  setFlag(): void {
+    const flag = this.newFlag().trim();
+    if (!flag) return;
+    this.updateFlags([flag], []);
+    this.newFlag.set('');
+  }
+
+  clearFlag(flag: string): void {
+    this.updateFlags([], [flag]);
+  }
+
+  private updateFlags(set: string[], clear: string[]): void {
+    this.executionService.setFlags(this.executionId, { set, clear, by: 'white-cell' }).subscribe({
+      next: (state) => {
+        this.state.set(state);
+        this.loadTimelineItems(this.executionId);
+      },
+      error: (error) => {
+        this.snackBar.open('Failed to update flags: ' + (error.error?.error || ''), 'Close', { duration: 3000 });
+      },
+    });
+  }
+
+  // Decision dialog
+  choicesOf(item: ExecutionTimelineItem): DecisionChoice[] {
+    return this.parseJson(item.extras || '{}').choices ?? [];
+  }
+
+  openDecisionDialog(item: ExecutionTimelineItem): void {
+    this.decisionItem.set(item);
+    this.decisionChoice.set('');
+    this.decisionBy.set('white-cell');
+  }
+
+  closeDecisionDialog(): void {
+    this.decisionItem.set(null);
+  }
+
+  submitDecision(): void {
+    const item = this.decisionItem();
+    if (!item || !this.decisionChoice()) return;
+
+    this.executionService
+      .recordDecision(this.executionId, item.id, {
+        choiceId: this.decisionChoice(),
+        by: this.decisionBy() || 'white-cell',
+      })
+      .subscribe({
+        next: (state) => {
+          this.state.set(state);
+          this.snackBar.open(`Decision recorded for item #${item.number}`, 'Close', { duration: 2000 });
+          this.closeDecisionDialog();
+          this.loadTimelineItems(this.executionId);
+          this.loadEvents(this.executionId);
+        },
+        error: (error) => {
+          this.snackBar.open('Failed: ' + (error.error?.error || ''), 'Close', { duration: 3000 });
+        },
+      });
+  }
+
+  // Expected responses: White Cell marks each met or missed
+  expectedOf(item: ExecutionTimelineItem): string {
+    return this.parseJson(item.extras || '{}').expectedResponse ?? '';
+  }
+
+  responseFor(item: ExecutionTimelineItem): ResponseMark | undefined {
+    return this.state()?.responses?.find(r => r.itemId === item.id);
+  }
+
+  markResponse(item: ExecutionTimelineItem, met: boolean): void {
+    this.executionService.markResponse(this.executionId, item.id, { met, by: 'white-cell' }).subscribe({
+      next: (state) => {
+        this.state.set(state);
+        this.loadEvents(this.executionId);
+      },
+      error: (error) => {
+        this.snackBar.open('Failed to mark response: ' + (error.error?.error || ''), 'Close', { duration: 3000 });
+      },
+    });
+  }
+
+  // NPC bindings
+  autoBind(): void {
+    this.executionService.autoBindNpcs(this.executionId).subscribe({
+      next: (result) => {
+        this.snackBar.open(
+          `Bound ${result.bound} NPC(s) across ${result.hosts} host(s); ${result.unbound} unbound`,
+          'Close',
+          { duration: 3000 }
+        );
+        this.loadNpcBindings(this.executionId);
+      },
+      error: (error) => {
+        this.snackBar.open('Failed to auto-bind: ' + (error.error?.error || ''), 'Close', { duration: 3000 });
+      },
+    });
+  }
+
+  hostFor(npc: NpcBinding): string {
+    return this.hostEdits()[npc.npcId] ?? npc.hostName ?? '';
+  }
+
+  editHost(npc: NpcBinding, value: string): void {
+    this.hostEdits.update((edits) => ({ ...edits, [npc.npcId]: value }));
+  }
+
+  hostChanged(npc: NpcBinding): boolean {
+    const edit = this.hostEdits()[npc.npcId];
+    return edit !== undefined && edit.trim() !== (npc.hostName ?? '');
+  }
+
+  saveHost(npc: NpcBinding): void {
+    this.executionService.setNpcHost(this.executionId, npc.npcId, this.hostFor(npc).trim()).subscribe({
+      next: () => {
+        this.snackBar.open(`Host saved for ${npc.name}`, 'Close', { duration: 2000 });
+        this.loadNpcBindings(this.executionId);
+      },
+      error: (error) => {
+        this.snackBar.open('Failed to save host: ' + (error.error?.error || ''), 'Close', { duration: 3000 });
+      },
+    });
+  }
+
+  // Terrain
+  buildTerrain(): void {
+    this.executionService.buildTerrain(this.executionId).subscribe({
+      next: (terrain) => {
+        this.terrain.set(terrain);
+        this.watchTerrain();
+        this.snackBar.open('Terrain build requested', 'Close', { duration: 2000 });
+      },
+      error: (error) => {
+        this.snackBar.open('Failed to build terrain: ' + (error.error?.error || ''), 'Close', { duration: 3000 });
+      },
+    });
+  }
+
+  teardownTerrain(): void {
+    if (!confirm("Tear down this run's enclave? The base stays.")) return;
+
+    this.executionService.teardownTerrain(this.executionId).subscribe({
+      next: (terrain) => {
+        this.terrain.set(terrain);
+        this.watchTerrain();
+        this.snackBar.open('Terrain teardown requested', 'Close', { duration: 2000 });
+      },
+      error: (error) => {
+        this.snackBar.open('Failed to tear down terrain: ' + (error.error?.error || ''), 'Close', { duration: 3000 });
+      },
+    });
+  }
+
+  isTerrainInProgress(status?: string): boolean {
+    return status === 'queued' || status === 'building' || status === 'tearing-down';
+  }
+
+  canBuildTerrain(terrain: ExecutionTerrain | null): boolean {
+    return !terrain?.status || terrain.status === 'failed' || terrain.status === 'deleted';
+  }
+
+  canTeardownTerrain(terrain: ExecutionTerrain | null): boolean {
+    return !!terrain?.instanceId && terrain.status !== 'deleted' && terrain.status !== 'tearing-down';
+  }
+
+  getTerrainStatusClass(status?: string): string {
+    if (!status) return 'badge-light';
+    switch (status) {
+      case 'ready': return 'badge-success';
+      case 'failed': return 'badge-danger';
+      case 'deleted': return 'badge-secondary';
+      default: return 'badge-warning';
+    }
+  }
+
   // Helpers
+  floor(value: number): number {
+    return Math.floor(value);
+  }
+
   formatDate(dateString?: string): string {
     if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleString();
@@ -344,6 +584,7 @@ export class ExecutionDetailsComponent implements OnInit, OnDestroy {
       case 'Completed': return 'item-completed';
       case 'Failed': return 'item-failed';
       case 'Skipped': return 'item-skipped';
+      case 'Ready': return 'item-ready';
       case 'Deployed': return 'item-deployed';
       case 'Queued': return 'item-queued';
       default: return 'item-pending';

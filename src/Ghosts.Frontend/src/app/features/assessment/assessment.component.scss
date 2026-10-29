@@ -21,6 +21,25 @@
   }
 }
 
+.run-picker-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: #666;
+
+  .run-picker {
+    min-width: 280px;
+  }
+}
+
+.section-heading {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #495057;
+  margin: 0 0 12px;
+}
+
 .panel-grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);

@@ -19,7 +19,7 @@ longer is the draft document arriving early; anything that reads like a form is 
 <What the audience is expected to do about it, and what counts as success — the standard, not the
 aspiration.>
 
-Terrain: <the base slice this starts from, plus what this exercise adds>.
+Terrain: <the enclave and base this starts from, plus what this exercise adds>.
 
 Rules of engagement: <what the audience may do; what the adversary will not do>.
 ```
@@ -32,7 +32,7 @@ This is §4a's example, and it is the register to aim for — short enough to ar
 > rotation. A state-sponsored actor phishes the billing staff on day 2 and, by day 5, holds credentialed
 > access to an engineering workstation that reaches the OT network. The blue cell is expected to catch
 > the lateral movement before the substation trips on day 9; success is a correct containment decision by
-> day 7, not a clean network. Terrain: the *regional-utility* slice, plus two OT segments this exercise
+> day 7, not a clean network. Terrain: the *regional-utility* enclave, plus two OT segments this exercise
 > adds.
 
 Note what that does in six sentences: it names the audience and their proficiency, the adversary and its

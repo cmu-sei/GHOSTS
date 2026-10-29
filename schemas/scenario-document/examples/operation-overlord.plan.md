@@ -1,6 +1,6 @@
 # OPERATION OVERLORD: The Normandy Decision — exercise plan
 
-*Rendered from `operation-overlord.scenario.json` (schema 1.1.0). A view, not a source: regenerate it after every edit. What gets signed is the plan; what gets loaded is the document.*
+*Rendered from `operation-overlord.scenario.json` (schema 1.2.0). A view, not a source: regenerate it after every edit. What gets signed is the plan; what gets loaded is the document.*
 
 January 1944. You sit with the Supreme Headquarters Allied Expeditionary Force joint planning staff. The COSSAC outline must become an executable plan for opening a lodgment in Normandy. Landing frontage, air cover, naval lift, deception, and sustainment all compete for scarce resources. Eisenhower expects a coherent recommendation before the conference closes.
 

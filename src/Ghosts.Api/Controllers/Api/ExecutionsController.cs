@@ -534,7 +534,8 @@ public class ExecutionsController : ControllerBase
             item.Schedule,
             item.TriggerCondition,
             item.LastFiredAt,
-            item.FireCount
+            item.FireCount,
+            item.Extras
         );
     }
 }

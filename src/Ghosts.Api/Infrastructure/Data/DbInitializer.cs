@@ -33,6 +33,9 @@ namespace Ghosts.Api.Infrastructure.Data
             // Ensure execution_timeline_items has workflow_id column
             await EnsureExecutionTimelineWorkflowColumn(context, logger);
 
+            // Ensure the execution clock and item extras columns exist (server-side dispatch)
+            await EnsureExecutionRunColumns(context, logger);
+
             // Ensure scenarios have author and publishedat columns (drafts and publishing)
             await EnsureScenarioDraftColumns(context, logger);
 
@@ -205,6 +208,34 @@ namespace Ghosts.Api.Infrastructure.Data
         /// Adds scenarios.author and scenarios.publishedat. Every scenario that existed before them counts as
         /// published, so that nothing disappears from anyone's list; new scenarios start as drafts.
         /// </summary>
+        private static async Task EnsureExecutionRunColumns(ApplicationDbContext context, ILogger<DbInitializer> logger)
+        {
+            try
+            {
+                var connection = context.Database.GetDbConnection();
+                if (connection.State != System.Data.ConnectionState.Open)
+                    await connection.OpenAsync();
+
+                using var cmd = connection.CreateCommand();
+                cmd.CommandText = @"
+                    ALTER TABLE executions ADD COLUMN IF NOT EXISTS pausedat TIMESTAMP WITHOUT TIME ZONE;
+                    ALTER TABLE executions ADD COLUMN IF NOT EXISTS pausedseconds DOUBLE PRECISION NOT NULL DEFAULT 0;
+                    ALTER TABLE execution_timeline_items ADD COLUMN IF NOT EXISTS extras JSONB;
+                    ALTER TABLE executions ADD COLUMN IF NOT EXISTS terrainstatus TEXT;
+                    ALTER TABLE executions ADD COLUMN IF NOT EXISTS terrain JSONB;
+                    ALTER TABLE executions ADD COLUMN IF NOT EXISTS runstate JSONB;
+                    ALTER TABLE npcs ADD COLUMN IF NOT EXISTS hostname TEXT;
+                    ALTER TABLE machine_updates ADD COLUMN IF NOT EXISTS executionid INTEGER;
+                ";
+                await cmd.ExecuteNonQueryAsync();
+                logger.LogInformation("Verified the execution run columns (clock, terrain, run state, item extras, NPC host name, queued update's run) exist");
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Could not verify/add the execution clock and item extras columns");
+            }
+        }
+
         private static async Task EnsureScenarioDraftColumns(ApplicationDbContext context, ILogger<DbInitializer> logger)
         {
             try

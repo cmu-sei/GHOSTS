@@ -56,7 +56,8 @@ public record TerrainExtrasDto(
     InformationEnvironmentDto InformationEnvironment = null,
     List<DefenseDto> Defenses = null);
 
-public record TerrainReferenceDto(string Provider = null, string Slice = null);
+/// <summary>The terrain a scenario runs on. Slice is the 1.1.0 name for Enclave, read as the enclave on import.</summary>
+public record TerrainReferenceDto(string Provider = null, string Slice = null, string Enclave = null, string Base = null);
 
 public record SegmentDto(string Name = null, string Cidr = null, string Description = null);
 
@@ -99,7 +100,8 @@ public record MoveDto(
 
 public record EffectsDto(List<string> SetFlags = null, Dictionary<string, string> SetFacts = null);
 
-public record PoolExtrasDto(string Description = null);
+/// <summary>A pool's description, and where its people sit: segments or host names (1.2.0).</summary>
+public record PoolExtrasDto(string Description = null, List<string> Segments = null, List<string> Hosts = null);
 
 /// <summary>A vulnerability's description, when the cve column already holds its CVE.</summary>
 public record VulnerabilityExtrasDto(string Description = null);
@@ -121,6 +123,17 @@ public record EventExtrasDto(
     EventExecutionDto Execution = null,
     string ExpectedResponse = null,
     EffectsDto Effects = null,
-    List<string> Indicators = null);
+    List<string> Indicators = null,
+    List<ChoiceDto> Choices = null);
 
-public record EventExecutionDto(string Mode = null, string WorkflowRef = null);
+/// <summary>How an event is carried out. Action and Targets (1.2.0) say what an NPC does and which NPCs do it.</summary>
+public record EventExecutionDto(string Mode = null, string WorkflowRef = null, NpcActionDto Action = null, TargetsDto Targets = null);
+
+/// <summary>What the NPC's client runs: an everyday handler, its initial value, its commands and the arguments each command gets.</summary>
+public record NpcActionDto(string Handler = null, string Initial = null, List<string> Commands = null, Dictionary<string, string> Args = null, List<string> CommandArgs = null);
+
+/// <summary>Which NPCs carry out an event: by pool role, by the segments they sit on, or by host name.</summary>
+public record TargetsDto(List<string> Pools = null, List<string> Segments = null, List<string> Hosts = null);
+
+/// <summary>One answer to a decision point, and what choosing it sets.</summary>
+public record ChoiceDto(string Id = null, string Label = null, EffectsDto Effects = null);

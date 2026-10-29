@@ -46,6 +46,9 @@ var facebook = builder.AddProject<Projects.Ghosts_Pandora>("facebook")
     .WithHttpEndpoint(port: 8800, name: "http", isProxied: false)
     .WithExternalHttpEndpoints();
 
+// The terrain provider in development is the API's own GraySpace stub; a range points it at a real GraySpace.
+var terrainApiKey = builder.AddParameter("TerrainApiKey", "dev-terrain-key", secret: true);
+
 var api = builder.AddProject<Projects.Ghosts_Api>("api")
     .WaitFor(postgres)
     .WithReference(db, "DefaultConnection")
@@ -53,6 +56,9 @@ var api = builder.AddProject<Projects.Ghosts_Api>("api")
     .WithEnvironment("ASPNETCORE_URLS", "http://0.0.0.0:5000")
     // The frontend runs on 4222 under Aspire (4200 elsewhere), so allow that origin instead
     .WithEnvironment("CorsPolicy__Origins__0", "http://localhost:4222")
+    .WithEnvironment("TerrainProvider__BaseUrl", "http://localhost:5000/stubs/grayspace")
+    .WithEnvironment("TerrainProvider__ApiKey", terrainApiKey)
+    .WithEnvironment("TerrainProvider__EnableStub", "true")
     .WithHttpEndpoint(port: 5000, name: "http", isProxied: false)
     .WithExternalHttpEndpoints()
     .WithUrlForEndpoint("http", url =>
@@ -94,6 +100,10 @@ var n8n = builder.AddContainer("n8n", "docker.n8n.io/n8nio/n8n")
     .WithEnvironment("N8N_PROTOCOL", "http")
     // Big Five study reports: the only directory the Read/Write Files node may touch (n8n blocks file access elsewhere by default).
     .WithEnvironment("N8N_RESTRICT_FILE_ACCESS_TO", "/home/node/bigfive-out")
+    // The social workflows post to Pandora at $env.PANDORA_URL, so one set of files works wherever Pandora runs:
+    // here it is the "facebook" project on the devcontainer's port 8800; on a range it is a site on the base internet.
+    .WithEnvironment("PANDORA_URL", "http://host.docker.internal:8800")
+    .WithEnvironment("N8N_BLOCK_ENV_ACCESS_IN_NODE", "false")
     .WithContainerName("n8n")
     // Reach the Mac's Ollama from inside this inner DinD container. host.docker.internal
     // points at the devcontainer, so map host.ollama -> Docker Desktop's host-gateway IP.
@@ -187,6 +197,8 @@ var baserow = builder.AddContainer("baserow", "baserow/baserow")
 // GHOSTS Universal Clients (built from source, demo/testing)
 var client1 = builder.AddDockerfile("ghosts-client-1", "../../", "src/Dockerfile-client-universal")
     .WithContainerName("ghosts-client-1")
+    // A real hostname, so the client reports "ghosts-client-1" and can be bound to a manifest host by name.
+    .WithContainerRuntimeArgs("--hostname", "ghosts-client-1")
     .WithEnvironment("BASE_URL", "http://host.docker.internal:5000/api")
     .WithBindMount("../../configuration/clients/client-1/config", "/app/config", isReadOnly: false)
     .WithLifetime(ContainerLifetime.Persistent)
@@ -194,6 +206,8 @@ var client1 = builder.AddDockerfile("ghosts-client-1", "../../", "src/Dockerfile
 
 var client2 = builder.AddDockerfile("ghosts-client-2", "../../", "src/Dockerfile-client-universal")
     .WithContainerName("ghosts-client-2")
+    // A real hostname, so the client reports "ghosts-client-2" and can be bound to a manifest host by name.
+    .WithContainerRuntimeArgs("--hostname", "ghosts-client-2")
     .WithEnvironment("BASE_URL", "http://host.docker.internal:5000/api")
     .WithBindMount("../../configuration/clients/client-2/config", "/app/config", isReadOnly: false)
     .WithLifetime(ContainerLifetime.Persistent)
@@ -201,6 +215,8 @@ var client2 = builder.AddDockerfile("ghosts-client-2", "../../", "src/Dockerfile
 
 var client3 = builder.AddDockerfile("ghosts-client-3", "../../", "src/Dockerfile-client-universal")
     .WithContainerName("ghosts-client-3")
+    // A real hostname, so the client reports "ghosts-client-3" and can be bound to a manifest host by name.
+    .WithContainerRuntimeArgs("--hostname", "ghosts-client-3")
     .WithEnvironment("BASE_URL", "http://host.docker.internal:5000/api")
     .WithBindMount("../../configuration/clients/client-3/config", "/app/config", isReadOnly: false)
     .WithLifetime(ContainerLifetime.Persistent)

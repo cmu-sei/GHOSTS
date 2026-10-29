@@ -7,7 +7,32 @@
         <a [href]="grafanaUrl" target="_blank" rel="noopener">Grafana</a>
       </p>
     </div>
+    <label class="run-picker-label">
+      Run
+      <select class="run-picker form-select form-select-sm" (change)="selectExecution($any($event.target).value)">
+        <option value="">Choose a run…</option>
+        @for (execution of executions(); track execution.id) {
+        <option [value]="execution.id">{{ execution.name }} · {{ execution.scenarioName }} · {{ execution.status }}</option>
+        }
+      </select>
+    </label>
   </div>
+
+  @if (runPanels().length > 0) {
+  <h2 class="section-heading">This run</h2>
+  <div class="panel-grid mb-4">
+    @for (entry of runPanels(); track entry.panel.panelId) {
+    <div class="panel-wrapper" [class.stat-panel]="entry.panel.height === '120px'">
+      <iframe
+        [src]="entry.url"
+        [style.height]="entry.panel.height"
+        frameborder="0"
+      ></iframe>
+    </div>
+    }
+  </div>
+  <h2 class="section-heading">All runs</h2>
+  }
 
   <div class="panel-grid">
     @for (entry of panels; track entry.panel.panelId) {

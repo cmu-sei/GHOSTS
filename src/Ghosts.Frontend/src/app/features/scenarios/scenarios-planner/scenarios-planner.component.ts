@@ -617,6 +617,7 @@ export class ScenariosPlannerComponent implements OnInit, OnDestroy {
 
   private withExtrasDefaults(extras: ScenarioExtras | null | undefined): ScenarioExtras {
     const e = extras ?? {};
+    const { slice, ...reference } = e.terrain?.reference ?? {};
     return {
       ...e,
       catalog: e.catalog ?? {},
@@ -624,7 +625,7 @@ export class ScenariosPlannerComponent implements OnInit, OnDestroy {
       audience: e.audience ?? {},
       terrain: {
         ...e.terrain,
-        reference: e.terrain?.reference ?? {},
+        reference: { ...reference, enclave: reference.enclave ?? slice },
         segments: e.terrain?.segments ?? [],
         hosts: e.terrain?.hosts ?? [],
         services: e.terrain?.services ?? [],

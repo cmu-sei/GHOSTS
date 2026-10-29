@@ -93,25 +93,50 @@ namespace Ghosts.Api.Infrastructure.Services
             return machineResponse;
         }
 
-        private async Task<Machine> FindByValue(Machine machine, CancellationToken ct)
+        /// <summary>
+        /// The machine a checking-in client is, by exact value ignoring case: the setting's field, or with no setting
+        /// the first of name, FQDN, host and resolved host that the client sent. An empty value matches nothing, and
+        /// among duplicates the most recently reported wins.
+        /// </summary>
+        public static async Task<Machine> FindMatchAsync(IQueryable<Machine> machines, Machine machine, string matchBy, CancellationToken ct)
         {
-            if (string.IsNullOrEmpty(Program.ApplicationSettings.MatchMachinesBy))
+            var fields = (matchBy ?? string.Empty).ToLowerInvariant() switch
             {
-                return await _context.Machines.FirstOrDefaultAsync(o => o.Name.ToLower().Contains(machine.Name)
-                                                                        || o.FQDN.ToLower().Contains(machine.FQDN.ToLower())
-                                                                        || o.Host.ToLower().Contains(machine.Host.ToLower())
-                                                                        || o.ResolvedHost.ToLower().Contains(machine.ResolvedHost.ToLower()), ct);
+                "fqdn" => new[] { "fqdn" },
+                "host" => ["host"],
+                "resolvedhost" => ["resolvedhost"],
+                "name" => ["name"],
+                "" => ["name", "fqdn", "host", "resolvedhost"],
+                _ => ["name"]
+            };
+
+            foreach (var field in fields)
+            {
+                var value = (field switch
+                {
+                    "fqdn" => machine.FQDN,
+                    "host" => machine.Host,
+                    "resolvedhost" => machine.ResolvedHost,
+                    _ => machine.Name
+                })?.Trim().ToLower();
+                if (string.IsNullOrEmpty(value)) continue;
+
+                var query = field switch
+                {
+                    "fqdn" => machines.Where(o => o.FQDN.ToLower() == value),
+                    "host" => machines.Where(o => o.Host.ToLower() == value),
+                    "resolvedhost" => machines.Where(o => o.ResolvedHost.ToLower() == value),
+                    _ => machines.Where(o => o.Name.ToLower() == value)
+                };
+                var match = await query.OrderByDescending(o => o.LastReportedUtc).FirstOrDefaultAsync(ct);
+                if (match != null) return match;
             }
 
-            return Program.ApplicationSettings.MatchMachinesBy.ToLower() switch
-            {
-                "name" => await _context.Machines.FirstOrDefaultAsync(o => o.Name.ToLower().Contains(machine.Name.ToLower()), ct),
-                "fqdn" => await _context.Machines.FirstOrDefaultAsync(o => o.FQDN.ToLower().Contains(machine.FQDN.ToLower()), ct),
-                "host" => await _context.Machines.FirstOrDefaultAsync(o => o.Host.ToLower().Contains(machine.Host.ToLower()), ct),
-                "resolvedhost" => await _context.Machines.FirstOrDefaultAsync(o => o.ResolvedHost.ToLower().Contains(machine.ResolvedHost.ToLower()), ct),
-                _ => await _context.Machines.FirstOrDefaultAsync(o => o.Name.ToLower().Contains(machine.Name.ToLower()), ct)
-            };
+            return null;
         }
+
+        private Task<Machine> FindByValue(Machine machine, CancellationToken ct) =>
+            FindMatchAsync(_context.Machines, machine, Program.ApplicationSettings.MatchMachinesBy, ct);
 
         public List<MachineListItem> GetList()
         {

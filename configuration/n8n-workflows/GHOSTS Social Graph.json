@@ -3,27 +3,7 @@
   "nodes": [
     {
       "parameters": {
-        "rule": {
-          "interval": [
-            {
-              "field": "cronExpression",
-              "expression": "*/5 * * * *"
-            }
-          ]
-        }
-      },
-      "id": "b8c72b96-ab29-4a1d-931c-c47be07a3803",
-      "name": "Schedule Trigger",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
-      "position": [
-        -2080,
-        736
-      ]
-    },
-    {
-      "parameters": {
-        "url": "http://ghosts-api:5000/api/npcs/list",
+        "url": "=http://ghosts-api:5000/api/npcs/list?executionId={{ $('Webhook').isExecuted ? ($('Webhook').first().json.query.executionId ?? '') : '' }}",
         "options": {}
       },
       "id": "bdf0bc40-8254-4442-a16d-8860d6dd183c",
@@ -111,7 +91,7 @@
     },
     {
       "parameters": {
-        "url": "http://ghosts-api:5000/api/npcs/list",
+        "url": "=http://ghosts-api:5000/api/npcs/list?executionId={{ $('Webhook').isExecuted ? ($('Webhook').first().json.query.executionId ?? '') : '' }}",
         "options": {}
       },
       "id": "92fcb08f-16f0-4983-a0b2-594bb7f93f6e",
@@ -258,17 +238,6 @@
   ],
   "pinData": {},
   "connections": {
-    "Schedule Trigger": {
-      "main": [
-        [
-          {
-            "node": "Get NPC List",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Get NPC List": {
       "main": [
         [

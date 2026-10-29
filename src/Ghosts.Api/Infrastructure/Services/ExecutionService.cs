@@ -39,7 +39,7 @@ namespace Ghosts.Api.Infrastructure.Services
         Task<List<ExecutionTimelineItem>> GetTimelineItemsAsync(int executionId, CancellationToken ct);
         Task<ExecutionTimelineItem> CompleteTimelineItemAsync(int executionId, int itemId, CompleteTimelineItemDto dto, CancellationToken ct);
         Task<ExecutionTimelineItem> ReportTimelineItemResultAsync(int executionId, int itemId, JsonElement resultData, CancellationToken ct);
-        Task<ExecutionTimelineItem> RecordScenarioActionAsync(int executionId, int eventNumber, string detail, CancellationToken ct);
+        Task<ExecutionTimelineItem> RecordScenarioActionAsync(int executionId, int? itemId, int? eventNumber, string detail, CancellationToken ct);
     }
 
     /// <summary>
@@ -59,10 +59,8 @@ namespace Ghosts.Api.Infrastructure.Services
         private DbSet<ExecutionEvent> ExecutionEvents => _context.Set<ExecutionEvent>();
         private DbSet<ExecutionMetricSnapshot> ExecutionMetricSnapshots => _context.Set<ExecutionMetricSnapshot>();
         private DbSet<ExecutionTimelineItem> ExecutionTimelineItems => _context.Set<ExecutionTimelineItem>();
-        private DbSet<ScenarioCompilation> ScenarioCompilations => _context.Set<ScenarioCompilation>();
-        private DbSet<ScenarioNpcAssignment> ScenarioNpcAssignments => _context.Set<ScenarioNpcAssignment>();
         private DbSet<ScenarioTimelineEvent> ScenarioTimelineEvents => _context.Set<ScenarioTimelineEvent>();
-        private DbSet<MachineUpdate> MachineUpdates => _context.Set<MachineUpdate>();
+        private DbSet<Inject> Injects => _context.Set<Inject>();
         private DbSet<ScenarioParameters> ScenarioParameters => _context.Set<ScenarioParameters>();
         private DbSet<NpcRecord> Npcs => _context.Set<NpcRecord>();
         private DbSet<ScenarioWorkflowBinding> ScenarioWorkflowBindings => _context.Set<ScenarioWorkflowBinding>();
@@ -173,15 +171,8 @@ namespace Ghosts.Api.Infrastructure.Services
                 .OrderBy(e => e.Number)
                 .ToListAsync(ct);
 
-            var hasAssignments = await ScenarioNpcAssignments
-                .AnyAsync(a => a.ScenarioId == dto.ScenarioId, ct);
-
             foreach (var evt in scenarioEvents)
             {
-                var automationKind = evt.ExecutionType == ExecutionType.Workflow
-                    ? "Workflow"
-                    : hasAssignments ? "MachineUpdate" : "Manual";
-
                 execution.TimelineItems.Add(new ExecutionTimelineItem
                 {
                     SourceTimelineEventId = evt.Id,
@@ -190,11 +181,43 @@ namespace Ghosts.Api.Infrastructure.Services
                     Assigned = evt.Assigned,
                     Description = evt.Description,
                     Status = "Pending",
-                    AutomationKind = automationKind,
+                    AutomationKind = AutomationKindFor(evt.ExecutionType, evt.Assigned),
                     WorkflowId = evt.WorkflowId,
                     TriggerKind = evt.TriggerKind,
                     Schedule = evt.Schedule,
                     TriggerCondition = evt.TriggerCondition,
+                    Extras = evt.Extras,
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
+
+            var nextNumber = scenarioEvents.Count > 0 ? scenarioEvents.Max(e => e.Number) + 1 : 1;
+
+            // ── Snapshot injects: the document's title-only events, numbered after the events ──
+            var injects = await Injects
+                .Where(i => i.ScenarioParameters.ScenarioId == dto.ScenarioId)
+                .OrderBy(i => i.Id)
+                .ToListAsync(ct);
+
+            foreach (var inject in injects)
+            {
+                var extras = ScenarioExtras.Read<EventExtrasDto>(inject.Extras);
+                var assigned = string.IsNullOrEmpty(extras?.Owner) ? "White Cell" : ScenarioDocumentMapper.CellName(extras.Owner);
+                var mode = Enum.TryParse<ExecutionType>(extras?.Execution?.Mode, true, out var parsed) ? parsed : ExecutionType.Manual;
+                execution.TimelineItems.Add(new ExecutionTimelineItem
+                {
+                    Time = inject.Trigger,
+                    Number = nextNumber++,
+                    Assigned = assigned,
+                    Description = inject.Title,
+                    Status = "Pending",
+                    AutomationKind = AutomationKindFor(mode, assigned),
+                    WorkflowId = extras?.Execution?.WorkflowRef,
+                    TriggerKind = !string.IsNullOrEmpty(extras?.Schedule) ? TriggerKind.Scheduled
+                        : !string.IsNullOrEmpty(extras?.When) ? TriggerKind.Triggered : TriggerKind.PointInTime,
+                    Schedule = extras?.Schedule,
+                    TriggerCondition = extras?.When,
+                    Extras = inject.Extras,
                     CreatedAt = DateTime.UtcNow
                 });
             }
@@ -206,7 +229,6 @@ namespace Ghosts.Api.Infrastructure.Services
                 .Where(wb => wb.ScenarioParameters.ScenarioId == dto.ScenarioId && wb.Enabled)
                 .ToListAsync(ct);
 
-            var nextNumber = scenarioEvents.Count > 0 ? scenarioEvents.Max(e => e.Number) + 1 : 1;
             foreach (var binding in bindings)
             {
                 execution.TimelineItems.Add(new ExecutionTimelineItem
@@ -237,6 +259,19 @@ namespace Ghosts.Api.Infrastructure.Services
             await GenerateUserPoolNpcsAsync(execution, scenario.Name, ct);
 
             return await GetByIdAsync(execution.Id, ct);
+        }
+
+        /// <summary>
+        /// Who carries out an item, decided once from its mode and owner: a workflow item goes to n8n; an npc item
+        /// (1.2.0) goes to its targeted NPCs; otherwise a Green Cell or unowned item is the simulated population's, so
+        /// it is dispatched to bound NPCs, and anything a cell owns (White Cell, Red Team, Blue Team) is done by a person.
+        /// </summary>
+        public static string AutomationKindFor(ExecutionType type, string assigned)
+        {
+            if (type == ExecutionType.Workflow) return "Workflow";
+            if (type == ExecutionType.Npc) return "MachineUpdate";
+            var cell = (assigned ?? string.Empty).Trim();
+            return cell is "" or "None" or "Green Cell" ? "MachineUpdate" : "Manual";
         }
 
         /// <summary>
@@ -351,6 +386,10 @@ namespace Ghosts.Api.Infrastructure.Services
             _log.Info($"Deleted execution: {id}");
         }
 
+        /// <summary>
+        /// Starts or resumes a run. Nothing is sent to clients here: ExecutionDispatcher sends each item when it
+        /// comes due, so a resume replays nothing. Resuming adds the pause to PausedSeconds so the clock skips it.
+        /// </summary>
         public async Task<Execution> StartAsync(int id, CancellationToken ct)
         {
             var execution = await GetByIdAsync(id, ct);
@@ -361,254 +400,54 @@ namespace Ghosts.Api.Infrastructure.Services
                 throw new InvalidOperationException($"Cannot start execution with status {execution.Status}");
             }
 
-            // ── Optional deployment: compile + assign if available ──────────
-            var compilation = await ScenarioCompilations
-                .Where(c => c.ScenarioId == execution.ScenarioId && c.Status == "Completed")
-                .OrderByDescending(c => c.CompletedAt)
-                .FirstOrDefaultAsync(ct);
+            var now = DateTime.UtcNow;
+            var resuming = execution.Status == ExecutionStatus.Paused;
+            if (resuming && execution.PausedAt.HasValue)
+                execution.PausedSeconds += Math.Max(0, (now - execution.PausedAt.Value).TotalSeconds);
+            execution.PausedAt = null;
 
-            var deployedCount = 0;
-            var deployErrors = new List<string>();
-            int? compilationId = null;
-            var assignmentCount = 0;
-
-            if (compilation != null)
-            {
-                compilationId = compilation.Id;
-
-                var assignments = await ScenarioNpcAssignments
-                    .Where(a => a.CompilationId == compilation.Id)
-                    .ToListAsync(ct);
-
-                assignmentCount = assignments.Count;
-
-                if (assignments.Count > 0)
-                {
-                    var timelineEvents = await ScenarioTimelineEvents
-                        .Where(e => e.Timeline.ScenarioId == execution.ScenarioId)
-                        .OrderBy(e => e.Number)
-                        .ToListAsync(ct);
-
-                    foreach (var assignment in assignments)
-                    {
-                        try
-                        {
-                            var timeline = BuildTimelineForNpc(assignment.NpcId, execution.Id, timelineEvents);
-
-                            var machineUpdate = new MachineUpdate
-                            {
-                                MachineId = assignment.MachineId,
-                                Status = StatusType.Active,
-                                Update = timeline,
-                                ActiveUtc = DateTime.UtcNow,
-                                CreatedUtc = DateTime.UtcNow,
-                                Type = UpdateClientConfig.UpdateType.TimelinePartial
-                            };
-
-                            var delivered = await _clientHubService.SendUpdate(assignment.MachineId, machineUpdate);
-                            if (!delivered)
-                            {
-                                MachineUpdates.Add(machineUpdate);
-                                _log.Debug($"[Execution {id}] NPC {assignment.NpcId} → machine {assignment.MachineId}: queued in DB (no active socket)");
-                            }
-                            else
-                            {
-                                _log.Debug($"[Execution {id}] NPC {assignment.NpcId} → machine {assignment.MachineId}: delivered via websocket");
-                            }
-
-                            deployedCount++;
-                        }
-                        catch (Exception ex)
-                        {
-                            var msg = $"Failed to deploy NPC {assignment.NpcId} to machine {assignment.MachineId}: {ex.Message}";
-                            _log.Warn(msg);
-                            deployErrors.Add(msg);
-                        }
-                    }
-                }
-            }
-
-            // ── Transition timeline items ────────────────────────────────────
             var timelineItems = await ExecutionTimelineItems
                 .Where(ti => ti.ExecutionId == id)
                 .ToListAsync(ct);
 
-            foreach (var item in timelineItems)
-            {
-                if (item.AutomationKind == "MachineUpdate" && item.Status == "Pending")
-                {
-                    item.Status = deployedCount > 0 ? "Deployed" : "Queued";
-                }
-                else if (item.AutomationKind == "Workflow" && item.Status == "Pending")
-                {
-                    item.Status = "Queued";
-                }
-                // Manual items stay Pending
-            }
+            foreach (var item in timelineItems.Where(ti => ti.AutomationKind == "Workflow" && ti.Status == "Pending"))
+                item.Status = "Queued";
 
-            // ── Transition state ─────────────────────────────────────────────
             execution.Status = ExecutionStatus.Running;
-            if (execution.StartedAt == null)
+            execution.StartedAt ??= now;
+
+            // A first start seeds the run's ground truth from the document's starting conditions.
+            if (!resuming && string.IsNullOrEmpty(execution.RunState))
             {
-                execution.StartedAt = DateTime.UtcNow;
+                var extras = ScenarioExtras.Read<ScenarioExtrasDto>(execution.Scenario?.Extras
+                    ?? await Scenarios.Where(s => s.Id == execution.ScenarioId).Select(s => s.Extras).FirstOrDefaultAsync(ct));
+                RunState.Write(execution, RunState.Seed(extras?.StartingConditions));
             }
 
-            var startEvent = new ExecutionEvent
+            ExecutionEvents.Add(new ExecutionEvent
             {
                 ExecutionId = execution.Id,
-                Timestamp = DateTime.UtcNow,
+                Timestamp = now,
                 EventType = "StatusChange",
-                Description = "Execution started",
+                Description = resuming ? "Execution resumed" : "Execution started",
                 Data = JsonSerializer.Serialize(new
                 {
                     status = "Running",
-                    timestamp = DateTime.UtcNow,
-                    compilationId,
-                    deploymentsAttempted = assignmentCount,
-                    deploymentsSucceeded = deployedCount,
-                    deployErrors,
+                    timestamp = now,
+                    pausedSeconds = execution.PausedSeconds,
                     timelineItemsTotal = timelineItems.Count,
                     automatedItems = timelineItems.Count(ti => ti.AutomationKind == "MachineUpdate"),
                     workflowItems = timelineItems.Count(ti => ti.AutomationKind == "Workflow"),
                     manualItems = timelineItems.Count(ti => ti.AutomationKind == "Manual")
                 }),
-                Severity = deployErrors.Count > 0 ? "Warning" : "Info"
-            };
-            ExecutionEvents.Add(startEvent);
+                Severity = "Info"
+            });
 
             await _context.SaveChangesAsync(ct);
-
-            if (assignmentCount > 0)
-            {
-                _log.Info($"Started execution {id}: deployed to {deployedCount}/{assignmentCount} machines" +
-                          (deployErrors.Count > 0 ? $" ({deployErrors.Count} errors)" : ""));
-            }
-            else
-            {
-                _log.Info($"Started execution {id}: no NPC assignments to deploy (scenario not compiled or no assignments)");
-            }
-
+            _log.Info($"{(resuming ? "Resumed" : "Started")} execution {id}");
             await BroadcastExecutionUpdateAsync(id, "StatusChange", new { status = "Running" });
 
             return execution;
-        }
-
-        /// <summary>
-        /// Builds a GHOSTS-native Timeline for an NPC from the scenario's timeline events.
-        /// Uses NpcSystem handler so the client knows it is operating in NPC-driven mode.
-        /// </summary>
-        private static Timeline BuildTimelineForNpc(
-            Guid npcId,
-            int executionId,
-            List<ScenarioTimelineEvent> scenarioEvents)
-        {
-            var handlers = new List<TimelineHandler>();
-
-            // Group events by trigger kind to produce appropriate handler configurations
-            var pointInTimeEvents = scenarioEvents.Where(e => e.TriggerKind == TriggerKind.PointInTime).ToList();
-            var scheduledEvents = scenarioEvents.Where(e => e.TriggerKind == TriggerKind.Scheduled).ToList();
-            var triggeredEvents = scenarioEvents.Where(e => e.TriggerKind == TriggerKind.Triggered).ToList();
-
-            // Point-in-time events: one-shot handler with delay-based ordering
-            if (pointInTimeEvents.Count > 0)
-            {
-                var ghostsEvents = pointInTimeEvents.Select(evt => new TimelineEvent
-                {
-                    Command = "npc-scenario-action",
-                    CommandArgs = new List<object>
-                    {
-                        $"execution:{executionId}",
-                        $"event:{evt.Number}",
-                        evt.Description ?? string.Empty
-                    },
-                    DelayBefore = ParseTimeOffsetMs(evt.Time),
-                    DelayAfter = 0
-                }).ToList();
-
-                var handler = new TimelineHandler
-                {
-                    HandlerType = HandlerType.NpcSystem,
-                    Initial = $"scenario-execution:{executionId}:npc:{npcId}:point-in-time"
-                };
-                handler.TimeLineEvents.AddRange(ghostsEvents);
-                handlers.Add(handler);
-            }
-
-            // Scheduled events: looping handler with cron/interval schedule
-            foreach (var evt in scheduledEvents)
-            {
-                var handler = new TimelineHandler
-                {
-                    HandlerType = HandlerType.NpcSystem,
-                    Initial = $"scenario-execution:{executionId}:npc:{npcId}:scheduled:{evt.Number}",
-                    Loop = true,
-                    ScheduleType = TimelineHandler.TimelineScheduleType.Cron,
-                    Schedule = evt.Schedule
-                };
-                handler.TimeLineEvents.Add(new TimelineEvent
-                {
-                    Command = "npc-scenario-action",
-                    CommandArgs = new List<object>
-                    {
-                        $"execution:{executionId}",
-                        $"event:{evt.Number}",
-                        evt.Description ?? string.Empty
-                    },
-                    DelayBefore = 0,
-                    DelayAfter = 0
-                });
-                handlers.Add(handler);
-            }
-
-            // Triggered events: handler with trigger condition in args (client evaluates)
-            foreach (var evt in triggeredEvents)
-            {
-                var handler = new TimelineHandler
-                {
-                    HandlerType = HandlerType.NpcSystem,
-                    Initial = $"scenario-execution:{executionId}:npc:{npcId}:triggered:{evt.Number}"
-                };
-                handler.HandlerArgs["triggerCondition"] = evt.TriggerCondition ?? string.Empty;
-                handler.TimeLineEvents.Add(new TimelineEvent
-                {
-                    Command = "npc-scenario-action",
-                    CommandArgs = new List<object>
-                    {
-                        $"execution:{executionId}",
-                        $"event:{evt.Number}",
-                        $"trigger:{evt.TriggerCondition}",
-                        evt.Description ?? string.Empty
-                    },
-                    DelayBefore = ParseTimeOffsetMs(evt.Time),
-                    DelayAfter = 0
-                });
-                handlers.Add(handler);
-            }
-
-            // Ensure at least one handler
-            if (handlers.Count == 0)
-            {
-                var handler = new TimelineHandler
-                {
-                    HandlerType = HandlerType.NpcSystem,
-                    Initial = $"scenario-execution:{executionId}:npc:{npcId}"
-                };
-                handler.TimeLineEvents.Add(new TimelineEvent
-                {
-                    Command = "npc-scenario-action",
-                    CommandArgs = new List<object> { $"execution:{executionId}", "event:1", "default" },
-                    DelayBefore = 0,
-                    DelayAfter = 60000
-                });
-                handlers.Add(handler);
-            }
-
-            return new Timeline
-            {
-                Id = Guid.NewGuid(),
-                Status = Timeline.TimelineStatus.Run,
-                TimeLineHandlers = handlers
-            };
         }
 
         /// <summary>Parses "T+15m" → 900000 ms, and the schema's "T+2d9h40m" form the way the validator does. Returns 0 for any unparseable input.</summary>
@@ -619,6 +458,15 @@ namespace Ghosts.Api.Infrastructure.Services
             var m = Regex.Match(time, @"T\+(\d+)m", RegexOptions.IgnoreCase);
             if (!m.Success) return 0;
             return int.Parse(m.Groups[1].Value) * 60_000;
+        }
+
+        /// <summary>Minutes from T+0 for an offset; 0 for anything unparseable. Long, so offsets past 24 days don't overflow.</summary>
+        public static long ParseTimeOffsetMinutes(string time)
+        {
+            if (string.IsNullOrWhiteSpace(time)) return 0;
+            if (ScenarioDocumentMapper.TryOffsetMinutes(time.Trim(), out var minutes)) return minutes;
+            var m = Regex.Match(time, @"T\+(\d+)m", RegexOptions.IgnoreCase);
+            return m.Success && long.TryParse(m.Groups[1].Value, out var legacy) ? legacy : 0;
         }
 
         public async Task<Execution> PauseAsync(int id, CancellationToken ct)
@@ -632,6 +480,8 @@ namespace Ghosts.Api.Infrastructure.Services
             }
 
             execution.Status = ExecutionStatus.Paused;
+            execution.PausedAt = DateTime.UtcNow;
+            await ExecutionDispatcher.WithdrawQueuedAsync(_context, execution.Id, ct);
 
             ExecutionEvents.Add(new ExecutionEvent
             {
@@ -663,6 +513,7 @@ namespace Ghosts.Api.Infrastructure.Services
 
             execution.Status = failed ? ExecutionStatus.Failed : ExecutionStatus.Completed;
             execution.CompletedAt = DateTime.UtcNow;
+            await ExecutionDispatcher.WithdrawQueuedAsync(_context, execution.Id, ct);
 
             ExecutionEvents.Add(new ExecutionEvent
             {
@@ -694,6 +545,7 @@ namespace Ghosts.Api.Infrastructure.Services
 
             execution.Status = ExecutionStatus.Cancelled;
             execution.CompletedAt = DateTime.UtcNow;
+            await ExecutionDispatcher.WithdrawQueuedAsync(_context, execution.Id, ct);
 
             ExecutionEvents.Add(new ExecutionEvent
             {
@@ -815,6 +667,7 @@ namespace Ghosts.Api.Infrastructure.Services
             execution.ErrorDetails = error.GetRawText();
             execution.Status = ExecutionStatus.Failed;
             execution.CompletedAt = DateTime.UtcNow;
+            await ExecutionDispatcher.WithdrawQueuedAsync(_context, execution.Id, ct);
 
             ExecutionEvents.Add(new ExecutionEvent
             {
@@ -857,6 +710,7 @@ namespace Ghosts.Api.Infrastructure.Services
             item.Notes = dto.Notes;
             item.CompletedBy = dto.CompletedBy ?? "exercise-admin";
             item.CompletedAt = DateTime.UtcNow;
+            if (dto.Status == "Completed") await ApplyEffectsAsync(executionId, item, ct);
 
             ExecutionEvents.Add(new ExecutionEvent
             {
@@ -883,10 +737,12 @@ namespace Ghosts.Api.Infrastructure.Services
             if (item == null)
                 throw new InvalidOperationException("Timeline item not found");
 
+            var wasOpen = !TerminalItemStatuses.Contains(item.Status);
             item.Status = "Completed";
             item.ResultData = resultData.GetRawText();
             item.CompletedBy = "client-report";
             item.CompletedAt = DateTime.UtcNow;
+            if (wasOpen) await ApplyEffectsAsync(executionId, item, ct);
 
             ExecutionEvents.Add(new ExecutionEvent
             {
@@ -912,12 +768,21 @@ namespace Ghosts.Api.Infrastructure.Services
         /// record a fire and stay active so they can recur. Closes the loop so scenario events
         /// reported by NPC clients drive execution progress instead of remaining metadata.
         /// </summary>
-        public async Task<ExecutionTimelineItem> RecordScenarioActionAsync(int executionId, int eventNumber, string detail, CancellationToken ct)
+        public async Task<ExecutionTimelineItem> RecordScenarioActionAsync(int executionId, int? itemId, int? eventNumber, string detail, CancellationToken ct)
         {
-            var item = await ExecutionTimelineItems
-                .FirstOrDefaultAsync(ti => ti.ExecutionId == executionId && ti.Number == eventNumber, ct);
+            var item = itemId.HasValue
+                ? await ExecutionTimelineItems.FirstOrDefaultAsync(ti => ti.ExecutionId == executionId && ti.Id == itemId.Value, ct)
+                : await ExecutionTimelineItems.FirstOrDefaultAsync(ti => ti.ExecutionId == executionId && ti.Number == eventNumber, ct);
             if (item == null)
                 throw new InvalidOperationException("Timeline item not found");
+
+            // A report that arrives after the run ended is late news, not progress.
+            var execution = await Executions.FindAsync([executionId], ct);
+            if (execution == null || (execution.Status != ExecutionStatus.Running && execution.Status != ExecutionStatus.Paused))
+            {
+                _log.Debug($"Ignoring scenario action for item #{item.Number}: execution {executionId} is {execution?.Status}");
+                return item;
+            }
 
             item.LastFiredAt = DateTime.UtcNow;
             item.FireCount++;
@@ -926,9 +791,11 @@ namespace Ghosts.Api.Infrastructure.Services
             var completed = item.TriggerKind != TriggerKind.Scheduled;
             if (completed)
             {
+                var wasOpen = !TerminalItemStatuses.Contains(item.Status);
                 item.Status = "Completed";
                 item.CompletedBy = "client-report";
                 item.CompletedAt = DateTime.UtcNow;
+                if (wasOpen) await RunState.ApplyItemEffectsAsync(_context, execution, item, ct);
             }
 
             ExecutionEvents.Add(new ExecutionEvent
@@ -937,7 +804,7 @@ namespace Ghosts.Api.Infrastructure.Services
                 Timestamp = DateTime.UtcNow,
                 EventType = "ScenarioActionReported",
                 Description = $"Scenario action for timeline item #{item.Number} reported by client (fire #{item.FireCount})",
-                Data = JsonSerializer.Serialize(new { itemId = item.Id, eventNumber, detail, fireCount = item.FireCount, completed }),
+                Data = JsonSerializer.Serialize(new { itemId = item.Id, eventNumber = item.Number, detail, fireCount = item.FireCount, completed }),
                 Severity = "Info"
             });
 
@@ -948,6 +815,13 @@ namespace Ghosts.Api.Infrastructure.Services
                 await CheckAndAutoCompleteExecutionAsync(executionId, ct);
 
             return item;
+        }
+
+        /// <summary>Applies a completed item's event effects to its run's state, once.</summary>
+        private async Task ApplyEffectsAsync(int executionId, ExecutionTimelineItem item, CancellationToken ct)
+        {
+            var execution = await Executions.FindAsync([executionId], ct);
+            if (execution != null) await RunState.ApplyItemEffectsAsync(_context, execution, item, ct);
         }
 
         private async Task BroadcastExecutionUpdateAsync(int executionId, string updateType, object data)
@@ -991,6 +865,7 @@ namespace Ghosts.Api.Infrastructure.Services
 
             execution.Status = ExecutionStatus.Completed;
             execution.CompletedAt = DateTime.UtcNow;
+            await ExecutionDispatcher.WithdrawQueuedAsync(_context, executionId, ct);
 
             ExecutionEvents.Add(new ExecutionEvent
             {

@@ -18,10 +18,13 @@ namespace Ghosts.Api.Infrastructure.ScenarioDocuments;
 public static class ScenarioDocumentSchema
 {
     /// <summary>The version an export writes.</summary>
-    public const string Version = "1.1.0";
+    public const string Version = "1.2.0";
 
-    /// <summary>Versions an import reads. 1.1.0 only declares defaults 1.0.0 left implicit.</summary>
-    public static readonly IReadOnlyList<string> SupportedVersions = ["1.0.0", "1.1.0"];
+    /// <summary>
+    /// Versions an import reads. 1.1.0 only declares defaults 1.0.0 left implicit; 1.2.0 only adds optional
+    /// fields (enclave and base, NPC actions, targets, choices, pool placement) and reads a 1.1.0 slice as the enclave.
+    /// </summary>
+    public static readonly IReadOnlyList<string> SupportedVersions = ["1.0.0", "1.1.0", "1.2.0"];
 
     private const string Resource = "Ghosts.Api.ScenarioDocuments.scenario-document.schema.json";
 

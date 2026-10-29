@@ -189,14 +189,14 @@ error); human rows 11, 12.
 
 ### E2. "What terrain already exists, what does this exercise add, and what may not be touched?"
 
-**Fills** `terrain.reference.provider`, `.slice`; `terrain.segments[]`; `terrain.hosts[]`;
+**Fills** `terrain.reference.provider`, `.enclave`, `.base`; `terrain.segments[]`; `terrain.hosts[]`;
 `terrain.services[]`
-**No defensible default:** the intent names a slice ("the *regional-utility* slice") and nothing in
+**No defensible default:** the intent names an enclave ("the *regional-utility* enclave") and nothing in
 GHOSTS can look up what is in it, so the base terrain is knowledge the developer holds. What the exercise
 *adds* is a design decision, and it hides a difficulty dial: whether two OT segments are segmented from
 each other decides whether the lateral movement is findable, which the agent run flagged as "a difficulty
 decision disguised as a network detail".
-**The agent must ask** for the slice and for what is off limits; it **may propose the added segments and
+**The agent must ask** for the enclave and for what is off limits; it **may propose the added segments and
 hosts**, which the developer corrects.
 **Step 0:** agent #22, #23, #25; human row 10.
 

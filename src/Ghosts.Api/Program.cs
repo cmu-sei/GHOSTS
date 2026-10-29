@@ -14,6 +14,7 @@ using Ghosts.Api.Infrastructure.Filters;
 using Ghosts.Api.Infrastructure.Formatters;
 using Ghosts.Api.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Services;
+using Ghosts.Api.Infrastructure.Terrain;
 using Ghosts.Api.Infrastructure.Services.ClientServices;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
@@ -126,6 +127,17 @@ public class Program
         builder.Services.AddScoped<IObjectiveService, ObjectiveService>();
         builder.Services.AddScoped<DbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
         builder.Services.AddScoped<IExecutionService, ExecutionService>();
+        builder.Services.AddScoped<IExecutionDispatcher, ExecutionDispatcher>();
+        builder.Services.AddScoped<IExecutionStateService, ExecutionStateService>();
+        builder.Services.AddScoped<IExecutionBindingService, ExecutionBindingService>();
+
+        // Terrain provider (GraySpace). Unset by default; the Aspire AppHost points BaseUrl at GHOSTS's own in-memory stub (/stubs/grayspace).
+        builder.Services.Configure<TerrainProviderOptions>(builder.Configuration.GetSection(TerrainProviderOptions.Section));
+        builder.Services.AddHttpClient<ITerrainProvider, GraySpaceTerrainProvider>();
+        builder.Services.AddSingleton(sp => new GraySpaceStub(() => DateTime.UtcNow,
+            sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<TerrainProviderOptions>>().Value.StubBuildSeconds));
+        builder.Services.AddScoped<ITerrainService>(sp => new TerrainService(sp.GetRequiredService<DbContext>(), sp.GetRequiredService<ITerrainProvider>()));
+        builder.Services.AddHostedService<TerrainStatusPoller>();
         builder.Services.AddScoped<IExecutionMapService, ExecutionMapService>();
 
         // Scenario Builder services

@@ -171,7 +171,7 @@ function convert(fixture, slug) {
 // Shape A: the three-GETs export of the live API (scenario + graph + objectives).
 function convertApiShape(fx, slug) {
   const s = fx.scenario, p = s.scenarioParameters, te = s.technicalEnvironment, gm = s.gameMechanics, tl = s.timeline;
-  const doc = { schemaVersion: '1.1.0', slug, name: s.name, description: s.description };
+  const doc = { schemaVersion: '1.2.0', slug, name: s.name, description: s.description };
   if (fx.catalog) doc.catalog = fx.catalog;
   doc.context = { political: p.politicalContext };
   doc.audience = { role: p.playerRole, rulesOfEngagement: p.rulesOfEngagement };
@@ -254,7 +254,7 @@ function convertApiShape(fx, slug) {
 // Shape B: the current kriegspiel bundle (situation, player, opfor, world, triggers, clock, fog).
 function convertKriegspielShape(fx, slug) {
   const s = fx.scenario;
-  const doc = { schemaVersion: '1.1.0', slug, name: s.name, description: s.description };
+  const doc = { schemaVersion: '1.2.0', slug, name: s.name, description: s.description };
   if (fx.catalog) doc.catalog = fx.catalog;
   doc.context = { situation: s.situation };
   doc.audience = { role: s.player?.role, mandate: s.player?.mandate, rulesOfEngagement: s.player?.roe };
@@ -512,7 +512,7 @@ function renderTerrain(out, doc) {
   const t = doc.terrain;
   if (!t) return;
   heading(out, 2, 'The terrain');
-  if (t.reference) para(out, `**Base.** The \`${t.reference.slice}\` slice from ${t.reference.provider}. ` +
+  if (t.reference) para(out, `**Base.** The \`${t.reference.enclave || t.reference.slice}\` enclave${t.reference.base ? ` on the \`${t.reference.base}\` base` : ''} from ${t.reference.provider}. ` +
     'Everything below is what this exercise adds to it or relies on from it.');
   if (t.summary?.topology) para(out, `**Topology.** ${t.summary.topology}`);
   if (t.summary?.assets) para(out, `**Assets.** ${t.summary.assets}`);

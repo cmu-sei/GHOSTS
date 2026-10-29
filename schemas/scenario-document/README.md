@@ -78,7 +78,7 @@ GHOSTS=/path/to/GHOSTS bash test.sh
 | `sides` | Nations or organizations with `alignment`. | |
 | `adversaries[]` | `type`, `capability` 1–5 with defined anchors, `techniques[]`, `capabilities[]`, `objective`, `winThreshold`, `playbook[]` of precondition-gated moves. | |
 | `terrain` | See rule 8. | |
-| `population.pools[]` | Simulated people: `role`, `count`, `description` of who they are. | |
+| `population.pools[]` | Simulated people: `role`, `count`, `description` of who they are, and (1.2.0) the `segments` and `hosts` they sit on. | |
 | `startingConditions` | Initial `flags[]` and `facts{}`. | |
 | `rulesOfPlay` | `pacing`, `duration`, `clock`, `deadline`, `adjudication`, `fog`, `telemetry`, `escalationLadder` with `rungs[]`, `branching`. | |
 | `assessment` | `purpose`, `victoryConditions`, `performanceMetrics`, `objectives[]` with `metWhen` gates. | |
@@ -222,6 +222,19 @@ but requiring the description can reject a document 1.0.0 accepted. It was taken
 an event becomes an Inject row and silently loses `when`, `schedule`, `objectives` and `execution` —
 being told is better than being imported wrong — and because no document of that shape exists outside
 `tests/invalid.scenario.json`.
+
+v1.2.0 adds optional fields only, so every 1.1.0 document is read unchanged:
+
+- `terrain.reference.enclave` and `terrain.reference.base` name the enclave a terrain provider builds and the base it
+  builds on. `slice`, the 1.1.0 name for the enclave, is still accepted and is stored as `enclave` on import.
+- `event.execution.mode` gains `npc`: the event's `action` (an everyday handler, its commands and their
+  `commandArgs`) runs on the clients of the NPCs its `targets` name, by pool, segment or host. Browsers, Word,
+  Excel, PowerPoint and Print need `commandArgs`: the pages, the save directory, the files to print.
+- `event.choices[]` lists a decision point's answers; White Cell records the one taken and its `effects` apply.
+- `population.pools[].segments` and `.hosts` place a pool's people, so NPCs can be bound to hosts.
+
+Exports write 1.2.0. Tier 2 checks the new names against the document: `REF_UNKNOWN_POOL`, and
+`REF_UNKNOWN_SEGMENT` and `REF_UNKNOWN_HOST` at the new paths.
 
 ## Open questions for the GHOSTS team
 

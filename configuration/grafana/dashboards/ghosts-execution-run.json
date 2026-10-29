@@ -1,0 +1,613 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "id": 1,
+      "title": "Status",
+      "type": "stat",
+      "datasource": {
+        "type": "postgres",
+        "uid": "ghosts"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ghosts"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT status FROM executions WHERE id = $execution"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Created",
+                  "index": 0
+                },
+                "1": {
+                  "text": "Running",
+                  "index": 1
+                },
+                "2": {
+                  "text": "Paused",
+                  "index": 2
+                },
+                "3": {
+                  "text": "Completed",
+                  "index": 3
+                },
+                "4": {
+                  "text": "Failed",
+                  "index": 4
+                },
+                "5": {
+                  "text": "Cancelled",
+                  "index": 5
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 2,
+      "title": "Exercise clock (min)",
+      "type": "stat",
+      "datasource": {
+        "type": "postgres",
+        "uid": "ghosts"
+      },
+      "gridPos": {
+        "x": 4,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ghosts"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT round(((extract(epoch FROM (coalesce(pausedat, completedat, now() AT TIME ZONE 'UTC') - startedat)) - pausedseconds) / 60)::numeric, 1) AS clock FROM executions WHERE id = $execution AND startedat IS NOT NULL"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Wall time since start, less time paused"
+    },
+    {
+      "id": 3,
+      "title": "Objectives met",
+      "type": "stat",
+      "datasource": {
+        "type": "postgres",
+        "uid": "ghosts"
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ghosts"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT count(*) AS met FROM executions e, jsonb_object_keys(coalesce(e.runstate -> 'objectivesMet', '{}'::jsonb)) k WHERE e.id = $execution"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 4,
+      "title": "Responses met",
+      "type": "stat",
+      "datasource": {
+        "type": "postgres",
+        "uid": "ghosts"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ghosts"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT count(*) AS met FROM executions e, jsonb_array_elements(coalesce(e.runstate -> 'responses', '[]'::jsonb)) r WHERE e.id = $execution AND (r ->> 'met')::boolean"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Expected responses White Cell marked met"
+    },
+    {
+      "id": 5,
+      "title": "Responses missed",
+      "type": "stat",
+      "datasource": {
+        "type": "postgres",
+        "uid": "ghosts"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ghosts"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT count(*) AS missed FROM executions e, jsonb_array_elements(coalesce(e.runstate -> 'responses', '[]'::jsonb)) r WHERE e.id = $execution AND NOT (r ->> 'met')::boolean"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Expected responses White Cell marked missed"
+    },
+    {
+      "id": 6,
+      "title": "Items resolved",
+      "type": "stat",
+      "datasource": {
+        "type": "postgres",
+        "uid": "ghosts"
+      },
+      "gridPos": {
+        "x": 20,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ghosts"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT count(*) FILTER (WHERE status IN ('Completed', 'Failed', 'Skipped')) AS resolved FROM execution_timeline_items WHERE executionid = $execution"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "description": "Timeline items completed, failed or skipped"
+    },
+    {
+      "id": 7,
+      "title": "Expected responses",
+      "type": "table",
+      "datasource": {
+        "type": "postgres",
+        "uid": "ghosts"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 4,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ghosts"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT (r ->> 'itemNumber')::int AS \"Item\", r ->> 'expected' AS \"Expected response\", CASE WHEN (r ->> 'met')::boolean THEN 'Met' ELSE 'Missed' END AS \"Result\", r ->> 'notes' AS \"Notes\", r ->> 'by' AS \"By\", (r ->> 'at')::timestamp AS \"At\" FROM executions e, jsonb_array_elements(coalesce(e.runstate -> 'responses', '[]'::jsonb)) r WHERE e.id = $execution ORDER BY 1"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      }
+    },
+    {
+      "id": 8,
+      "title": "Objectives",
+      "type": "table",
+      "datasource": {
+        "type": "postgres",
+        "uid": "ghosts"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 4,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ghosts"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT (o ->> 'id')::int AS \"Id\", o ->> 'name' AS \"Objective\", o ->> 'metWhen' AS \"Met when\", CASE WHEN coalesce(e.runstate -> 'objectivesMet', '{}'::jsonb) ? (o ->> 'id') THEN 'Met' ELSE 'Open' END AS \"Status\", (e.runstate -> 'objectivesMet' ->> (o ->> 'id'))::timestamp AS \"Met at\" FROM executions e CROSS JOIN LATERAL (SELECT d.document FROM scenario_documents d WHERE d.scenarioid = e.scenarioid ORDER BY d.createdat DESC, d.id DESC LIMIT 1) doc CROSS JOIN LATERAL jsonb_array_elements(coalesce(doc.document -> 'assessment' -> 'objectives', '[]'::jsonb)) o WHERE e.id = $execution ORDER BY 1"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "description": "The objectives in the scenario's latest document, and whether this run has met each"
+    },
+    {
+      "id": 9,
+      "title": "Items by status",
+      "type": "bargauge",
+      "datasource": {
+        "type": "postgres",
+        "uid": "ghosts"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 12,
+        "w": 8,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ghosts"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT status AS \"Status\", count(*) AS \"Items\" FROM execution_timeline_items WHERE executionid = $execution GROUP BY status ORDER BY 2 DESC"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": true
+        },
+        "orientation": "horizontal",
+        "displayMode": "basic",
+        "showUnfilled": true
+      }
+    },
+    {
+      "id": 10,
+      "title": "Timeline",
+      "type": "table",
+      "datasource": {
+        "type": "postgres",
+        "uid": "ghosts"
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 12,
+        "w": 16,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ghosts"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT number AS \"#\", time AS \"Time\", assigned AS \"Owner\", description AS \"Description\", status AS \"Status\", completedby AS \"By\", completedat AS \"Completed\" FROM execution_timeline_items WHERE executionid = $execution ORDER BY number"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      }
+    },
+    {
+      "id": 11,
+      "title": "Flags",
+      "type": "table",
+      "datasource": {
+        "type": "postgres",
+        "uid": "ghosts"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 20,
+        "w": 6,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ghosts"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT jsonb_array_elements_text(coalesce(runstate -> 'flags', '[]'::jsonb)) AS \"Flag\" FROM executions WHERE id = $execution"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      }
+    },
+    {
+      "id": 12,
+      "title": "Decisions",
+      "type": "table",
+      "datasource": {
+        "type": "postgres",
+        "uid": "ghosts"
+      },
+      "gridPos": {
+        "x": 6,
+        "y": 20,
+        "w": 8,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ghosts"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT (d ->> 'itemNumber')::int AS \"Item\", d ->> 'label' AS \"Choice\", d ->> 'by' AS \"By\", (d ->> 'at')::timestamp AS \"At\" FROM executions e, jsonb_array_elements(coalesce(e.runstate -> 'decisions', '[]'::jsonb)) d WHERE e.id = $execution ORDER BY 4"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      }
+    },
+    {
+      "id": 13,
+      "title": "Run events",
+      "type": "table",
+      "datasource": {
+        "type": "postgres",
+        "uid": "ghosts"
+      },
+      "gridPos": {
+        "x": 14,
+        "y": 20,
+        "w": 10,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ghosts"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT timestamp AS \"Time\", eventtype AS \"Type\", description AS \"Description\", severity AS \"Severity\" FROM execution_events WHERE executionid = $execution ORDER BY timestamp DESC LIMIT 200"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      }
+    }
+  ],
+  "preload": false,
+  "refresh": "30s",
+  "schemaVersion": 42,
+  "tags": [
+    "ghosts",
+    "assessment"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {},
+        "datasource": {
+          "type": "postgres",
+          "uid": "ghosts"
+        },
+        "definition": "",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Execution",
+        "multi": false,
+        "name": "execution",
+        "options": [],
+        "query": "SELECT e.name || ' (' || to_char(e.createdat, 'YYYY-MM-DD') || ')' AS __text, e.id::text AS __value FROM executions e ORDER BY e.createdat DESC",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "utc",
+  "title": "GHOSTS - Execution Run",
+  "uid": "ghosts-execution-run",
+  "version": 1
+}

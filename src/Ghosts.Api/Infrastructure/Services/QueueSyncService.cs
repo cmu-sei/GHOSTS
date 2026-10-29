@@ -384,7 +384,7 @@ namespace Ghosts.Api.Infrastructure.Services
         }
 
         /// <summary>
-        /// Parses an npc-scenario-action CommandArg ("execution:{id},event:{n},...") and advances
+        /// Parses an npc-scenario-action CommandArg ("execution:{id},item:{itemId},event:{n},...") and advances
         /// the matching execution timeline item via the execution service.
         /// </summary>
         private static async Task RecordScenarioAction(IServiceScope scope, string commandArg)
@@ -395,25 +395,29 @@ namespace Ghosts.Api.Infrastructure.Services
             try
             {
                 int? executionId = null;
+                int? itemId = null;
                 int? eventNumber = null;
                 foreach (var t in commandArg.Split(',').Select(token => token.Trim()))
                 {
                     if (t.StartsWith("execution:", StringComparison.OrdinalIgnoreCase)
                         && int.TryParse(t["execution:".Length..], out var eid))
                         executionId = eid;
+                    else if (t.StartsWith("item:", StringComparison.OrdinalIgnoreCase)
+                        && int.TryParse(t["item:".Length..], out var iid))
+                        itemId = iid;
                     else if (t.StartsWith("event:", StringComparison.OrdinalIgnoreCase)
                         && int.TryParse(t["event:".Length..], out var num))
                         eventNumber = num;
                 }
 
-                if (executionId == null || eventNumber == null)
+                if (executionId == null || (itemId == null && eventNumber == null))
                 {
                     _log.Trace($"npc-scenario-action missing execution/event in args: {commandArg}");
                     return;
                 }
 
                 var executionService = scope.ServiceProvider.GetRequiredService<IExecutionService>();
-                await executionService.RecordScenarioActionAsync(executionId.Value, eventNumber.Value, commandArg, new CancellationToken());
+                await executionService.RecordScenarioActionAsync(executionId.Value, itemId, eventNumber, commandArg, new CancellationToken());
             }
             catch (InvalidOperationException e)
             {

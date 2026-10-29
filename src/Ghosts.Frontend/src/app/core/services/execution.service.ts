@@ -12,6 +12,13 @@ import {
   UpdateExecutionRequest,
   CreateExecutionEventRequest,
   CompleteTimelineItemRequest,
+  ExecutionState,
+  SetFlagsRequest,
+  RecordDecisionRequest,
+  MarkResponseRequest,
+  NpcBinding,
+  BindingResult,
+  ExecutionTerrain,
 } from '../models/execution.model';
 
 @Injectable({
@@ -156,5 +163,62 @@ export class ExecutionService {
       `${this.apiUrl}/${executionId}/timeline-items/${itemId}/complete`,
       request
     );
+  }
+
+  // Run state
+  getState(executionId: number): Observable<ExecutionState> {
+    return this.http.get<ExecutionState>(`${this.apiUrl}/${executionId}/state`);
+  }
+
+  setFlags(executionId: number, request: SetFlagsRequest): Observable<ExecutionState> {
+    return this.http.post<ExecutionState>(`${this.apiUrl}/${executionId}/state/flags`, request);
+  }
+
+  recordDecision(
+    executionId: number,
+    itemId: number,
+    request: RecordDecisionRequest
+  ): Observable<ExecutionState> {
+    return this.http.post<ExecutionState>(
+      `${this.apiUrl}/${executionId}/timeline-items/${itemId}/decision`,
+      request
+    );
+  }
+
+  markResponse(
+    executionId: number,
+    itemId: number,
+    request: MarkResponseRequest
+  ): Observable<ExecutionState> {
+    return this.http.post<ExecutionState>(
+      `${this.apiUrl}/${executionId}/timeline-items/${itemId}/response`,
+      request
+    );
+  }
+
+  // NPC bindings
+  getNpcBindings(executionId: number): Observable<NpcBinding[]> {
+    return this.http.get<NpcBinding[]>(`${this.apiUrl}/${executionId}/npcs`);
+  }
+
+  autoBindNpcs(executionId: number): Observable<BindingResult> {
+    return this.http.post<BindingResult>(`${this.apiUrl}/${executionId}/npcs/autobind`, {});
+  }
+
+  setNpcHost(executionId: number, npcId: string, hostName: string): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/${executionId}/npcs/${npcId}/host`, { hostName });
+  }
+
+  // Terrain
+  getTerrain(executionId: number): Observable<ExecutionTerrain> {
+    return this.http.get<ExecutionTerrain>(`${this.apiUrl}/${executionId}/terrain`);
+  }
+
+  buildTerrain(executionId: number): Observable<ExecutionTerrain> {
+    return this.http.post<ExecutionTerrain>(`${this.apiUrl}/${executionId}/terrain`, {});
+  }
+
+  teardownTerrain(executionId: number): Observable<ExecutionTerrain> {
+    return this.http.delete<ExecutionTerrain>(`${this.apiUrl}/${executionId}/terrain`);
   }
 }

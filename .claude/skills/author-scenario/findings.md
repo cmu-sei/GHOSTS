@@ -54,7 +54,7 @@ observe. Apply this rule before a classifier ever has to; do not wait for one to
 | Code | Tier | Severity | The repair |
 |---|---|---|---|
 | `SCHEMA_*` | 1 | error | The schema said what it wanted; the message and hint name the keyword. `SCHEMA_ADDITIONAL_PROPERTIES` is usually a field you invented or misspelled — check `schemas/scenario-document/v1/`, do not guess. |
-| `SCHEMA_NOT_AN_OBJECT`, `SCHEMA_VERSION_MISSING`, `SCHEMA_VERSION_UNSUPPORTED` | 1 | error | The file is not a scenario document or declares a version the API does not support. Set `schemaVersion` to `1.1.0`. |
+| `SCHEMA_NOT_AN_OBJECT`, `SCHEMA_VERSION_MISSING`, `SCHEMA_VERSION_UNSUPPORTED` | 1 | error | The file is not a scenario document or declares a version the API does not support. Set `schemaVersion` to `1.2.0`. |
 | `ID_DUPLICATE` | 2 | error | Two things share an id. Rename the later one and update every reference to it. |
 | `REF_UNKNOWN_ENTITY`, `REF_UNKNOWN_OBJECTIVE`, `REF_UNKNOWN_SEGMENT`, `REF_UNKNOWN_WORKFLOW`, `REF_UNKNOWN_REFERENCE` | 2 | error | A pointer to something the document does not declare — a typo, or a declaration you forgot. The hint lists what *is* declared. |
 | `REF_UNKNOWN_HOST` (error, at `/terrain/vulnerabilities/*/asset` or `/terrain/defenses/*/covers/*`) | 2 | error | A vulnerability or defense on a host that does not exist. Declare the host or fix the name. |
@@ -76,7 +76,7 @@ observe. Apply this rule before a classifier ever has to; do not wait for one to
 | `ATTACK_DEPRECATED_TECHNIQUE` | 2 | warning | MITRE deprecated it without a replacement. **Ask D2**: is the deprecated technique the point (this adversary really does the old thing), or should the adversary press differently? |
 | `REF_UNSET_FLAG` | 2 | warning | A condition reads a flag nothing sets, so the branch is false until something outside the document raises it. **Either a typo (mechanical) or an adjudicated outcome (judgment)** — if a white cell raises it, that is B3, and it belongs in `decisions.md` as adjudicated, with who adjudicates named. Never silence it by adding a `setFlags` you invented; that quietly removes a human from the exercise. |
 | `DRYRUN_NPCS` (warning) | 4 | warning | `population.pools` is empty, or a pool has a count of zero, so the dry run's generator made nobody for it and nothing will act there. **Ask A3**: who is simulated and who is played? Entities and edges are the graph, not the population — adding a Person entity does not give the exercise a user. |
-| `TERRAIN_UNSTRUCTURED` | 2 | info | Terrain is prose, not hosts and segments, so nothing downstream can check it. **Ask E2** for the slice and what this exercise adds, then structure it. This is an info finding you should almost never accept. |
+| `TERRAIN_UNSTRUCTURED` | 2 | info | Terrain is prose, not hosts and segments, so nothing downstream can check it. **Ask E2** for the enclave and what this exercise adds, then structure it. This is an info finding you should almost never accept. |
 | `TIME_NO_DURATION` | 2 | info | No duration declared, so no offset can be checked. **Ask E1.** |
 
 ### Usually accepted — say why

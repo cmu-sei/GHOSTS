@@ -484,12 +484,18 @@
           </mat-form-field>
           <div class="form-row">
             <mat-form-field class="half-width">
-              <mat-label>Base range provider</mat-label>
-              <input matInput [(ngModel)]="terrain.reference.provider" placeholder="e.g., topomojo">
+              <mat-label>Terrain provider</mat-label>
+              <input matInput [(ngModel)]="terrain.reference.provider" placeholder="e.g., grayspace">
             </mat-form-field>
             <mat-form-field class="half-width">
-              <mat-label>Base range slice</mat-label>
-              <input matInput [(ngModel)]="terrain.reference.slice">
+              <mat-label>Enclave</mat-label>
+              <input matInput [(ngModel)]="terrain.reference.enclave">
+            </mat-form-field>
+          </div>
+          <div class="form-row">
+            <mat-form-field class="half-width">
+              <mat-label>Base</mat-label>
+              <input matInput [(ngModel)]="terrain.reference.base">
             </mat-form-field>
           </div>
         </div>
