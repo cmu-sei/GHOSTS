@@ -1,0 +1,268 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:ghosts:scenario-builder:exercise-document:v0",
+  "title": "Scenario Builder exercise document, version 0",
+  "description": "What GET /api/scenarios/{id} returns: the Crucible Scenario Format. Version 0.3 covers the Tabletop Exercise (TTX) and Small Unit Team Exercise kinds; a value under scenario or network may be text, a list of text, or a list of items. network holds what the network module needs to build the scenario's range.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "slug",
+    "name",
+    "status",
+    "stage",
+    "decisions",
+    "findings"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "0.3.0"
+    },
+    "kind": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "enum": [
+        "draft"
+      ]
+    },
+    "stage": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "engagement": {
+      "$ref": "#/$defs/texts"
+    },
+    "objectives": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/item"
+      }
+    },
+    "teachingPoints": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/item"
+      }
+    },
+    "scenario": {
+      "type": "object",
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "$ref": "#/$defs/textList"
+          },
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/item"
+            }
+          }
+        ]
+      }
+    },
+    "groundTruth": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/item"
+      }
+    },
+    "names": {
+      "type": "object",
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "$ref": "#/$defs/textList"
+          }
+        ]
+      }
+    },
+    "vocabulary": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "fixed": {
+          "$ref": "#/$defs/textList"
+        },
+        "banned": {
+          "$ref": "#/$defs/textList"
+        }
+      }
+    },
+    "network": {
+      "type": "object",
+      "description": "Network considerations for the network module: segments, hosts, connectivity, identity, monitoring, simulated users, what is planted, build limits.",
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "$ref": "#/$defs/textList"
+          },
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/item"
+            }
+          }
+        ]
+      }
+    },
+    "decisions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/decision"
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/finding"
+      }
+    }
+  },
+  "$defs": {
+    "texts": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "textList": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "text"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "visibility": {
+          "enum": [
+            "excon",
+            "participant"
+          ]
+        }
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "question",
+        "value",
+        "who",
+        "by",
+        "via",
+        "time"
+      ],
+      "properties": {
+        "question": {
+          "type": "string"
+        },
+        "value": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/textList"
+            }
+          ]
+        },
+        "who": {
+          "enum": [
+            "stated",
+            "proposed"
+          ]
+        },
+        "by": {
+          "type": "string"
+        },
+        "via": {
+          "enum": [
+            "person",
+            "agent"
+          ]
+        },
+        "reason": {
+          "type": "string"
+        },
+        "time": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "severity",
+        "code",
+        "message",
+        "stage"
+      ],
+      "properties": {
+        "severity": {
+          "enum": [
+            "stop",
+            "warning"
+          ]
+        },
+        "code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "stage": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The stage the finding is about: the open one, or a closed one whose approval went stale."
+        }
+      }
+    }
+  }
+}

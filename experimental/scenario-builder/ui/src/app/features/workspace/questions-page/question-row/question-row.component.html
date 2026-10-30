@@ -1,0 +1,74 @@
+<div class="row" role="listitem" [class.editing]="editing()" [attr.data-status]="status()">
+  <span class="mark" aria-hidden="true"></span>
+  <span class="status visually-hidden">{{ status() }}</span>
+
+  <div class="name">
+    <span class="label">{{ label() }}</span>
+    <span class="question">{{ question().text }}</span>
+  </div>
+
+  <div class="answer">
+    @if (!editing()) {
+      @if (answer(); as a) {
+        @if (question().answer === 'list') {
+          <ul class="items">
+            @for (item of shown(); track $index) {
+              <li>{{ item }}</li>
+            }
+          </ul>
+        } @else {
+          <div class="value">{{ shown()[0] }}</div>
+        }
+        <div class="meta">
+          @if (a.who === 'proposed') {
+            Proposed by the agent, {{ a.time | date: 'MMM d HH:mm' }}
+          } @else {
+            Stated by {{ a.by }}{{ a.via === 'agent' ? ' through the agent' : '' }}, {{ a.time | date: 'MMM d HH:mm' }}
+          }
+        </div>
+        @if (a.reason) {
+          <div class="reason">{{ a.reason }}</div>
+        }
+      } @else {
+        <div class="empty">
+          Not answered
+          @if (question().recommended) {
+            <span class="hint">Recommended: {{ question().recommended }}</span>
+          }
+        </div>
+      }
+    } @else {
+      <div class="editor">
+        <p class="why">{{ question().why }}</p>
+        @switch (question().answer) {
+          @case ('choice') {
+            <select class="sb-field" [value]="draft()" (change)="typed($event)" [attr.aria-label]="label()">
+              @for (option of question().options ?? []; track option) {
+                <option [value]="option" [selected]="option === draft()">{{ option }}</option>
+              }
+            </select>
+          }
+          @case ('list') {
+            <textarea class="sb-field" rows="4" placeholder="One item per line" [value]="draft()" (input)="typed($event)" [attr.aria-label]="label()"></textarea>
+          }
+          @default {
+            <textarea class="sb-field" rows="2" [value]="draft()" (input)="typed($event)" [attr.aria-label]="label()"></textarea>
+          }
+        }
+        <div class="actions">
+          <button class="sb-button primary save" type="button" (click)="submit()">Save</button>
+          @if (question().recommended) {
+            <button class="sb-button use-recommended" type="button" (click)="useRecommended()">Use the recommended answer</button>
+          }
+          <button class="sb-button ghost" type="button" (click)="cancel()">Cancel</button>
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="act">
+    @if (editable() && !editing()) {
+      <button class="sb-button edit" type="button" [class.on-hover]="!!answer()" (click)="edit()">{{ answer() ? 'Change' : 'Answer' }}</button>
+    }
+  </div>
+</div>

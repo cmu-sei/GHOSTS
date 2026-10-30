@@ -1,0 +1,95 @@
+<app-top-bar crumb="Admin">
+  <a class="back" routerLink="/admin">All libraries</a>
+</app-top-bar>
+
+@if (library(); as library) {
+  <section class="sheet">
+    <header class="head">
+      <div>
+        <h1>{{ library.name }}</h1>
+        <p class="sub">
+          {{ library.latestVersion ? 'Version ' + library.latestVersion + ' is what scenarios get.' : 'Publish to offer these templates.' }}
+          @if (library.draftChanged) {
+            <span class="changed">Draft changes</span>
+          }
+        </p>
+      </div>
+      <div class="actions">
+        @if (library.latestVersion) {
+          <a class="sb-button" [href]="admin.exportUrl(id)" download>Export</a>
+        }
+        <button class="sb-button primary" type="button" [disabled]="!library.draftChanged || dirty()" (click)="publish()">Publish</button>
+      </div>
+    </header>
+
+    @if (error(); as error) {
+      <p class="error" role="alert">{{ error }}</p>
+    }
+    <p class="note" role="status">{{ note() }}</p>
+
+    <section class="block" aria-labelledby="library-details">
+      <h2 id="library-details">Details</h2>
+      <div class="panel details">
+        <label>
+          <span class="label">Name</span>
+          <input class="sb-field" [value]="name()" (input)="typedName($event)" />
+        </label>
+        <label>
+          <span class="label">Description</span>
+          <textarea class="sb-field" rows="2" [value]="description()" (input)="typedDescription($event)"></textarea>
+        </label>
+        <fieldset>
+          <legend class="label">Serves</legend>
+          @for (kind of kinds(); track kind.id) {
+            <label class="kind">
+              <input type="checkbox" [checked]="kindIds().includes(kind.id)" (change)="toggleKind(kind.id, $any($event.target).checked)" />
+              {{ kind.name }}
+            </label>
+          }
+        </fieldset>
+        <div class="save">
+          <span class="state">{{ dirty() ? 'Unsaved changes' : '' }}</span>
+          <button class="sb-button" type="button" [disabled]="!dirty() || !name().trim()" (click)="saveDetails()">Save</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" aria-labelledby="library-templates">
+      <h2 id="library-templates">Templates</h2>
+      <div class="panel">
+        @for (t of library.templates; track t.id) {
+          <div class="row template">
+            <a class="title" [routerLink]="['/admin/libraries', id, 'templates', t.id]">{{ t.name }}</a>
+            <span class="audience" [attr.data-audience]="t.audience">{{ audiences[t.audience] }}</span>
+            <span class="meta">{{ formats[t.format] }}</span>
+            <span class="row-actions">
+              <a class="sb-button ghost" [routerLink]="['/admin/libraries', id, 'templates', t.id]">Edit</a>
+              <button class="sb-button ghost" type="button" [disabled]="dirty()" (click)="removeTemplate(t)">Remove</button>
+            </span>
+          </div>
+        } @empty {
+          <p class="empty">No templates yet.</p>
+        }
+        <form class="add" (submit)="$event.preventDefault(); addTemplate()">
+          <input class="sb-field" placeholder="Name a new template" aria-label="Template name" [value]="newTemplate()" (input)="typedTemplate($event)" />
+          <button class="sb-button" type="submit" [disabled]="!newTemplate().trim() || dirty()">Add template</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="block" aria-labelledby="library-versions">
+      <h2 id="library-versions">Versions</h2>
+      <div class="panel">
+        @for (v of library.versions.slice().reverse(); track v.number) {
+          <div class="row version">
+            <span class="title">Version {{ v.number }}</span>
+            <span class="meta">Published by {{ v.publishedBy }}</span>
+            <span class="meta when">{{ v.published | date: 'MMM d, y, HH:mm' }}</span>
+          </div>
+        } @empty {
+          <p class="empty">Nothing published yet.</p>
+        }
+      </div>
+    </section>
+  </section>
+}

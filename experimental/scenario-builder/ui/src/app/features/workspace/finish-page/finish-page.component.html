@@ -1,0 +1,123 @@
+<section class="sheet">
+  <header class="head">
+    <h1>Finish</h1>
+    <p class="sub">Take the scenario out of the builder as its JSON, as documents, or into another app. All of it works at any stage.</p>
+    @if (findings() > 0) {
+      <p class="draft">Draft: {{ findings() }} {{ findings() === 1 ? 'finding' : 'findings' }} open. Each export and document says so.</p>
+    }
+  </header>
+
+  @if (error(); as error) {
+    <p class="error" role="alert">{{ error }}</p>
+  }
+
+  <section class="block" aria-labelledby="finish-export">
+    <h2 id="finish-export">Export</h2>
+    <div class="panel">
+      <div class="row">
+        <div class="what">
+          <span class="name">Scenario JSON{{ store.schemaVersion() ? ' (in Crucible Scenario Format Schema v' + store.schemaVersion() + ')' : '' }}</span>
+          <span class="meta">Exactly what the pull API gives every consumer.</span>
+        </div>
+        <div class="actions">
+          <button class="sb-button ghost" type="button" [attr.aria-expanded]="shown() === 'json'" (click)="toggle('json')">{{ shown() === 'json' ? 'Hide JSON' : 'Show JSON' }}</button>
+          <a class="sb-button primary" [href]="api.exportUrl(store.scenarioId())" download>Download JSON</a>
+        </div>
+      </div>
+      <div class="row">
+        <div class="what">
+          <span class="name">Scenario Markdown</span>
+          <span class="meta">The same scenario to read: every answer by stage, with who gave it and why.</span>
+        </div>
+        <div class="actions">
+          <button class="sb-button ghost" type="button" [attr.aria-expanded]="shown() === 'markdown'" (click)="toggle('markdown')">{{ shown() === 'markdown' ? 'Hide Markdown' : 'Show Markdown' }}</button>
+          <a class="sb-button" [href]="api.exportUrl(store.scenarioId(), 'markdown')" download>Download Markdown</a>
+        </div>
+      </div>
+      @if (shown() && text(); as text) {
+        <pre>{{ text }}</pre>
+      }
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="finish-documents">
+    <h2 id="finish-documents">Document Templates</h2>
+    @if (documents(); as documents) {
+      @if (documents.length) {
+        <ul class="panel">
+          @for (d of documents; track d.library + '/' + d.template) {
+            <li class="row document">
+              <div class="what">
+                <span class="name">{{ d.name }}</span>
+                <span class="meta">{{ d.libraryName }}, version {{ d.version }}</span>
+              </div>
+              <span class="audience" [attr.data-audience]="d.audience">{{ audiences[d.audience] }}</span>
+              <span class="format">{{ formats[d.format] }}</span>
+              <div class="actions">
+                <a class="sb-button ghost" [href]="api.documentUrl(store.scenarioId(), d.library, d.template)" target="_blank" rel="noopener">Preview</a>
+                <a class="sb-button" [href]="api.documentUrl(store.scenarioId(), d.library, d.template, true)" download>Download</a>
+              </div>
+            </li>
+          }
+        </ul>
+      } @else {
+        <div class="panel empty">
+          No template library serves this kind yet.
+          @if (me()?.admin) {
+            <a routerLink="/admin">Make one in Admin</a>.
+          } @else {
+            Ask an admin to make one.
+          }
+        </div>
+      }
+    }
+  </section>
+
+  <section class="block" aria-labelledby="finish-plugins">
+    <h2 id="finish-plugins">Plugins</h2>
+    <p class="section-sub">Send the scenario to another app. Each sends once an admin connects it by its API's address.</p>
+    <ul class="plugins">
+      @for (p of plugins(); track p.id) {
+        <li class="plugin" [class.connected]="p.connected">
+          <span class="monogram" [attr.data-plugin]="p.id" aria-hidden="true">{{ p.name[0] }}</span>
+          <div class="plugin-text">
+            <span class="plugin-name">{{ p.name }}</span>
+            <span class="plugin-description">{{ p.description }}</span>
+          </div>
+          @if (editing() === p.id) {
+            <form class="plugin-connect" (submit)="$event.preventDefault(); connect(p)">
+              <input class="sb-field" type="url" placeholder="https://… its API's address" [attr.aria-label]="p.name + ' API URL'"
+                [value]="draftUrl()" (input)="draftUrl.set($any($event.target).value)" />
+              @if (pluginError(); as message) {
+                <p class="plugin-error" role="alert">{{ message }}</p>
+              }
+              <div class="plugin-foot">
+                @if (p.connected) {
+                  <button class="sb-button ghost" type="button" (click)="disconnect(p)">Disconnect</button>
+                }
+                <span class="spacer"></span>
+                <button class="sb-button ghost" type="button" (click)="editing.set(null)">Cancel</button>
+                <button class="sb-button primary" type="submit" [disabled]="!draftUrl().trim()">Connect</button>
+              </div>
+            </form>
+          } @else {
+            <div class="plugin-foot">
+              <span class="plugin-state" [attr.title]="p.url ?? null">{{ p.connected ? host(p.url!) : 'Not connected' }}</span>
+              <span class="plugin-actions">
+                @if (me()?.admin) {
+                  @if (p.connected) {
+                    <button class="sb-button ghost" type="button" [attr.aria-label]="'Change ' + p.name" (click)="openConnect(p)">Change</button>
+                  } @else {
+                    <button class="sb-button connect" type="button" [attr.aria-label]="'Connect ' + p.name" (click)="openConnect(p)">+</button>
+                  }
+                }
+                <button class="sb-button" type="button" [disabled]="!p.connected" [attr.aria-label]="'Send to ' + p.name" (click)="send(p)">Send</button>
+              </span>
+            </div>
+          }
+        </li>
+      }
+    </ul>
+    <p class="note" role="status">{{ sendNote() }}</p>
+  </section>
+</section>

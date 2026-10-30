@@ -1,0 +1,120 @@
+.sheet {
+  max-width: 1080px;
+  margin: 20px auto 40px;
+  padding: 0 24px;
+}
+
+.head {
+  margin-bottom: 12px;
+}
+
+h1 {
+  font-size: var(--sb-title);
+}
+
+.sub {
+  margin: 4px 0 0;
+  color: var(--sb-muted);
+}
+
+.table {
+  border: 1px solid var(--sb-line);
+  border-radius: var(--sb-radius);
+  background: var(--sb-surface);
+  overflow: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  position: sticky;
+  top: 0;
+  text-align: left;
+  font-size: var(--sb-small);
+  font-weight: 500;
+  color: var(--sb-muted);
+  background: var(--sb-surface);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--sb-line);
+}
+
+td {
+  vertical-align: top;
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--sb-line);
+}
+
+tr:last-child td {
+  border-bottom: 0;
+}
+
+.when {
+  white-space: nowrap;
+  color: var(--sb-muted);
+}
+
+.type {
+  padding: 1px 7px;
+  border-radius: var(--sb-pill);
+  font-size: var(--sb-small);
+  background: var(--sb-canvas);
+  color: var(--sb-muted);
+
+  &[data-type='approval'] {
+    background: var(--sb-pass-soft);
+    color: var(--sb-pass);
+  }
+
+  &[data-type='proposal'] {
+    background: var(--sb-agent-soft);
+    color: var(--sb-agent);
+  }
+}
+
+.item {
+  font-weight: 500;
+}
+
+.change {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 460px;
+  overflow-wrap: anywhere;
+}
+
+.before {
+  color: var(--sb-faint);
+  text-decoration: line-through;
+}
+
+.reason {
+  font-size: var(--sb-small);
+  font-style: italic;
+  color: var(--sb-muted);
+}
+
+.who {
+  white-space: nowrap;
+}
+
+.dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--sb-person);
+}
+
+[data-via='agent'] .dot {
+  background: var(--sb-agent);
+}
+
+.empty {
+  color: var(--sb-muted);
+  padding: 16px 12px;
+}

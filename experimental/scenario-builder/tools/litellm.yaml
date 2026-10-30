@@ -1,0 +1,12 @@
+# LiteLLM in front of Bedrock, so Sonnet answers on the same OpenAI-compatible API as Ollama
+# and the evaluation compares two models behind one identical harness (jeffort's
+# .devcontainer/profiles/aws/litellm.json does the same). See the README for the docker run line.
+model_list:
+  - model_name: sonnet-5.5
+    litellm_params:
+      model: bedrock/us.anthropic.claude-sonnet-5-5
+      aws_region_name: us-east-1
+      max_tokens: 8192
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY

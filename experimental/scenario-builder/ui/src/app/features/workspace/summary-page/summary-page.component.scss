@@ -1,0 +1,50 @@
+.sheet {
+  max-width: 820px;
+  margin: 20px auto 40px;
+  padding: 0 24px;
+}
+
+.head {
+  margin-bottom: 12px;
+}
+
+h1 {
+  font-size: var(--sb-title);
+}
+
+.sub {
+  margin: 4px 0 0;
+  color: var(--sb-muted);
+}
+
+.editor {
+  padding: 12px;
+  border: 1px solid var(--sb-line);
+  border-radius: var(--sb-radius);
+  background: var(--sb-surface);
+
+  textarea {
+    border-color: transparent;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 4px;
+
+    &:focus {
+      box-shadow: none;
+      border-color: transparent;
+    }
+  }
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.state {
+  font-size: var(--sb-small);
+  color: var(--sb-muted);
+}

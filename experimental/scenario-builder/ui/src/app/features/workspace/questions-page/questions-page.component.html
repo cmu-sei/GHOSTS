@@ -1,0 +1,44 @@
+@if (stage(); as stage) {
+  @if (store.progress(); as progress) {
+    <section class="sheet">
+      <header class="head">
+        <div class="titles">
+          <h1>{{ stage.title }}</h1>
+          <p class="sub">Stage {{ stage.number }}</p>
+        </div>
+        <div class="tally">
+          <span class="big">{{ answeredCount() }}</span>
+          <span class="of">of {{ stage.questions.length }} answered</span>
+        </div>
+      </header>
+
+      @if (stage.number === progress.stage) {
+        <app-gate-panel
+          [gate]="progress.gate"
+          [stage]="progress.stage"
+          [lastStage]="progress.lastStage"
+          (approve)="approve($event)"
+          (advance)="advance()" />
+      } @else if (stage.number > progress.stage) {
+        <p class="note">This stage opens once stage {{ progress.stage }} closes.</p>
+      } @else if (staleHere(); as stale) {
+        <div class="note stale">
+          <span>{{ stale.message }}</span>
+          <button class="sb-button" type="button" (click)="approve(stage.number)">Approve stage {{ stage.number }} again</button>
+        </div>
+      } @else {
+        <p class="note done">Closed and approved.</p>
+      }
+
+      <div class="ledger" role="list">
+        @for (question of stage.questions; track question.id) {
+          <app-question-row
+            [question]="question"
+            [answer]="store.answer(question.id)"
+            [editable]="stage.number <= progress.stage"
+            (save)="save(question.id, $event)" />
+        }
+      </div>
+    </section>
+  }
+}

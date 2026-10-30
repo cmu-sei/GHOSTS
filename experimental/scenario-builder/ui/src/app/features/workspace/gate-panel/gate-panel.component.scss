@@ -1,0 +1,39 @@
+:host {
+  display: block;
+}
+
+.gate {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 34px;
+  margin: 0 0 12px;
+  padding: 7px 8px 7px 12px;
+  border-radius: var(--sb-radius);
+  border: 1px solid var(--sb-line);
+  background: var(--sb-surface);
+  color: var(--sb-muted);
+
+  &[data-state='approval'] {
+    border-color: var(--sb-person);
+    background: var(--sb-person-soft);
+    color: #20357f;
+  }
+
+  &[data-state='passes'] {
+    border-color: transparent;
+    background: var(--sb-pass-soft);
+    color: var(--sb-pass);
+  }
+
+  &[data-state='attention'] {
+    border-color: transparent;
+    background: var(--sb-attention-soft);
+    color: var(--sb-attention);
+  }
+}
+
+.text {
+  min-width: 0;
+}

@@ -1,0 +1,68 @@
+<section class="sheet">
+  <header class="head">
+    <div>
+      <h1>Context</h1>
+      <p class="sub">Give the agent what you already have: notes, a link, documents. It searches them before it recommends an answer, and names the source in its reason.</p>
+    </div>
+    <button class="sb-button primary" type="button" (click)="start()">Start the questions</button>
+  </header>
+
+  <div class="panel add">
+    <form class="part" (submit)="$event.preventDefault(); addText()">
+      <h2>Paste Text</h2>
+      <input class="sb-field" placeholder="Name, such as where it came from" aria-label="Text name" [value]="textName()" (input)="field(textName, $event)" />
+      <textarea class="sb-field" rows="4" placeholder="Paste notes, an email, a report…" aria-label="Text" [value]="text()" (input)="field(text, $event)"></textarea>
+      <div class="end">
+        <button class="sb-button" type="submit" [disabled]="!textName().trim() || !text().trim()">Add text</button>
+      </div>
+    </form>
+
+    <form class="part" (submit)="$event.preventDefault(); addUrl()">
+      <h2>Link</h2>
+      <input class="sb-field" type="url" placeholder="https://…" aria-label="Link" [value]="url()" (input)="field(url, $event)" />
+      <input class="sb-field" placeholder="Name (optional)" aria-label="Link name" [value]="urlName()" (input)="field(urlName, $event)" />
+      <div class="end">
+        <span class="hint">{{ fetching() ? 'Fetching…' : 'Read once, now. Named by its title if you leave the name blank.' }}</span>
+        <button class="sb-button" type="submit" [disabled]="!url().trim() || fetching()">Add link</button>
+      </div>
+    </form>
+
+    <div class="part">
+      <h2>Documents</h2>
+      <p class="hint">PDF, Word (.docx), text, Markdown, CSV, JSON or HTML, up to 20 MB each. Only the text is kept.</p>
+      <div class="end">
+        <span class="hint">{{ uploading() ? 'Reading ' + uploading() + (uploading() === 1 ? ' file…' : ' files…') : '' }}</span>
+        <label class="sb-button choose">
+          Choose files
+          <input class="visually-hidden" type="file" multiple accept=".pdf,.docx,.txt,.md,.csv,.json,.html,.htm" (change)="chosen($event)" />
+        </label>
+      </div>
+    </div>
+  </div>
+
+  @if (error(); as error) {
+    <p class="error" role="alert">{{ error }}</p>
+  }
+
+  <section class="block" aria-labelledby="context-sources">
+    <h2 id="context-sources">Sources{{ sources().length ? ' (' + sources().length + ')' : '' }}</h2>
+    <div class="panel">
+      @for (s of sources(); track s.id) {
+        <div class="source">
+          <span class="kind" [attr.data-kind]="s.kind">{{ kinds[s.kind] }}</span>
+          <div class="what">
+            <span class="name">{{ s.name }}</span>
+            @if (s.origin && s.origin !== s.name) {
+              <span class="origin">{{ s.origin }}</span>
+            }
+          </div>
+          <span class="meta">{{ s.characters | number }} characters</span>
+          <span class="meta">{{ s.addedBy }}, {{ s.added | date: 'MMM d, HH:mm' }}</span>
+          <button class="sb-button ghost" type="button" (click)="remove(s)">Remove</button>
+        </div>
+      } @empty {
+        <p class="empty">Nothing yet. Without context, the agent works from your answers alone.</p>
+      }
+    </div>
+  </section>
+</section>

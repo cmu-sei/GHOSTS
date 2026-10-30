@@ -1,0 +1,130 @@
+{
+  "kind": "crucible-tabletop",
+  "opening": "We're planning a tabletop for 20 port and logistics operations leaders, in four teams of five. It runs on 4 March 2027 from 09:00 to 13:00, with one 15-minute break. Most of them speak English as a second language, so keep everything plain.",
+  "openingQuestions": {
+    "participants": [
+      "port",
+      "leaders"
+    ],
+    "headcount": [
+      "20",
+      "five"
+    ],
+    "timeSlot": [
+      "4 March",
+      "09:00"
+    ],
+    "plainEnglish": [
+      "Yes"
+    ]
+  },
+  "answers": {
+    "participants": "Port and logistics operations leaders",
+    "headcount": "20 people, four teams of five",
+    "timeSlot": "4 March 2027, 09:00 to 13:00, one 15-minute break",
+    "plainEnglish": "Yes",
+    "scopeDocuments": "None yet",
+    "sourceLimits": "Public sources only",
+    "world": "Fictional world",
+    "audienceType": "Civilian",
+    "recording": "Team answers are recorded; AI summarises them by theme for the after-action review",
+    "complements": "None",
+    "objectives": [
+      "Assess an outage under uncertainty",
+      "Decide who leads the response",
+      "Share information with partner ports",
+      "Agree public messages"
+    ],
+    "teachingPoints": [
+      "Backup power is only as good as its last test"
+    ],
+    "outputsFed": "The after-action review, by theme",
+    "problem": "A heatwave cuts power to a regional data centre; port booking systems fail on and off, and leaders must decide who leads and what to tell shippers",
+    "obviousExplanation": "It looks like the heatwave overloaded the grid; really, the data centre's backup generators failed their last test and were never fixed",
+    "groundTruth": [
+      "The backup generators failed their last test",
+      "The repair was never scheduled",
+      "Power is fully restored at 18:00 on Day 2"
+    ],
+    "actorType": "none",
+    "motive": "There is no attacker",
+    "attackPath": "Not applicable: there is no attacker",
+    "escalationCeiling": "Never a full outage, nobody hurt, no cargo lost",
+    "realVsFictional": "Real: the season. Fictional: every port, company, person and number",
+    "ending": "Power restored and a generator repair planned before the deadline",
+    "symmetry": "Yes",
+    "exerciseName": "Harbor Blackout",
+    "organizations": [
+      "Coastline Data Centre",
+      "Harbor Booking Service",
+      "Port Operators Group"
+    ],
+    "actorName": "None",
+    "nationalBodies": "By role only: your port authority, your ministry",
+    "fixedTerms": [
+      "booking system",
+      "data centre"
+    ],
+    "bannedTerms": [
+      "crisis"
+    ],
+    "notionalNetwork": "The port's corporate network and the crane control network, joined at the operations centre",
+    "liveRange": "No, discussion only",
+    "intent": "Rehearse how the port's leaders decide and communicate when a data centre outage stops the cranes, and find the gaps in the continuity plan",
+    "proficiency": "Most have run the continuity plan once on paper; none have handled a real outage",
+    "mandate": "Keep the port operating safely and keep the public and partners informed; they can call in contractors and the regional authority",
+    "successCriteria": [
+      "They agree a recovery priority within the first move",
+      "They hand over to the regional authority with a written brief"
+    ],
+    "victoryConditions": "Success: cranes back and partners informed on time. Failure: the port goes silent for a whole move",
+    "trainingKind": "Rehearsal",
+    "rulesOfEngagement": "Decisions only; no real calls to outside organizations; stay within the continuity plan unless they say why",
+    "deadline": "The 18:00 ship departure; if the cranes are still down, the shipping line diverts",
+    "description": "A heatwave afternoon at a busy port goes wrong when the cranes stop. Leaders have to decide what to restore first and who to tell",
+    "placeAndTime": "A fictional mid-sized European port, a July afternoon in the present day",
+    "actorCapability": "Organized",
+    "attackTechniques": [
+      "T1499 Endpoint Denial of Service"
+    ],
+    "population": "Port staff, the shipping line, two reporters and the public on social media; about thirty voices",
+    "informationEnvironment": "Local news site, a regional radio station, social media posts from the public, staff email",
+    "keyEvents": [
+      "Move 1: the cranes stop; White Cell; the team opens an incident",
+      "Move 2: a reporter calls; White Cell; the team agrees a holding line"
+    ],
+    "decisionPoints": [
+      "Move 1: restore cranes or the booking system first",
+      "Move 2: when to tell the public"
+    ],
+    "branching": "If they tell the public early, the press calms; if late, a second reporter calls",
+    "escalationSteps": [
+      "Cranes stop",
+      "Booking system fails",
+      "Shipping line threatens to divert (last recoverable)",
+      "Ship diverts"
+    ],
+    "pacing": "Turn-based moves",
+    "scenarioClock": "Each move is two hours of scenario time",
+    "adjudication": "Exercise control decides",
+    "fog": "Partial: each role sees what it would"
+  },
+  "delegate": [
+    "framework",
+    "redHerring",
+    "publicHandles"
+  ],
+  "summary": {
+    "required": [
+      "port",
+      "power",
+      "heat"
+    ],
+    "banned": [
+      "ransomware",
+      "hacker",
+      "malware",
+      "nation-state"
+    ]
+  }
+}

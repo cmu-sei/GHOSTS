@@ -1,0 +1,75 @@
+<app-top-bar />
+
+<section class="sheet">
+  <header class="head">
+    <h1>Scenarios</h1>
+    <p class="sub">Each scenario starts with the context you have, then walks through its kind's questions, stage by stage.</p>
+  </header>
+
+  <form class="create" (submit)="$event.preventDefault(); create()">
+    <input class="sb-field name" placeholder="Name a new scenario" aria-label="Scenario name" [value]="name()" (input)="typed($event)" />
+    <select class="sb-field kind" aria-label="Kind" [value]="kindId()" (change)="picked($event)">
+      @for (kind of kinds(); track kind.id) {
+        <option [value]="kind.id" [selected]="kind.id === kindId()">{{ kind.name }}</option>
+      }
+    </select>
+    <button class="sb-button primary" type="submit" [disabled]="!name().trim() || !kindId()">Create</button>
+  </form>
+
+  <div class="tools">
+    <input class="sb-field search" type="search" placeholder="Search by name, kind or owner" aria-label="Search scenarios"
+      [value]="query()" (input)="searched($event)" />
+    <label class="archived-toggle">
+      <input type="checkbox" [checked]="showArchived()" (change)="showArchived.set($any($event.target).checked)" />
+      Show archived{{ archivedCount() ? ' (' + archivedCount() + ')' : '' }}
+    </label>
+  </div>
+
+  @if (error(); as error) {
+    <p class="error" role="alert">{{ error }}</p>
+  }
+
+  <div class="grid">
+    <table>
+      <thead>
+        <tr>
+          @for (column of columns; track column.key) {
+            <th scope="col" [attr.aria-sort]="ariaSort(column.key)" [class]="column.key">
+              <button class="sort" type="button" (click)="sortBy(column.key)">{{ column.label }}</button>
+            </th>
+          }
+          <th scope="col" class="actions"><span class="visually-hidden">Actions</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (scenario of rows(); track scenario.id) {
+          <tr [class.archived]="scenario.archived">
+            <td class="name">
+              <a class="title" [routerLink]="['/scenarios', scenario.id, 'questions']">{{ scenario.name }}</a>
+              @if (scenario.archived) {
+                <span class="pill">Archived</span>
+              }
+            </td>
+            <td class="meta">{{ kindName(scenario.kindId) }}</td>
+            <td class="stage">Stage {{ scenario.stage }}</td>
+            <td class="meta">{{ scenario.owner }}</td>
+            <td class="meta when">{{ scenario.updated | date: 'MMM d, HH:mm' }}</td>
+            <td class="actions">
+              @if (scenario.archived) {
+                <button class="sb-button ghost" type="button" (click)="archive(scenario, false)">Restore</button>
+              } @else {
+                <button class="sb-button ghost" type="button" (click)="archive(scenario, true)">Archive</button>
+              }
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td class="empty" colspan="6">
+              {{ scenarios().length ? 'No scenario matches. Clear the search, or show archived ones.' : 'No scenarios yet. Name one above to start.' }}
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

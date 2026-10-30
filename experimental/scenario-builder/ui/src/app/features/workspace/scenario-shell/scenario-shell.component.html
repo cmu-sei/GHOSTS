@@ -1,0 +1,30 @@
+<app-top-bar [crumb]="store.name()">
+  <nav class="pages" aria-label="Pages">
+    @for (page of pages; track page.path) {
+      <a [routerLink]="page.path" routerLinkActive="active" ariaCurrentWhenActive="page">{{ page.label }}</a>
+    }
+  </nav>
+</app-top-bar>
+
+<div class="body">
+  <aside class="rail">
+    @if (store.kind(); as kind) {
+      @if (store.progress(); as progress) {
+        <app-stage-rail [kind]="kind" [progress]="progress" [selected]="store.selectedStage()" (select)="pick($event)" />
+      }
+    }
+  </aside>
+
+  <main class="page">
+    @if (store.error(); as error) {
+      <p class="error" role="alert">{{ error }}</p>
+    }
+    <router-outlet />
+  </main>
+
+  <aside class="agent" aria-label="Agent">
+    @if (store.scenarioId()) {
+      <app-agent-panel />
+    }
+  </aside>
+</div>

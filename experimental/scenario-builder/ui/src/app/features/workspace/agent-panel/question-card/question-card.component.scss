@@ -1,0 +1,65 @@
+.card {
+  margin: 10px 0;
+  padding: 12px;
+  border: 1px solid var(--sb-line);
+  border-radius: var(--sb-radius);
+  background: var(--sb-surface);
+
+  &.done {
+    opacity: 0.6;
+  }
+}
+
+.question {
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.picks {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pick {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid var(--sb-line-strong);
+  border-radius: var(--sb-radius);
+  background: var(--sb-surface);
+  color: var(--sb-ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    border-color: var(--sb-person);
+    background: var(--sb-person-soft);
+  }
+
+  &.recommended {
+    border-color: var(--sb-person);
+    font-weight: 500;
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+.why {
+  margin: -2px 2px 4px;
+  font-size: var(--sb-small);
+  color: var(--sb-muted);
+}
+
+.own {
+  margin-top: 8px;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 8px;
+}

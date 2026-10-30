@@ -1,0 +1,45 @@
+<app-top-bar crumb="Admin" />
+
+<section class="sheet">
+  <header class="head">
+    <div>
+      <h1>Template Libraries</h1>
+      <p class="sub">Each library offers documents for the kinds it serves. Scenarios get its latest published version.</p>
+    </div>
+    <label class="sb-button import">
+      Import
+      <input class="visually-hidden" type="file" accept=".json,application/json" (change)="chosen($event)" />
+    </label>
+  </header>
+
+  <form class="create" (submit)="$event.preventDefault(); create()">
+    <input class="sb-field" placeholder="Name a new library" aria-label="Library name" [value]="name()" (input)="typed($event)" />
+    <button class="sb-button primary" type="submit" [disabled]="!name().trim()">New library</button>
+  </form>
+
+  @if (error(); as error) {
+    <p class="error" role="alert">{{ error }}</p>
+  }
+  <p class="note" role="status">{{ note() }}</p>
+
+  @if (libraries(); as libraries) {
+    <div class="list" role="list">
+      @for (library of libraries; track library.id) {
+        <a class="library" role="listitem" [routerLink]="['/admin/libraries', library.id]">
+          <span class="title">{{ library.name }}</span>
+          <span class="meta">{{ kindNames(library.kinds) }}</span>
+          <span class="version" [class.unpublished]="!library.latestVersion">
+            {{ library.latestVersion ? 'Version ' + library.latestVersion : 'Not published' }}
+          </span>
+          <span class="state">
+            @if (library.draftChanged) {
+              <span class="changed">Draft changes</span>
+            }
+          </span>
+        </a>
+      } @empty {
+        <p class="empty">No libraries yet. Name one above, or import a .library.json file.</p>
+      }
+    </div>
+  }
+</section>

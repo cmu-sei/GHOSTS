@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="ScenarioBuilder.Api.Tests/ScenarioBuilder.Api.Tests.csproj" />
+  <Project Path="ScenarioBuilder.Api/ScenarioBuilder.Api.csproj" />
+</Solution>

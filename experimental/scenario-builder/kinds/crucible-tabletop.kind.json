@@ -1,0 +1,599 @@
+{
+  "id": "crucible-tabletop",
+  "version": "0.3.0",
+  "name": "Tabletop Exercise (TTX)",
+  "stages": [
+    {
+      "number": 0,
+      "title": "Engagement Context",
+      "gate": {
+        "approval": "Confirm the engagement settings"
+      },
+      "questions": [
+        {
+          "id": "intent",
+          "label": "Intent",
+          "text": "In plain English, what is this exercise for, and what happens in it? (exercise control only)",
+          "why": "It is the yardstick every later answer is checked against.",
+          "answer": "text",
+          "path": "/engagement/intent",
+          "visibility": "excon"
+        },
+        {
+          "id": "participants",
+          "label": "Participants",
+          "text": "Who are the participants (role and seniority)?",
+          "why": "Leaders need decisions, not technical steps.",
+          "recommended": "Leaders and senior coordinators",
+          "answer": "text",
+          "path": "/engagement/participants"
+        },
+        {
+          "id": "headcount",
+          "label": "Headcount and Teams",
+          "text": "How many participants, and how many per team?",
+          "why": "It drives the team count, roles and timing.",
+          "answer": "text",
+          "path": "/engagement/headcount"
+        },
+        {
+          "id": "proficiency",
+          "label": "Proficiency",
+          "text": "How experienced are the participants with this kind of situation?",
+          "why": "It sets how hard the scenario can push and how much help the controllers give.",
+          "answer": "text",
+          "path": "/engagement/proficiency"
+        },
+        {
+          "id": "mandate",
+          "label": "Mandate",
+          "text": "What are the participants responsible for protecting or achieving, and which actions are open to them?",
+          "why": "It defines what counts as a good decision in play.",
+          "answer": "text",
+          "path": "/engagement/mandate"
+        },
+        {
+          "id": "timeSlot",
+          "label": "Time Slot",
+          "text": "What is the time slot (date, start, length, breaks)?",
+          "why": "Every move must fit it.",
+          "answer": "text",
+          "path": "/engagement/timeSlot"
+        },
+        {
+          "id": "scopeDocuments",
+          "label": "Scope Documents",
+          "text": "Which documents set the scope (terms of reference, contract, agenda)?",
+          "why": "They are the source of truth for titles and times.",
+          "answer": "text",
+          "path": "/engagement/scopeDocuments"
+        },
+        {
+          "id": "plainEnglish",
+          "label": "Plain English",
+          "text": "Is English a second language for most participants?",
+          "why": "It sets the reading level and the acronym rules.",
+          "recommended": "Yes",
+          "answer": "choice",
+          "options": [
+            "Yes",
+            "No"
+          ],
+          "path": "/engagement/plainEnglish"
+        },
+        {
+          "id": "sourceLimits",
+          "label": "Source Limits",
+          "text": "Must all sources be public? Are there export-control or classification limits?",
+          "why": "It limits what the AI may use.",
+          "recommended": "Public sources only",
+          "answer": "text",
+          "path": "/engagement/sourceLimits"
+        },
+        {
+          "id": "world",
+          "label": "Real or Fictional World",
+          "text": "Real country names, or a fictional world?",
+          "why": "It changes the whole sensitivity profile.",
+          "answer": "choice",
+          "options": [
+            "Real country names",
+            "Fictional world"
+          ],
+          "path": "/engagement/world"
+        },
+        {
+          "id": "audienceType",
+          "label": "Civilian or Military",
+          "text": "Civilian or military audience?",
+          "why": "It sets the vocabulary and the frameworks.",
+          "recommended": "Civilian",
+          "answer": "choice",
+          "options": [
+            "Civilian",
+            "Military",
+            "Mixed"
+          ],
+          "path": "/engagement/audienceType"
+        },
+        {
+          "id": "recording",
+          "label": "Recording and AI Use",
+          "text": "Is performance data recorded, and is AI used on it?",
+          "why": "Participants must be told plainly.",
+          "answer": "text",
+          "path": "/engagement/recording"
+        },
+        {
+          "id": "complements",
+          "label": "Complements",
+          "text": "Which existing exercises or mechanisms must this complement, not replace?",
+          "why": "It sets the framing and the tone.",
+          "answer": "text",
+          "path": "/engagement/complements"
+        }
+      ]
+    },
+    {
+      "number": 1,
+      "title": "Objectives and Teaching Points",
+      "gate": {},
+      "questions": [
+        {
+          "id": "objectives",
+          "label": "Objectives",
+          "text": "What should teams practise? List 3–5 objectives, each starting with a verb.",
+          "why": "Later injects and decisions reference each objective by its ID.",
+          "recommended": "Assess under uncertainty; decide who leads; share information; coordinate public messages",
+          "answer": "list",
+          "path": "/objectives",
+          "idPrefix": "O"
+        },
+        {
+          "id": "successCriteria",
+          "label": "Success Criteria",
+          "text": "How will you know each objective is met? One per item, in the same order as the objectives.",
+          "why": "An objective without a test can't be assessed.",
+          "answer": "list",
+          "path": "/scenario/successCriteria"
+        },
+        {
+          "id": "victoryConditions",
+          "label": "Success and Failure",
+          "text": "What counts as success for the participants overall, and what counts as failure?",
+          "why": "The review measures against it.",
+          "answer": "text",
+          "path": "/scenario/victoryConditions"
+        },
+        {
+          "id": "teachingPoints",
+          "label": "Teaching Points",
+          "text": "What one or two teaching points should teams find for themselves?",
+          "why": "Teaching points are for facilitators. They never appear as takeaways in participant-facing text.",
+          "answer": "list",
+          "path": "/teachingPoints",
+          "visibility": "excon"
+        },
+        {
+          "id": "outputsFed",
+          "label": "Outputs Fed",
+          "text": "Which outputs must the exercise feed (report sections, AAR structure)?",
+          "why": "Every capture item should feed one of them.",
+          "answer": "text",
+          "path": "/engagement/outputsFed"
+        },
+        {
+          "id": "framework",
+          "label": "Framework",
+          "text": "Which competency or norms framework, if any, should decisions map to?",
+          "why": "Decisions can be mapped to the framework the sponsor uses.",
+          "recommended": "None",
+          "answer": "text",
+          "path": "/engagement/framework"
+        },
+        {
+          "id": "trainingKind",
+          "label": "Kind of Training",
+          "text": "What kind of training is this?",
+          "why": "It sets how the exercise is evaluated and reported.",
+          "recommended": "Rehearsal",
+          "answer": "choice",
+          "options": [
+            "Mission-essential task (MET)",
+            "Joint mission-essential task (JMET)",
+            "Rehearsal",
+            "Onboarding",
+            "Tool training"
+          ],
+          "path": "/engagement/trainingKind"
+        },
+        {
+          "id": "rulesOfEngagement",
+          "label": "Rules of Engagement",
+          "text": "What may the participants do, and not do, during play?",
+          "why": "It keeps play realistic and stops the exercise turning into something it isn't.",
+          "answer": "text",
+          "path": "/engagement/rulesOfEngagement"
+        },
+        {
+          "id": "deadline",
+          "label": "Deadline",
+          "text": "Is there a point by which the participants must act, and what happens if they miss it?",
+          "why": "A fixed point forces the decision the exercise is built around.",
+          "answer": "text",
+          "path": "/scenario/deadline"
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "title": "Premise, Ground Truth and Escalation Ceiling",
+      "gate": {
+        "approval": "Approve the executive summary"
+      },
+      "questions": [
+        {
+          "id": "problem",
+          "label": "One-Line Problem",
+          "text": "One-line problem: what goes wrong, for whom, and what must leaders decide?",
+          "why": "Everything else is built on it. Offer three options drawn from the objectives.",
+          "answer": "text",
+          "path": "/scenario/problem"
+        },
+        {
+          "id": "description",
+          "label": "Participant Description",
+          "text": "In one paragraph a participant could read, what is the scenario about?",
+          "why": "Catalogs, invitations and read-ins all start from it. It must not give the twist away.",
+          "answer": "text",
+          "path": "/scenario/description"
+        },
+        {
+          "id": "placeAndTime",
+          "label": "Place and Time",
+          "text": "Where and when is the scenario set: region, era, time of year?",
+          "why": "Places and dates stay consistent across every inject and document.",
+          "answer": "text",
+          "path": "/scenario/placeAndTime"
+        },
+        {
+          "id": "obviousExplanation",
+          "label": "Obvious Explanation",
+          "text": "What is the \"obvious\" explanation, and what is really happening?",
+          "why": "A plausible innocent cause that is true but not the whole story trains assessment under uncertainty.",
+          "answer": "text",
+          "path": "/scenario/obviousExplanation",
+          "visibility": "excon"
+        },
+        {
+          "id": "groundTruth",
+          "label": "Ground Truth",
+          "text": "List the ground-truth facts, one per item: what really happens (exercise control only).",
+          "why": "Only exercise control knows the ground truth. Later checks use these facts to catch leaks.",
+          "answer": "list",
+          "path": "/groundTruth",
+          "idPrefix": "GT",
+          "visibility": "excon"
+        },
+        {
+          "id": "actorType",
+          "label": "Threat Actor Type",
+          "text": "What is the threat actor type?",
+          "why": "It sets the whole threat story. A non-state actor with no home country blames no state.",
+          "recommended": "non-state",
+          "answer": "choice",
+          "options": [
+            "non-state",
+            "criminal",
+            "hacktivist",
+            "insider",
+            "none"
+          ],
+          "path": "/scenario/actorType"
+        },
+        {
+          "id": "actorCapability",
+          "label": "Threat Actor Capability",
+          "text": "How capable is the threat actor? (exercise control only)",
+          "why": "It bounds what the adversary can plausibly do in play.",
+          "recommended": "Organized",
+          "answer": "choice",
+          "options": [
+            "Opportunistic",
+            "Organized",
+            "Top-tier"
+          ],
+          "path": "/scenario/actorCapability",
+          "visibility": "excon"
+        },
+        {
+          "id": "motive",
+          "label": "Motive",
+          "text": "What is the actor's motive?",
+          "why": "It must not target a government, political system, religion or ethnic group.",
+          "answer": "text",
+          "path": "/scenario/motive",
+          "visibility": "excon"
+        },
+        {
+          "id": "attackPath",
+          "label": "Way In",
+          "text": "How does the attacker get in, and how does the attack work (in plain terms)?",
+          "why": "Keep it simple and common: leaders decide better on an attack they recognise.",
+          "answer": "text",
+          "path": "/scenario/attackPath",
+          "visibility": "excon"
+        },
+        {
+          "id": "attackTechniques",
+          "label": "ATT&CK Techniques",
+          "text": "Which ATT&CK techniques does the adversary use? One per item, such as \"T1566 Phishing\" (exercise control only).",
+          "why": "Techniques tie the scenario to real behaviour, and to the injects and detections that test it.",
+          "answer": "list",
+          "path": "/scenario/attackTechniques",
+          "visibility": "excon"
+        },
+        {
+          "id": "escalationCeiling",
+          "label": "Escalation Ceiling",
+          "text": "What is the escalation ceiling: the worst it gets, and what never happens?",
+          "why": "It keeps the exercise inside what teams can discuss in the time.",
+          "recommended": "Never a full outage, nobody hurt, no data stolen, no state blamed",
+          "answer": "text",
+          "path": "/scenario/escalationCeiling",
+          "visibility": "excon"
+        },
+        {
+          "id": "realVsFictional",
+          "label": "Real and Fictional",
+          "text": "What is real and what is fictional?",
+          "why": "Participants must be able to tell the two apart.",
+          "recommended": "Real: countries, season, holidays (background only). Fictional: every organization, person, event and number",
+          "answer": "text",
+          "path": "/scenario/realVsFictional"
+        },
+        {
+          "id": "ending",
+          "label": "Ending",
+          "text": "How does it end?",
+          "why": "Teams need a resolution to discuss in the after-action review.",
+          "recommended": "Cause known and a fix planned, before the exercise's deadline",
+          "answer": "text",
+          "path": "/scenario/ending",
+          "visibility": "excon"
+        },
+        {
+          "id": "redHerring",
+          "label": "Red Herring",
+          "text": "Is there a red herring?",
+          "why": "One per exercise at most, clearly marked in the ground truth.",
+          "answer": "text",
+          "path": "/scenario/redHerring",
+          "visibility": "excon"
+        },
+        {
+          "id": "symmetry",
+          "label": "Symmetry",
+          "text": "Does the incident hit every participating state in the same way?",
+          "why": "Symmetry keeps any one state from being singled out.",
+          "recommended": "Yes",
+          "answer": "choice",
+          "options": [
+            "Yes",
+            "No"
+          ],
+          "path": "/scenario/symmetry"
+        },
+        {
+          "id": "population",
+          "label": "Population",
+          "text": "Who else populates the scenario world (press, public, staff, simulated users), and roughly how many?",
+          "why": "Injects need voices, and simulated users (NPCs) have to be generated before play.",
+          "answer": "text",
+          "path": "/scenario/population"
+        },
+        {
+          "id": "informationEnvironment",
+          "label": "Information Environment",
+          "text": "Which news, social media, email and chat platforms exist in the scenario world, and who uses them?",
+          "why": "Information injects need somewhere to appear, and the same platforms every time.",
+          "answer": "text",
+          "path": "/scenario/informationEnvironment"
+        },
+        {
+          "id": "notionalNetwork",
+          "label": "Notional Network",
+          "text": "What networks and systems does the scenario's story describe?",
+          "why": "Injects and documents describe the same systems every time, and the network module can build them later.",
+          "answer": "text",
+          "path": "/network/notional"
+        },
+        {
+          "id": "liveRange",
+          "label": "Live Range",
+          "text": "Does any part of the exercise run on a live range or real systems?",
+          "why": "A live part needs a network built for it; a discussion needs only the story.",
+          "recommended": "No, discussion only",
+          "answer": "choice",
+          "options": [
+            "No, discussion only",
+            "Yes, as a demonstration",
+            "Yes, participants work on it"
+          ],
+          "path": "/network/liveRange"
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "title": "Events, Decisions and Rules of Play",
+      "gate": {},
+      "questions": [
+        {
+          "id": "keyEvents",
+          "label": "Key Events",
+          "text": "What events (injects) does exercise control push, in order? One per item: when, who delivers it, what happens, and the response you expect (exercise control only).",
+          "why": "They make sure every objective gets tested, whatever the participants do.",
+          "answer": "list",
+          "path": "/scenario/keyEvents",
+          "idPrefix": "E",
+          "visibility": "excon"
+        },
+        {
+          "id": "decisionPoints",
+          "label": "Decision Points",
+          "text": "Which decisions must the participants make, and when? One per item (exercise control only).",
+          "why": "They are where the exercise does its teaching.",
+          "answer": "list",
+          "path": "/scenario/decisionPoints",
+          "idPrefix": "D",
+          "visibility": "excon"
+        },
+        {
+          "id": "branching",
+          "label": "Branching",
+          "text": "How does the scenario change depending on what the participants do? (exercise control only)",
+          "why": "Controllers need to know which way to steer before play starts.",
+          "answer": "text",
+          "path": "/scenario/branching",
+          "visibility": "excon"
+        },
+        {
+          "id": "escalationSteps",
+          "label": "Escalation Steps",
+          "text": "What are the escalation steps, in order? One per item; mark the last one the participants can still recover from (exercise control only).",
+          "why": "Controllers can see how close play is to the ceiling.",
+          "answer": "list",
+          "path": "/scenario/escalationSteps",
+          "visibility": "excon"
+        },
+        {
+          "id": "pacing",
+          "label": "Pacing",
+          "text": "How does time run in the exercise?",
+          "why": "It decides how injects are timed and how long each decision can take.",
+          "recommended": "Turn-based moves",
+          "answer": "choice",
+          "options": [
+            "Real time",
+            "Compressed time",
+            "Turn-based moves"
+          ],
+          "path": "/engagement/pacing"
+        },
+        {
+          "id": "scenarioClock",
+          "label": "Scenario Clock",
+          "text": "How does scenario time map to real time, such as \"one move is six hours\"?",
+          "why": "Participants and controllers need the same sense of how much time has passed.",
+          "answer": "text",
+          "path": "/engagement/clock"
+        },
+        {
+          "id": "adjudication",
+          "label": "Adjudication",
+          "text": "Who decides the outcome of what participants do?",
+          "why": "Someone has to rule on what each action achieves, and everyone should know who.",
+          "recommended": "Exercise control decides",
+          "answer": "choice",
+          "options": [
+            "Exercise control decides",
+            "Rules or models decide",
+            "Both"
+          ],
+          "path": "/engagement/adjudication"
+        },
+        {
+          "id": "fog",
+          "label": "Fog",
+          "text": "How much of the picture do participants see?",
+          "why": "What they are not shown, on purpose, is part of what the exercise tests.",
+          "recommended": "Partial: each role sees what it would",
+          "answer": "choice",
+          "options": [
+            "Partial: each role sees what it would",
+            "Full: only what is reported to them",
+            "Off: they see everything"
+          ],
+          "path": "/engagement/fog"
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "title": "Names, Vocabulary and the First Sensitivity Review",
+      "gate": {
+        "approval": "Approve the names"
+      },
+      "questions": [
+        {
+          "id": "exerciseName",
+          "label": "Exercise Name",
+          "text": "What is the exercise's name?",
+          "why": "Two words, easy to say aloud in a second language, and not reused from an earlier exercise.",
+          "answer": "text",
+          "path": "/names/exercise",
+          "default": "scenarioName"
+        },
+        {
+          "id": "organizations",
+          "label": "Organizations",
+          "text": "Which organizations appear in the scenario, and whose side is each on: friendly, adversary or neutral? One per item, such as \"Harrow Port Authority: friendly\".",
+          "why": "As few names as possible, and each name says what it is (\"… Bank\", \"… Telecom\").",
+          "answer": "list",
+          "path": "/names/organizations"
+        },
+        {
+          "id": "actorName",
+          "label": "Threat Actor Name",
+          "text": "What is the threat actor's name?",
+          "why": "Check it for meaning in the region's languages, and for links to films, books, games or real groups.",
+          "answer": "text",
+          "path": "/names/actor"
+        },
+        {
+          "id": "nationalBodies",
+          "label": "National Bodies",
+          "text": "How are national bodies named?",
+          "why": "Naming them by role keeps every state equal.",
+          "recommended": "By role only: \"your central bank\", \"your ministry\"",
+          "answer": "text",
+          "path": "/names/nationalBodies"
+        },
+        {
+          "id": "fixedTerms",
+          "label": "Fixed Terms",
+          "text": "Which words are fixed?",
+          "why": "The vocabulary list is enforced in every artifact.",
+          "answer": "list",
+          "path": "/vocabulary/fixed"
+        },
+        {
+          "id": "bannedTerms",
+          "label": "Banned Terms",
+          "text": "Which words are banned?",
+          "why": "The vocabulary list is enforced in every artifact.",
+          "answer": "list",
+          "path": "/vocabulary/banned"
+        },
+        {
+          "id": "publicHandles",
+          "label": "Public Handles",
+          "text": "How are members of the public shown?",
+          "why": "Generated handles avoid real people's names.",
+          "recommended": "Generated handles (@traveller_4821), not personal names",
+          "answer": "text",
+          "path": "/names/publicHandles"
+        }
+      ]
+    }
+  ],
+  "drafts": [
+    {
+      "field": "executiveSummary",
+      "dueAfterStage": 2,
+      "path": "/scenario/executiveSummary",
+      "visibility": "excon"
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.pages {
+  display: flex;
+  gap: 4px;
+  height: 100%;
+
+  a {
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    color: var(--sb-muted);
+    font-weight: 500;
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+
+    &:hover {
+      color: var(--sb-ink);
+    }
+
+    &.active {
+      color: var(--sb-ink);
+      border-bottom-color: var(--sb-person);
+    }
+  }
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 236px minmax(0, 1fr) 400px;
+}
+
+.rail {
+  overflow: auto;
+  background: var(--sb-surface);
+  border-right: 1px solid var(--sb-line);
+}
+
+// Positioned, so a visually hidden element inside scrolls with the page instead of stretching the window.
+.page {
+  position: relative;
+  overflow: auto;
+  min-width: 0;
+}
+
+.agent {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--sb-surface);
+  border-left: 1px solid var(--sb-line);
+}
+
+.error {
+  margin: 16px 24px 0;
+  color: var(--sb-error);
+}
+
+@media (max-width: 1280px) {
+  .body {
+    grid-template-columns: 220px minmax(0, 1fr) 340px;
+  }
+}
+
+@media (max-width: 1000px) {
+  .body {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) 360px;
+  }
+
+  .rail {
+    border-right: 0;
+    border-bottom: 1px solid var(--sb-line);
+  }
+
+  .agent {
+    border-left: 0;
+    border-top: 1px solid var(--sb-line);
+  }
+
+  .pages a {
+    padding: 0 8px;
+  }
+}

@@ -1,0 +1,165 @@
+:host {
+  display: block;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 14px minmax(180px, 36%) minmax(0, 1fr) auto;
+  column-gap: 14px;
+  align-items: start;
+  padding: 10px 20px 10px 16px;
+  border-bottom: 1px solid var(--sb-line);
+
+  &:hover {
+    background: #fafbfc;
+  }
+
+  &.editing {
+    background: var(--sb-surface);
+    box-shadow: inset 3px 0 0 var(--sb-person);
+  }
+}
+
+// Provenance in the margin.
+.mark {
+  width: 9px;
+  height: 9px;
+  margin-top: 5px;
+  border-radius: 50%;
+  border: 1.5px solid var(--sb-faint);
+  box-sizing: border-box;
+}
+
+[data-status='answered'] .mark {
+  border-color: var(--sb-person);
+  background: var(--sb-person);
+}
+
+[data-status='proposed by agent'] .mark {
+  border-color: var(--sb-agent);
+  background: var(--sb-agent);
+}
+
+.name {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.label {
+  font-weight: 500;
+}
+
+.question {
+  font-size: var(--sb-small);
+  color: var(--sb-muted);
+  line-height: 1.4;
+}
+
+.answer {
+  min-width: 0;
+}
+
+.value {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    padding: 1px 7px;
+    border-radius: var(--sb-pill);
+    background: var(--sb-person-soft);
+    color: #20357f;
+  }
+}
+
+[data-status='proposed by agent'] .items li {
+  background: var(--sb-agent-soft);
+  color: #4b2d8f;
+}
+
+.meta,
+.reason,
+.empty,
+.why {
+  font-size: var(--sb-small);
+  color: var(--sb-muted);
+}
+
+.meta {
+  margin-top: 3px;
+  color: var(--sb-faint);
+}
+
+[data-status='proposed by agent'] .meta {
+  color: var(--sb-agent);
+}
+
+.reason {
+  margin-top: 2px;
+  font-style: italic;
+}
+
+.empty {
+  color: var(--sb-faint);
+}
+
+.hint {
+  display: block;
+  margin-top: 2px;
+  color: var(--sb-muted);
+}
+
+.editor {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.why {
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.act {
+  padding-top: 1px;
+  min-width: 66px;
+  text-align: right;
+}
+
+// An answered row's "Change" appears with the pointer or keyboard focus; an open row keeps "Answer" in view.
+@media (hover: hover) {
+  .edit.on-hover {
+    opacity: 0;
+  }
+
+  .row:hover .edit.on-hover,
+  .row:focus-within .edit.on-hover {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 760px) {
+  .row {
+    grid-template-columns: 14px minmax(0, 1fr) auto;
+    row-gap: 6px;
+  }
+
+  .answer {
+    grid-column: 2 / 4;
+  }
+}

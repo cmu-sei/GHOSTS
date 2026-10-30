@@ -1,0 +1,59 @@
+<app-top-bar crumb="Admin">
+  @if (library(); as library) {
+    <a class="back" [routerLink]="['/admin/libraries', libraryId]">{{ library.name }}</a>
+  }
+</app-top-bar>
+
+@if (error(); as error) {
+  <p class="error" role="alert">{{ error }}</p>
+}
+
+@if (saved()) {
+  <div class="editor">
+    <header class="strip">
+      <input class="sb-field name" aria-label="Template name" [value]="name()" (input)="typedName($event)" />
+      <select class="sb-field" aria-label="Audience" (change)="pickedAudience($event)">
+        @for (a of audiences; track a[0]) {
+          <option [value]="a[0]" [selected]="a[0] === audience()">For {{ a[1].toLowerCase() }}</option>
+        }
+      </select>
+      <select class="sb-field" aria-label="Format" (change)="pickedFormat($event)">
+        @for (f of formats; track f[0]) {
+          <option [value]="f[0]" [selected]="f[0] === format()">{{ f[1] }}</option>
+        }
+      </select>
+      <span class="state">{{ dirty() ? 'Unsaved changes' : state() }}</span>
+      <button class="sb-button primary" type="button" [disabled]="!dirty() || !name().trim()" (click)="save()">Save</button>
+    </header>
+
+    <div class="panes">
+      <section class="source" aria-label="Template source">
+        <textarea spellcheck="false" wrap="off" aria-label="Template body" [value]="body()" (input)="typedBody($event)"></textarea>
+        <p class="hint">
+          Liquid: <code>{{ '{{ scenario.objectives }}' }}</code>, <code>{{ '{{ labels.timeSlot }}' }}</code>, <code>{{ '{% if draft %}' }}</code>.
+          The scenario is filtered for the audience before the template sees it.
+        </p>
+      </section>
+
+      <section class="preview" aria-label="Preview">
+        <div class="bar">
+          <span>Preview on</span>
+          @if (scenarios().length) {
+            <select class="sb-field" aria-label="Scenario" (change)="pickedScenario($event)">
+              @for (s of scenarios(); track s.id) {
+                <option [value]="s.id" [selected]="s.id === scenarioId()">{{ s.name }}</option>
+              }
+            </select>
+          }
+        </div>
+        @if (!scenarios().length) {
+          <p class="empty">Create a scenario of a kind this library serves to see a preview.</p>
+        } @else if (templateError(); as message) {
+          <div class="template-error" role="alert">{{ message }}</div>
+        } @else if (page(); as page) {
+          <iframe sandbox="" title="Template preview" [srcdoc]="page"></iframe>
+        }
+      </section>
+    </div>
+  </div>
+}

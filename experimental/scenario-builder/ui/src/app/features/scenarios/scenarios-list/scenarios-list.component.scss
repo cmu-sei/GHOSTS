@@ -1,0 +1,207 @@
+:host {
+  display: block;
+  height: 100%;
+  overflow: auto;
+}
+
+.sheet {
+  max-width: 1000px;
+  margin: 32px auto;
+  padding: 0 24px;
+}
+
+.head {
+  margin-bottom: 16px;
+}
+
+h1 {
+  font-size: 22px;
+}
+
+.sub {
+  margin: 4px 0 0;
+  color: var(--sb-muted);
+}
+
+.create {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 240px auto;
+  gap: 8px;
+  margin-bottom: 20px;
+
+  .sb-button {
+    height: auto;
+  }
+}
+
+.tools {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 8px;
+
+  .search {
+    max-width: 360px;
+  }
+}
+
+.archived-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--sb-muted);
+  white-space: nowrap;
+}
+
+.error {
+  margin: 0 0 8px;
+  color: var(--sb-error);
+}
+
+.grid {
+  border: 1px solid var(--sb-line);
+  border-radius: var(--sb-radius);
+  background: var(--sb-surface);
+  overflow: hidden;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  padding: 0;
+  text-align: left;
+  border-bottom: 1px solid var(--sb-line);
+  background: var(--sb-canvas);
+
+  &.stage {
+    width: 90px;
+  }
+
+  &.owner {
+    width: 120px;
+  }
+
+  &.updated {
+    width: 120px;
+  }
+
+  &.kind {
+    width: 220px;
+  }
+
+  &.actions {
+    width: 90px;
+  }
+
+  // Which column sorts, and which way: an arrow after its label.
+  &[aria-sort] .sort {
+    color: var(--sb-ink);
+  }
+
+  &[aria-sort='ascending'] .sort::after {
+    content: ' ↑';
+  }
+
+  &[aria-sort='descending'] .sort::after {
+    content: ' ↓';
+  }
+}
+
+.sort {
+  width: 100%;
+  padding: 8px 16px;
+  border: 0;
+  background: none;
+  font: 500 var(--sb-small) / 1.4 var(--sb-font);
+  color: var(--sb-muted);
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--sb-ink);
+  }
+}
+
+td {
+  padding: 9px 16px;
+  border-bottom: 1px solid var(--sb-line);
+  vertical-align: middle;
+}
+
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+tbody tr:hover {
+  background: var(--sb-person-soft);
+}
+
+tr.archived .title {
+  color: var(--sb-muted);
+}
+
+td.name {
+  max-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.title {
+  font-weight: 500;
+  color: var(--sb-ink);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--sb-person);
+  }
+}
+
+.pill {
+  margin-left: 8px;
+  padding: 1px 6px;
+  border: 1px solid var(--sb-line-strong);
+  border-radius: var(--sb-pill);
+  font-size: 11px;
+  color: var(--sb-muted);
+}
+
+.stage {
+  color: var(--sb-person);
+  font-weight: 500;
+  font-size: var(--sb-small);
+}
+
+.meta {
+  font-size: var(--sb-small);
+  color: var(--sb-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+td.actions {
+  padding: 4px 12px;
+  text-align: right;
+}
+
+.empty {
+  padding: 20px 16px;
+  color: var(--sb-muted);
+}
+
+@media (max-width: 720px) {
+  .create {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  th.kind,
+  th.owner,
+  td:nth-child(2),
+  td:nth-child(4) {
+    display: none;
+  }
+}

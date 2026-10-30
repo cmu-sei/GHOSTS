@@ -1,0 +1,47 @@
+<section class="sheet">
+  <header class="head">
+    <h1>Decision Log</h1>
+    <p class="sub">Every answer, draft, proposal and approval, newest first.</p>
+  </header>
+
+  <div class="table">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">When</th>
+          <th scope="col">What</th>
+          <th scope="col">Item</th>
+          <th scope="col">Change</th>
+          <th scope="col">Who</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (entry of entries(); track $index) {
+          <tr [attr.data-via]="entry.via">
+            <td class="when">{{ entry.time | date: 'MMM d HH:mm:ss' }}</td>
+            <td><span class="type" [attr.data-type]="entry.type">{{ entry.type }}</span></td>
+            <td class="item">{{ label(entry.target) }}</td>
+            <td>
+              <div class="change">
+                @if (entry.before !== undefined && entry.before !== null) {
+                  <span class="before">{{ show(entry.before) }}</span>
+                }
+                @if (entry.after !== undefined && entry.after !== null) {
+                  <span class="after">{{ show(entry.after) }}</span>
+                }
+                @if (entry.reason) {
+                  <span class="reason">{{ entry.reason }}</span>
+                }
+              </div>
+            </td>
+            <td class="who"><span class="dot" aria-hidden="true"></span>{{ entry.by }}{{ entry.via === 'agent' ? ' through the agent' : '' }}</td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="5" class="empty">Nothing is decided yet. Answers, drafts and approvals show here as they happen.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

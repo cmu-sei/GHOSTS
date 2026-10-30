@@ -1,0 +1,24 @@
+{
+  "name": "scenario-builder-agent",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The Scenario Builder's agent: the Pi agent SDK, reaching OpenAI-compatible models through the builder's API.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "build:web": "node build.mjs",
+    "eval": "node evals/run.ts"
+  },
+  "devDependencies": {
+    "@earendil-works/pi-agent-core": "^1.4.0",
+    "@earendil-works/pi-ai": "^1.4.0",
+    "@types/node": "^22.20.5",
+    "esbuild": "^0.28.2",
+    "typescript": "~5.9.2",
+    "vitest": "^4.1.11"
+  }
+}

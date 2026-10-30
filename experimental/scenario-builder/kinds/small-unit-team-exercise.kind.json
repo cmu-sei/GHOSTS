@@ -1,0 +1,551 @@
+{
+  "id": "small-unit-team-exercise",
+  "version": "0.3.0",
+  "name": "Small Unit Team Exercise",
+  "drafts": [
+    {
+      "field": "executiveSummary",
+      "dueAfterStage": 2,
+      "path": "/scenario/executiveSummary",
+      "visibility": "excon"
+    }
+  ],
+  "stages": [
+    {
+      "number": 0,
+      "title": "Team and Setting",
+      "gate": {
+        "approval": "Confirm the team and setting"
+      },
+      "questions": [
+        {
+          "id": "intent",
+          "label": "Intent",
+          "text": "In plain English, what is this exercise for, and what happens in it? (exercise control only)",
+          "why": "It is the yardstick every later answer is checked against.",
+          "answer": "text",
+          "path": "/engagement/intent",
+          "visibility": "excon"
+        },
+        {
+          "id": "unit",
+          "label": "Unit",
+          "text": "Which team or unit trains, and what is its job?",
+          "why": "Every task, condition and standard is written for this team.",
+          "answer": "text",
+          "path": "/engagement/unit"
+        },
+        {
+          "id": "teamSize",
+          "label": "Team Size and Positions",
+          "text": "How many people train, and in which positions?",
+          "why": "It decides how many tasks can run at once and whom the controllers watch.",
+          "answer": "text",
+          "path": "/engagement/teamSize"
+        },
+        {
+          "id": "proficiency",
+          "label": "Proficiency",
+          "text": "How experienced are the team with this kind of situation?",
+          "why": "It sets how hard the scenario can push and how much help the controllers give.",
+          "answer": "text",
+          "path": "/engagement/proficiency"
+        },
+        {
+          "id": "mandate",
+          "label": "Mandate",
+          "text": "What are the team responsible for protecting or achieving, and which actions are open to them?",
+          "why": "It defines what counts as a good decision in play.",
+          "answer": "text",
+          "path": "/engagement/mandate"
+        },
+        {
+          "id": "timeSlot",
+          "label": "Time Slot",
+          "text": "How long does the exercise run, and when?",
+          "why": "The tasks, the events and the review all have to fit inside it.",
+          "recommended": "Four hours, then a one-hour review",
+          "answer": "text",
+          "path": "/engagement/timeSlot"
+        },
+        {
+          "id": "setting",
+          "label": "Setting",
+          "text": "Where does the exercise run?",
+          "why": "It decides what has to be built or booked before the day.",
+          "recommended": "On a cyber range",
+          "answer": "choice",
+          "options": [
+            "On a cyber range",
+            "In a lab or on real equipment",
+            "In a classroom",
+            "Distributed, each person at their own station"
+          ],
+          "path": "/engagement/setting"
+        },
+        {
+          "id": "world",
+          "label": "Real or Fictional World",
+          "text": "Does it use real country and organization names, or a fictional world?",
+          "why": "A fictional world avoids real-world sensitivities and lets the team speak freely.",
+          "recommended": "Fictional world",
+          "answer": "choice",
+          "options": [
+            "Real country names",
+            "Fictional world"
+          ],
+          "path": "/engagement/world"
+        },
+        {
+          "id": "recording",
+          "label": "Handling and Recording",
+          "text": "How is the exercise handled and recorded: classification, notes, screen capture, AI tools?",
+          "why": "It sets what the team can write down and what leaves the room.",
+          "answer": "text",
+          "path": "/engagement/recording"
+        }
+      ]
+    },
+    {
+      "number": 1,
+      "title": "Tasks, Conditions and Standards",
+      "gate": {},
+      "questions": [
+        {
+          "id": "tasks",
+          "label": "Collective Tasks",
+          "text": "Which collective tasks does the team train? One per item.",
+          "why": "The exercise exists to train these; everything else serves them.",
+          "answer": "list",
+          "path": "/objectives",
+          "idPrefix": "T"
+        },
+        {
+          "id": "standards",
+          "label": "Standards",
+          "text": "What standard must the team meet on each task? One per item, in the same order as the tasks.",
+          "why": "A task without a standard can't be evaluated.",
+          "answer": "list",
+          "path": "/scenario/standards"
+        },
+        {
+          "id": "conditions",
+          "label": "Conditions",
+          "text": "Under what conditions does the team work: time pressure, degraded systems, missing people?",
+          "why": "Conditions make the same task easier or harder; they are what controllers vary.",
+          "answer": "text",
+          "path": "/scenario/conditions"
+        },
+        {
+          "id": "evaluation",
+          "label": "Evaluation Method",
+          "text": "How is each task evaluated?",
+          "why": "Trained, practiced or untrained gives the commander a reading per task, not just a pass or a fail.",
+          "recommended": "Rated per task (T, P, U)",
+          "answer": "choice",
+          "options": [
+            "Rated per task (T, P, U)",
+            "Go or no-go per task",
+            "Observed only, no rating"
+          ],
+          "path": "/engagement/evaluation"
+        },
+        {
+          "id": "trainingKind",
+          "label": "Kind of Training",
+          "text": "What kind of training is this?",
+          "why": "It sets how the exercise is evaluated and reported.",
+          "recommended": "Mission-essential task (MET)",
+          "answer": "choice",
+          "options": [
+            "Mission-essential task (MET)",
+            "Joint mission-essential task (JMET)",
+            "Rehearsal",
+            "Onboarding",
+            "Tool training"
+          ],
+          "path": "/engagement/trainingKind"
+        },
+        {
+          "id": "rulesOfEngagement",
+          "label": "Rules of Engagement",
+          "text": "What may the team do, and not do, during play?",
+          "why": "It keeps play realistic and stops the exercise turning into something it isn't.",
+          "answer": "text",
+          "path": "/engagement/rulesOfEngagement"
+        },
+        {
+          "id": "deadline",
+          "label": "Deadline",
+          "text": "Is there a point by which the team must act, and what happens if they miss it?",
+          "why": "A fixed point forces the decision the exercise is built around.",
+          "answer": "text",
+          "path": "/scenario/deadline"
+        },
+        {
+          "id": "pacing",
+          "label": "Pacing",
+          "text": "How does time run in the exercise?",
+          "why": "It decides how injects are timed and how long each decision can take.",
+          "recommended": "Real time",
+          "answer": "choice",
+          "options": [
+            "Real time",
+            "Compressed time",
+            "Turn-based moves"
+          ],
+          "path": "/engagement/pacing"
+        },
+        {
+          "id": "adjudication",
+          "label": "Adjudication",
+          "text": "Who decides the outcome of what participants do?",
+          "why": "Someone has to rule on what each action achieves, and everyone should know who.",
+          "recommended": "Exercise control decides",
+          "answer": "choice",
+          "options": [
+            "Exercise control decides",
+            "Rules or models decide",
+            "Both"
+          ],
+          "path": "/engagement/adjudication"
+        },
+        {
+          "id": "teachingPoints",
+          "label": "Teaching Points",
+          "text": "What should the team take away even if the exercise goes wrong? One per item (controllers only).",
+          "why": "They steer the review when the tasks don't go to plan.",
+          "answer": "list",
+          "path": "/teachingPoints",
+          "visibility": "excon"
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "title": "Scenario, Opposition and Ground Truth",
+      "gate": {
+        "approval": "Approve the executive summary"
+      },
+      "questions": [
+        {
+          "id": "problem",
+          "label": "One-Line Problem",
+          "text": "In one line, what does the team face when the exercise starts?",
+          "why": "The team hears this first, so it has to be clear and short.",
+          "answer": "text",
+          "path": "/scenario/problem"
+        },
+        {
+          "id": "description",
+          "label": "Participant Description",
+          "text": "In one paragraph a participant could read, what is the scenario about?",
+          "why": "Catalogs, invitations and read-ins all start from it. It must not give the twist away.",
+          "answer": "text",
+          "path": "/scenario/description"
+        },
+        {
+          "id": "placeAndTime",
+          "label": "Place and Time",
+          "text": "Where and when is the scenario set: region, era, time of year?",
+          "why": "Places and dates stay consistent across every inject and document.",
+          "answer": "text",
+          "path": "/scenario/placeAndTime"
+        },
+        {
+          "id": "groundTruth",
+          "label": "Ground Truth",
+          "text": "List what is really happening, one fact per item (controllers only).",
+          "why": "Only the controllers know the ground truth. Later checks use these facts to catch leaks.",
+          "answer": "list",
+          "path": "/groundTruth",
+          "idPrefix": "GT",
+          "visibility": "excon"
+        },
+        {
+          "id": "opposition",
+          "label": "Opposition",
+          "text": "Who or what works against the team?",
+          "why": "It decides how many controllers you need and how unpredictable the exercise is.",
+          "recommended": "Scripted events only",
+          "answer": "choice",
+          "options": [
+            "A live opposing force",
+            "Scripted events only",
+            "Simulated users and traffic",
+            "No opposition"
+          ],
+          "path": "/scenario/opposition"
+        },
+        {
+          "id": "adversary",
+          "label": "Adversary",
+          "text": "Who is the opposition, what does it want, and what is at stake for it? (exercise control only)",
+          "why": "The opposition plays to a goal, not at random.",
+          "answer": "text",
+          "path": "/scenario/adversary",
+          "visibility": "excon"
+        },
+        {
+          "id": "actorCapability",
+          "label": "Threat Actor Capability",
+          "text": "How capable is the threat actor? (exercise control only)",
+          "why": "It bounds what the adversary can plausibly do in play.",
+          "recommended": "Organized",
+          "answer": "choice",
+          "options": [
+            "Opportunistic",
+            "Organized",
+            "Top-tier"
+          ],
+          "path": "/scenario/actorCapability",
+          "visibility": "excon"
+        },
+        {
+          "id": "attackTechniques",
+          "label": "ATT&CK Techniques",
+          "text": "Which ATT&CK techniques does the adversary use? One per item, such as \"T1566 Phishing\" (exercise control only).",
+          "why": "Techniques tie the scenario to real behaviour, and to the injects and detections that test it.",
+          "answer": "list",
+          "path": "/scenario/attackTechniques",
+          "visibility": "excon"
+        },
+        {
+          "id": "systems",
+          "label": "Systems in Play",
+          "text": "Which systems, networks or equipment does the team work on? One per item.",
+          "why": "Range builders and controllers prepare exactly these.",
+          "answer": "list",
+          "path": "/scenario/systems"
+        },
+        {
+          "id": "keyEvents",
+          "label": "Key Events",
+          "text": "What key events do the controllers push, in order? One per item: when, who delivers it, what happens, and the response you expect (controllers only).",
+          "why": "They make sure every task gets tested, whatever the team does.",
+          "answer": "list",
+          "path": "/scenario/keyEvents",
+          "idPrefix": "E",
+          "visibility": "excon"
+        },
+        {
+          "id": "branching",
+          "label": "Branching",
+          "text": "How does the scenario change depending on what the team do? (exercise control only)",
+          "why": "Controllers need to know which way to steer before play starts.",
+          "answer": "text",
+          "path": "/scenario/branching",
+          "visibility": "excon"
+        },
+        {
+          "id": "escalationCeiling",
+          "label": "Escalation Ceiling",
+          "text": "How hard can it get before the controllers ease off?",
+          "why": "Past this point the team stops learning.",
+          "answer": "text",
+          "path": "/scenario/escalationCeiling",
+          "visibility": "excon"
+        },
+        {
+          "id": "escalationSteps",
+          "label": "Escalation Steps",
+          "text": "What are the escalation steps, in order? One per item; mark the last one the team can still recover from (exercise control only).",
+          "why": "Controllers can see how close play is to the ceiling.",
+          "answer": "list",
+          "path": "/scenario/escalationSteps",
+          "visibility": "excon"
+        },
+        {
+          "id": "ending",
+          "label": "Ending",
+          "text": "How does the exercise end, and on what?",
+          "why": "The controllers need to know when to call it.",
+          "answer": "text",
+          "path": "/scenario/ending",
+          "visibility": "excon"
+        },
+        {
+          "id": "fog",
+          "label": "Fog",
+          "text": "How much of the picture do participants see?",
+          "why": "What they are not shown, on purpose, is part of what the exercise tests.",
+          "recommended": "Partial: each role sees what it would",
+          "answer": "choice",
+          "options": [
+            "Partial: each role sees what it would",
+            "Full: only what is reported to them",
+            "Off: they see everything"
+          ],
+          "path": "/engagement/fog"
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "title": "Network and Range",
+      "gate": {
+        "approval": "Approve the network requirements"
+      },
+      "questions": [
+        {
+          "id": "rangeReference",
+          "label": "Range Reference",
+          "text": "Which range does it build on: the provider, the enclave, and the base image or network, if known?",
+          "why": "The network module starts from this instead of from nothing.",
+          "recommended": "GraySpace; enclave and base to be chosen with the range team",
+          "answer": "text",
+          "path": "/network/rangeReference"
+        },
+        {
+          "id": "segments",
+          "label": "Network Segments",
+          "text": "Which network segments or enclaves does the scenario need, and what is each for? One per item.",
+          "why": "The network module builds one segment for each.",
+          "answer": "list",
+          "path": "/network/segments"
+        },
+        {
+          "id": "hosts",
+          "label": "Hosts",
+          "text": "Which hosts sit on each segment: role, operating system, rough count? One per item, such as \"OT network: historian, Windows Server 2019, 1\".",
+          "why": "It sizes the build and decides which images are needed.",
+          "answer": "list",
+          "path": "/network/hosts"
+        },
+        {
+          "id": "services",
+          "label": "Services",
+          "text": "Which services run on the range, and on which hosts? One per item, such as \"Email: mail01\".",
+          "why": "Services decide what the team defends and what the scenario's attacker uses.",
+          "answer": "list",
+          "path": "/network/services"
+        },
+        {
+          "id": "connectivity",
+          "label": "Connectivity",
+          "text": "What talks to what, and what reaches the internet?",
+          "why": "Routes and firewall rules decide which attack paths exist.",
+          "answer": "text",
+          "path": "/network/connectivity"
+        },
+        {
+          "id": "identity",
+          "label": "Identity and Accounts",
+          "text": "How are identities set up: domain, user accounts, service accounts?",
+          "why": "Accounts are often how the scenario's attacker gets in, and how the team traces them.",
+          "answer": "text",
+          "path": "/network/identity"
+        },
+        {
+          "id": "monitoring",
+          "label": "Defenses and Sensors",
+          "text": "What defends the network, and what can the team see with: firewalls, EDR, SIEM, packet capture, logs? One per item.",
+          "why": "The team can only find what its sensors record.",
+          "answer": "list",
+          "path": "/network/monitoring"
+        },
+        {
+          "id": "telemetry",
+          "label": "Telemetry",
+          "text": "What is recorded for the review? One per item: logs, network traffic, endpoint activity, chat.",
+          "why": "The review can only show what was recorded.",
+          "answer": "list",
+          "path": "/network/telemetry"
+        },
+        {
+          "id": "platforms",
+          "label": "Platforms",
+          "text": "Which websites, email, chat or social media must exist on the range? One per item.",
+          "why": "Simulated users need somewhere to work, and information injects need somewhere to appear.",
+          "answer": "list",
+          "path": "/network/platforms"
+        },
+        {
+          "id": "simulatedUsers",
+          "label": "Simulated Users",
+          "text": "Which simulated users should be on the network (NPCs): how many, in which roles, doing what? (controllers only)",
+          "why": "Background activity hides the attack the way real users would.",
+          "answer": "text",
+          "path": "/network/simulatedUsers",
+          "visibility": "excon"
+        },
+        {
+          "id": "planted",
+          "label": "Planted Before Start",
+          "text": "What must be in place before the exercise starts: vulnerabilities, malware, files, log history? One per item (controllers only).",
+          "why": "The key events only work if these are there on the day.",
+          "answer": "list",
+          "path": "/network/planted",
+          "visibility": "excon"
+        },
+        {
+          "id": "buildLimits",
+          "label": "Build Limits",
+          "text": "What limits the build: scale, images that must be used, air-gapped, time to build?",
+          "why": "The network module has to fit inside these.",
+          "answer": "text",
+          "path": "/network/buildLimits"
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "title": "Control, Safety and Names",
+      "gate": {
+        "approval": "Approve the control plan and names"
+      },
+      "questions": [
+        {
+          "id": "controlCell",
+          "label": "Control Cell",
+          "text": "Who controls, who observes and evaluates, and who plays the opposition?",
+          "why": "Each role needs a named person before the exercise starts.",
+          "answer": "text",
+          "path": "/engagement/controlCell"
+        },
+        {
+          "id": "safety",
+          "label": "Safety and Stop",
+          "text": "What stops the exercise for a real-world problem, and who can call it?",
+          "why": "Everyone must know how to stop, and how play restarts.",
+          "recommended": "Anyone can say \"real world, stop\"; the lead controller restarts it",
+          "answer": "text",
+          "path": "/engagement/safety"
+        },
+        {
+          "id": "exerciseName",
+          "label": "Exercise Name",
+          "text": "What is the exercise's name?",
+          "why": "Short and easy to say over a radio or a call, and not reused from an earlier exercise.",
+          "answer": "text",
+          "path": "/names/exercise",
+          "default": "scenarioName"
+        },
+        {
+          "id": "organizations",
+          "label": "Organizations",
+          "text": "Which organizations appear in the scenario, and whose side is each on: friendly, adversary or neutral? One per item, such as \"Harrow Port Authority: friendly\".",
+          "why": "Names stay the same in every event and document.",
+          "answer": "list",
+          "path": "/names/organizations"
+        },
+        {
+          "id": "fixedTerms",
+          "label": "Fixed Terms",
+          "text": "Which terms must everyone use the same way? One per item.",
+          "why": "Shared terms keep reports and events consistent.",
+          "answer": "list",
+          "path": "/vocabulary/fixed"
+        },
+        {
+          "id": "bannedTerms",
+          "label": "Banned Terms",
+          "text": "Which words must the scenario avoid? One per item.",
+          "why": "Some words give the twist away or touch real-world sensitivities.",
+          "answer": "list",
+          "path": "/vocabulary/banned"
+        }
+      ]
+    }
+  ]
+}
