@@ -25,7 +25,11 @@ public static class FileListing
     private static readonly object _safetyLocked = new object();
     private static readonly int _sleepTime = 10000;
 
-    public static void Add(string path, HandlerType handlerType)
+    // Need CancellationToken to sleep the correct task and also to throw if the task is cancelled
+    // DO NOT CALL THIS. It hangs up GHOSTS with a continual file locked problem for the PPT/Excel/Word/LightHandlers that call this.
+    // The FlushList() method is that uses this file is never called, so there is no need to add to the file listing.
+    // A watcher handler should be used to delete files that are older than a certain age, and the file listing is not needed for that.
+    public static void Add(string path, HandlerType handlerType, CancellationToken Token)
     {
         try
         {
@@ -39,7 +43,7 @@ public static class FileListing
                     while (new FileInfo(_fileName).IsFileLocked())
                     {
                         _log.Trace($"{_fileName} is locked, sleeping for {_sleepTime}...");
-                        Thread.Sleep(_sleepTime);
+                        if (Token.WaitHandle.WaitOne(_sleepTime)) Token.ThrowIfCancellationRequested();
                     }
 
                     File.AppendAllText(_fileName, $"{DateTime.UtcNow}|{handlerType}|{path}{Environment.NewLine}");
@@ -47,7 +51,7 @@ public static class FileListing
             }
             else //sleep if safety net is being safe
             {
-                Thread.Sleep(5000);
+                if (Token.WaitHandle.WaitOne(5000)) Token.ThrowIfCancellationRequested();
             }
         }
         catch (Exception e)

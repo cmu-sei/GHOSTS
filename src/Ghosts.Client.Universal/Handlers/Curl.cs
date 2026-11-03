@@ -171,7 +171,7 @@ public class Curl(Timeline entireTimeline, TimelineHandler timelineHandler, Canc
             try
             {
                 //get all links from results
-                var doc = new HtmlDocument();
+                var doc = new HtmlAgilityPack.HtmlDocument();
                 doc.LoadHtml(Result.ToLowerInvariant());
 
                 var nodes = doc.DocumentNode.SelectNodes("//a");

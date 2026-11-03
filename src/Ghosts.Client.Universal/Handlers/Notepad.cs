@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using Ghosts.Client.Universal.Infrastructure;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
+using System.Diagnostics;
+using Ghosts.Client.Universal.Infrastructure;
 
 namespace Ghosts.Client.Universal.Handlers;
 
@@ -25,19 +27,17 @@ public class Notepad(Timeline entireTimeline, TimelineHandler timelineHandler, C
     private string _outputDirectory;
     private int _paragraphsMin = 1;
     private int _paragraphsMax = 10;
-
-    private static readonly string[] Words =
-    {
-        "the", "quick", "brown", "fox", "jumps", "over", "lazy", "dog",
-        "lorem", "ipsum", "dolor", "sit", "amet", "consectetur", "adipiscing",
-        "elit", "sed", "do", "eiusmod", "tempor", "incididunt", "ut", "labore",
-        "et", "dolore", "magna", "aliqua"
-    };
+    public Process NotepadProcess;
 
     protected override Task RunOnce()
     {
         try
         {
+            if (!OperatingSystem.IsWindows())
+            {
+                _log.Info("Word handler automation is not currently supported on this OS");
+                return Task.CompletedTask;
+            }
             ParseHandlerArgs();
 
             var probabilityList = new[] { _creationProbability, _modificationProbability, _deletionProbability, _viewProbability };
@@ -48,14 +48,15 @@ public class Notepad(Timeline entireTimeline, TimelineHandler timelineHandler, C
                 Token.ThrowIfCancellationRequested();
                 WorkingHours.Is(Handler);
 
-                if (timelineEvent.DelayBeforeActual > 0)
-                    Thread.Sleep(timelineEvent.DelayBeforeActual);
-
+                if (timelineEvent.DelayBeforeActual > 0) {
+                    if (Token.WaitHandle.WaitOne(timelineEvent.DelayBeforeActual)) Token.ThrowIfCancellationRequested();
+                }
                 if (_random.Next(0, 100) >= _executionProbability)
                 {
                     _log.Trace("Notepad:: Action skipped due to execution probability.");
-                    if (timelineEvent.DelayAfterActual > 0)
-                        Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, _jitterFactor));
+                    if (timelineEvent.DelayAfterActual > 0) {
+                        if (Token.WaitHandle.WaitOne(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, _jitterFactor))) Token.ThrowIfCancellationRequested();
+                    }
                     continue;
                 }
 
@@ -63,8 +64,9 @@ public class Notepad(Timeline entireTimeline, TimelineHandler timelineHandler, C
                 if (action == null)
                 {
                     _log.Trace("Notepad:: No action this cycle.");
-                    if (timelineEvent.DelayAfterActual > 0)
-                        Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, _jitterFactor));
+                    if (timelineEvent.DelayAfterActual > 0) {
+                        if (Token.WaitHandle.WaitOne(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, _jitterFactor))) Token.ThrowIfCancellationRequested();
+                    }
                     continue;
                 }
 
@@ -74,19 +76,23 @@ public class Notepad(Timeline entireTimeline, TimelineHandler timelineHandler, C
                 if (action == "delete" && GetRandomFile(_outputDirectory) == null)
                     action = "create";
 
+                String filepath;
                 switch (action)
                 {
                     case "create":
-                        DoCreateAction();
+                        filepath = DoCreateAction();
+                        if (!StartNotePad(filepath)) return Task.CompletedTask;
                         break;
                     case "modify":
-                        DoModifyAction();
+                        filepath = DoModifyAction();
+                        if (!StartNotePad(filepath)) return Task.CompletedTask;
                         break;
                     case "delete":
                         DoDeleteAction();
                         break;
                     case "view":
-                        DoViewAction();
+                        filepath = DoViewAction();
+                        if (!StartNotePad(filepath)) return Task.CompletedTask;
                         break;
                 }
 
@@ -98,8 +104,9 @@ public class Notepad(Timeline entireTimeline, TimelineHandler timelineHandler, C
                     Trackable = timelineEvent.TrackableId
                 });
 
-                if (timelineEvent.DelayAfterActual > 0)
-                    Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, _jitterFactor));
+                if (timelineEvent.DelayAfterActual > 0) {
+                    if (Token.WaitHandle.WaitOne(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, _jitterFactor))) Token.ThrowIfCancellationRequested();
+                }
             }
         }
         catch (OperationCanceledException)
@@ -114,7 +121,7 @@ public class Notepad(Timeline entireTimeline, TimelineHandler timelineHandler, C
         return Task.CompletedTask;
     }
 
-    private void DoCreateAction()
+    private String DoCreateAction()
     {
         try
         {
@@ -123,29 +130,41 @@ public class Notepad(Timeline entireTimeline, TimelineHandler timelineHandler, C
             var text = GenerateRandomText();
             File.WriteAllText(filePath, text, Encoding.UTF8);
             _log.Trace($"Notepad:: File {filePath} created.");
+            return filePath;
         }
         catch (Exception e)
         {
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+            {
+                throw;
+            }
             _log.Trace("Notepad:: Error creating file.");
             _log.Error(e);
         }
+        return null;
     }
 
-    private void DoModifyAction()
+    private String DoModifyAction()
     {
         try
         {
             var filePath = GetRandomFile(_outputDirectory);
-            if (filePath == null) return;
+            if (filePath == null) return null;
             var additionalText = GenerateRandomText();
             File.AppendAllText(filePath, Environment.NewLine + additionalText, Encoding.UTF8);
             _log.Trace($"Notepad:: File {filePath} modified.");
+            return filePath;
         }
         catch (Exception e)
         {
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+            {
+                throw;
+            }
             _log.Trace("Notepad:: Error modifying file.");
             _log.Error(e);
         }
+        return null;
     }
 
     private void DoDeleteAction()
@@ -155,66 +174,56 @@ public class Notepad(Timeline entireTimeline, TimelineHandler timelineHandler, C
             var filePath = GetRandomFile(_outputDirectory);
             if (filePath == null) return;
             File.Delete(filePath);
-            _log.Trace($"Notepad:: Deleted file {filePath}.");
+            _log.Trace($"Notepad:: File deleted {filePath}.");
         }
         catch (Exception e)
         {
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+            {
+                throw;
+            }
             _log.Trace("Notepad:: Error deleting file.");
             _log.Error(e);
         }
     }
 
-    private void DoViewAction()
+    private String DoViewAction()
     {
         try
         {
             var filePath = GetRandomFile(_inputDirectory);
-            if (filePath == null) return;
+            if (filePath == null) return null;
             var content = File.ReadAllText(filePath, Encoding.UTF8);
-            _log.Trace($"Notepad:: Viewed file {filePath} ({content.Length} chars).");
+            _log.Trace($"Notepad:: File viewed {filePath} ({content.Length} chars).");
+            return filePath;
         }
         catch (Exception e)
         {
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+            {
+                throw;
+            }
             _log.Trace("Notepad:: Error viewing file.");
             _log.Error(e);
         }
+        return null;
     }
 
     private string GenerateRandomText()
     {
-        var paragraphCount = _random.Next(_paragraphsMin, _paragraphsMax + 1);
-        var sb = new StringBuilder();
-        for (var p = 0; p < paragraphCount; p++)
+        var list = RandomText.GetDictionary.GetDictionaryList();
+        using (var rt = new RandomText(list))
         {
-            if (p > 0) sb.AppendLine();
-            var sentenceCount = _random.Next(3, 8);
-            for (var s = 0; s < sentenceCount; s++)
-            {
-                var wordCount = _random.Next(5, 15);
-                var sentence = new StringBuilder();
-                for (var w = 0; w < wordCount; w++)
-                {
-                    if (w > 0) sentence.Append(' ');
-                    sentence.Append(Words[_random.Next(Words.Length)]);
-                }
-                sentence[0] = char.ToUpper(sentence[0]);
-                sentence.Append(". ");
-                sb.Append(sentence);
-            }
-            sb.AppendLine();
+            var numberParagraphs = _random.Next(_paragraphsMin, _paragraphsMax + 1);
+            rt.AddContentParagraphs(numberParagraphs, 4, 10, 4, 15);
+            var formattedContent = rt.FormatContent(60, 90);
+            return formattedContent;
         }
-        return sb.ToString();
     }
 
-    private static string GenerateRandomFileName()
+    private static String GenerateRandomFileName()
     {
-        var length = _random.Next(8, 16);
-        const string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
-        var sb = new StringBuilder(length);
-        for (var i = 0; i < length; i++)
-            sb.Append(chars[_random.Next(chars.Length)]);
-        sb.Append(".txt");
-        return sb.ToString();
+        return $"{RandomFilename.Generate()}.txt";
     }
 
     private static string GetRandomFile(string directory)
@@ -227,8 +236,12 @@ public class Notepad(Timeline entireTimeline, TimelineHandler timelineHandler, C
             if (files.Length == 0) return null;
             return files[_random.Next(files.Length)];
         }
-        catch
+        catch (Exception e)
         {
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+            {
+                throw;
+            }
             return null;
         }
     }
@@ -318,4 +331,72 @@ public class Notepad(Timeline entireTimeline, TimelineHandler timelineHandler, C
             _jitterFactor = Jitter.JitterFactorParse(dj.ToString());
         }
     }
+
+    private void CloseNotePad()
+    {
+        //do our best at cleaning this up
+        if (this.NotepadProcess == null || this.NotepadProcess.HasExited) return;
+        try
+        {
+            //close the running process
+            this.NotepadProcess.CloseMainWindow();
+            if (Token.WaitHandle.WaitOne(1000)) Token.ThrowIfCancellationRequested();
+            if (!this.NotepadProcess.HasExited)
+            {
+                this.NotepadProcess.Kill();   //may have a dialog window up
+                if (Token.WaitHandle.WaitOne(1000)) Token.ThrowIfCancellationRequested();
+            }
+            this.NotepadProcess.Close();  //free resources
+            if (Token.WaitHandle.WaitOne(1000)) Token.ThrowIfCancellationRequested();
+
+        }
+        catch (Exception e)
+        {
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+            {
+                throw;
+            }
+            _log.Trace("Notepad:: Error closing Notepad process.");
+            _log.Error(e);
+        }
+        this.NotepadProcess = null;
+    }
+
+
+    private bool StartNotePad(string fname)
+    {
+        if (this.NotepadProcess != null && !this.NotepadProcess.HasExited)
+        {
+            CloseNotePad();
+        }
+        try
+        {
+            if (fname == null)
+            {
+                this.NotepadProcess = Process.Start("notepad.exe");
+            }
+            else
+            {
+                this.NotepadProcess = Process.Start("notepad.exe", fname);
+            }
+            if (this.NotepadProcess == null)
+            {
+                _log.Trace("Notepad:: Unable to start Notepad process, handler exiting.");
+                return false;
+            }
+            if (Token.WaitHandle.WaitOne(1000)) Token.ThrowIfCancellationRequested();
+        }
+        catch (Exception e)
+        {
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+            {
+                throw;
+            }
+            _log.Trace("Notepad:: Unable to start Notepad process, handler exiting.");
+            _log.Error(e);
+            return false;
+        }
+        return true;
+    }
+
 }

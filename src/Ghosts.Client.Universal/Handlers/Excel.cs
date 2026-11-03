@@ -14,7 +14,7 @@ using Newtonsoft.Json;
 
 namespace Ghosts.Client.Universal.Handlers;
 
-public class ExcelHandler(Timeline entireTimeline, TimelineHandler timelineHandler, CancellationToken cancellationToken)
+public class Excel(Timeline entireTimeline, TimelineHandler timelineHandler, CancellationToken cancellationToken)
     : BaseHandler(entireTimeline, timelineHandler, cancellationToken)
 {
     protected override Task RunOnce()
@@ -25,7 +25,7 @@ public class ExcelHandler(Timeline entireTimeline, TimelineHandler timelineHandl
             return Task.CompletedTask;
         }
 
-        _log.Info("Starting Word handler automation...");
+        _log.Info("Starting Excel handler automation...");
 
         var handler = this.Handler;
 
@@ -47,8 +47,13 @@ public class ExcelHandler(Timeline entireTimeline, TimelineHandler timelineHandl
             {
                 try
                 {
-                    _log.Trace($"Word event - {timelineEvent}");
+                    _log.Trace($"Excel event - {timelineEvent}");
                     WorkingHours.Is(handler);
+
+                    var applicationType = Type.GetTypeFromProgID("Excel.Application");
+                    dynamic officeApplication = Activator.CreateInstance(applicationType);
+                    officeApplication.Visible = true;
+                    dynamic document = null;
 
                     if (timelineEvent.DelayBeforeActual > 0)
                     {
@@ -67,11 +72,6 @@ public class ExcelHandler(Timeline entireTimeline, TimelineHandler timelineHandl
                         }
                     }
 
-                    var applicationType = Type.GetTypeFromProgID("Excel.Application");
-                    dynamic officeApplication = Activator.CreateInstance(applicationType);
-                    officeApplication.Visible = true;
-                    dynamic document = null;
-
                     if (OfficeHelpers.ShouldOpenExisting(handler))
                     {
                         document = officeApplication.Workbooks.Open(FileListing.GetRandomFile(handler.HandlerType));
@@ -80,8 +80,10 @@ public class ExcelHandler(Timeline entireTimeline, TimelineHandler timelineHandl
 
                     if (document == null)
                     {
-                        document = officeApplication.Workbooks.Add();
-                        _log.Trace($"{handler.HandlerType} adding new...");
+                        if (officeApplication.Workbooks.Count == 0) {
+                            document = officeApplication.Workbooks.Add();
+                            _log.Trace($"{handler.HandlerType} adding new workbook...");
+                        }
                     }
 
                     for (var i = 0; i < _random.Next(1, 8); i++)
@@ -96,7 +98,6 @@ public class ExcelHandler(Timeline entireTimeline, TimelineHandler timelineHandl
                             if (_random.Next(0, 30) != 1) // 1 in x cells are blank
                             {
                                 workSheet.Cells[i, j].Value = _random.Next(0, 9999);
-                                workSheet.Cells[i, j].Dispose();
                             }
                         }
                     }
@@ -205,7 +206,7 @@ public class ExcelHandler(Timeline entireTimeline, TimelineHandler timelineHandl
                     if (string.IsNullOrEmpty(document.Path))
                     {
                         document.SaveAs(path);
-                        FileListing.Add(path, handler.HandlerType);
+                        //FileListing.Add(path, handler.HandlerType);
                         _log.Trace($"{handler.HandlerType} saving new file: {path}");
                     }
                     else
@@ -239,7 +240,7 @@ public class ExcelHandler(Timeline entireTimeline, TimelineHandler timelineHandl
                             Arg = "pdf",
                             Trackable = timelineEvent.TrackableId
                         });
-                        FileListing.Add(pdfFileName, handler.HandlerType);
+                        //FileListing.Add(pdfFileName, handler.HandlerType);
                     }
 
                     if (_random.Next(100) < 50)
@@ -252,51 +253,8 @@ public class ExcelHandler(Timeline entireTimeline, TimelineHandler timelineHandl
                         if (Token.WaitHandle.WaitOne(timelineEvent.DelayAfterActual.GetSafeSleepTime(writeSleep))) Token.ThrowIfCancellationRequested();
                     }
 
-                    workSheet.Dispose();
-
-                    document.Dispose();
-
-                    // close excel and dispose reference
+                    // close excel
                     officeApplication.Quit();
-
-                    try
-                    {
-                        officeApplication.Dispose();
-                    }
-                    catch (Exception e)
-                    {
-                        if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
-                        {
-                            throw;
-                        }
-                        // ignore
-                    }
-
-                    try
-                    {
-                        Marshal.ReleaseComObject(officeApplication);
-                    }
-                    catch (Exception e)
-                    {
-                        if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
-                        {
-                            throw;
-                        }
-                        // ignore
-                    }
-
-                    try
-                    {
-                        Marshal.FinalReleaseComObject(officeApplication);
-                    }
-                    catch (Exception e)
-                    {
-                        if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
-                        {
-                            throw;
-                        }
-                        // ignore
-                    }
 
                     GC.Collect();
                 }
