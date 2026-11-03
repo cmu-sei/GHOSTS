@@ -90,7 +90,14 @@ public class WatcherHandlerTests
         cts.CancelAfter(TimeSpan.FromMilliseconds(200));
 
         var task = Orchestrator.RunHandler(HandlerType.Watcher, timeline, handler, cts.Token);
-        await task;
+        try
+        {
+            await task;
+        }
+        catch (TaskCanceledException)
+        {
+            // The token fired before the thread pool started the handler, so StartNew cancelled it instead of running it.
+        }
     }
 
     [Fact]
@@ -109,6 +116,10 @@ public class WatcherHandlerTests
 
             var task = Orchestrator.RunHandler(HandlerType.Watcher, timeline, handler, cts.Token);
             await task;
+        }
+        catch (TaskCanceledException)
+        {
+            // The token fired before the thread pool started the handler, so StartNew cancelled it instead of running it.
         }
         finally
         {
@@ -132,6 +143,10 @@ public class WatcherHandlerTests
 
             var task = Orchestrator.RunHandler(HandlerType.Watcher, timeline, handler, cts.Token);
             await task;
+        }
+        catch (TaskCanceledException)
+        {
+            // The token fired before the thread pool started the handler, so StartNew cancelled it instead of running it.
         }
         finally
         {
