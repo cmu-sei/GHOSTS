@@ -200,7 +200,7 @@ namespace Ghosts.Client.Universal.timelineManager
             }
         }
 
-        private static string Handle(Message message)
+        private static string Handle(SimpleTCP.Message message)
         {
             var tempMsg =
                 $"PortListener received raw {message.TcpClient.Client.RemoteEndPoint}: {message.MessageString}";

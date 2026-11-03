@@ -14,7 +14,7 @@ using Newtonsoft.Json;
 
 namespace Ghosts.Client.Universal.Handlers;
 
-public class PowerPointHandler(Timeline entireTimeline, TimelineHandler timelineHandler, CancellationToken cancellationToken)
+public class PowerPoint(Timeline entireTimeline, TimelineHandler timelineHandler, CancellationToken cancellationToken)
     : BaseHandler(entireTimeline, timelineHandler, cancellationToken)
 {
     protected override Task RunOnce()
@@ -50,6 +50,11 @@ public class PowerPointHandler(Timeline entireTimeline, TimelineHandler timeline
                     _log.Trace($"PowerPoint event - {timelineEvent}");
                     WorkingHours.Is(handler);
 
+                    var applicationType = Type.GetTypeFromProgID("PowerPoint.Application");
+                    dynamic officeApplication = Activator.CreateInstance(applicationType);
+                    officeApplication.Visible = true;
+                    dynamic document = null;
+
                     if (timelineEvent.DelayBeforeActual > 0)
                     {
                         if (jitterFactor > 0)
@@ -65,31 +70,26 @@ public class PowerPointHandler(Timeline entireTimeline, TimelineHandler timeline
                         }
                     }
 
-                    var applicationType = Type.GetTypeFromProgID("PowerPoint.Application");
-                    dynamic officeApplication = Activator.CreateInstance(applicationType);
-                    officeApplication.Visible = true;
-                    dynamic document = null;
-
                     if (OfficeHelpers.ShouldOpenExisting(handler))
                     {
-                        document = officeApplication.Documents.Open(FileListing.GetRandomFile(handler.HandlerType),
+                        document = officeApplication.Presentations.Open(FileListing.GetRandomFile(handler.HandlerType),
                             ReadOnly: false);
                         _log.Trace($"{handler.HandlerType} opening existing file: {document.FullName}");
                     }
 
                     if (document == null)
                     {
-                        document = officeApplication.Documents.Add();
+                        document = officeApplication.Presentations.Add();
                         _log.Trace($"{handler.HandlerType} adding new...");
                     }
 
                     try
                     {
-                        // Minimize the main Word application window
+                        // Minimize the main PowerPoint application window
                         officeApplication.WindowState = 2; // 2 = wdWindowStateMinimize
 
-                        // Optionally minimize all document windows (usually unnecessary)
-                        foreach (var doc in officeApplication.Documents)
+                        // Optionally minimize all presentation windows (usually unnecessary)
+                        foreach (var doc in officeApplication.Presentations)
                         {
                             foreach (var win in doc.Windows)
                             {
@@ -198,7 +198,7 @@ public class PowerPointHandler(Timeline entireTimeline, TimelineHandler timeline
                     if (string.IsNullOrEmpty(document.Path))
                     {
                         document.SaveAs(path);
-                        FileListing.Add(path, handler.HandlerType);
+                        //FileListing.Add(path, handler.HandlerType);
                         _log.Trace($"{handler.HandlerType} saving new file: {path}");
                     }
                     else
@@ -233,7 +233,7 @@ public class PowerPointHandler(Timeline entireTimeline, TimelineHandler timeline
                             Arg = "pdf",
                             Trackable = timelineEvent.TrackableId
                         });
-                        FileListing.Add(outputFileName, handler.HandlerType);
+                        //FileListing.Add(outputFileName, handler.HandlerType);
                     }
 
                     if (_random.Next(100) < 50)
@@ -246,50 +246,9 @@ public class PowerPointHandler(Timeline entireTimeline, TimelineHandler timeline
                         if (Token.WaitHandle.WaitOne(timelineEvent.DelayAfterActual.GetSafeSleepTime(writeSleep))) Token.ThrowIfCancellationRequested();
                     }
 
-                    document.Dispose();
-
                     // close ppt and dispose reference
                     officeApplication.Quit();
 
-                    try
-                    {
-                        officeApplication.Dispose();
-                    }
-                    catch (Exception e)
-                    {
-                        if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
-                        {
-                            throw;
-                        }
-                        // ignore
-                    }
-
-
-                    try
-                    {
-                        Marshal.ReleaseComObject(officeApplication);
-                    }
-                    catch (Exception e)
-                    {
-                        if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
-                        {
-                            throw;
-                        }
-                        // ignore
-                    }
-
-                    try
-                    {
-                        Marshal.FinalReleaseComObject(officeApplication);
-                    }
-                    catch (Exception e)
-                    {
-                        if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
-                        {
-                            throw;
-                        }
-                        // ignore
-                    }
                 }
                 catch (Exception e)
                 {
@@ -328,7 +287,7 @@ public class PowerPointHandler(Timeline entireTimeline, TimelineHandler timeline
         }
         finally
         {
-            _log.Trace("Word closing normally...");
+            _log.Trace("PowerPoint closing normally...");
         }
 
         return Task.CompletedTask;

@@ -66,71 +66,7 @@ namespace Ghosts.Client.Universal.Infrastructure
             Log.Trace($"{id}:: Bash command output: {Result}");
             return Result;
         }
-
-        public void AttachFile()
-        {
-            try
-            {
-                needRestart = false;
-                //The dummy \b (backspaces) are needed at the beginning because a few characters at the start can be lost
-                string cmd =
-                    $"xdotool search -name '{windowTitle}' windowfocus --sync type --delay 100 '\b\b\b\b\b\b\b\b\b\b{filename}\r'";
-                ExecuteBashCommand(id, cmd);
-                Thread.Sleep(3000);
-                // Check if the window has closed, do multiple close attempts
-                int i = 0;
-                int closeMax = 5;
-                while (i < closeMax)
-                {
-                    cmd = $"xdotool search -name '{windowTitle}'";
-                    string result = ExecuteBashCommand(id, cmd);
-                    Thread.Sleep(1000);
-                    if (!string.IsNullOrEmpty(result))
-                    {
-                        // close the window
-                        cmd = $"xdotool search -name '{windowTitle}' windowfocus key alt+c";
-                        ExecuteBashCommand(id, cmd);
-                        Thread.Sleep(1000);
-                    }
-                    else
-                    {
-                        break;
-                    }
-
-                    i += 1;
-                }
-
-                if (i == closeMax)
-                {
-                    // try windowkill
-                    cmd = $"xdotool search -name '{windowTitle}'";
-                    string result = ExecuteBashCommand(id, cmd);
-                    if (!string.IsNullOrEmpty(result))
-                    {
-                        cmd = $"xdotool search -name '{windowTitle}' windowkill";
-                        ExecuteBashCommand(id, cmd);
-                        Thread.Sleep(1000);
-                        result = ExecuteBashCommand(id, cmd);
-                        ExecuteBashCommand(id, cmd);
-                        Thread.Sleep(1000);
-                        // reset i if window actually killed
-                        if (string.IsNullOrEmpty(result)) i = 0;
-                    }
-                }
-
-                if (i == closeMax)
-                {
-                    needRestart = true;
-                    Log.Error($"{id}:: Unable to attach file {filename}");
-                }
-
-                return;
-            }
-            catch (Exception e)
-            {
-                Log.Error(e);
-            }
-        }
+    
     }
 
 

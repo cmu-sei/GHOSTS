@@ -35,7 +35,7 @@ public class Connection(ClientConfiguration.SocketsSettings options)
         while (_connection.State == HubConnectionState.Connected)
         {
             _log.Trace($"Connected to {url}");
-            _ = new Timer(_ =>
+            _ = new System.Threading.Timer(_ =>
             {
                 Task.Run(async () =>
                 {

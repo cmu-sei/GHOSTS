@@ -99,7 +99,7 @@ public class LightHandlers
                         Domain.Code.Office.Word.Write(path, title, paragraph);
                     }
 
-                    FileListing.Add(path, this.Handler.HandlerType);
+                    //FileListing.Add(path, this.Handler.HandlerType);
                     Report(new ReportItem
                     {
                         Handler = this.Handler.HandlerType.ToString(),
@@ -146,7 +146,7 @@ public class LightHandlers
                         CreatePowerPoint(path, title, content);
                     }
 
-                    FileListing.Add(path, this.Handler.HandlerType);
+                    //FileListing.Add(path, this.Handler.HandlerType);
                     Report(new ReportItem
                     {
                         Handler = this.Handler.HandlerType.ToString(),
@@ -308,7 +308,7 @@ public class LightHandlers
                         Domain.Code.Office.Excel.Write(path, rt.Content);
                     }
 
-                    FileListing.Add(path, this.Handler.HandlerType);
+                    //FileListing.Add(path, this.Handler.HandlerType);
                     Report(new ReportItem
                     {
                         Handler = this.Handler.HandlerType.ToString(),

@@ -354,7 +354,7 @@ public class SocialHelperV1 : SocialHelper
                 
                 if (useEnterKey != null)
                 {
-                    targetElement.SendKeys(postContent + Keys.Enter);
+                    targetElement.SendKeys(postContent + OpenQA.Selenium.Keys.Enter);
                     Log.Trace($"Social:: Successfully added post on site {site}.");
                     themeToPostcount[theme] += 1;
                 } else {
