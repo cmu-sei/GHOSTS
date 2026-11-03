@@ -45,7 +45,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runtime: [linux-x64, linux-arm64, win-x64, win-x86]
+        # The csproj multi-targets net10.0 and net10.0-windows; publish needs -f
+        include:
+          - runtime: linux-x64
+            framework: net10.0
+          - runtime: linux-arm64
+            framework: net10.0
+          - runtime: win-x64
+            framework: net10.0-windows
+          - runtime: win-x86
+            framework: net10.0-windows
     steps:
       - uses: actions/checkout@v7
 
@@ -56,7 +65,7 @@ jobs:
       - name: Publish
         run: |
           dotnet publish src/Ghosts.Client.Universal/Ghosts.Client.Universal.csproj \
-            -c Release -r ${{ matrix.runtime }} --self-contained false \
+            -c Release -f ${{ matrix.framework }} -r ${{ matrix.runtime }} --self-contained false \
             -o publish/${{ matrix.runtime }}
 
       - name: Package

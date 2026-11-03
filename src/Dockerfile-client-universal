@@ -15,7 +15,7 @@ COPY src/Ghosts.Client.Universal/. /app/Ghosts.Client.Universal
 COPY src/Ghosts.Domain/. /app/Ghosts.Domain
 
 WORKDIR /app/Ghosts.Client.Universal
-RUN dotnet publish -c Release -o /app/dist
+RUN dotnet publish -c Release -f net10.0 -o /app/dist
 
 FROM mcr.microsoft.com/dotnet/runtime:10.0
 COPY --from=dev /app/dist /app
