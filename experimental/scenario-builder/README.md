@@ -1,7 +1,7 @@
 # Scenario Builder (experimental)
 
 A standalone, guided scenario builder: a .NET API that owns the question ledger, an Angular
-workspace, and a Pi agent in a side panel that walks a designer through a kind's questions on a
+workspace, and a Pi agent in a side panel that walks a designer through a scenario type's questions on a
 local or frontier model. It is separate from GHOSTS; GHOSTS and others pull the finished JSON.
 
 - Design: [docs/specs/2026-10-29-scenario-builder-design.md](docs/specs/2026-10-29-scenario-builder-design.md)
@@ -9,10 +9,10 @@ local or frontier model. It is separate from GHOSTS; GHOSTS and others pull the 
 
 | Folder | What |
 |---|---|
-| `api/` | .NET 10 minimal API: kinds, ledger, gates, proposals, log, pull API, model pass-through |
+| `api/` | .NET 10 minimal API: scenario types, ledger, gates, proposals, log, pull API, model pass-through |
 | `agent/` | TypeScript agent (Pi SDK 1.4): core, browser bundle, evaluation |
 | `ui/` | Angular 22 workspace with the agent panel |
-| `kinds/` | Kind files that seed a fresh database; after that, kinds are made and published in Admin › Scenario Types (the UI calls a kind a scenario type) |
+| `scenario-types/` | Scenario type files that seed a fresh database; after that, scenario types are made and published in Admin › Scenario Types |
 | `schema/` | JSON Schema of what `GET /api/scenarios/{id}` returns |
 | `tools/` | LiteLLM config for Sonnet on Bedrock |
 

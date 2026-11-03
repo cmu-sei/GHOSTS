@@ -14,8 +14,8 @@ public class Scenario
     public int Id { get; set; }
     public string Slug { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
-    public string KindId { get; set; } = string.Empty;
-    public string KindVersion { get; set; } = string.Empty;
+    public string ScenarioTypeId { get; set; } = string.Empty;
+    public string ScenarioTypeVersion { get; set; } = string.Empty;
     public string Owner { get; set; } = string.Empty;
 
     /// <summary>The open stage. Questions of later stages can't be answered yet.</summary>
@@ -106,7 +106,7 @@ public class Approval
     public DateTime Time { get; set; }
 }
 
-/// <summary>A named set of document templates for some kinds. Edits go to the draft; publishing makes a version.</summary>
+/// <summary>A named set of document templates for some scenario types. Edits go to the draft; publishing makes a version.</summary>
 public class TemplateLibrary
 {
     public int Id { get; set; }
@@ -114,8 +114,8 @@ public class TemplateLibrary
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
 
-    /// <summary>The kind ids it serves, as a JSON array.</summary>
-    public string Kinds { get; set; } = "[]";
+    /// <summary>The scenario type ids it serves, as a JSON array.</summary>
+    public string ScenarioTypes { get; set; } = "[]";
 
     /// <summary>The draft's templates, as a JSON array of <see cref="TemplateSpec"/>.</summary>
     public string Draft { get; set; } = "[]";
@@ -136,17 +136,17 @@ public class LibraryVersion
 }
 
 /// <summary>
-/// A kind as admins manage it: the draft they edit, the kind it was copied from, and whether new scenarios may still
-/// use it. Its published versions are <see cref="PublishedKind"/> rows; scenarios only ever run on those.
+/// A scenario type as admins manage it: the draft they edit, the scenario type it was copied from, and whether new scenarios may still
+/// use it. Its published versions are <see cref="PublishedScenarioType"/> rows; scenarios only ever run on those.
 /// </summary>
-public class ScenarioKind
+public class ScenarioTypeRecord
 {
     public int Id { get; set; }
 
-    /// <summary>The kind's id, such as crucible-tabletop. It never changes.</summary>
-    public string KindId { get; set; } = string.Empty;
+    /// <summary>The scenario type's id, such as crucible-tabletop. It never changes.</summary>
+    public string ScenarioTypeId { get; set; } = string.Empty;
 
-    /// <summary>The draft, as the kind's JSON. Its version is the latest published one, or 0.0.0 before the first publish.</summary>
+    /// <summary>The draft, as the scenario type's JSON. Its version is the latest published one, or 0.0.0 before the first publish.</summary>
     public string Draft { get; set; } = "{}";
 
     public string? BasedOn { get; set; }
@@ -159,12 +159,12 @@ public class ScenarioKind
     public DateTime Updated { get; set; }
 }
 
-/// <summary>One published version of a kind, kept whole as its <c>.kind.json</c> file.</summary>
-public class PublishedKind
+/// <summary>One published version of a scenario type, kept whole as its <c>.scenario-type.json</c> file.</summary>
+public class PublishedScenarioType
 {
     public int Id { get; set; }
 
-    public string KindId { get; set; } = string.Empty;
+    public string ScenarioTypeId { get; set; } = string.Empty;
 
     public string Version { get; set; } = string.Empty;
 

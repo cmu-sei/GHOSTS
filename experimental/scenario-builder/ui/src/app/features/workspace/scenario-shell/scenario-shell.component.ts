@@ -4,7 +4,7 @@ import { ActivatedRoute, NavigationEnd, Router, RouterLink, RouterLinkActive, Ro
 import { filter, map } from 'rxjs';
 import { TopBarComponent } from '../../../shared/components/top-bar/top-bar.component';
 import { AgentPanelComponent } from '../agent-panel/agent-panel.component';
-import { KindUpdateComponent } from '../kind-update/kind-update.component';
+import { ScenarioTypeUpdateComponent } from '../scenario-type-update/scenario-type-update.component';
 import { StageRailComponent } from '../stage-rail/stage-rail.component';
 import { WorkspaceStore } from '../workspace.store';
 
@@ -12,7 +12,7 @@ import { WorkspaceStore } from '../workspace.store';
 @Component({
   selector: 'app-scenario-shell',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, TopBarComponent, StageRailComponent, AgentPanelComponent, KindUpdateComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, TopBarComponent, StageRailComponent, AgentPanelComponent, ScenarioTypeUpdateComponent],
   providers: [WorkspaceStore],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './scenario-shell.component.html',
@@ -29,13 +29,13 @@ export class ScenarioShellComponent implements OnInit {
     { initialValue: this.questionsOpen() }
   );
 
-  /** Topology shows only for a kind that has one. */
+  /** Topology shows only for a scenario type that has one. */
   protected readonly pages = computed(() => [
     { path: 'context', label: 'Context' },
     { path: 'questions', label: 'Questions' },
     { path: 'summary', label: 'Summary' },
     { path: 'log', label: 'Decision Log' },
-    ...(this.store.kind()?.topology ? [{ path: 'topology', label: 'Topology' }] : []),
+    ...(this.store.scenarioType()?.topology ? [{ path: 'topology', label: 'Topology' }] : []),
     { path: 'finish', label: 'Finish' }
   ]);
 

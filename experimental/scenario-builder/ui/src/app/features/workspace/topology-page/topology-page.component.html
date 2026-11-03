@@ -1,12 +1,12 @@
 <section class="sheet">
   <header class="head">
     <h1>Topology</h1>
-    @if (store.kind()?.topology) {
+    @if (store.scenarioType()?.topology) {
       <p class="sub">Build the range from this scenario’s network answers, then deploy it to one of these.</p>
     }
   </header>
 
-  @if (store.kind()?.topology) {
+  @if (store.scenarioType()?.topology) {
     <ul class="targets">
       @for (t of targets; track t.id) {
         <li class="target">

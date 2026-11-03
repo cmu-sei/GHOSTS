@@ -7,7 +7,7 @@ namespace ScenarioBuilder.Api.Tests;
 
 public class TemplateRendererTests
 {
-    private static readonly Domain.Kind Tabletop = new KindCatalog(ApiFactory.KindsDirectory).Find(TestApi.Kind)!;
+    private static readonly Domain.ScenarioType Tabletop = new ScenarioTypeCatalog(ApiFactory.ScenarioTypesDirectory).Find(TestApi.TabletopType)!;
 
     private static TemplateSpec Spec(string body, TemplateFormat format = TemplateFormat.Html, string name = "Brief") =>
         new("brief", name, Audience.Designers, format, body);

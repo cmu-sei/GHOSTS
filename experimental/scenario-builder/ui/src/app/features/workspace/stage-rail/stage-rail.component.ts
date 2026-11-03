@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
-import { Kind, Progress } from '../../../core/models/builder.model';
+import { ScenarioType, Progress } from '../../../core/models/builder.model';
 
 type StageState = 'done' | 'open' | 'locked' | 'attention';
 
@@ -21,7 +21,7 @@ interface StageView {
   styleUrls: ['./stage-rail.component.scss']
 })
 export class StageRailComponent {
-  readonly kind = input.required<Kind>();
+  readonly scenarioType = input.required<ScenarioType>();
   readonly progress = input.required<Progress>();
   readonly selected = input(0);
   readonly select = output<number>();
@@ -29,7 +29,7 @@ export class StageRailComponent {
   protected readonly stages = computed<StageView[]>(() => {
     const progress = this.progress();
     const stale = new Set(progress.gate.findings.filter(f => f.code === 'APPROVAL_STALE').map(f => f.stage));
-    return this.kind().stages.map(stage => {
+    return this.scenarioType().stages.map(stage => {
       const answered = progress.answered.filter(a => a.stage === stage.number).length;
       const total = stage.questions.length;
       const state: StageState = stale.has(stage.number) && stage.number < progress.stage

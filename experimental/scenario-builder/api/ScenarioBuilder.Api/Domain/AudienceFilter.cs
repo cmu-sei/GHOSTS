@@ -9,12 +9,12 @@ public enum Audience { Participants, Facilitators, Designers }
 
 /// <summary>
 /// What an audience may see of a scenario, decided before any template gets it: the decision ledger is for
-/// designers; each question and draft carries its visibility in the kind file; list items carry their own.
+/// designers; each question and draft carries its visibility in the scenario type file; list items carry their own.
 /// A participant document can't leak exercise-control material, whatever its template asks for.
 /// </summary>
 public static class AudienceFilter
 {
-    public static JsonObject For(JsonObject document, Kind kind, Audience audience)
+    public static JsonObject For(JsonObject document, ScenarioType scenarioType, Audience audience)
     {
         var doc = (JsonObject)document.DeepClone();
         var allowed = (int)audience;
@@ -23,9 +23,9 @@ public static class AudienceFilter
             doc.Remove("decisions");
             doc.Remove("findings");
         }
-        foreach (var q in kind.AllQuestions.Where(q => Rank(q.Visibility) > allowed))
+        foreach (var q in scenarioType.AllQuestions.Where(q => Rank(q.Visibility) > allowed))
             Remove(doc, q.Path);
-        foreach (var d in kind.Drafts.Where(d => Rank(d.Visibility) > allowed))
+        foreach (var d in scenarioType.Drafts.Where(d => Rank(d.Visibility) > allowed))
             Remove(doc, d.Path);
         Prune(doc, allowed, top: true);
         return doc;

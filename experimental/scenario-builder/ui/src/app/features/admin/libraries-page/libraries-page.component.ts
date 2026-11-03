@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { KindSummary, LibrarySummary } from '../../../core/models/builder.model';
+import { ScenarioTypeSummary, LibrarySummary } from '../../../core/models/builder.model';
 import { AdminApiService } from '../../../core/services/admin-api.service';
 import { BuilderApiService, errorMessage } from '../../../core/services/builder-api.service';
 import { TopBarComponent } from '../../../shared/components/top-bar/top-bar.component';
@@ -21,27 +21,27 @@ export class LibrariesPageComponent implements OnInit {
   private readonly router = inject(Router);
 
   protected readonly libraries = signal<LibrarySummary[] | null>(null);
-  protected readonly kinds = signal<KindSummary[]>([]);
+  protected readonly scenarioTypes = signal<ScenarioTypeSummary[]>([]);
   protected readonly name = signal('');
   protected readonly note = signal<string | null>(null);
   protected readonly error = signal<string | null>(null);
 
   ngOnInit(): void {
     this.load();
-    this.api.getKinds().subscribe(kinds => this.kinds.set(kinds));
+    this.api.getScenarioTypes().subscribe(scenarioTypes => this.scenarioTypes.set(scenarioTypes));
   }
 
-  protected kindNames(ids: string[]): string {
-    return ids.length ? ids.map(id => this.kinds().find(k => k.id === id)?.name ?? id).join(', ') : 'No scenario types';
+  protected scenarioTypeNames(ids: string[]): string {
+    return ids.length ? ids.map(id => this.scenarioTypes().find(k => k.id === id)?.name ?? id).join(', ') : 'No scenario types';
   }
 
   protected typed(event: Event): void {
     this.name.set((event.target as HTMLInputElement).value);
   }
 
-  /** A new library serves every loaded kind until its page says otherwise. */
+  /** A new library serves every loaded scenario type until its page says otherwise. */
   protected create(): void {
-    this.admin.create(this.name().trim(), '', this.kinds().map(k => k.id)).subscribe({
+    this.admin.create(this.name().trim(), '', this.scenarioTypes().map(k => k.id)).subscribe({
       next: library => this.router.navigate(['/admin/libraries', library.id]),
       error: e => this.error.set(errorMessage(e))
     });

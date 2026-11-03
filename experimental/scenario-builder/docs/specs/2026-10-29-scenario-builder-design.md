@@ -28,7 +28,7 @@ good scenario, keep every decision and artifact consistent, and work on a local 
 | # | Topic | Decision |
 |---|---|---|
 | 1 | Product | A standalone scenario builder. It's not a GHOSTS feature. GHOSTS, Crucible and others are consumers. |
-| 2 | Modules | The scenario builder and a network (environment) builder are separate. A scenario can copy a network design in or point to a saved one. A kind can have a Topology page (the small unit exercise does, the tabletop doesn't) where the range is built and deployed to GraySpace, Updraft, Crucible or another range, each through its API (Updraft through its CLI). *Changed 2026-11-02: the page is a stub; nothing is built or deployed yet.* |
+| 2 | Modules | The scenario builder and a network (environment) builder are separate. A scenario can copy a network design in or point to a saved one. A scenario type can have a Topology page (the small unit exercise does, the tabletop doesn't) where the range is built and deployed to GraySpace, Updraft, Crucible or another range, each through its API (Updraft through its CLI). *Changed 2026-11-02: the page is a stub; nothing is built or deployed yet.* |
 | 3 | Output | One exercise document, the "full scenario JSON". Everything else (PDFs, the MSEL, the Crucible import file) is rendered from it. |
 | 4 | Renderers | Code adapters for machine targets. Team-supplied templates for documents people read. Designing templates is its own path. The agent may write one-off drafts but can't create templates. |
 | 5 | Who drives the interview | The tool keeps the question ledger (open, answered, delegated). The model chooses wording and order, and nothing counts as answered until a tool records it. |
@@ -37,19 +37,19 @@ good scenario, keep every decision and artifact consistent, and work on a local 
 | 8 | Approval | One owner per scenario approves every proposal that touches a stated decision. |
 | 9 | Scope | Author only, with results flowing back read-only later. The first version deploys nothing: consumers pull the full JSON from an API. *Changed 2026-11-02: deploying a range from the Topology page (row 2) is planned and stubbed.* |
 | 10 | Main screen | A structured workspace with the agent in a side panel, and a Questions page as the spine. Nobody starts at an empty prompt. |
-| 11 | Kinds | A kind (for example "Crucible tabletop") is a data file: its stages, questions, gates, checks and outputs. We write the kinds for now. *Changed 2026-11-03: admins create and manage kinds in Admin › Scenario Types (the UI's name for a kind), and a model can draft one from a few sentences. Kinds live in the database with a draft and published versions, seeded from `kinds/` on a fresh database. A scenario stays on the kind version it was made on until its owner updates it to the latest: answers whose question is still there and still fits carry over, the rest are dropped into the Decision Log, and new questions are left open.* |
-| 12 | Checks | Make checks structural wherever possible, and have the model flag what's left. Each check is a stop or a warning, set per kind and per project. There's no hard floor for now. Stops block sign-off only. Export is never blocked; it carries its open findings. |
+| 11 | Scenario types | A scenario type (for example "Crucible tabletop") is a data file: its stages, questions, gates, checks and outputs. We write the scenario types for now. *Changed 2026-11-03: admins create and manage scenario types in Admin › Scenario Types (the code called them kinds until then), and a model can draft one from a few sentences. Scenario types live in the database with a draft and published versions, seeded from `scenario-types/` on a fresh database. A scenario stays on the scenario type version it was made on until its owner updates it to the latest: answers whose question is still there and still fits carry over, the rest are dropped into the Decision Log, and new questions are left open.* |
+| 12 | Checks | Make checks structural wherever possible, and have the model flag what's left. Each check is a stop or a warning, set per scenario type and per project. There's no hard floor for now. Stops block sign-off only. Export is never blocked; it carries its open findings. |
 | 13 | Libraries | Shared items (scales, vocabulary, organizations, network designs) are pinned by version. When a newer version exists, the builder offers it with a preview of what changes. Pinned items are copied into the pulled JSON. (A working default; nobody objected.) |
 | 14 | Where the agent runs | The conversation runs in the browser. Long jobs run in a server-side worker on the same agent code. The model is always reached through the builder's server. |
 | 15 | Model floor | An OPAL-class gateway serving gemma-4-26b. For development, `gemma4:26b` runs under Ollama on a 64 GB M1 Pro. A frontier model is used where one is available. |
 | 16 | Stack | C# (.NET 10) API and an Angular front end, shaped like jeffort. A TypeScript agent on the Pi SDK. |
-| 17 | First piece | The Crucible tabletop kind, stages 0 to 3, scored on gemma against Sonnet before anything else is built (section 5). |
+| 17 | First piece | The Crucible tabletop scenario type, stages 0 to 3, scored on gemma against Sonnet before anything else is built (section 5). |
 
 ## 3. Words used here
 
 | Word | Meaning |
 |---|---|
-| Kind | A type of scenario, defined by a data file: stages, questions, gates, checks, outputs. |
+| Scenario type | A type of scenario, defined by a data file: stages, questions, gates, checks, outputs. |
 | Stage | A group of questions, answered before the next group. From the Monsoon design input. |
 | Gate | What must be true before the next stage opens, for example "the owner approved the executive summary". |
 | Ledger | The record of every question: open, answered, or delegated. For each answer it records who decided it, when, and why. |
@@ -63,9 +63,9 @@ good scenario, keep every decision and artifact consistent, and work on a local 
 
 Each part is marked **first piece** or **later**.
 
-- **Kinds and the question ledger.** The kind file holds stages, questions, recommended answers,
+- **Scenario types and the question ledger.** The scenario type file holds stages, questions, recommended answers,
   gates and checks. The ledger records each answer and who gave it. The Questions page shows both.
-  *First piece: one kind, stages 0 to 3.*
+  *First piece: one scenario type, stages 0 to 3.*
 - **Agent in a side panel.** It asks one question at a time with a recommended answer first. It
   records answers through tools, proposes changes to stated answers, and drafts text into fields.
   *First piece.*
@@ -73,13 +73,13 @@ Each part is marked **first piece** or **later**.
   same agent code, under the authority of the person who started them. *Later.*
 - **Checks.** Structural checks are code: counts, timing, markings, vocabulary, and ground-truth
   facts tagged with the move that reveals them. Model-judged checks raise flags that a person
-  clears. Each check is a stop or a warning per kind and project. *First piece: gate checks only.*
+  clears. Each check is a stop or a warning per scenario type and project. *First piece: gate checks only.*
 - **Renderers.** Review PDF, designers' pack, MSEL, read-in, and the Crucible `exercise.json`, all
   from the document. *Later.*
 - **Collaboration.** Per-element versions, presence ("Dana is in Move 3"), and an owner approving
   proposals. *Later. The first piece has one owner and records who did what.*
 - **Libraries.** Version-pinned shared items, and update offers with an impact preview. *Later.*
-- **More kinds.** A range exercise kind, built from `schemas/scenario-document/ELICITATION.md` and
+- **More scenario types.** A range exercise scenario type, built from `schemas/scenario-document/ELICITATION.md` and
   schema 1.2.0. *Later.*
 - **Consumers.** GHOSTS reads the full JSON. Crucible gets `exercise.json`. *Later. The first piece
   serves the JSON.*
@@ -96,7 +96,7 @@ it's no, we learn that before building the workspace, the jobs and the collabora
 **In:**
 
 - The C# API with the ledger, gates, proposals, an edit log, the pull API, and a model pass-through.
-- The `crucible-tabletop` kind file, stages 0 to 3 only.
+- The `crucible-tabletop` scenario type file, stages 0 to 3 only.
 - The Angular app: the scenario list, the Questions page, the Summary page, the Decision log page,
   a raw JSON view, and the agent side panel with question cards and proposal cards.
 - The TypeScript agent: its core, a browser bundle for the Angular app, and the same core run from
@@ -104,7 +104,7 @@ it's no, we learn that before building the workspace, the jobs and the collabora
 - The evaluation: a scripted user, structural checks, and a report comparing the two models.
 
 **Out (later pieces):** stages 4 to 12, the background worker, renderers and PDFs, the Crucible
-export, collaboration and per-element versions, libraries, the range kind, uploading source
+export, collaboration and per-element versions, libraries, the range scenario type, uploading source
 documents, the automatic name check, model-judged checks, and sign-off versions.
 
 ## 6. Folder layout
@@ -113,7 +113,7 @@ documents, the automatic name check, model-judged checks, and sign-off versions.
 experimental/scenario-builder/
   README.md                     how to run it
   docs/specs/                   this file
-  kinds/crucible-tabletop.kind.json
+  scenario-types/crucible-tabletop.scenario-type.json
   schema/exercise-document.v0.schema.json
   api/ScenarioBuilder.slnx
   api/ScenarioBuilder.Api/      .NET 10 minimal API, one file per endpoint (jeffort's layout)
@@ -139,13 +139,13 @@ around, because the model can't set headers. The server uses it to apply authori
 
 | Table | Holds |
 |---|---|
-| `Scenario` | id, slug, name, kind id and version, owner, current stage, drafted fields (JSON), created, updated |
+| `Scenario` | id, slug, name, scenario type id and version, owner, current stage, drafted fields (JSON), created, updated |
 | `Decision` | scenario, question id, stage, value (JSON), who (`stated` or `proposed`), decided by, via (`person` or `agent`), reason, quote, time. One row per answered question. |
 | `Proposal` | scenario, question id, before, after, reason, proposed by, status (`pending`, `applied`, `discarded`), times |
 | `Edit` | scenario, target (a question id or a drafted field), before, after, by, via, time. Every change to an answer or a drafted field, so the history survives an overwrite and changes can be reverted later. |
 | `Approval` | scenario, gate, approved by, a hash of what was approved, time. An edit after approval makes the hash stale, which voids the approval. |
 
-Open questions have no row. They are the kind's questions minus the answered ones. Answers live
+Open questions have no row. They are the scenario type's questions minus the answered ones. Answers live
 only in `Decision`, and the pull API assembles the document from those rows and the drafted fields.
 Nothing is stored twice.
 
@@ -153,14 +153,14 @@ Nothing is stored twice.
 
 | Endpoint | Does |
 |---|---|
-| `GET /api/kinds`, `GET /api/kinds/{id}` | Lists the kinds, or returns one kind's definition. |
-| `POST /api/scenarios`, `GET /api/scenarios` | Creates a scenario (name and kind; the caller becomes owner), or lists scenarios. |
+| `GET /api/scenario-types`, `GET /api/scenario-types/{id}` | Lists the scenario types, or returns one scenario type's definition. |
+| `POST /api/scenarios`, `GET /api/scenarios` | Creates a scenario (name and scenario type; the caller becomes owner), or lists scenarios. |
 | `GET /api/scenarios/{id}` | **The pull API.** The full scenario JSON (section 9), with status and open findings. |
-| `GET /api/scenarios/{id}/progress` | The current stage, the gate status, the open questions in kind order, and what's answered or delegated. Used by the UI and by the agent. |
+| `GET /api/scenarios/{id}/progress` | The current stage, the gate status, the open questions in scenario type order, and what's answered or delegated. Used by the UI and by the agent. |
 | `PUT /api/scenarios/{id}/decisions/{questionId}` | Records an answer, logged in `Edit`. Refused with 409 when the agent (`X-Via: agent`) tries to overwrite a stated answer; the agent must propose instead. A person may overwrite any answer. |
 | `POST /api/scenarios/{id}/proposals` | Proposes a change to a stated answer. |
 | `POST …/proposals/{pid}/apply`, `…/discard` | Owner only, and person only. |
-| `PUT /api/scenarios/{id}/drafts/{field}` | Writes a drafted field, such as `executiveSummary`. Allowed only once the kind says that draft is due. Logged in `Edit`. |
+| `PUT /api/scenarios/{id}/drafts/{field}` | Writes a drafted field, such as `executiveSummary`. Allowed only once the scenario type says that draft is due. Logged in `Edit`. |
 | `POST /api/scenarios/{id}/gates/{stage}/approve` | Owner only, and person only. The agent can't approve. |
 | `POST /api/scenarios/{id}/advance` | Opens the next stage if the gate passes, and otherwise returns the gate's findings. |
 | `GET /api/scenarios/{id}/log` | Decisions, edits and proposals in time order. |
@@ -172,9 +172,9 @@ contextWindow }`. For development: Ollama on the Mac at `http://192.168.65.254:1
 does it (`profiles/aws/litellm.json`). Keys come from environment variables and never reach the
 browser.
 
-## 8. The kind file
+## 8. The scenario type file
 
-`kinds/crucible-tabletop.kind.json`. Its questions are the Monsoon design input's section 4,
+`scenario-types/crucible-tabletop.scenario-type.json`. Its questions are the Monsoon design input's section 4,
 stages 0 to 3: about 30 questions.
 
 ```json
@@ -233,7 +233,7 @@ follow schema 1.2.0 where a field fits. A later piece maps the two.
 ```json
 {
   "schemaVersion": "0.1.0",
-  "kind": { "id": "crucible-tabletop", "version": "0.1.0" },
+  "scenarioType": { "id": "crucible-tabletop", "version": "0.1.0" },
   "slug": "…", "name": "…", "status": "draft", "stage": 2,
   "engagement": { "participants": "…", "teamSize": 5, "timeSlot": "…", "plainEnglish": true },
   "objectives": [ { "id": "O1", "text": "…" } ],
@@ -270,7 +270,7 @@ tools.
 | `ask_user` | Takes one `questionId`, the question as worded, a recommended answer with one sentence of why, and two or three alternatives. Shows a question card and ends the turn. Refused if this turn has already asked a question. |
 | `record_answer` | Takes `questionId`, `value`, `who`, and `reason`. A `stated` answer must carry a `quote` of the person's own words. A `proposed` answer must carry a reason. |
 | `propose_change` | Proposes a change to a stated answer, as a card for the owner. |
-| `draft` | Writes a drafted field that the kind says is due. |
+| `draft` | Writes a drafted field that the scenario type says is due. |
 | `advance_stage` | Asks the server to open the next stage, and returns the gate's findings if it can't. |
 
 **What the person does without the model.** On a question card, the person picks the recommended
@@ -292,7 +292,7 @@ are buttons, never tools.
 
 These are pages, not a chat window:
 
-- **Scenarios:** the list, and "New scenario" (name and kind).
+- **Scenarios:** the list, and "New scenario" (name and scenario type).
 - **Questions:** tabs for stages 0 to 3. Each question shows its text, its status (open, answered,
   proposed by the agent, delegated), its value, who decided it and when, and lets the person edit it.
   Each stage shows its gate status and the owner's approve button.
@@ -326,7 +326,7 @@ from a fixture of answers:
 | 2 | No repeats | A question is asked more than once. |
 | 3 | Known answers | A question the opening message answered is asked anyway. |
 | 4 | One at a time | A turn asks more than one question. |
-| 5 | Recommendation | A question whose kind entry has a recommended answer is asked without one. |
+| 5 | Recommendation | A question whose scenario type entry has a recommended answer is asked without one. |
 | 6 | Order | A later stage's question is asked before the earlier gate passed. |
 | 7 | Delegation | A You decide doesn't produce a `proposed` answer with a reason. |
 | 8 | Fidelity | A `stated` answer lacks the fixture's key fragments, or its quote isn't in the person's words. |
@@ -393,5 +393,5 @@ In order. Each is decided again on what the evaluation shows.
 5. Stage 8 and the Crucible `exercise.json` export.
 6. Collaboration: per-element versions and presence.
 7. Libraries with pinned versions.
-8. The range exercise kind, and GHOSTS reading the full JSON.
+8. The range exercise scenario type, and GHOSTS reading the full JSON.
 9. Uploading source documents, the name check, and model-judged checks.

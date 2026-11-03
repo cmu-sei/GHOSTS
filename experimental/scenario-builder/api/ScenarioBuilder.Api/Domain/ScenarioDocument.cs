@@ -11,14 +11,14 @@ namespace ScenarioBuilder.Api.Domain;
 /// </summary>
 public static class ScenarioDocument
 {
-    public const string SchemaVersion = "0.3.0";
+    public const string SchemaVersion = "0.4.0";
 
-    public static JsonObject Build(Kind kind, Scenario scenario, IReadOnlyList<Decision> decisions, IReadOnlyList<Approval> approvals)
+    public static JsonObject Build(ScenarioType scenarioType, Scenario scenario, IReadOnlyList<Decision> decisions, IReadOnlyList<Approval> approvals)
     {
         var doc = new JsonObject
         {
             ["schemaVersion"] = SchemaVersion,
-            ["kind"] = new JsonObject { ["id"] = kind.Id, ["version"] = scenario.KindVersion },
+            ["scenarioType"] = new JsonObject { ["id"] = scenarioType.Id, ["version"] = scenario.ScenarioTypeVersion },
             ["slug"] = scenario.Slug,
             ["name"] = scenario.Name,
             ["status"] = "draft",
@@ -27,7 +27,7 @@ public static class ScenarioDocument
 
         var byQuestion = decisions.ToDictionary(d => d.QuestionId);
         var record = new JsonArray();
-        foreach (var q in kind.AllQuestions)
+        foreach (var q in scenarioType.AllQuestions)
         {
             if (!byQuestion.TryGetValue(q.Id, out var decision))
                 continue;
@@ -48,19 +48,19 @@ public static class ScenarioDocument
         }
 
         var drafts = Ledger.ReadDrafts(scenario);
-        foreach (var draft in kind.Drafts)
+        foreach (var draft in scenarioType.Drafts)
             if (drafts[draft.Field] is JsonValue text && !string.IsNullOrWhiteSpace(text.GetValue<string>()))
                 Place(doc, draft.Path, text.DeepClone());
 
         doc["decisions"] = record;
-        doc["findings"] = new JsonArray(Ledger.Progress(kind, scenario, decisions, approvals).Gate.Findings
+        doc["findings"] = new JsonArray(Ledger.Progress(scenarioType, scenario, decisions, approvals).Gate.Findings
             .Select(f => (JsonNode?)new JsonObject { ["severity"] = f.Severity, ["code"] = f.Code, ["message"] = f.Message, ["stage"] = f.Stage })
             .ToArray());
         return doc;
     }
 
     /// <summary>A list answer with an id prefix or a visibility becomes items; every other answer stays as it is.</summary>
-    private static JsonNode? Shape(KindQuestion q, JsonNode? value)
+    private static JsonNode? Shape(ScenarioTypeQuestion q, JsonNode? value)
     {
         if (q.Answer != AnswerType.List || value is not JsonArray list || (q.IdPrefix is null && q.Visibility is null))
             return value;

@@ -11,12 +11,12 @@ namespace ScenarioBuilder.Api.Tests;
 /// <summary>Calls the tests share. Writes go through the HTTP API; only setup shortcuts touch the database.</summary>
 public static class TestApi
 {
-    public const string Kind = "crucible-tabletop";
-    public const string SmallUnitKind = "small-unit-team-exercise";
+    public const string TabletopType = "crucible-tabletop";
+    public const string SmallUnitType = "small-unit-team-exercise";
 
-    public static async Task<int> CreateScenario(HttpClient client, string name = "Harbor Blackout", string kindId = Kind)
+    public static async Task<int> CreateScenario(HttpClient client, string name = "Harbor Blackout", string scenarioTypeId = TabletopType)
     {
-        var response = await client.PostAsJsonAsync("/api/scenarios", new { name, kindId });
+        var response = await client.PostAsJsonAsync("/api/scenarios", new { name, scenarioTypeId });
         response.EnsureSuccessStatusCode();
         return (int)(await Body(response))["id"]!;
     }
@@ -32,23 +32,23 @@ public static class TestApi
 
     public static async Task<string> Code(HttpResponseMessage response) => (string)(await Body(response))["code"]!;
 
-    private static readonly KindCatalog Kinds = new(ApiFactory.KindsDirectory);
-    private static readonly Kind Tabletop = Kinds.Find(Kind)!;
+    private static readonly ScenarioTypeCatalog ScenarioTypes = new(ApiFactory.ScenarioTypesDirectory);
+    private static readonly ScenarioType Tabletop = ScenarioTypes.Find(TabletopType)!;
 
-    public static Kind KindOf(string id) => Kinds.Find(id)!;
+    public static ScenarioType ScenarioTypeOf(string id) => ScenarioTypes.Find(id)!;
 
     /// <summary>A value every question of its type accepts.</summary>
-    public static object ValidValue(KindQuestion q) => q.Answer switch
+    public static object ValidValue(ScenarioTypeQuestion q) => q.Answer switch
     {
         AnswerType.Choice => q.Options![0],
         AnswerType.List => new[] { $"Item for {q.Id}" },
         _ => $"Answer for {q.Id}"
     };
 
-    /// <summary>Answers every question of <paramref name="stage"/> as a person; the tabletop kind unless another is given.</summary>
-    public static async Task AnswerStage(HttpClient client, int scenarioId, int stage, Kind? kind = null)
+    /// <summary>Answers every question of <paramref name="stage"/> as a person; the tabletop scenario type unless another is given.</summary>
+    public static async Task AnswerStage(HttpClient client, int scenarioId, int stage, ScenarioType? scenarioType = null)
     {
-        foreach (var q in (kind ?? Tabletop).Stages[stage].Questions)
+        foreach (var q in (scenarioType ?? Tabletop).Stages[stage].Questions)
             (await Put(client, scenarioId, q.Id, new { value = ValidValue(q) })).EnsureSuccessStatusCode();
     }
 
@@ -62,15 +62,15 @@ public static class TestApi
         client.PutAsJsonAsync($"/api/scenarios/{scenarioId}/drafts/{field}", new { text });
 
     /// <summary>Answers, drafts, approves and advances as the owner until <paramref name="target"/> is the open stage.</summary>
-    public static async Task ReachStage(HttpClient owner, int scenarioId, int target, Kind? kind = null)
+    public static async Task ReachStage(HttpClient owner, int scenarioId, int target, ScenarioType? scenarioType = null)
     {
-        kind ??= Tabletop;
+        scenarioType ??= Tabletop;
         for (var stage = 0; stage < target; stage++)
         {
-            await AnswerStage(owner, scenarioId, stage, kind);
-            if (kind.Drafts.Any(d => d.DueAfterStage == stage))
+            await AnswerStage(owner, scenarioId, stage, scenarioType);
+            if (scenarioType.Drafts.Any(d => d.DueAfterStage == stage))
                 (await Draft(owner, scenarioId, "A summary.")).EnsureSuccessStatusCode();
-            if (kind.Stages[stage].Gate.Approval is not null)
+            if (scenarioType.Stages[stage].Gate.Approval is not null)
                 (await Approve(owner, scenarioId, stage)).EnsureSuccessStatusCode();
             (await Advance(owner, scenarioId)).EnsureSuccessStatusCode();
         }

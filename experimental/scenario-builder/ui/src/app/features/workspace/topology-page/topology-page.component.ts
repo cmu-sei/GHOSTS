@@ -3,7 +3,7 @@ import { RouterLink } from '@angular/router';
 import { WorkspaceStore } from '../workspace.store';
 
 /**
- * Where the range a scenario needs is built and deployed, for a kind that has a topology.
+ * Where the range a scenario needs is built and deployed, for a scenario type that has a topology.
  * A stub for now: GraySpace and Updraft open read-only screens of their choices, and the others aren't built yet.
  */
 @Component({

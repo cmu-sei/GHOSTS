@@ -8,7 +8,7 @@ import { BuilderApiService } from '../../../core/services/builder-api.service';
 import { TemplateEditorComponent } from './template-editor.component';
 
 const library: LibraryDetail = {
-  id: 1, slug: 'basics', name: 'Basics', kinds: ['crucible-tabletop'], latestVersion: 1, draftChanged: false, versions: [],
+  id: 1, slug: 'basics', name: 'Basics', scenarioTypes: ['crucible-tabletop'], latestVersion: 1, draftChanged: false, versions: [],
   templates: [{ id: 'read-in', name: 'Read-in', audience: 'participants', format: 'markdown', body: '# {{ scenario.name }}\n{% if %}' }]
 };
 
@@ -21,7 +21,7 @@ async function render(preview: () => ReturnType<AdminApiService['preview']>) {
       { provide: AdminApiService, useValue: admin },
       {
         provide: BuilderApiService,
-        useValue: { getScenarios: () => of([{ id: 4, slug: 'harbor', name: 'Harbor Blackout', kindId: 'crucible-tabletop', kindVersion: '1', owner: 'dev', stage: 2, updated: '' }]) }
+        useValue: { getScenarios: () => of([{ id: 4, slug: 'harbor', name: 'Harbor Blackout', scenarioTypeId: 'crucible-tabletop', scenarioTypeVersion: '1', owner: 'dev', stage: 2, updated: '' }]) }
       }
     ]
   });

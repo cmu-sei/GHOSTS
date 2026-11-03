@@ -88,7 +88,7 @@ th {
     width: 120px;
   }
 
-  &.kind {
+  &.scenario-type {
     width: 220px;
   }
 
@@ -198,7 +198,7 @@ td.actions {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  th.kind,
+  th.scenarioType,
   th.owner,
   td:nth-child(2),
   td:nth-child(4) {

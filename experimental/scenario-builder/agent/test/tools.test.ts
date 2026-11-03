@@ -35,10 +35,10 @@ describe("ask_user", () => {
     expect(cards).toEqual([{ ...askA, answer: "text" }]);
   });
 
-  it("reads the questions from the kind version the scenario is on", async () => {
+  it("reads the questions from the scenario type version the scenario is on", async () => {
     await run("ask_user", askA);
 
-    expect(api.kindFetches).toEqual(["small@0.2.0"]);
+    expect(api.scenarioTypeFetches).toEqual(["small@0.2.0"]);
   });
 
   it("refuses a second question in the same turn", async () => {
@@ -76,16 +76,16 @@ describe("ask_user", () => {
     expect(ctx.turn.asked).toBe(false);
   });
 
-  it("refuses a question the kind doesn't have", async () => {
+  it("refuses a question the scenario type doesn't have", async () => {
     const result = await run("ask_user", { questionId: "zzz", question: "?", alternatives: [] });
 
     expect(result.details.code).toBe("UNKNOWN_QUESTION");
   });
 
-  it("fetches the kind again after a failed fetch", async () => {
-    // One tool set, as a session keeps it: the kind is cached across calls.
+  it("fetches the scenario type again after a failed fetch", async () => {
+    // One tool set, as a session keeps it: the scenario type is cached across calls.
     const ask = createTools(ctx).find(t => t.name === "ask_user") as AgentTool<any>;
-    api.failKind = new ApiError(0, "UNREACHABLE", "Can't reach the Scenario Builder API.");
+    api.failScenarioType = new ApiError(0, "UNREACHABLE", "Can't reach the Scenario Builder API.");
     const failed = await ask.execute("call-1", askA);
     expect(failed.details.code).toBe("UNREACHABLE");
 
@@ -137,12 +137,12 @@ describe("record_answer", () => {
 describe("delegation", () => {
   it("record_answers records a whole stage as proposed, each with its reason", async () => {
     const result = await run("record_answers", { answers: [
-      { questionId: "a", value: "A1", reason: "The kind recommends it." },
+      { questionId: "a", value: "A1", reason: "The scenario type recommends it." },
       { questionId: "b", value: "x", reason: "Simplest." },
     ] });
 
     expect(result.isError).toBeFalsy();
-    expect([...api.answers.values()].map(a => [a.id, a.who, a.reason])).toEqual([["a", "proposed", "The kind recommends it."], ["b", "proposed", "Simplest."]]);
+    expect([...api.answers.values()].map(a => [a.id, a.who, a.reason])).toEqual([["a", "proposed", "The scenario type recommends it."], ["b", "proposed", "Simplest."]]);
     expect(text(result)).toContain("Recorded 2");
   });
 
@@ -194,7 +194,7 @@ describe("get_progress with sources", () => {
 
     const result = await run("get_progress", {});
 
-    expect(text(result)).toContain("From the sources. When a passage answers a question, recommend what it says, not the kind's suggestion, and name the source in your reason:");
+    expect(text(result)).toContain("From the sources. When a passage answers a question, recommend what it says, not the scenario type's suggestion, and name the source in your reason:");
     expect(text(result)).toContain("For b: [Brief, passage 1 of 1]\nPick the answer: the brief says y.");
     expect(text(result).split("[Brief, passage 1 of 1]")).toHaveLength(2);
     expect(text(result)).not.toContain("[Notes,");
@@ -230,13 +230,13 @@ describe("record_answer as stated", () => {
 });
 
 describe("ask_user with sources", () => {
-  it("asks for the sources' answer before the kind's when a card has no recommendation", async () => {
+  it("asks for the sources' answer before the scenario type's when a card has no recommendation", async () => {
     api.sources.push({ id: 3, name: "Brief", text: "A is A7." });
 
     const result = await run("ask_user", { questionId: "a", question: "What is A?", alternatives: ["A2"] });
 
     expect(result.details.code).toBe("NO_RECOMMENDED");
-    expect(text(result)).toContain("Recommend what the sources say if they answer it; otherwise the kind's suggestion, A1.");
+    expect(text(result)).toContain("Recommend what the sources say if they answer it; otherwise the scenario type's suggestion, A1.");
   });
 });
 

@@ -12,11 +12,11 @@ public record PreviewTemplate(int ScenarioId, Audience Audience, TemplateFormat 
 public class PreviewEndpoint : IEndpoint
 {
     public RouteHandlerBuilder Register(RouteGroupBuilder group, string tag) =>
-        group.MapPost("/admin/preview", async (PreviewTemplate body, HttpContext http, KindCatalog kinds, BuilderDb db, CancellationToken ct) =>
+        group.MapPost("/admin/preview", async (PreviewTemplate body, HttpContext http, ScenarioTypeCatalog scenarioTypes, BuilderDb db, CancellationToken ct) =>
             {
                 if (!Enum.IsDefined(body.Audience) || !Enum.IsDefined(body.Format))
                     return ErrorResults.BadRequest("TEMPLATE_INVALID", "Use the audience participants, facilitators or designers, and the format html or markdown.");
-                var state = await ScenarioState.Load(db, kinds, body.ScenarioId, ct);
+                var state = await ScenarioState.Load(db, scenarioTypes, body.ScenarioId, ct);
                 if (state is null)
                     return ScenarioState.Missing(body.ScenarioId);
                 var library = body.LibraryId is { } libraryId ? await db.Libraries.FindAsync([libraryId], ct) : null;

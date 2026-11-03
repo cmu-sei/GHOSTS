@@ -8,12 +8,12 @@
 
   <form class="create" (submit)="$event.preventDefault(); create()">
     <input class="sb-field name" placeholder="Name a new scenario" aria-label="Scenario name" [value]="name()" (input)="typed($event)" />
-    <select class="sb-field kind" aria-label="Scenario type" [value]="kindId()" (change)="picked($event)">
-      @for (kind of kinds(); track kind.id) {
-        <option [value]="kind.id" [selected]="kind.id === kindId()">{{ kind.name }}</option>
+    <select class="sb-field scenario-type" aria-label="Scenario type" [value]="scenarioTypeId()" (change)="picked($event)">
+      @for (scenarioType of scenarioTypes(); track scenarioType.id) {
+        <option [value]="scenarioType.id" [selected]="scenarioType.id === scenarioTypeId()">{{ scenarioType.name }}</option>
       }
     </select>
-    <button class="sb-button primary" type="submit" [disabled]="!name().trim() || !kindId()">Create</button>
+    <button class="sb-button primary" type="submit" [disabled]="!name().trim() || !scenarioTypeId()">Create</button>
   </form>
 
   <div class="tools">
@@ -50,7 +50,7 @@
                 <span class="pill">Archived</span>
               }
             </td>
-            <td class="meta">{{ kindName(scenario.kindId) }}</td>
+            <td class="meta">{{ scenarioTypeName(scenario.scenarioTypeId) }}</td>
             <td class="stage">Stage {{ scenario.stage }}</td>
             <td class="meta">{{ scenario.owner }}</td>
             <td class="meta when">{{ scenario.updated | date: 'MMM d, HH:mm' }}</td>

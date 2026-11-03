@@ -1,9 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { AnsweredView, Kind, Progress } from '../../../core/models/builder.model';
+import { AnsweredView, ScenarioType, Progress } from '../../../core/models/builder.model';
 import { StageRailComponent } from './stage-rail.component';
 
 const q = (id: string) => ({ id, text: `${id}?`, why: 'w', answer: 'text' as const, path: `/${id}` });
-const kind: Kind = {
+const scenarioType: ScenarioType = {
   id: 'k', version: '1', name: 'K', drafts: [],
   stages: [
     { number: 0, title: 'Engagement context', gate: { approval: 'Confirm' }, questions: [q('a'), q('b')] },
@@ -16,7 +16,7 @@ const answered = (id: string, stage: number): AnsweredView =>
 
 function progress(overrides: Partial<Progress>): Progress {
   return {
-    kindId: 'k', kindVersion: '0.1.0', stage: 1, stageTitle: 'Objectives', lastStage: false,
+    scenarioTypeId: 'k', scenarioTypeVersion: '0.1.0', stage: 1, stageTitle: 'Objectives', lastStage: false,
     gate: { passes: false, approved: false, findings: [] },
     open: [], answered: [answered('a', 0), answered('b', 0), answered('c', 1)], draftsDue: [], delegated: false, ...overrides
   };
@@ -24,7 +24,7 @@ function progress(overrides: Partial<Progress>): Progress {
 
 async function render(p: Progress, selected = 1): Promise<ComponentFixture<StageRailComponent>> {
   const fixture = TestBed.createComponent(StageRailComponent);
-  fixture.componentRef.setInput('kind', kind);
+  fixture.componentRef.setInput('scenarioType', scenarioType);
   fixture.componentRef.setInput('progress', p);
   fixture.componentRef.setInput('selected', selected);
   await fixture.whenStable();

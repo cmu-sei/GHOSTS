@@ -11,9 +11,9 @@ public record AdvanceView(int Stage);
 public class AdvanceEndpoint : IEndpoint
 {
     public RouteHandlerBuilder Register(RouteGroupBuilder group, string tag) =>
-        group.MapPost("/scenarios/{id:int}/advance", async (int id, KindCatalog kinds, BuilderDb db, CancellationToken ct) =>
+        group.MapPost("/scenarios/{id:int}/advance", async (int id, ScenarioTypeCatalog scenarioTypes, BuilderDb db, CancellationToken ct) =>
         {
-            var state = await ScenarioState.Load(db, kinds, id, ct);
+            var state = await ScenarioState.Load(db, scenarioTypes, id, ct);
             if (state is null)
                 return ScenarioState.Missing(id);
             var progress = state.Progress();

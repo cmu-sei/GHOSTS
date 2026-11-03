@@ -12,9 +12,9 @@ namespace ScenarioBuilder.Api.Endpoints.Scenarios;
 public class PullEndpoint : IEndpoint
 {
     public RouteHandlerBuilder Register(RouteGroupBuilder group, string tag) =>
-        group.MapGet("/scenarios/{id:int}", async (int id, KindCatalog kinds, BuilderDb db, CancellationToken ct) =>
-                await ScenarioState.Load(db, kinds, id, ct) is { } s
-                    ? Results.Ok(ScenarioDocument.Build(s.Kind, s.Scenario, s.Decisions, s.Approvals))
+        group.MapGet("/scenarios/{id:int}", async (int id, ScenarioTypeCatalog scenarioTypes, BuilderDb db, CancellationToken ct) =>
+                await ScenarioState.Load(db, scenarioTypes, id, ct) is { } s
+                    ? Results.Ok(ScenarioDocument.Build(s.ScenarioType, s.Scenario, s.Decisions, s.Approvals))
                     : ScenarioState.Missing(id))
             .WithTags(tag);
 }

@@ -21,7 +21,7 @@ export class LogPageComponent {
   protected readonly entries = signal<LogEntry[]>([]);
 
   protected label(target: string): string {
-    return labelFor(target, this.store.kind());
+    return labelFor(target, this.store.scenarioType());
   }
 
   protected show(value: unknown): string {

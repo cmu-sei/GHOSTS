@@ -31,7 +31,7 @@ const { values } = parseArgs({
 
 const api = values.api!.replace(/\/+$/, "");
 const fixture: Fixture = JSON.parse(readFileSync(values.fixture!, "utf8"));
-const kind = await (await fetch(`${api}/api/kinds/${fixture.kind}`)).json();
+const scenarioType = await (await fetch(`${api}/api/scenario-types/${fixture.scenarioType}`)).json();
 const offered = await listModels(api);
 const names = values.models!.split(",").map(s => s.trim()).filter(Boolean);
 const local = values.local ?? names[0];
@@ -55,7 +55,7 @@ for (const name of names) {
       maxPrompts: Number(values["max-prompts"]),
       onPrompt: p => console.error(`${tag} prompt ${p.index + 1} ${((p.endedAt - p.startedAt) / 1000).toFixed(1)} s: ${p.text.slice(0, 70)}`),
     });
-    const checks = runChecks(o, fixture, kind);
+    const checks = runChecks(o, fixture, scenarioType);
     results[name].push(checks);
     metrics[name].push(o.metrics);
     const failed = checks.filter(c => !c.pass);

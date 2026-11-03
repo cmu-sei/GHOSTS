@@ -8,8 +8,8 @@ import { verdict, writeReport } from "../report.ts";
 import type { Call, CheckResult, Fixture, Observed } from "../types.ts";
 
 const fixture: Fixture = JSON.parse(readFileSync(new URL("../fixtures/harbor-blackout.json", import.meta.url), "utf8"));
-const kind = JSON.parse(readFileSync(new URL("../../../kinds/crucible-tabletop.kind.json", import.meta.url), "utf8"));
-const ALL = (kind.stages as { questions: { id: string }[] }[]).flatMap(s => s.questions.map(q => q.id));
+const scenarioType = JSON.parse(readFileSync(new URL("../../../scenario-types/crucible-tabletop.scenario-type.json", import.meta.url), "utf8"));
+const ALL = (scenarioType.stages as { questions: { id: string }[] }[]).flatMap(s => s.questions.map(q => q.id));
 
 /** A clean run: every question decided as the fixture intends, nothing refused. */
 function observed(overrides: Partial<Observed> = {}): Observed {
@@ -37,11 +37,11 @@ function observed(overrides: Partial<Observed> = {}): Observed {
 }
 
 const call = (name: string, args: any, extra: Partial<Call> = {}): Call => ({ name, args, isError: false, prompt: 0, ...extra });
-const check = (o: Observed, id: number) => runChecks(o, fixture, kind).find(c => c.id === id)!;
+const check = (o: Observed, id: number) => runChecks(o, fixture, scenarioType).find(c => c.id === id)!;
 
 describe("runChecks", () => {
   it("passes all ten on a clean run", () => {
-    expect(runChecks(observed(), fixture, kind).filter(c => !c.pass)).toEqual([]);
+    expect(runChecks(observed(), fixture, scenarioType).filter(c => !c.pass)).toEqual([]);
   });
 
   it("check 1 fails when a question is left unanswered or the run stalls", () => {

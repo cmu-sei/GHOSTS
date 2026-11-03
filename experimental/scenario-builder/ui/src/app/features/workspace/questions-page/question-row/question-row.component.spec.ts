@@ -1,12 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { AnsweredView, AnswerValue, KindQuestion } from '../../../../core/models/builder.model';
+import { AnsweredView, AnswerValue, ScenarioTypeQuestion } from '../../../../core/models/builder.model';
 import { QuestionRowComponent } from './question-row.component';
 
-const audience: KindQuestion = {
+const audience: ScenarioTypeQuestion = {
   id: 'audienceType', label: 'Civilian or military', text: 'Civilian or military audience?', why: 'Sets vocabulary.', recommended: 'Civilian',
   answer: 'choice', options: ['Civilian', 'Military', 'Mixed'], path: '/engagement/audienceType'
 };
-const objectives: KindQuestion = {
+const objectives: ScenarioTypeQuestion = {
   id: 'objectives', text: 'What should teams practise?', why: 'IDs.', answer: 'list', path: '/objectives'
 };
 
@@ -14,7 +14,7 @@ function answer(overrides: Partial<AnsweredView>): AnsweredView {
   return { id: 'audienceType', stage: 0, value: 'Civilian', who: 'stated', by: 'dev', via: 'person', time: '2026-10-29T12:00:00Z', ...overrides };
 }
 
-async function render(question: KindQuestion, given?: AnsweredView): Promise<{ fixture: ComponentFixture<QuestionRowComponent>; saved: AnswerValue[] }> {
+async function render(question: ScenarioTypeQuestion, given?: AnsweredView): Promise<{ fixture: ComponentFixture<QuestionRowComponent>; saved: AnswerValue[] }> {
   const fixture = TestBed.createComponent(QuestionRowComponent);
   fixture.componentRef.setInput('question', question);
   fixture.componentRef.setInput('answer', given);

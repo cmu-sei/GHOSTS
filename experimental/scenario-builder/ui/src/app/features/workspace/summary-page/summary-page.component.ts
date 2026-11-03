@@ -22,7 +22,7 @@ export class SummaryPageComponent {
 
   protected readonly saved = signal('');
   protected readonly text = signal('');
-  protected readonly dueAfter = computed(() => this.store.kind()?.drafts.find(d => d.field === FIELD)?.dueAfterStage ?? 2);
+  protected readonly dueAfter = computed(() => this.store.scenarioType()?.drafts.find(d => d.field === FIELD)?.dueAfterStage ?? 2);
   protected readonly isGateStage = computed(() => this.store.progress()?.stage === this.dueAfter());
 
   constructor() {

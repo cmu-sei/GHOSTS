@@ -6,13 +6,13 @@ namespace ScenarioBuilder.Api.Tests;
 
 public class LedgerTests
 {
-    private static KindQuestion Text(string id) => new(id, $"{id}?", "w", null, AnswerType.Text, null, $"/scenario/{id}");
+    private static ScenarioTypeQuestion Text(string id) => new(id, $"{id}?", "w", null, AnswerType.Text, null, $"/scenario/{id}");
 
-    // A kind whose stage 0 gained question "b" after a scenario had already passed it.
-    private static readonly Domain.Kind Grown = new("grown", "2", "Grown",
+    // A scenario type whose stage 0 gained question "b" after a scenario had already passed it.
+    private static readonly Domain.ScenarioType Grown = new("grown", "2", "Grown",
     [
-        new KindStage(0, "First", [Text("a"), Text("b")], new KindGate("Confirm the first stage")),
-        new KindStage(1, "Second", [Text("c")], new KindGate(null))
+        new ScenarioTypeStage(0, "First", [Text("a"), Text("b")], new ScenarioTypeGate("Confirm the first stage")),
+        new ScenarioTypeStage(1, "Second", [Text("c")], new ScenarioTypeGate(null))
     ], []);
 
     private static Decision Answer(string id, int stage) =>

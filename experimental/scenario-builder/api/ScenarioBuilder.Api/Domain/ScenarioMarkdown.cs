@@ -7,23 +7,23 @@ using System.Text.RegularExpressions;
 namespace ScenarioBuilder.Api.Domain;
 
 /// <summary>
-/// The whole scenario as one readable Markdown file: what the JSON export carries, stage by stage in the kind's
+/// The whole scenario as one readable Markdown file: what the JSON export carries, stage by stage in the scenario type's
 /// order, each answer with who gave it and why, each draft after the stage it's due, then the open findings.
 /// </summary>
 public static partial class ScenarioMarkdown
 {
-    public static string Build(Kind kind, Scenario scenario, IReadOnlyList<Decision> decisions, IReadOnlyList<Approval> approvals)
+    public static string Build(ScenarioType scenarioType, Scenario scenario, IReadOnlyList<Decision> decisions, IReadOnlyList<Approval> approvals)
     {
-        var findings = Ledger.Progress(kind, scenario, decisions, approvals).Gate.Findings;
+        var findings = Ledger.Progress(scenarioType, scenario, decisions, approvals).Gate.Findings;
         var byQuestion = decisions.ToDictionary(d => d.QuestionId);
         var drafts = Ledger.ReadDrafts(scenario);
         var md = new StringBuilder();
 
         if (findings.Count > 0)
             md.Append($"> Draft: {findings.Count} {(findings.Count == 1 ? "finding" : "findings")} open.\n\n");
-        md.Append($"# {scenario.Name}\n\n{kind.Name}, scenario type version {scenario.KindVersion}. Open stage: {scenario.Stage}.\n");
+        md.Append($"# {scenario.Name}\n\n{scenarioType.Name}, scenario type version {scenario.ScenarioTypeVersion}. Open stage: {scenario.Stage}.\n");
 
-        foreach (var stage in kind.Stages)
+        foreach (var stage in scenarioType.Stages)
         {
             md.Append($"\n## Stage {stage.Number}: {stage.Title}\n\n");
             foreach (var q in stage.Questions)
@@ -45,7 +45,7 @@ public static partial class ScenarioMarkdown
                 md.Append($"  _{Provenance(decision)}_\n");
             }
 
-            foreach (var draft in kind.Drafts.Where(d => d.DueAfterStage == stage.Number))
+            foreach (var draft in scenarioType.Drafts.Where(d => d.DueAfterStage == stage.Number))
                 if (drafts[draft.Field] is JsonValue text && !string.IsNullOrWhiteSpace(text.GetValue<string>()))
                     md.Append($"\n### {Spaced(draft.Field)}\n\n{text.GetValue<string>().Trim()}\n");
         }

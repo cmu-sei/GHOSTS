@@ -10,9 +10,9 @@ public class DiscardEndpoint : IEndpoint
 {
     public RouteHandlerBuilder Register(RouteGroupBuilder group, string tag) =>
         group.MapPost("/scenarios/{id:int}/proposals/{proposalId:int}/discard",
-            async (int id, int proposalId, HttpContext http, KindCatalog kinds, BuilderDb db, CancellationToken ct) =>
+            async (int id, int proposalId, HttpContext http, ScenarioTypeCatalog scenarioTypes, BuilderDb db, CancellationToken ct) =>
             {
-                var state = await ScenarioState.Load(db, kinds, id, ct);
+                var state = await ScenarioState.Load(db, scenarioTypes, id, ct);
                 if (state is null)
                     return ScenarioState.Missing(id);
                 var (proposal, error) = await ProposalRules.PendingForOwner(db, state, Caller.From(http), proposalId, ct);

@@ -69,7 +69,7 @@ export class TemplateEditorComponent implements OnInit {
         this.library.set(library);
         this.show(template);
         this.api.getScenarios().subscribe(scenarios => {
-          const served = scenarios.filter(s => library.kinds.includes(s.kindId));
+          const served = scenarios.filter(s => library.scenarioTypes.includes(s.scenarioTypeId));
           this.scenarios.set(served);
           this.scenarioId.set(served[0]?.id ?? 0);
           this.refresh();
@@ -112,7 +112,7 @@ export class TemplateEditorComponent implements OnInit {
     const library = this.library()!;
     const template: TemplateSpec = { id: this.templateId, name: this.name().trim(), audience: this.audience(), format: this.format(), body: this.body() };
     const templates = library.templates.map(t => t.id === this.templateId ? template : t);
-    this.admin.save(this.libraryId, { name: library.name, description: library.description, kinds: library.kinds, templates }).subscribe({
+    this.admin.save(this.libraryId, { name: library.name, description: library.description, scenarioTypes: library.scenarioTypes, templates }).subscribe({
       next: saved => {
         this.library.set(saved);
         this.saved.set(template);

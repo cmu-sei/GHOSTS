@@ -12,11 +12,11 @@ export const ADMIN_ROUTES: Routes = [
   },
   {
     path: 'scenario-types',
-    loadComponent: () => import('./kinds-page/kinds-page.component').then(m => m.KindsPageComponent)
+    loadComponent: () => import('./scenario-types-page/scenario-types-page.component').then(m => m.ScenarioTypesPageComponent)
   },
   {
     path: 'scenario-types/:id',
-    loadComponent: () => import('./kind-page/kind-page.component').then(m => m.KindPageComponent)
+    loadComponent: () => import('./scenario-type-page/scenario-type-page.component').then(m => m.ScenarioTypePageComponent)
   },
   {
     path: 'libraries/:id/templates/:templateId',

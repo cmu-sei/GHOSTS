@@ -21,9 +21,9 @@ public class DelegationEndpoint : IEndpoint
 
     public RouteHandlerBuilder Register(RouteGroupBuilder group, string tag) =>
         group.MapPut("/scenarios/{id:int}/delegation",
-            async (int id, PutDelegation body, HttpContext http, KindCatalog kinds, BuilderDb db, CancellationToken ct) =>
+            async (int id, PutDelegation body, HttpContext http, ScenarioTypeCatalog scenarioTypes, BuilderDb db, CancellationToken ct) =>
             {
-                var state = await ScenarioState.Load(db, kinds, id, ct);
+                var state = await ScenarioState.Load(db, scenarioTypes, id, ct);
                 if (state is null)
                     return ScenarioState.Missing(id);
                 var caller = Caller.From(http);

@@ -13,11 +13,11 @@ public static class LibrarySeeder
 {
     public const string By = "system";
 
-    public static async Task Seed(BuilderDb db, KindCatalog kinds, string directory, CancellationToken ct)
+    public static async Task Seed(BuilderDb db, ScenarioTypeCatalog scenarioTypes, string directory, CancellationToken ct)
     {
         if (await db.Libraries.AnyAsync(ct))
             return;
-        var known = kinds.All.Select(k => k.Id).ToList();
+        var known = scenarioTypes.All.Select(k => k.Id).ToList();
         foreach (var path in Directory.GetFiles(directory, "*.library.json").Order())
         {
             var file = LibraryFile.Read(await File.ReadAllTextAsync(path, ct));

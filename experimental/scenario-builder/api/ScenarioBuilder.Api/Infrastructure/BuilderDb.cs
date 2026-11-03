@@ -18,8 +18,8 @@ public class BuilderDb(DbContextOptions<BuilderDb> options) : DbContext(options)
     public DbSet<LibraryVersion> LibraryVersions => Set<LibraryVersion>();
     public DbSet<Source> Sources => Set<Source>();
     public DbSet<PluginConnection> PluginConnections => Set<PluginConnection>();
-    public DbSet<ScenarioKind> Kinds => Set<ScenarioKind>();
-    public DbSet<PublishedKind> PublishedKinds => Set<PublishedKind>();
+    public DbSet<ScenarioTypeRecord> ScenarioTypes => Set<ScenarioTypeRecord>();
+    public DbSet<PublishedScenarioType> PublishedScenarioTypes => Set<PublishedScenarioType>();
 
     /// <summary>SQLite keeps no time zone; every time written is UTC, so read it back as UTC.</summary>
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
@@ -45,7 +45,7 @@ public class BuilderDb(DbContextOptions<BuilderDb> options) : DbContext(options)
         modelBuilder.Entity<LibraryVersion>().HasIndex(v => new { v.LibraryId, v.Number }).IsUnique();
         modelBuilder.Entity<Source>().HasIndex(s => s.ScenarioId);
         modelBuilder.Entity<PluginConnection>().HasIndex(c => c.Plugin).IsUnique();
-        modelBuilder.Entity<ScenarioKind>().HasIndex(k => k.KindId).IsUnique();
-        modelBuilder.Entity<PublishedKind>().HasIndex(p => new { p.KindId, p.Version }).IsUnique();
+        modelBuilder.Entity<ScenarioTypeRecord>().HasIndex(k => k.ScenarioTypeId).IsUnique();
+        modelBuilder.Entity<PublishedScenarioType>().HasIndex(p => new { p.ScenarioTypeId, p.Version }).IsUnique();
     }
 }

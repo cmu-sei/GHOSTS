@@ -8,7 +8,7 @@ import { AUDIENCES, FORMATS } from '../../../shared/labels/document-labels';
 import { WorkspaceStore } from '../workspace.store';
 
 /**
- * The scenario leaving the builder: its JSON, the documents its kind's libraries offer, and the apps it will
+ * The scenario leaving the builder: its JSON, the documents its scenario type's libraries offer, and the apps it will
  * be sent to. Nothing here waits for the last gate; open findings only mark each output as a draft.
  */
 @Component({

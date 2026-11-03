@@ -17,12 +17,12 @@ public partial record LibraryFile(
     string Slug,
     string Name,
     string? Description,
-    List<string> Kinds,
+    List<string> ScenarioTypes,
     int Version,
     List<TemplateSpec> Templates)
 {
     public const string FormatName = "scenario-builder-library";
-    public const int CurrentFormatVersion = 1;
+    public const int CurrentFormatVersion = 2;
 
     public static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web)
     {
@@ -33,7 +33,7 @@ public partial record LibraryFile(
     /// <summary>A library's draft, as the file it would publish as <paramref name="version"/>.</summary>
     public static LibraryFile Of(TemplateLibrary library, int version) => new(
         FormatName, CurrentFormatVersion, library.Slug, library.Name, library.Description,
-        JsonSerializer.Deserialize<List<string>>(library.Kinds, Json)!, version,
+        JsonSerializer.Deserialize<List<string>>(library.ScenarioTypes, Json)!, version,
         JsonSerializer.Deserialize<List<TemplateSpec>>(library.Draft, Json)!);
 
     public static LibraryFile Read(string content) => JsonSerializer.Deserialize<LibraryFile>(content, Json)!;
@@ -45,7 +45,7 @@ public partial record LibraryFile(
         JsonNode.DeepEquals(JsonSerializer.SerializeToNode(this with { Version = 0 }, Json), JsonSerializer.SerializeToNode(other with { Version = 0 }, Json));
 
     /// <summary>Null when the file is a library this installation can use; otherwise the first thing wrong with it.</summary>
-    public static string? Check(LibraryFile f, IReadOnlyCollection<string> knownKinds)
+    public static string? Check(LibraryFile f, IReadOnlyCollection<string> knownTypes)
     {
         if (f.Format != FormatName)
             return $"The file's \"format\" is \"{f.Format}\", not \"{FormatName}\", so it isn't a library file.";
@@ -55,11 +55,11 @@ public partial record LibraryFile(
             return $"The slug \"{f.Slug}\" must be lower-case words joined by hyphens.";
         if (string.IsNullOrWhiteSpace(f.Name))
             return "Give the library a name.";
-        if (f.Kinds is null || f.Templates is null)
+        if (f.ScenarioTypes is null || f.Templates is null)
             return "A library file lists its scenario types and its templates.";
-        foreach (var kind in f.Kinds)
-            if (kind is null || !knownKinds.Contains(kind))
-                return $"There is no scenario type \"{kind}\" here. Scenario types: {string.Join(", ", knownKinds)}.";
+        foreach (var scenarioType in f.ScenarioTypes)
+            if (scenarioType is null || !knownTypes.Contains(scenarioType))
+                return $"There is no scenario type \"{scenarioType}\" here. Scenario types: {string.Join(", ", knownTypes)}.";
 
         var ids = new HashSet<string>();
         foreach (var t in f.Templates)

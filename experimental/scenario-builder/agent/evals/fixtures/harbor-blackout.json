@@ -1,5 +1,5 @@
 {
-  "kind": "crucible-tabletop",
+  "scenarioType": "crucible-tabletop",
   "opening": "We're planning a tabletop for 20 port and logistics operations leaders, in four teams of five. It runs on 4 March 2027 from 09:00 to 13:00, with one 15-minute break. Most of them speak English as a second language, so keep everything plain.",
   "openingQuestions": {
     "participants": [

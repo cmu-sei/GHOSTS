@@ -7,7 +7,7 @@ import { BuilderApiService } from '../../../core/services/builder-api.service';
 import { ScenariosListComponent } from './scenarios-list.component';
 
 const scenario = (id: number, name: string, extra: Partial<ScenarioSummary> = {}): ScenarioSummary => ({
-  id, slug: name.toLowerCase().replace(/ /g, '-'), name, kindId: 'crucible-tabletop', kindVersion: '0.1.0', owner: 'dev', stage: 0,
+  id, slug: name.toLowerCase().replace(/ /g, '-'), name, scenarioTypeId: 'crucible-tabletop', scenarioTypeVersion: '0.1.0', owner: 'dev', stage: 0,
   created: '2026-10-01T09:00:00Z', updated: '2026-10-01T09:00:00Z', archived: false, ...extra
 });
 
@@ -18,7 +18,7 @@ const old = scenario(3, 'Old Drill', { archived: true, updated: '2026-09-01T09:0
 async function render() {
   const api = {
     getScenarios: vi.fn(() => of([rail, harbor, old])),
-    getKinds: () => of([{ id: 'crucible-tabletop', version: '0.1.0', name: 'Crucible tabletop exercise' }]),
+    getScenarioTypes: () => of([{ id: 'crucible-tabletop', version: '0.1.0', name: 'Crucible tabletop exercise' }]),
     createScenario: vi.fn(() => of(scenario(9, 'New One'))),
     archive: vi.fn((id: number, archived: boolean) => of({ ...[harbor, rail, old].find(s => s.id === id)!, archived }))
   };
@@ -43,7 +43,7 @@ describe('ScenariosListComponent', () => {
     expect(names(root)).toEqual(['Harbor Blackout', 'Rail Freeze']);
   });
 
-  it('searches by name, kind or owner', async () => {
+  it('searches by name, scenario type or owner', async () => {
     const { fixture, root } = await render();
     const search = root.querySelector<HTMLInputElement>('input[aria-label="Search scenarios"]')!;
 

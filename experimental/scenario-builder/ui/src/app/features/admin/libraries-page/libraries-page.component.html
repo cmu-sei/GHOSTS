@@ -27,7 +27,7 @@
       @for (library of libraries; track library.id) {
         <a class="library" role="listitem" [routerLink]="['/admin/libraries', library.id]">
           <span class="title">{{ library.name }}</span>
-          <span class="meta">{{ kindNames(library.kinds) }}</span>
+          <span class="meta">{{ scenarioTypeNames(library.scenarioTypes) }}</span>
           <span class="version" [class.unpublished]="!library.latestVersion">
             {{ library.latestVersion ? 'Version ' + library.latestVersion : 'Not published' }}
           </span>

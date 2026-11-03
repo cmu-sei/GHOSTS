@@ -12,7 +12,7 @@ public class AdminTests
 {
     private static async Task<int> CreateLibrary(HttpClient admin, string name = "Harbor documents")
     {
-        var response = await admin.PostAsJsonAsync("/api/admin/libraries", new { name, description = "For tests.", kinds = new[] { Kind } });
+        var response = await admin.PostAsJsonAsync("/api/admin/libraries", new { name, description = "For tests.", scenarioTypes = new[] { TabletopType } });
         response.EnsureSuccessStatusCode();
         return (int)(await Body(response))["id"]!;
     }
@@ -21,7 +21,7 @@ public class AdminTests
         new { id, name, audience, format, body };
 
     private static Task<HttpResponseMessage> Save(HttpClient admin, int id, params object[] templates) =>
-        admin.PutAsJsonAsync($"/api/admin/libraries/{id}", new { name = "Harbor documents", description = "For tests.", kinds = new[] { Kind }, templates });
+        admin.PutAsJsonAsync($"/api/admin/libraries/{id}", new { name = "Harbor documents", description = "For tests.", scenarioTypes = new[] { TabletopType }, templates });
 
     private static Task<HttpResponseMessage> Publish(HttpClient admin, int id) =>
         admin.PostAsync($"/api/admin/libraries/{id}/publish", null);
@@ -178,8 +178,8 @@ public class AdminTests
         var admin = factory.Client();
         var good = new JsonObject
         {
-            ["format"] = "scenario-builder-library", ["formatVersion"] = 1, ["slug"] = "harbor-documents", ["name"] = "Harbor documents",
-            ["kinds"] = new JsonArray(Kind), ["version"] = 1,
+            ["format"] = "scenario-builder-library", ["formatVersion"] = 2, ["slug"] = "harbor-documents", ["name"] = "Harbor documents",
+            ["scenarioTypes"] = new JsonArray(TabletopType), ["version"] = 1,
             ["templates"] = new JsonArray(
                 new JsonObject { ["id"] = "brief", ["name"] = "Brief", ["audience"] = "participants", ["format"] = "markdown", ["body"] = "# Brief" })
         };
@@ -208,17 +208,17 @@ public class AdminTests
     {
         using var factory = new ApiFactory();
         var admin = factory.Client();
-        JsonObject File(JsonNode? audience, JsonNode? format, JsonNode? kind) => new()
+        JsonObject File(JsonNode? audience, JsonNode? format, JsonNode? scenarioType) => new()
         {
-            ["format"] = "scenario-builder-library", ["formatVersion"] = 1, ["slug"] = "odd", ["name"] = "Odd",
-            ["kinds"] = new JsonArray(kind), ["version"] = 1,
+            ["format"] = "scenario-builder-library", ["formatVersion"] = 2, ["slug"] = "odd", ["name"] = "Odd",
+            ["scenarioTypes"] = new JsonArray(scenarioType), ["version"] = 1,
             ["templates"] = new JsonArray(new JsonObject { ["id"] = "brief", ["name"] = "Brief", ["audience"] = audience, ["format"] = format, ["body"] = "# Brief" })
         };
 
         foreach (var (file, reason) in new[]
                  {
-                     (File(7, "markdown", Kind), "audience"),
-                     (File("participants", 2, Kind), "format"),
+                     (File(7, "markdown", TabletopType), "audience"),
+                     (File("participants", 2, TabletopType), "format"),
                      (File("participants", "markdown", null), "scenario type")
                  })
         {
@@ -229,7 +229,7 @@ public class AdminTests
             Assert.Contains(reason, (string)body["message"]!);
         }
 
-        var nullTemplate = File("participants", "markdown", Kind);
+        var nullTemplate = File("participants", "markdown", TabletopType);
         nullTemplate["templates"] = new JsonArray((JsonNode?)null);
         Assert.Equal("LIBRARY_INVALID", await Code(await Import(admin, nullTemplate.ToJsonString())));
         var id = await CreateLibrary(admin);

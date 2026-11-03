@@ -6,7 +6,7 @@ namespace ScenarioBuilder.Api.Domain;
 
 public record QuestionView(string Id, int Stage, string Text, string Why, string? Recommended, AnswerType Answer, List<string>? Options)
 {
-    public static QuestionView From(KindQuestion q, int stage) => new(q.Id, stage, q.Text, q.Why, q.Recommended, q.Answer, q.Options);
+    public static QuestionView From(ScenarioTypeQuestion q, int stage) => new(q.Id, stage, q.Text, q.Why, q.Recommended, q.Answer, q.Options);
 }
 
 public record AnsweredView(string Id, int Stage, JsonNode? Value, Who Who, string By, Via Via, string? Reason, DateTime Time)
@@ -28,7 +28,7 @@ public record GateView(bool Passes, string? Approval, bool Approved, List<Findin
 
 /// <summary>Where a scenario stands: the open stage, what's left in it, and everything answered so far.</summary>
 public record ProgressView(
-    string KindId,
+    string ScenarioTypeId,
     int Stage,
     string StageTitle,
     bool LastStage,
@@ -38,8 +38,8 @@ public record ProgressView(
     List<string> DraftsDue,
     bool Delegated)
 {
-    /// <summary>The version of the kind the scenario was made on, which is the one it runs on.</summary>
-    public string KindVersion { get; init; } = string.Empty;
+    /// <summary>The version of the scenario type the scenario was made on, which is the one it runs on.</summary>
+    public string ScenarioTypeVersion { get; init; } = string.Empty;
 
     /// <summary>The context the person gave, so the agent knows what it can search. The progress endpoint fills it.</summary>
     public List<SourceSummary> Sources { get; init; } = [];

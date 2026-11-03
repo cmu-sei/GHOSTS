@@ -7,7 +7,7 @@ eventually as packages for the Crucible apps and GHOSTS. This piece adds two thi
 
 - a **Finish** page at the end of each scenario, for the JSON, documents, and "send to" buttons;
 - an **Admin** area, where administrators build **template libraries** that decide which documents
-  each kind of scenario offers.
+  each scenario type offers.
 
 ## 1. Decisions
 
@@ -31,7 +31,7 @@ eventually as packages for the Crucible apps and GHOSTS. This piece adds two thi
 | Word | Meaning |
 |---|---|
 | Template | One document's Liquid source, with a name, an audience and a format (`html` or `markdown`). |
-| Library | A named set of templates, for one or more kinds, with a draft and numbered published versions. |
+| Library | A named set of templates, for one or more scenario types, with a draft and numbered published versions. |
 | Audience | Who a document is for: `participants`, `facilitators` or `designers`. |
 | Visibility | Who may see a piece of the scenario: `participant` (everyone), `excon` (facilitators and designers), or `designer` (designers only). |
 
@@ -43,13 +43,13 @@ The scenario's top bar reads Questions, Summary, Decision log, **Finish**. Finis
   It's marked `"status": "draft"` and carries its open findings. **Show JSON** opens the same document
   in place, as the JSON tab did.
 - **Documents.** One row per template in the latest published version of every library assigned to
-  the scenario's kind. Each row shows:
+  the scenario's scenario type. Each row shows:
   - the template's name, audience and format;
   - the library and its version;
   - **Preview**, which opens the rendered document in a new tab (Markdown is shown rendered);
   - **Download**, which saves `.html` or `.md`.
 
-  When no library serves the kind, the section says so, and tells admins where to make one.
+  When no library serves the scenario type, the section says so, and tells admins where to make one.
 - **Send to.** Blueprint, CITE, Gallery, Player, Steamfitter, GHOSTS. Each says "Sending to Blueprint
   isn't connected yet." when pressed.
 
@@ -57,11 +57,11 @@ The scenario's top bar reads Questions, Summary, Decision log, **Finish**. Finis
 
 Admins see an **Admin** link in the top bar. `/api/me` tells the UI whether the user is one.
 
-- **Libraries** (`/admin`). A list showing each library's name, its kinds, its latest version, and
+- **Libraries** (`/admin`). A list showing each library's name, its scenario types, its latest version, and
   "Draft changes" when the draft differs from that version. It has **New library** and **Import**
   (choose a `.library.json` file).
 - **A library** (`/admin/libraries/:id`).
-  - Name, description, and the kinds it serves (checkboxes from the loaded kinds).
+  - Name, description, and the scenario types it serves (checkboxes from the loaded scenario types).
   - Its templates, with **Add template**. Edits save to the draft.
   - **Publish**, which makes the next version.
   - **Export**, which downloads the latest published version.
@@ -77,7 +77,7 @@ receives it.
 
 1. **The ledger is for designers only.** `decisions` and `findings` are removed for participants and
    facilitators.
-2. **Each question's visibility comes from the kind file.** A question with `"visibility": "excon"` is
+2. **Each question's visibility comes from the scenario type file.** A question with `"visibility": "excon"` is
    removed at its path for participants. A question with `"visibility": "designer"` is removed for
    participants and facilitators. A question with no visibility is `participant`. Drafts carry a
    visibility the same way.
@@ -85,7 +85,7 @@ receives it.
    Today these are ground truth and teaching points.
 4. **A container left empty by the filter is removed**, so templates can test whether something exists.
 
-This piece sets these visibilities in `crucible-tabletop.kind.json`. These answers say what is really
+This piece sets these visibilities in `crucible-tabletop.scenario-type.json`. These answers say what is really
 happening, which participants work out during the exercise:
 
 | Question or draft | Visibility |
@@ -94,7 +94,7 @@ happening, which participants work out during the exercise:
 | `executiveSummary` (draft) | `excon` |
 | everything else | `participant` |
 
-The kind loader rejects any other visibility value.
+The scenario type loader rejects any other visibility value.
 
 ## 6. What a template receives
 
@@ -102,7 +102,7 @@ The kind loader rejects any other visibility value.
 |---|---|
 | `scenario` | The filtered scenario JSON, for example `scenario.engagement.participants` or `scenario.objectives`. |
 | `labels` | Each question's short label by id, for example `labels.timeSlot`. |
-| `kind` | `id`, `name`, `version`. |
+| `scenario_type` | `id`, `name`, `version`. |
 | `library` | `name`, `version`. |
 | `template` | `name`, `audience`. |
 | `generated` | The time of rendering, ISO 8601, UTC. |
@@ -137,11 +137,11 @@ receive values as they are.
 ```json
 {
   "format": "scenario-builder-library",
-  "formatVersion": 1,
+  "formatVersion": 2,
   "slug": "crucible-tabletop-basics",
   "name": "Crucible tabletop basics",
   "description": "…",
-  "kinds": ["crucible-tabletop"],
+  "scenarioTypes": ["crucible-tabletop"],
   "version": 1,
   "templates": [
     { "id": "design-summary", "name": "Design summary", "audience": "designers", "format": "html", "body": "…" }
@@ -159,7 +159,7 @@ Either way the draft is reset to the imported templates.
 
 | Table | Holds |
 |---|---|
-| `TemplateLibrary` | id, slug (unique), name, description, kinds (JSON), draft templates (JSON), created, updated |
+| `TemplateLibrary` | id, slug (unique), name, description, scenario types (JSON), draft templates (JSON), created, updated |
 | `LibraryVersion` | id, library, number, content (the library file's JSON), published by, published |
 
 The schema changes, and storage still has no migrations (spec 2026-10-29, §7). So the running
@@ -172,10 +172,10 @@ installation's database is backed up and started fresh, as it was for delegation
 | Endpoint | Does |
 |---|---|
 | `GET /api/me` | `{ user, admin }`. Open to everyone. |
-| `GET /api/admin/libraries` | Lists the libraries: id, slug, name, kinds, latest version, whether the draft has changes. |
-| `POST /api/admin/libraries` | `{ name, description, kinds }` creates a library with an empty draft. |
+| `GET /api/admin/libraries` | Lists the libraries: id, slug, name, scenario types, latest version, whether the draft has changes. |
+| `POST /api/admin/libraries` | `{ name, description, scenarioTypes }` creates a library with an empty draft. |
 | `GET /api/admin/libraries/{id}` | Returns the library, its draft templates, and its versions. |
-| `PUT /api/admin/libraries/{id}` | `{ name, description, kinds, templates }` saves the draft. Each template's body is parsed, and a parse error returns `400 TEMPLATE_INVALID` with the template, message and line. |
+| `PUT /api/admin/libraries/{id}` | `{ name, description, scenarioTypes, templates }` saves the draft. Each template's body is parsed, and a parse error returns `400 TEMPLATE_INVALID` with the template, message and line. |
 | `POST /api/admin/libraries/{id}/publish` | Makes the draft the next version. Returns `409 NOTHING_TO_PUBLISH` when the draft matches the latest version. |
 | `GET /api/admin/libraries/{id}/export` | The latest version as a `.library.json` attachment. Returns `409 NOT_PUBLISHED` before the first publish. |
 | `POST /api/admin/libraries/import` | Imports a library file (§8). Returns `400 LIBRARY_INVALID` for a file that isn't one. |

@@ -38,10 +38,10 @@
         </label>
         <fieldset>
           <legend class="label">Serves</legend>
-          @for (kind of kinds(); track kind.id) {
-            <label class="kind">
-              <input type="checkbox" [checked]="kindIds().includes(kind.id)" (change)="toggleKind(kind.id, $any($event.target).checked)" />
-              {{ kind.name }}
+          @for (scenarioType of scenarioTypes(); track scenarioType.id) {
+            <label class="scenario-type">
+              <input type="checkbox" [checked]="scenarioTypeIds().includes(scenarioType.id)" (change)="toggleScenarioType(scenarioType.id, $any($event.target).checked)" />
+              {{ scenarioType.name }}
             </label>
           }
         </fieldset>

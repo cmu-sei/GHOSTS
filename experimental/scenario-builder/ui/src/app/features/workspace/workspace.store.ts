@@ -1,7 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Subject, forkJoin, switchMap } from 'rxjs';
 import { BuilderApiService, errorMessage } from '../../core/services/builder-api.service';
-import { AnsweredView, Kind, Progress } from '../../core/models/builder.model';
+import { AnsweredView, ScenarioType, Progress } from '../../core/models/builder.model';
 
 /**
  * One scenario's state for its workspace pages and agent panel, provided by the scenario shell.
@@ -15,7 +15,7 @@ export class WorkspaceStore {
   readonly name = signal<string | null>(null);
   /** The version of the scenario format the pull document is in, read from the document itself. */
   readonly schemaVersion = signal<string | null>(null);
-  readonly kind = signal<Kind | null>(null);
+  readonly scenarioType = signal<ScenarioType | null>(null);
   readonly progress = signal<Progress | null>(null);
   readonly error = signal<string | null>(null);
   /** The stage the Questions page shows. It follows the open stage whenever a new one opens. */
@@ -31,10 +31,10 @@ export class WorkspaceStore {
   load(scenarioId: number): void {
     this.scenarioId.set(scenarioId);
     this.api.getProgress(scenarioId).pipe(
-      switchMap(progress => forkJoin({ progress: [progress], kind: this.api.getKind(progress.kindId, progress.kindVersion), doc: this.api.pull(scenarioId) }))
+      switchMap(progress => forkJoin({ progress: [progress], scenarioType: this.api.getScenarioType(progress.scenarioTypeId, progress.scenarioTypeVersion), doc: this.api.pull(scenarioId) }))
     ).subscribe({
-      next: ({ progress, kind, doc }) => {
-        this.kind.set(kind);
+      next: ({ progress, scenarioType, doc }) => {
+        this.scenarioType.set(scenarioType);
         this.name.set(typeof doc['name'] === 'string' ? doc['name'] : null);
         this.schemaVersion.set(typeof doc['schemaVersion'] === 'string' ? doc['schemaVersion'] : null);
         this.apply(progress);

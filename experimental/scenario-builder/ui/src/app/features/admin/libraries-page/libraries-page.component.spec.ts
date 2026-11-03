@@ -7,9 +7,9 @@ import { BuilderApiService } from '../../../core/services/builder-api.service';
 import { LibrariesPageComponent } from './libraries-page.component';
 
 const basics: LibrarySummary = {
-  id: 1, slug: 'crucible-tabletop-basics', name: 'Crucible tabletop basics', kinds: ['crucible-tabletop'], latestVersion: 2, draftChanged: true
+  id: 1, slug: 'crucible-tabletop-basics', name: 'Crucible tabletop basics', scenarioTypes: ['crucible-tabletop'], latestVersion: 2, draftChanged: true
 };
-const unpublished: LibrarySummary = { id: 2, slug: 'drafts', name: 'Drafts', kinds: [], draftChanged: false };
+const unpublished: LibrarySummary = { id: 2, slug: 'drafts', name: 'Drafts', scenarioTypes: [], draftChanged: false };
 
 async function render() {
   const imported: LibraryDetail = { ...basics, latestVersion: 3, draftChanged: false, templates: [], versions: [] };
@@ -22,7 +22,7 @@ async function render() {
     providers: [
       provideRouter([]),
       { provide: AdminApiService, useValue: admin },
-      { provide: BuilderApiService, useValue: { getKinds: () => of([{ id: 'crucible-tabletop', version: '1.0.0', name: 'Crucible tabletop exercise' }]) } }
+      { provide: BuilderApiService, useValue: { getScenarioTypes: () => of([{ id: 'crucible-tabletop', version: '1.0.0', name: 'Crucible tabletop exercise' }]) } }
     ]
   });
   const fixture = TestBed.createComponent(LibrariesPageComponent);

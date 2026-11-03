@@ -9,7 +9,7 @@ namespace ScenarioBuilder.Api.Tests;
 
 public class AudienceFilterTests
 {
-    private static readonly Domain.Kind Tabletop = new KindCatalog(ApiFactory.KindsDirectory).Find(TestApi.Kind)!;
+    private static readonly Domain.ScenarioType Tabletop = new ScenarioTypeCatalog(ApiFactory.ScenarioTypesDirectory).Find(TestApi.TabletopType)!;
 
     /// <summary>A finished scenario whose ground truth and motive say something recognisable.</summary>
     private static async Task<JsonObject> FinishedDocument()

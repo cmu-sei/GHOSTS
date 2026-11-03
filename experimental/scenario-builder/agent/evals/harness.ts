@@ -28,7 +28,7 @@ export async function runOnce(opts: RunOptions): Promise<Observed> {
   const maxPrompts = opts.maxPrompts ?? 150;
   const maxStalls = opts.maxStalls ?? 3;
   const person = new BuilderApi(opts.apiUrl);
-  const { id } = await person.createScenario(`eval ${opts.model.id} ${new Date().toISOString()}`, opts.fixture.kind);
+  const { id } = await person.createScenario(`eval ${opts.model.id} ${new Date().toISOString()}`, opts.fixture.scenarioType);
   const session = new BuilderSession({
     model: builderModel(opts.apiUrl, opts.model),
     api: new BuilderApi(opts.apiUrl, { via: "agent" }),

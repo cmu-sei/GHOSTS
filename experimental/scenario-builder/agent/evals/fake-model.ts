@@ -56,7 +56,7 @@ export function decide(messages: any[]): Reply {
         const [, questionId, , question, recommended] = open;
         return {
           tool: "ask_user",
-          args: { questionId, question, alternatives: [], ...(recommended ? { recommended: { answer: recommended, why: "The kind recommends it." } } : {}) },
+          args: { questionId, question, alternatives: [], ...(recommended ? { recommended: { answer: recommended, why: "The scenario type recommends it." } } : {}) },
         };
       }
       if (text.includes("Gate: passes. Call")) return { tool: "advance_stage", args: {} };

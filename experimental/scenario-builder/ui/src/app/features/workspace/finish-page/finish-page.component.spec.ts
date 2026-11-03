@@ -162,7 +162,7 @@ describe('FinishPageComponent', () => {
     expect(root.querySelector('[role="status"]')!.textContent).toContain("isn't built yet");
   });
 
-  it('points admins to the admin area when no library serves the kind', async () => {
+  it('points admins to the admin area when no library serves the scenario type', async () => {
     const admin = await render([]);
     expect(admin.root.textContent).toContain('No template library serves this scenario type yet.');
     expect(byText(admin.root, 'a', 'Make one in Admin')!.getAttribute('href')).toBe('/admin');

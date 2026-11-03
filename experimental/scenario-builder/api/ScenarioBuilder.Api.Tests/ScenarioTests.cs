@@ -26,7 +26,7 @@ public class ScenarioTests
         var log = (await owner.GetFromJsonAsync<JsonArray>($"/api/scenarios/{id}/log"))!;
         Assert.Contains(log, e => (string)e!["target"]! == "exerciseName" && (string)e["after"]! == "Harbor Blackout");
 
-        SetStage(factory, id, KindOf(Kind).Find("exerciseName")!.Value.Stage);
+        SetStage(factory, id, ScenarioTypeOf(TabletopType).Find("exerciseName")!.Value.Stage);
         (await Put(owner, id, "exerciseName", new { value = "Still Water" })).EnsureSuccessStatusCode();
         Assert.Equal("Still Water", (string)(await owner.GetFromJsonAsync<JsonObject>($"/api/scenarios/{id}"))!["names"]!["exercise"]!);
     }
@@ -37,14 +37,14 @@ public class ScenarioTests
         using var factory = new ApiFactory();
         var client = factory.Client();
 
-        var response = await client.PostAsJsonAsync("/api/scenarios", new { name = "Harbor Blackout", kindId = Kind });
+        var response = await client.PostAsJsonAsync("/api/scenarios", new { name = "Harbor Blackout", scenarioTypeId = TabletopType });
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         var created = await Body(response);
         Assert.Equal("harbor-blackout", (string)created["slug"]!);
         Assert.Equal("dev", (string)created["owner"]!);
         Assert.Equal(0, (int)created["stage"]!);
-        Assert.Equal("0.3.0", (string)created["kindVersion"]!);
+        Assert.Equal("0.3.0", (string)created["scenarioTypeVersion"]!);
 
         var list = await client.GetFromJsonAsync<JsonArray>("/api/scenarios");
         Assert.Equal("Harbor Blackout", (string)list![0]!["name"]!);
@@ -57,7 +57,7 @@ public class ScenarioTests
         var client = factory.Client();
 
         await CreateScenario(client);
-        var second = await client.PostAsJsonAsync("/api/scenarios", new { name = "Harbor  Blackout!", kindId = Kind });
+        var second = await client.PostAsJsonAsync("/api/scenarios", new { name = "Harbor  Blackout!", scenarioTypeId = TabletopType });
 
         Assert.Equal("harbor-blackout-2", (string)(await Body(second))["slug"]!);
     }
@@ -67,10 +67,10 @@ public class ScenarioTests
     {
         using var factory = new ApiFactory();
 
-        var response = await factory.Client().PostAsJsonAsync("/api/scenarios", new { name = "x", kindId = "nope" });
+        var response = await factory.Client().PostAsJsonAsync("/api/scenarios", new { name = "x", scenarioTypeId = "nope" });
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        Assert.Equal("KIND_UNKNOWN", await Code(response));
+        Assert.Equal("SCENARIO_TYPE_UNKNOWN", await Code(response));
     }
 
     [Fact]
@@ -78,7 +78,7 @@ public class ScenarioTests
     {
         using var factory = new ApiFactory();
 
-        var response = await factory.Client().PostAsJsonAsync("/api/scenarios", new { name = "  ", kindId = Kind });
+        var response = await factory.Client().PostAsJsonAsync("/api/scenarios", new { name = "  ", scenarioTypeId = TabletopType });
 
         Assert.Equal("NAME_REQUIRED", await Code(response));
     }
@@ -92,11 +92,11 @@ public class ScenarioTests
 
         var progress = await Progress(client, id);
 
-        Assert.Equal(Kind, (string)progress["kindId"]!);
+        Assert.Equal(TabletopType, (string)progress["scenarioTypeId"]!);
         Assert.Equal(0, (int)progress["stage"]!);
         Assert.Equal("Engagement Context", (string)progress["stageTitle"]!);
         var open = progress["open"]!.AsArray();
-        Assert.Equal(KindOf(Kind).Stages[0].Questions.Count, open.Count);
+        Assert.Equal(ScenarioTypeOf(TabletopType).Stages[0].Questions.Count, open.Count);
         Assert.Equal("intent", (string)open[0]!["id"]!);
         Assert.False((bool)progress["gate"]!["passes"]!);
         Assert.All(progress["gate"]!["findings"]!.AsArray(), f => Assert.Equal("QUESTION_OPEN", (string)f!["code"]!));

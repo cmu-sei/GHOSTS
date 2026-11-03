@@ -6,7 +6,7 @@ using ScenarioBuilder.Api.Infrastructure;
 
 namespace ScenarioBuilder.Api.Endpoints.Admin;
 
-public record LibrarySummary(int Id, string Slug, string Name, List<string> Kinds, int? LatestVersion, bool DraftChanged);
+public record LibrarySummary(int Id, string Slug, string Name, List<string> ScenarioTypes, int? LatestVersion, bool DraftChanged);
 
 public record VersionView(int Number, string PublishedBy, DateTime Published)
 {
@@ -14,7 +14,7 @@ public record VersionView(int Number, string PublishedBy, DateTime Published)
 }
 
 public record LibraryDetail(
-    int Id, string Slug, string Name, string? Description, List<string> Kinds, List<TemplateSpec> Templates,
+    int Id, string Slug, string Name, string? Description, List<string> ScenarioTypes, List<TemplateSpec> Templates,
     int? LatestVersion, bool DraftChanged, List<VersionView> Versions);
 
 public static class LibraryViews
@@ -25,7 +25,7 @@ public static class LibraryViews
     {
         var draft = LibraryFile.Of(library, 0);
         var latest = versions.MaxBy(v => v.Number);
-        return new LibrarySummary(library.Id, library.Slug, library.Name, draft.Kinds, latest?.Number, DraftChanged(draft, latest));
+        return new LibrarySummary(library.Id, library.Slug, library.Name, draft.ScenarioTypes, latest?.Number, DraftChanged(draft, latest));
     }
 
     public static async Task<LibraryDetail> Detail(BuilderDb db, TemplateLibrary library, CancellationToken ct)
@@ -33,7 +33,7 @@ public static class LibraryViews
         var versions = await db.LibraryVersions.Where(v => v.LibraryId == library.Id).OrderBy(v => v.Number).ToListAsync(ct);
         var draft = LibraryFile.Of(library, 0);
         var latest = versions.LastOrDefault();
-        return new LibraryDetail(library.Id, library.Slug, library.Name, library.Description, draft.Kinds, draft.Templates,
+        return new LibraryDetail(library.Id, library.Slug, library.Name, library.Description, draft.ScenarioTypes, draft.Templates,
             latest?.Number, DraftChanged(draft, latest), versions.Select(VersionView.From).ToList());
     }
 

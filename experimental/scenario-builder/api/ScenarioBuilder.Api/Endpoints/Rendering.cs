@@ -13,11 +13,11 @@ public static class Rendering
 
     public static RenderInput Input(ScenarioState s, Audience audience, string libraryName, int libraryVersion)
     {
-        var document = ScenarioDocument.Build(s.Kind, s.Scenario, s.Decisions, s.Approvals);
+        var document = ScenarioDocument.Build(s.ScenarioType, s.Scenario, s.Decisions, s.Approvals);
         return new RenderInput(
-            AudienceFilter.For(document, s.Kind, audience),
-            s.Kind.AllQuestions.ToDictionary(q => q.Id, q => q.Label ?? q.Id),
-            s.Kind, s.Scenario.Name, libraryName, libraryVersion,
+            AudienceFilter.For(document, s.ScenarioType, audience),
+            s.ScenarioType.AllQuestions.ToDictionary(q => q.Id, q => q.Label ?? q.Id),
+            s.ScenarioType, s.Scenario.Name, libraryName, libraryVersion,
             document["findings"]!.AsArray().Count, DateTime.UtcNow);
     }
 

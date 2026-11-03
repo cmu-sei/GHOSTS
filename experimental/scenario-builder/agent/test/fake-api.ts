@@ -1,4 +1,4 @@
-// An in-memory stand-in for the builder API, over a small kind: stage 0 asks `a` (text,
+// An in-memory stand-in for the builder API, over a small scenario type: stage 0 asks `a` (text,
 // recommended "A1") and `b` (choice x/y), stage 1 asks `c` (a list). It keeps the API's
 // one authority rule the tools depend on: the agent can't overwrite a stated answer.
 
@@ -41,17 +41,17 @@ export class FakeApi implements ToolApi {
     if (fail) throw fail;
   }
 
-  /** The next kind fetch throws this, once. */
-  failKind?: ApiError;
+  /** The next scenario type fetch throws this, once. */
+  failScenarioType?: ApiError;
 
-  /** Each kind fetch, as id@version. */
-  kindFetches: string[] = [];
+  /** Each scenario type fetch, as id@version. */
+  scenarioTypeFetches: string[] = [];
 
-  async kind(id: string, version: string): Promise<any> {
+  async scenarioType(id: string, version: string): Promise<any> {
     this.check();
-    this.kindFetches.push(`${id}@${version}`);
-    const fail = this.failKind;
-    this.failKind = undefined;
+    this.scenarioTypeFetches.push(`${id}@${version}`);
+    const fail = this.failScenarioType;
+    this.failScenarioType = undefined;
     if (fail) throw fail;
     return SMALL_KIND;
   }
@@ -60,8 +60,8 @@ export class FakeApi implements ToolApi {
     this.check();
     const open = QUESTIONS.filter(q => q.stage === this.stage && !this.answers.has(q.id));
     return {
-      kindId: "small",
-      kindVersion: "0.2.0",
+      scenarioTypeId: "small",
+      scenarioTypeVersion: "0.2.0",
       stage: this.stage,
       stageTitle: SMALL_KIND.stages[this.stage].title,
       lastStage: this.stage === 1,

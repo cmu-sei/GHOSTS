@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { AnsweredView, AnswerValue, KindQuestion } from '../../../../core/models/builder.model';
+import { AnsweredView, AnswerValue, ScenarioTypeQuestion } from '../../../../core/models/builder.model';
 import { spaced } from '../../../../shared/labels/question-label';
 
 /**
@@ -17,7 +17,7 @@ import { spaced } from '../../../../shared/labels/question-label';
   styleUrls: ['./question-row.component.scss']
 })
 export class QuestionRowComponent {
-  readonly question = input.required<KindQuestion>();
+  readonly question = input.required<ScenarioTypeQuestion>();
   readonly answer = input<AnsweredView | undefined>();
   /** False for a stage that isn't open: its questions can't be answered yet. */
   readonly editable = input(true);

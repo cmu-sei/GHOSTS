@@ -20,7 +20,7 @@ public record TemplateSpec(string Id, string Name, Audience Audience, TemplateFo
 public record RenderInput(
     JsonObject Scenario,
     IReadOnlyDictionary<string, string> Labels,
-    Kind Kind,
+    ScenarioType ScenarioType,
     string ScenarioName,
     string LibraryName,
     int LibraryVersion,
@@ -69,7 +69,7 @@ public static partial class TemplateRenderer
         {
             ["scenario"] = Value(input.Scenario, html),
             ["labels"] = labels,
-            ["kind"] = new ScriptObject { ["id"] = input.Kind.Id, ["name"] = Text(input.Kind.Name), ["version"] = input.Kind.Version },
+            ["scenario_type"] = new ScriptObject { ["id"] = input.ScenarioType.Id, ["name"] = Text(input.ScenarioType.Name), ["version"] = input.ScenarioType.Version },
             ["library"] = new ScriptObject { ["name"] = Text(input.LibraryName), ["version"] = input.LibraryVersion },
             ["template"] = new ScriptObject { ["name"] = Text(t.Name), ["audience"] = JsonNamingPolicy.CamelCase.ConvertName(t.Audience.ToString()) },
             ["generated"] = input.Generated.ToString("O", CultureInfo.InvariantCulture),

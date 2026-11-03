@@ -17,16 +17,16 @@ public class ExportEndpoint : IEndpoint
 {
     public RouteHandlerBuilder Register(RouteGroupBuilder group, string tag) =>
         group.MapGet("/scenarios/{id:int}/export",
-                async (int id, string? format, KindCatalog kinds, BuilderDb db, IOptions<JsonOptions> json, CancellationToken ct) =>
+                async (int id, string? format, ScenarioTypeCatalog scenarioTypes, BuilderDb db, IOptions<JsonOptions> json, CancellationToken ct) =>
                 {
                     if (format is not (null or "json" or "markdown"))
                         return ErrorResults.BadRequest("FORMAT_UNKNOWN", $"There is no export format '{format}'. Formats: json, markdown.");
-                    if (await ScenarioState.Load(db, kinds, id, ct) is not { } s)
+                    if (await ScenarioState.Load(db, scenarioTypes, id, ct) is not { } s)
                         return ScenarioState.Missing(id);
                     if (format == "markdown")
-                        return Results.File(Encoding.UTF8.GetBytes(ScenarioMarkdown.Build(s.Kind, s.Scenario, s.Decisions, s.Approvals)),
+                        return Results.File(Encoding.UTF8.GetBytes(ScenarioMarkdown.Build(s.ScenarioType, s.Scenario, s.Decisions, s.Approvals)),
                             "text/markdown; charset=utf-8", $"{s.Scenario.Slug}.scenario.md");
-                    var document = ScenarioDocument.Build(s.Kind, s.Scenario, s.Decisions, s.Approvals);
+                    var document = ScenarioDocument.Build(s.ScenarioType, s.Scenario, s.Decisions, s.Approvals);
                     return Results.File(JsonSerializer.SerializeToUtf8Bytes(document, json.Value.SerializerOptions),
                         "application/json", $"{s.Scenario.Slug}.scenario.json");
                 })

@@ -50,8 +50,8 @@ try {
   if ((await api(`/scenarios/${id}/sources/search?q=cranes`)).length !== 1) throw new Error('the pasted note is not searchable');
   await page.click('button:text-is("Start the questions")');
   await page.waitForURL(/scenarios\/\d+\/questions/);
-  const kind = await api('/kinds/crucible-tabletop');
-  const stage0 = kind.stages[0].questions;
+  const scenarioType = await api('/scenario-types/crucible-tabletop');
+  const stage0 = scenarioType.stages[0].questions;
   step('create a scenario with context');
 
   // 2. Pick the fake model.

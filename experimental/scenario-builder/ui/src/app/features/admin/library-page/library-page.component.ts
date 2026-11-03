@@ -1,14 +1,14 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { KindSummary, LibraryDetail, TemplateSpec } from '../../../core/models/builder.model';
+import { ScenarioTypeSummary, LibraryDetail, TemplateSpec } from '../../../core/models/builder.model';
 import { AdminApiService } from '../../../core/services/admin-api.service';
 import { BuilderApiService, errorMessage } from '../../../core/services/builder-api.service';
 import { TopBarComponent } from '../../../shared/components/top-bar/top-bar.component';
 import { AdminNavComponent } from '../admin-nav/admin-nav.component';
 import { AUDIENCES, FORMATS } from '../../../shared/labels/document-labels';
 
-/** One library: its details and kinds, its draft templates, and the versions publishing has made. */
+/** One library: its details and scenario types, its draft templates, and the versions publishing has made. */
 @Component({
   selector: 'app-library-page',
   standalone: true,
@@ -28,10 +28,10 @@ export class LibraryPageComponent implements OnInit {
   protected readonly id = Number(this.route.snapshot.paramMap.get('id'));
 
   protected readonly library = signal<LibraryDetail | null>(null);
-  protected readonly kinds = signal<KindSummary[]>([]);
+  protected readonly scenarioTypes = signal<ScenarioTypeSummary[]>([]);
   protected readonly name = signal('');
   protected readonly description = signal('');
-  protected readonly kindIds = signal<string[]>([]);
+  protected readonly scenarioTypeIds = signal<string[]>([]);
   protected readonly newTemplate = signal('');
   protected readonly note = signal<string | null>(null);
   protected readonly error = signal<string | null>(null);
@@ -39,12 +39,12 @@ export class LibraryPageComponent implements OnInit {
   protected readonly dirty = computed(() => {
     const library = this.library();
     return !!library && (this.name() !== library.name || this.description() !== (library.description ?? '')
-      || [...this.kindIds()].sort().join() !== [...library.kinds].sort().join());
+      || [...this.scenarioTypeIds()].sort().join() !== [...library.scenarioTypes].sort().join());
   });
 
   ngOnInit(): void {
     this.load();
-    this.api.getKinds().subscribe(kinds => this.kinds.set(kinds));
+    this.api.getScenarioTypes().subscribe(scenarioTypes => this.scenarioTypes.set(scenarioTypes));
   }
 
   protected typedName(event: Event): void {
@@ -59,8 +59,8 @@ export class LibraryPageComponent implements OnInit {
     this.newTemplate.set((event.target as HTMLInputElement).value);
   }
 
-  protected toggleKind(id: string, on: boolean): void {
-    this.kindIds.update(ids => on ? [...ids, id] : ids.filter(k => k !== id));
+  protected toggleScenarioType(id: string, on: boolean): void {
+    this.scenarioTypeIds.update(ids => on ? [...ids, id] : ids.filter(k => k !== id));
   }
 
   protected saveDetails(): void {
@@ -99,7 +99,7 @@ export class LibraryPageComponent implements OnInit {
 
   private save(templates: TemplateSpec[], then: () => void): void {
     this.note.set(null);
-    this.admin.save(this.id, { name: this.name().trim(), description: this.description(), kinds: this.kindIds(), templates }).subscribe({
+    this.admin.save(this.id, { name: this.name().trim(), description: this.description(), scenarioTypes: this.scenarioTypeIds(), templates }).subscribe({
       next: library => {
         this.show(library);
         then();
@@ -116,7 +116,7 @@ export class LibraryPageComponent implements OnInit {
     this.library.set(library);
     this.name.set(library.name);
     this.description.set(library.description ?? '');
-    this.kindIds.set(library.kinds);
+    this.scenarioTypeIds.set(library.scenarioTypes);
     this.error.set(null);
   }
 }

@@ -6,13 +6,13 @@ export type Who = 'stated' | 'proposed';
 export type Via = 'person' | 'agent';
 export type AnswerValue = string | string[];
 
-export interface KindSummary {
+export interface ScenarioTypeSummary {
   id: string;
   version: string;
   name: string;
 }
 
-export interface KindQuestion {
+export interface ScenarioTypeQuestion {
   id: string;
   /** A short name for lists, such as "Time slot". */
   label?: string;
@@ -27,17 +27,17 @@ export interface KindQuestion {
   default?: string;
 }
 
-export interface KindStage {
+export interface ScenarioTypeStage {
   number: number;
   title: string;
-  questions: KindQuestion[];
+  questions: ScenarioTypeQuestion[];
   gate: { approval?: string };
   /** What the stage settles; the model drafts its questions from it. */
   purpose?: string;
 }
 
-export interface Kind extends KindSummary {
-  stages: KindStage[];
+export interface ScenarioType extends ScenarioTypeSummary {
+  stages: ScenarioTypeStage[];
   drafts: { field: string; dueAfterStage: number; path: string; visibility?: string }[];
   /** Its scenarios have a Topology page, where the range is built and deployed. */
   topology?: boolean;
@@ -49,7 +49,7 @@ export interface Kind extends KindSummary {
  * What updating a scenario to the latest version of its scenario type would do. From and to are the same when it's
  * already on the latest. Only the owner can apply it.
  */
-export interface KindUpdatePlan {
+export interface ScenarioTypeUpdatePlan {
   from: string;
   to: string;
   carried: { id: string; label: string; fromStage: number; toStage: number }[];
@@ -61,8 +61,8 @@ export interface KindUpdatePlan {
   owner: string;
 }
 
-/** A kind in Admin: its latest published version, if any, and how many scenarios are on it. */
-export interface KindAdminSummary {
+/** A scenario type in Admin: its latest published version, if any, and how many scenarios are on it. */
+export interface ScenarioTypeAdminSummary {
   id: string;
   name: string;
   latestVersion?: string;
@@ -71,31 +71,31 @@ export interface KindAdminSummary {
   retired: boolean;
 }
 
-export interface KindVersionView {
+export interface ScenarioTypeVersionView {
   version: string;
   publishedBy: string;
   published: string;
   scenarios: number;
 }
 
-/** A kind's draft, which admins edit, and what's published of it. */
-export interface KindDetail {
+/** A scenario type's draft, which admins edit, and what's published of it. */
+export interface ScenarioTypeDetail {
   id: string;
-  kind: Kind;
+  scenarioType: ScenarioType;
   basedOn?: string;
   retired: boolean;
   latestVersion?: string;
   draftChanged: boolean;
   scenarios: number;
-  versions: KindVersionView[];
+  versions: ScenarioTypeVersionView[];
 }
 
 export interface ScenarioSummary {
   id: number;
   slug: string;
   name: string;
-  kindId: string;
-  kindVersion: string;
+  scenarioTypeId: string;
+  scenarioTypeVersion: string;
   owner: string;
   stage: number;
   created: string;
@@ -155,9 +155,9 @@ export interface Gate {
 }
 
 export interface Progress {
-  kindId: string;
-  /** The kind version the scenario was made on, which it runs on. */
-  kindVersion: string;
+  scenarioTypeId: string;
+  /** The scenario type version the scenario was made on, which it runs on. */
+  scenarioTypeVersion: string;
   stage: number;
   stageTitle: string;
   lastStage: boolean;
@@ -227,7 +227,7 @@ export interface LibrarySummary {
   id: number;
   slug: string;
   name: string;
-  kinds: string[];
+  scenarioTypes: string[];
   latestVersion?: number;
   draftChanged: boolean;
 }
@@ -248,7 +248,7 @@ export interface LibraryDetail extends LibrarySummary {
 export interface LibraryDraft {
   name: string;
   description?: string;
-  kinds: string[];
+  scenarioTypes: string[];
   templates: TemplateSpec[];
 }
 

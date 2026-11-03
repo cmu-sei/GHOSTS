@@ -77,7 +77,7 @@ public class OutputsTests
     }
 
     [Fact]
-    public async Task Documents_lists_the_starter_templates_for_the_kind()
+    public async Task Documents_lists_the_starter_templates_for_the_scenario_type()
     {
         using var factory = new ApiFactory();
         var owner = factory.Client();
@@ -94,7 +94,7 @@ public class OutputsTests
         });
         Assert.Equal(["designers", "facilitators", "participants"], documents.Select(d => (string)d!["audience"]!));
 
-        var team = await CreateScenario(owner, "Team Drill", SmallUnitKind);
+        var team = await CreateScenario(owner, "Team Drill", SmallUnitType);
         var teamDocuments = (await owner.GetFromJsonAsync<JsonArray>($"/api/scenarios/{team}/documents"))!;
         Assert.Equal(["team-read-ahead", "controller-guide", "after-action-review"], teamDocuments.Select(d => (string)d!["template"]!));
         Assert.All(teamDocuments, d => Assert.Equal("small-unit-team-exercise", (string)d!["library"]!));
@@ -133,8 +133,8 @@ public class OutputsTests
                               "|{{ scenario.teachingPoints }}|{{ scenario.scenario.problem }}|D={{ scenario.decisions | size }}|F={{ scenario.findings | size }}";
         var file = new JsonObject
         {
-            ["format"] = "scenario-builder-library", ["formatVersion"] = 1, ["slug"] = "greedy", ["name"] = "Greedy",
-            ["kinds"] = new JsonArray(Kind), ["version"] = 1,
+            ["format"] = "scenario-builder-library", ["formatVersion"] = 2, ["slug"] = "greedy", ["name"] = "Greedy",
+            ["scenarioTypes"] = new JsonArray(TabletopType), ["version"] = 1,
             ["templates"] = new JsonArray(
                 new JsonObject { ["id"] = "players", ["name"] = "Players", ["audience"] = "participants", ["format"] = "markdown", ["body"] = greedy },
                 new JsonObject { ["id"] = "control", ["name"] = "Control", ["audience"] = "facilitators", ["format"] = "markdown", ["body"] = greedy })
@@ -201,8 +201,8 @@ public class OutputsTests
         var id = await CreateScenario(owner);
         var file = new JsonObject
         {
-            ["format"] = "scenario-builder-library", ["formatVersion"] = 1, ["slug"] = "runaway", ["name"] = "Runaway",
-            ["kinds"] = new JsonArray(Kind), ["version"] = 1,
+            ["format"] = "scenario-builder-library", ["formatVersion"] = 2, ["slug"] = "runaway", ["name"] = "Runaway",
+            ["scenarioTypes"] = new JsonArray(TabletopType), ["version"] = 1,
             ["templates"] = new JsonArray(new JsonObject
             {
                 ["id"] = "forever", ["name"] = "Forever", ["audience"] = "participants", ["format"] = "html",

@@ -16,12 +16,12 @@ public class PutEndpoint : IEndpoint
 {
     public RouteHandlerBuilder Register(RouteGroupBuilder group, string tag) =>
         group.MapPut("/scenarios/{id:int}/decisions/{questionId}",
-            async (int id, string questionId, PutDecision body, HttpContext http, KindCatalog kinds, BuilderDb db, CancellationToken ct) =>
+            async (int id, string questionId, PutDecision body, HttpContext http, ScenarioTypeCatalog scenarioTypes, BuilderDb db, CancellationToken ct) =>
             {
-                var state = await ScenarioState.Load(db, kinds, id, ct);
+                var state = await ScenarioState.Load(db, scenarioTypes, id, ct);
                 if (state is null)
                     return ScenarioState.Missing(id);
-                if (state.Kind.Find(questionId) is not var (question, stage))
+                if (state.ScenarioType.Find(questionId) is not var (question, stage))
                     return ErrorResults.NotFound("QUESTION_UNKNOWN", $"There is no question '{questionId}' in this scenario type.");
                 if (stage > state.Scenario.Stage)
                     return ErrorResults.Conflict("STAGE_NOT_OPEN",

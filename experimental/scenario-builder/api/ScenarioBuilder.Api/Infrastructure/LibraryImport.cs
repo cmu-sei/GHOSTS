@@ -23,7 +23,7 @@ public static class LibraryImport
         }
         library.Name = file.Name;
         library.Description = file.Description;
-        library.Kinds = JsonSerializer.Serialize(file.Kinds, LibraryFile.Json);
+        library.ScenarioTypes = JsonSerializer.Serialize(file.ScenarioTypes, LibraryFile.Json);
         library.Draft = JsonSerializer.Serialize(file.Templates, LibraryFile.Json);
         library.Updated = now;
         await db.SaveChangesAsync(ct);

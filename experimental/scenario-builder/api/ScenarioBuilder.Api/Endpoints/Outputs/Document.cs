@@ -14,11 +14,11 @@ public class DocumentEndpoint : IEndpoint
 {
     public RouteHandlerBuilder Register(RouteGroupBuilder group, string tag) =>
         group.MapGet("/scenarios/{id:int}/documents/{library}/{template}",
-                async (int id, string library, string template, bool? download, HttpContext http, KindCatalog kinds, BuilderDb db, CancellationToken ct) =>
+                async (int id, string library, string template, bool? download, HttpContext http, ScenarioTypeCatalog scenarioTypes, BuilderDb db, CancellationToken ct) =>
                 {
-                    if (await ScenarioState.Load(db, kinds, id, ct) is not { } state)
+                    if (await ScenarioState.Load(db, scenarioTypes, id, ct) is not { } state)
                         return ScenarioState.Missing(id);
-                    var file = (await DocumentsEndpoint.Published(db, state.Scenario.KindId, ct)).FirstOrDefault(f => f.Slug == library);
+                    var file = (await DocumentsEndpoint.Published(db, state.Scenario.ScenarioTypeId, ct)).FirstOrDefault(f => f.Slug == library);
                     if (file?.Templates.FirstOrDefault(t => t.Id == template) is not { } spec)
                         return ErrorResults.NotFound("DOCUMENT_UNKNOWN", $"No published library for this scenario's type has a document {library}/{template}.");
 

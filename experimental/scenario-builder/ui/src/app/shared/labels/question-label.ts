@@ -1,4 +1,4 @@
-import { Kind } from '../../core/models/builder.model';
+import { ScenarioType } from '../../core/models/builder.model';
 
 /** Joining words that stay lower case inside a title. */
 const MINOR = new Set(['a', 'an', 'and', 'as', 'at', 'but', 'by', 'for', 'in', 'nor', 'of', 'on', 'or', 'the', 'to', 'vs']);
@@ -10,15 +10,15 @@ export function spaced(id: string): string {
 }
 
 /**
- * The short name people see for a question or a draft: the kind's label when it has one, the id
+ * The short name people see for a question or a draft: the scenario type's label when it has one, the id
  * spaced out when it doesn't. Anything else, such as "stage 0", starts with a capital.
  */
-export function labelFor(target: string, kind: Kind | null): string {
-  const question = kind?.stages.flatMap(s => s.questions).find(q => q.id === target);
+export function labelFor(target: string, scenarioType: ScenarioType | null): string {
+  const question = scenarioType?.stages.flatMap(s => s.questions).find(q => q.id === target);
   if (question?.label) {
     return question.label;
   }
-  if (question || kind?.drafts.some(d => d.field === target) || (!kind && /^[a-z]+[A-Z]/.test(target))) {
+  if (question || scenarioType?.drafts.some(d => d.field === target) || (!scenarioType && /^[a-z]+[A-Z]/.test(target))) {
     return spaced(target);
   }
   return target.charAt(0).toUpperCase() + target.slice(1);

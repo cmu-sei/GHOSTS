@@ -7,12 +7,12 @@ using ScenarioBuilder.Api.Domain;
 
 namespace ScenarioBuilder.Api.Tests;
 
-/// <summary>The API on a fresh SQLite file and the repository's own kinds.</summary>
+/// <summary>The API on a fresh SQLite file and the repository's own scenario types.</summary>
 public sealed class ApiFactory : WebApplicationFactory<Program>
 {
-    /// <summary>experimental/scenario-builder/kinds, from the test assembly's bin folder.</summary>
-    public static string KindsDirectory =>
-        Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../kinds"));
+    /// <summary>experimental/scenario-builder/scenario-types, from the test assembly's bin folder.</summary>
+    public static string ScenarioTypesDirectory =>
+        Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../scenario-types"));
 
     /// <summary>experimental/scenario-builder/libraries, the starter libraries.</summary>
     public static string LibrariesDirectory =>
@@ -30,7 +30,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseSetting("ConnectionStrings:Builder", $"Data Source={Database}");
-        builder.UseSetting("Kinds:Directory", KindsDirectory);
+        builder.UseSetting("ScenarioTypes:Directory", ScenarioTypesDirectory);
         builder.UseSetting("Libraries:Directory", LibrariesDirectory);
         if (Web is { } web)
             builder.ConfigureServices(services =>

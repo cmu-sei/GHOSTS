@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
-  AnsweredView, AnswerValue, DocumentView, Kind, KindSummary, KindUpdatePlan, LogEntry, PluginView, Progress, ProposalView, ScenarioSummary, SourceView
+  AnsweredView, AnswerValue, DocumentView, ScenarioType, ScenarioTypeSummary, ScenarioTypeUpdatePlan, LogEntry, PluginView, Progress, ProposalView, ScenarioSummary, SourceView
 } from '../models/builder.model';
 
 /**
@@ -14,32 +14,32 @@ export class BuilderApiService {
   private readonly http = inject(HttpClient);
   private readonly base = '/api';
 
-  getKinds(): Observable<KindSummary[]> {
-    return this.http.get<KindSummary[]>(`${this.base}/kinds`);
+  getScenarioTypes(): Observable<ScenarioTypeSummary[]> {
+    return this.http.get<ScenarioTypeSummary[]>(`${this.base}/scenario-types`);
   }
 
-  /** A kind's latest version, or the one given: a scenario's kind is the version it was made on. */
-  getKind(id: string, version?: string): Observable<Kind> {
+  /** A scenario type's latest version, or the one given: a scenario's scenario type is the version it was made on. */
+  getScenarioType(id: string, version?: string): Observable<ScenarioType> {
     const query = version ? `?version=${encodeURIComponent(version)}` : '';
-    return this.http.get<Kind>(`${this.base}/kinds/${encodeURIComponent(id)}${query}`);
+    return this.http.get<ScenarioType>(`${this.base}/scenario-types/${encodeURIComponent(id)}${query}`);
   }
 
   /** What updating to the latest version of the scenario's type would do. */
-  getKindUpdate(id: number): Observable<KindUpdatePlan> {
-    return this.http.get<KindUpdatePlan>(`${this.base}/scenarios/${id}/kind-update`);
+  getScenarioTypeUpdate(id: number): Observable<ScenarioTypeUpdatePlan> {
+    return this.http.get<ScenarioTypeUpdatePlan>(`${this.base}/scenarios/${id}/scenario-type-update`);
   }
 
   /** As the owner: update to the version reviewed. */
-  applyKindUpdate(id: number, version: string): Observable<KindUpdatePlan> {
-    return this.http.post<KindUpdatePlan>(`${this.base}/scenarios/${id}/kind-update`, { version });
+  applyScenarioTypeUpdate(id: number, version: string): Observable<ScenarioTypeUpdatePlan> {
+    return this.http.post<ScenarioTypeUpdatePlan>(`${this.base}/scenarios/${id}/scenario-type-update`, { version });
   }
 
   getScenarios(): Observable<ScenarioSummary[]> {
     return this.http.get<ScenarioSummary[]>(`${this.base}/scenarios`);
   }
 
-  createScenario(name: string, kindId: string): Observable<ScenarioSummary> {
-    return this.http.post<ScenarioSummary>(`${this.base}/scenarios`, { name, kindId });
+  createScenario(name: string, scenarioTypeId: string): Observable<ScenarioSummary> {
+    return this.http.post<ScenarioSummary>(`${this.base}/scenarios`, { name, scenarioTypeId });
   }
 
   /** As the owner: hide a scenario from the list, or bring it back. */

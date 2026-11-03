@@ -1,7 +1,7 @@
 // What a run records, and what the checks read: the evaluation's shared shapes.
 
 export interface Fixture {
-  kind: string;
+  scenarioType: string;
   /** The designer's first message, which answers the openingQuestions in plain prose. */
   opening: string;
   /** Each question the opening answers, with fragments its recorded value must contain. */

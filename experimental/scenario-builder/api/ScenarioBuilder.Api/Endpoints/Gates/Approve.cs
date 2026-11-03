@@ -16,9 +16,9 @@ public class ApproveEndpoint : IEndpoint
 {
     public RouteHandlerBuilder Register(RouteGroupBuilder group, string tag) =>
         group.MapPost("/scenarios/{id:int}/gates/{stage:int}/approve",
-            async (int id, int stage, HttpContext http, KindCatalog kinds, BuilderDb db, CancellationToken ct) =>
+            async (int id, int stage, HttpContext http, ScenarioTypeCatalog scenarioTypes, BuilderDb db, CancellationToken ct) =>
             {
-                var state = await ScenarioState.Load(db, kinds, id, ct);
+                var state = await ScenarioState.Load(db, scenarioTypes, id, ct);
                 if (state is null)
                     return ScenarioState.Missing(id);
                 var caller = Caller.From(http);
@@ -27,11 +27,11 @@ public class ApproveEndpoint : IEndpoint
                         "Only the owner can approve, on the Questions page, unless the owner hands you the decisions. Ask them to approve.");
                 if (caller.User != state.Scenario.Owner)
                     return ErrorResults.Forbidden("NOT_OWNER", $"Only {state.Scenario.Owner}, the scenario's owner, can approve.");
-                if (stage < 0 || stage > state.Kind.LastStage)
-                    return ErrorResults.NotFound("STAGE_UNKNOWN", $"This scenario type has stages 0 to {state.Kind.LastStage}.");
+                if (stage < 0 || stage > state.ScenarioType.LastStage)
+                    return ErrorResults.NotFound("STAGE_UNKNOWN", $"This scenario type has stages 0 to {state.ScenarioType.LastStage}.");
                 if (stage > state.Scenario.Stage)
                     return ErrorResults.Conflict("STAGE_NOT_OPEN", $"Stage {stage} isn't open yet; stage {state.Scenario.Stage} is.");
-                if (state.Kind.Stages[stage].Gate.Approval is null)
+                if (state.ScenarioType.Stages[stage].Gate.Approval is null)
                     return ErrorResults.Conflict("NO_APPROVAL_NEEDED", $"Stage {stage} needs no approval. Advance once its questions are answered.");
                 // A closed stage is complete by definition; approving it again only renews what changed after its approval.
                 var blocking = state.Progress().Gate.Findings.Where(f => f.Stage == stage && !f.Code.StartsWith("APPROVAL_")).ToList();
@@ -39,7 +39,7 @@ public class ApproveEndpoint : IEndpoint
                     return ErrorResults.Conflict("GATE_NOT_READY",
                         $"Stage {stage} isn't ready to approve: {string.Join(" ", blocking.Select(f => f.Message))}");
 
-                var hash = Ledger.StageHash(state.Kind, stage, state.Decisions, Ledger.ReadDrafts(state.Scenario));
+                var hash = Ledger.StageHash(state.ScenarioType, stage, state.Decisions, Ledger.ReadDrafts(state.Scenario));
                 var now = DateTime.UtcNow;
                 db.Approvals.Add(new Approval { ScenarioId = id, Stage = stage, ApprovedBy = caller.User, Via = caller.Via, Hash = hash, Time = now });
                 state.Scenario.Updated = now;

@@ -9,7 +9,7 @@ import type { BuilderApi, PassageView, Progress, ProposalView, QuestionView } fr
 import { formatProgress } from "./progress-text.ts";
 
 /** What the tools need from the API; the tests pass an in-memory stand-in. */
-export type ToolApi = Pick<BuilderApi, "progress" | "kind" | "putDecision" | "propose" | "putDraft" | "advance" | "approve" | "searchSources">;
+export type ToolApi = Pick<BuilderApi, "progress" | "scenarioType" | "putDecision" | "propose" | "putDraft" | "advance" | "approve" | "searchSources">;
 
 export interface QuestionCard {
   questionId: string;
@@ -64,7 +64,7 @@ const plain = (text: string) => text.toLowerCase().replace(/["“”'‘’]/g, 
 
 const passageText = (p: PassageView) => `[${p.source.name}, passage ${p.passage} of ${p.of}]\n${p.text}`;
 
-interface KindQuestion {
+interface ScenarioTypeQuestion {
   id: string;
   recommended?: string;
   answer: QuestionView["answer"];
@@ -72,13 +72,13 @@ interface KindQuestion {
 }
 
 export function createTools(ctx: ToolContext): AgentTool<any, ToolDetails>[] {
-  let kind: Promise<Map<string, { question: KindQuestion; stage: number }>> | undefined;
-  const questions = (kindId: string, version: string) =>
-    (kind ??= ctx.api.kind(kindId, version).then(
-      k => new Map((k.stages as { number: number; questions: KindQuestion[] }[]).flatMap(s => s.questions.map(q => [q.id, { question: q, stage: s.number }] as const))),
+  let scenarioType: Promise<Map<string, { question: ScenarioTypeQuestion; stage: number }>> | undefined;
+  const questions = (scenarioTypeId: string, version: string) =>
+    (scenarioType ??= ctx.api.scenarioType(scenarioTypeId, version).then(
+      k => new Map((k.stages as { number: number; questions: ScenarioTypeQuestion[] }[]).flatMap(s => s.questions.map(q => [q.id, { question: q, stage: s.number }] as const))),
       // A failed fetch isn't kept: the next ask tries again.
       e => {
-        kind = undefined;
+        scenarioType = undefined;
         throw e;
       }));
 
@@ -93,7 +93,7 @@ export function createTools(ctx: ToolContext): AgentTool<any, ToolDetails>[] {
     },
   });
 
-  // A small model doesn't reliably search before it recommends, and copies the kind's suggestion when it
+  // A small model doesn't reliably search before it recommends, and copies the scenario type's suggestion when it
   // doesn't, so the open questions arrive with their passages: each question's best match, tied to the
   // questions it answers, once each, the first question's first.
   const passagesForOpen = async (p: Progress): Promise<string> => {
@@ -109,7 +109,7 @@ export function createTools(ctx: ToolContext): AgentTool<any, ToolDetails>[] {
       found.set(key, entry);
     }
     if (!found.size) return "";
-    return "\n\nFrom the sources. When a passage answers a question, recommend what it says, not the kind's suggestion, and name the source in your reason:\n" +
+    return "\n\nFrom the sources. When a passage answers a question, recommend what it says, not the scenario type's suggestion, and name the source in your reason:\n" +
       [...found.values()].map(f => `For ${f.ids.join(", ")}: ${passageText(f.passage)}`).join("\n\n");
   };
 
@@ -132,7 +132,7 @@ export function createTools(ctx: ToolContext): AgentTool<any, ToolDetails>[] {
       if (progress.delegated)
         return refuse("DELEGATED", "The designer handed you every decision: don't ask. Decide the open questions yourself with record_answers.");
       const openIds = progress.open.map(q => q.id).join(", ") || "none";
-      const found = (await questions(progress.kindId, progress.kindVersion)).get(params.questionId);
+      const found = (await questions(progress.scenarioTypeId, progress.scenarioTypeVersion)).get(params.questionId);
       if (!found) return refuse("UNKNOWN_QUESTION", `There is no question '${params.questionId}'. Open now: ${openIds}.`);
       const answered = progress.answered.find(a => a.id === params.questionId);
       if (answered)
@@ -141,7 +141,7 @@ export function createTools(ctx: ToolContext): AgentTool<any, ToolDetails>[] {
         return refuse("FUTURE_STAGE", `'${params.questionId}' belongs to stage ${found.stage}, which isn't open. Open now: ${openIds}.`);
       if (found.question.recommended && !params.recommended)
         return refuse("NO_RECOMMENDED", progress.sources?.length
-          ? `'${params.questionId}' needs a recommended answer. Recommend what the sources say if they answer it; otherwise the kind's suggestion, ${found.question.recommended}.`
+          ? `'${params.questionId}' needs a recommended answer. Recommend what the sources say if they answer it; otherwise the scenario type's suggestion, ${found.question.recommended}.`
           : `'${params.questionId}' has a recommended answer: ${found.question.recommended}. Include it as recommended.`);
 
       const card: QuestionCard = {

@@ -13,7 +13,7 @@ namespace ScenarioBuilder.Api.Tests;
 public class PullTests
 {
     private static readonly string SchemaPath =
-        Path.GetFullPath(Path.Combine(ApiFactory.KindsDirectory, "../schema/exercise-document.v0.schema.json"));
+        Path.GetFullPath(Path.Combine(ApiFactory.ScenarioTypesDirectory, "../schema/exercise-document.v0.schema.json"));
 
     /// <summary>Built once: JsonSchema.Net registers a schema's $id globally and refuses a second registration.</summary>
     private static readonly JsonSchema Schema = JsonSchema.FromText(File.ReadAllText(SchemaPath));
@@ -33,8 +33,8 @@ public class PullTests
 
         var doc = await Pull(owner, id);
 
-        Assert.Equal("0.3.0", (string)doc["schemaVersion"]!);
-        Assert.Equal("crucible-tabletop", (string)doc["kind"]!["id"]!);
+        Assert.Equal("0.4.0", (string)doc["schemaVersion"]!);
+        Assert.Equal("crucible-tabletop", (string)doc["scenarioType"]!["id"]!);
         Assert.Equal("harbor-blackout", (string)doc["slug"]!);
         Assert.Equal("draft", (string)doc["status"]!);
         Assert.Equal(1, (int)doc["stage"]!);
@@ -45,8 +45,8 @@ public class PullTests
         Assert.Null(doc["objectives"]![1]!["visibility"]);
         Assert.Equal("Backups", (string)doc["teachingPoints"]![0]!["text"]!);
         Assert.Equal("excon", (string)doc["teachingPoints"]![0]!["visibility"]!);
-        // Stage 0's, the two above, and the exercise name, which starts as the scenario's name; in the kind's order.
-        var stage0 = KindOf(TestApi.Kind).Stages[0].Questions;
+        // Stage 0's, the two above, and the exercise name, which starts as the scenario's name; in the scenario type's order.
+        var stage0 = ScenarioTypeOf(TestApi.TabletopType).Stages[0].Questions;
         Assert.Equal(stage0.Count + 3, doc["decisions"]!.AsArray().Count);
         Assert.Equal(stage0[0].Id, (string)doc["decisions"]![0]!["question"]!);
     }
@@ -57,7 +57,7 @@ public class PullTests
         using var factory = new ApiFactory();
         var owner = factory.Client();
         var id = await CreateScenario(owner);
-        await ReachStage(owner, id, KindOf(TestApi.Kind).Find("organizations")!.Value.Stage);
+        await ReachStage(owner, id, ScenarioTypeOf(TestApi.TabletopType).Find("organizations")!.Value.Stage);
         await Put(owner, id, "organizations", new { value = new[] { "Coastline Data Centre", "Harbor Booking Service" } });
 
         var doc = await Pull(owner, id);
@@ -77,7 +77,7 @@ public class PullTests
 
         var findings = (await Pull(owner, id))["findings"]!.AsArray();
 
-        Assert.Equal(KindOf(TestApi.Kind).Stages[0].Questions.Count, findings.Count);
+        Assert.Equal(ScenarioTypeOf(TestApi.TabletopType).Stages[0].Questions.Count, findings.Count);
         Assert.All(findings, f =>
         {
             Assert.Equal("stop", (string)f!["severity"]!);
@@ -90,8 +90,8 @@ public class PullTests
     {
         using var factory = new ApiFactory();
         var owner = factory.Client();
-        var smallUnit = KindOf(SmallUnitKind);
-        var id = await CreateScenario(owner, "Team Drill", SmallUnitKind);
+        var smallUnit = ScenarioTypeOf(SmallUnitType);
+        var id = await CreateScenario(owner, "Team Drill", SmallUnitType);
         await ReachStage(owner, id, 3, smallUnit);
         await Put(owner, id, "segments", new { value = new[] { "OT network: plant control", "Corporate LAN: 40 users" } });
         await Put(owner, id, "planted", new { value = new[] { "Infected contractor laptop on the corporate LAN" } });
@@ -120,8 +120,8 @@ public class PullTests
         var finished = await CreateScenario(owner, "Finished");
         await ReachStage(owner, finished, 3);
         await AnswerStage(owner, finished, 3);
-        var smallUnit = KindOf(SmallUnitKind);
-        var team = await CreateScenario(owner, "Team Drill", SmallUnitKind);
+        var smallUnit = ScenarioTypeOf(SmallUnitType);
+        var team = await CreateScenario(owner, "Team Drill", SmallUnitType);
         await ReachStage(owner, team, smallUnit.LastStage, smallUnit);
         await AnswerStage(owner, team, smallUnit.LastStage, smallUnit);
 

@@ -2,13 +2,13 @@ import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } 
 import { DatePipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { BuilderApiService, errorMessage } from '../../../core/services/builder-api.service';
-import { KindSummary, ScenarioSummary } from '../../../core/models/builder.model';
+import { ScenarioTypeSummary, ScenarioSummary } from '../../../core/models/builder.model';
 import { TopBarComponent } from '../../../shared/components/top-bar/top-bar.component';
 
-type SortKey = 'name' | 'kind' | 'stage' | 'owner' | 'updated';
+type SortKey = 'name' | 'scenarioType' | 'stage' | 'owner' | 'updated';
 
 /**
- * Every scenario as a grid to search, sort and archive, and a new one from a kind. A new scenario opens on its
+ * Every scenario as a grid to search, sort and archive, and a new one from a scenario type. A new scenario opens on its
  * Context page, so the agent has what the designer already knows before the first question.
  */
 @Component({
@@ -25,16 +25,16 @@ export class ScenariosListComponent implements OnInit {
 
   protected readonly columns: { key: SortKey; label: string }[] = [
     { key: 'name', label: 'Name' },
-    { key: 'kind', label: 'Scenario Type' },
+    { key: 'scenarioType', label: 'Scenario Type' },
     { key: 'stage', label: 'Stage' },
     { key: 'owner', label: 'Owner' },
     { key: 'updated', label: 'Updated' }
   ];
 
   protected readonly scenarios = signal<ScenarioSummary[]>([]);
-  protected readonly kinds = signal<KindSummary[]>([]);
+  protected readonly scenarioTypes = signal<ScenarioTypeSummary[]>([]);
   protected readonly name = signal('');
-  protected readonly kindId = signal('');
+  protected readonly scenarioTypeId = signal('');
   protected readonly query = signal('');
   protected readonly sort = signal<{ key: SortKey; ascending: boolean }>({ key: 'updated', ascending: false });
   protected readonly showArchived = signal(false);
@@ -47,7 +47,7 @@ export class ScenariosListComponent implements OnInit {
     const { key, ascending } = this.sort();
     return this.scenarios()
       .filter(s => this.showArchived() || !s.archived)
-      .filter(s => !words || [s.name, s.slug, s.owner, this.kindName(s.kindId)].some(v => v.toLowerCase().includes(words)))
+      .filter(s => !words || [s.name, s.slug, s.owner, this.scenarioTypeName(s.scenarioTypeId)].some(v => v.toLowerCase().includes(words)))
       .sort((a, b) => (ascending ? 1 : -1) * compare(this.value(a, key), this.value(b, key)));
   });
 
@@ -56,14 +56,14 @@ export class ScenariosListComponent implements OnInit {
       next: scenarios => this.scenarios.set(scenarios),
       error: e => this.error.set(errorMessage(e))
     });
-    this.api.getKinds().subscribe(kinds => {
-      this.kinds.set(kinds);
-      this.kindId.set(kinds[0]?.id ?? '');
+    this.api.getScenarioTypes().subscribe(scenarioTypes => {
+      this.scenarioTypes.set(scenarioTypes);
+      this.scenarioTypeId.set(scenarioTypes[0]?.id ?? '');
     });
   }
 
   protected create(): void {
-    this.api.createScenario(this.name().trim(), this.kindId()).subscribe({
+    this.api.createScenario(this.name().trim(), this.scenarioTypeId()).subscribe({
       next: scenario => this.router.navigate(['/scenarios', scenario.id, 'context']),
       error: e => this.error.set(errorMessage(e))
     });
@@ -87,8 +87,8 @@ export class ScenariosListComponent implements OnInit {
     return sort.key === key ? (sort.ascending ? 'ascending' : 'descending') : null;
   }
 
-  protected kindName(id: string): string {
-    return this.kinds().find(k => k.id === id)?.name ?? id;
+  protected scenarioTypeName(id: string): string {
+    return this.scenarioTypes().find(k => k.id === id)?.name ?? id;
   }
 
   protected typed(event: Event): void {
@@ -100,12 +100,12 @@ export class ScenariosListComponent implements OnInit {
   }
 
   protected picked(event: Event): void {
-    this.kindId.set((event.target as HTMLSelectElement).value);
+    this.scenarioTypeId.set((event.target as HTMLSelectElement).value);
   }
 
   private value(s: ScenarioSummary, key: SortKey): string | number {
     switch (key) {
-      case 'kind': return this.kindName(s.kindId);
+      case 'scenarioType': return this.scenarioTypeName(s.scenarioTypeId);
       case 'stage': return s.stage;
       case 'owner': return s.owner;
       case 'updated': return s.updated;

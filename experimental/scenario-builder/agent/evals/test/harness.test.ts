@@ -40,7 +40,7 @@ beforeAll(async () => {
     env: { ...process.env, ASPNETCORE_URLS: API, ConnectionStrings__Builder: `Data Source=${db}` },
     stdio: "ignore",
   });
-  await waitFor(`${API}/api/kinds`, 60_000);
+  await waitFor(`${API}/api/scenario-types`, 60_000);
   fake = await startFakeModel(5299);
 }, 240_000);
 

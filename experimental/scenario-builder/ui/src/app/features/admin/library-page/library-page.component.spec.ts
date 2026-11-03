@@ -8,7 +8,7 @@ import { LibraryPageComponent } from './library-page.component';
 
 const library: LibraryDetail = {
   id: 1, slug: 'crucible-tabletop-basics', name: 'Crucible tabletop basics', description: 'Starter documents.',
-  kinds: ['crucible-tabletop'], latestVersion: 1, draftChanged: true,
+  scenarioTypes: ['crucible-tabletop'], latestVersion: 1, draftChanged: true,
   templates: [
     { id: 'design-summary', name: 'Design summary', audience: 'designers', format: 'html', body: '<h1>x</h1>' },
     { id: 'participant-read-in', name: 'Participant read-in', audience: 'participants', format: 'markdown', body: '# x' }
@@ -29,7 +29,7 @@ async function render() {
       provideRouter([]),
       { provide: ActivatedRoute, useValue: { snapshot: { paramMap: convertToParamMap({ id: '1' }) } } },
       { provide: AdminApiService, useValue: admin },
-      { provide: BuilderApiService, useValue: { getKinds: () => of([{ id: 'crucible-tabletop', version: '1.0.0', name: 'Crucible tabletop exercise' }]) } }
+      { provide: BuilderApiService, useValue: { getScenarioTypes: () => of([{ id: 'crucible-tabletop', version: '1.0.0', name: 'Crucible tabletop exercise' }]) } }
     ]
   });
   const fixture = TestBed.createComponent(LibraryPageComponent);

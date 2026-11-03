@@ -15,8 +15,8 @@ const lower = (s: string) => s.toLowerCase();
 const squash = (s: string) => lower(s).replace(/\s+/g, " ").trim();
 const refused = (o: Observed, code: string) => o.calls.filter(c => c.isError && c.code === code);
 
-export function runChecks(o: Observed, fixture: Fixture, kind: any): CheckResult[] {
-  const questionCount = (kind.stages as { questions: unknown[] }[]).reduce((n, s) => n + s.questions.length, 0);
+export function runChecks(o: Observed, fixture: Fixture, scenarioType: any): CheckResult[] {
+  const questionCount = (scenarioType.stages as { questions: unknown[] }[]).reduce((n, s) => n + s.questions.length, 0);
   const decisions: any[] = o.doc?.decisions ?? [];
   const decision = (id: string) => decisions.find(d => d.question === id);
   const asks = o.calls.filter(c => c.name === "ask_user");

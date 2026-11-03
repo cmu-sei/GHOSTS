@@ -13,7 +13,7 @@ namespace ScenarioBuilder.Api.Endpoints.Admin;
 public class ImportEndpoint : IEndpoint
 {
     public RouteHandlerBuilder Register(RouteGroupBuilder group, string tag) =>
-        group.MapPost("/admin/libraries/import", async (HttpContext http, KindCatalog kinds, BuilderDb db, CancellationToken ct) =>
+        group.MapPost("/admin/libraries/import", async (HttpContext http, ScenarioTypeCatalog scenarioTypes, BuilderDb db, CancellationToken ct) =>
             {
                 LibraryFile? file;
                 try
@@ -26,7 +26,7 @@ public class ImportEndpoint : IEndpoint
                 }
                 if (file is null)
                     return ErrorResults.BadRequest("LIBRARY_INVALID", "That isn't a library file: it's empty.");
-                if (LibraryFile.Check(file, kinds.All.Select(k => k.Id).ToList()) is { } problem)
+                if (LibraryFile.Check(file, scenarioTypes.All.Select(k => k.Id).ToList()) is { } problem)
                     return ErrorResults.BadRequest("LIBRARY_INVALID", problem);
 
                 var (library, _) = await LibraryImport.Apply(db, file, Caller.From(http).User, ct);

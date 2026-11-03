@@ -13,12 +13,12 @@ public class CreateEndpoint : IEndpoint
 {
     public RouteHandlerBuilder Register(RouteGroupBuilder group, string tag) =>
         group.MapPost("/scenarios/{id:int}/proposals",
-            async (int id, CreateProposal body, HttpContext http, KindCatalog kinds, BuilderDb db, CancellationToken ct) =>
+            async (int id, CreateProposal body, HttpContext http, ScenarioTypeCatalog scenarioTypes, BuilderDb db, CancellationToken ct) =>
             {
-                var state = await ScenarioState.Load(db, kinds, id, ct);
+                var state = await ScenarioState.Load(db, scenarioTypes, id, ct);
                 if (state is null)
                     return ScenarioState.Missing(id);
-                if (state.Kind.Find(body.QuestionId ?? string.Empty) is not var (question, _))
+                if (state.ScenarioType.Find(body.QuestionId ?? string.Empty) is not var (question, _))
                     return ErrorResults.NotFound("QUESTION_UNKNOWN", $"There is no question '{body.QuestionId}' in this scenario type.");
                 var existing = state.Decisions.FirstOrDefault(d => d.QuestionId == question.Id);
                 if (existing?.Who != Who.Stated)

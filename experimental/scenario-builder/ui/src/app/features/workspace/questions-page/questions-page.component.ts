@@ -20,7 +20,7 @@ export class QuestionsPageComponent {
   private readonly api = inject(BuilderApiService);
   private readonly snackBar = inject(MatSnackBar);
 
-  protected readonly stage = computed(() => this.store.kind()?.stages[this.store.selectedStage()] ?? null);
+  protected readonly stage = computed(() => this.store.scenarioType()?.stages[this.store.selectedStage()] ?? null);
   protected readonly answeredCount = computed(() => {
     const stage = this.stage();
     return stage ? stage.questions.filter(q => this.store.answers().has(q.id)).length : 0;

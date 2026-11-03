@@ -8,23 +8,23 @@ namespace ScenarioBuilder.Api.Endpoints.Outputs;
 
 public record DocumentView(string Library, string LibraryName, int Version, string Template, string Name, Audience Audience, TemplateFormat Format);
 
-/// <summary>GET /scenarios/{id}/documents — every template in the latest published version of each library for the scenario's kind.</summary>
+/// <summary>GET /scenarios/{id}/documents — every template in the latest published version of each library for the scenario's scenario type.</summary>
 public class DocumentsEndpoint : IEndpoint
 {
     public RouteHandlerBuilder Register(RouteGroupBuilder group, string tag) =>
         group.MapGet("/scenarios/{id:int}/documents", async (int id, BuilderDb db, CancellationToken ct) =>
                 await db.Scenarios.FindAsync([id], ct) is { } scenario
-                    ? Results.Ok((await Published(db, scenario.KindId, ct))
+                    ? Results.Ok((await Published(db, scenario.ScenarioTypeId, ct))
                         .SelectMany(f => f.Templates.Select(t => new DocumentView(f.Slug, f.Name, f.Version, t.Id, t.Name, t.Audience, t.Format))))
                     : ScenarioState.Missing(id))
             .WithTags(tag);
 
-    /// <summary>The latest version of every library serving <paramref name="kindId"/>, by library name.</summary>
-    public static async Task<List<LibraryFile>> Published(BuilderDb db, string kindId, CancellationToken ct) =>
+    /// <summary>The latest version of every library serving <paramref name="scenarioTypeId"/>, by library name.</summary>
+    public static async Task<List<LibraryFile>> Published(BuilderDb db, string scenarioTypeId, CancellationToken ct) =>
         (await db.LibraryVersions.ToListAsync(ct))
         .GroupBy(v => v.LibraryId)
         .Select(g => LibraryFile.Read(g.MaxBy(v => v.Number)!.Content))
-        .Where(f => f.Kinds.Contains(kindId))
+        .Where(f => f.ScenarioTypes.Contains(scenarioTypeId))
         .OrderBy(f => f.Name)
         .ToList();
 }

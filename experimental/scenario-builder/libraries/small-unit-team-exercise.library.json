@@ -1,10 +1,10 @@
 {
   "format": "scenario-builder-library",
-  "formatVersion": 1,
+  "formatVersion": 2,
   "slug": "small-unit-team-exercise",
   "name": "Small Unit Team Exercise",
   "description": "Three documents for a small unit team exercise: a read-ahead for the team, a guide for the controllers, and an after action review sheet to fill in.",
-  "kinds": [
+  "scenarioTypes": [
     "small-unit-team-exercise"
   ],
   "version": 1,

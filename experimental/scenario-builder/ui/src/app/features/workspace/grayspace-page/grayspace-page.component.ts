@@ -64,11 +64,11 @@ export class GraySpacePageComponent {
   /** The enclave's name GraySpace would get: the scenario's name, lowercased and hyphenated. */
   protected readonly slug = computed(() => (this.store.name() ?? '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''));
 
-  /** The answers that feed a decision, for the questions this kind asks. */
+  /** The answers that feed a decision, for the questions this scenario type asks. */
   protected answersFor(decision: Decision): { label: string; value?: AnswerValue }[] {
-    const kind = this.store.kind();
-    const asked = new Set(kind?.stages.flatMap(s => s.questions.map(q => q.id)));
-    return decision.answers.filter(id => asked.has(id)).map(id => ({ label: labelFor(id, kind), value: this.store.answer(id)?.value }));
+    const scenarioType = this.store.scenarioType();
+    const asked = new Set(scenarioType?.stages.flatMap(s => s.questions.map(q => q.id)));
+    return decision.answers.filter(id => asked.has(id)).map(id => ({ label: labelFor(id, scenarioType), value: this.store.answer(id)?.value }));
   }
 
   protected isList(value: AnswerValue): value is string[] {

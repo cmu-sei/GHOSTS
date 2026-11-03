@@ -1,13 +1,13 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { AnsweredView, Kind, KindQuestion } from '../../../core/models/builder.model';
+import { AnsweredView, ScenarioType, ScenarioTypeQuestion } from '../../../core/models/builder.model';
 import { WorkspaceStore } from '../workspace.store';
 import { GraySpacePageComponent } from './grayspace-page.component';
 
-const question = (id: string, label: string): KindQuestion => ({ id, label, text: `${label}?`, why: 'w', answer: 'list', path: `/network/${id}` });
+const question = (id: string, label: string): ScenarioTypeQuestion => ({ id, label, text: `${label}?`, why: 'w', answer: 'list', path: `/network/${id}` });
 
-const kind: Kind = {
+const scenarioType: ScenarioType = {
   id: 'small-unit-team-exercise', version: '1', name: 'Small Unit Team Exercise', drafts: [], topology: true,
   stages: [{ number: 0, title: 'Network and Range', gate: {}, questions: [question('segments', 'Network Segments'), question('connectivity', 'Connectivity')] }]
 };
@@ -20,7 +20,7 @@ async function render() {
   TestBed.configureTestingModule({
     providers: [
       provideRouter([]),
-      { provide: WorkspaceStore, useValue: { kind: signal(kind), name: signal('Cyber Antigen'), answer: (id: string) => id === 'segments' ? answered : undefined } }
+      { provide: WorkspaceStore, useValue: { scenarioType: signal(scenarioType), name: signal('Cyber Antigen'), answer: (id: string) => id === 'segments' ? answered : undefined } }
     ]
   });
   const fixture = TestBed.createComponent(GraySpacePageComponent);

@@ -210,7 +210,7 @@ public class GateTests
         using var factory = new ApiFactory();
         var owner = factory.Client();
         var id = await CreateScenario(owner);
-        var last = KindOf(Kind).LastStage;
+        var last = ScenarioTypeOf(TabletopType).LastStage;
         await ReachStage(owner, id, last);
         await AnswerStage(owner, id, last);
         await Approve(owner, id, last);

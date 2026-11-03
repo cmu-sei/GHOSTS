@@ -18,18 +18,18 @@ public class PutEndpoint : IEndpoint
 {
     public RouteHandlerBuilder Register(RouteGroupBuilder group, string tag) =>
         group.MapPut("/scenarios/{id:int}/drafts/{field}",
-            async (int id, string field, PutDraft body, HttpContext http, KindCatalog kinds, BuilderDb db, CancellationToken ct) =>
+            async (int id, string field, PutDraft body, HttpContext http, ScenarioTypeCatalog scenarioTypes, BuilderDb db, CancellationToken ct) =>
             {
-                var state = await ScenarioState.Load(db, kinds, id, ct);
+                var state = await ScenarioState.Load(db, scenarioTypes, id, ct);
                 if (state is null)
                     return ScenarioState.Missing(id);
-                var draft = state.Kind.Drafts.FirstOrDefault(d => d.Field == field);
+                var draft = state.ScenarioType.Drafts.FirstOrDefault(d => d.Field == field);
                 if (draft is null)
                     return ErrorResults.NotFound("DRAFT_UNKNOWN",
-                        $"There is no draft '{field}' in this scenario type. Drafts: {string.Join(", ", state.Kind.Drafts.Select(d => d.Field))}.");
+                        $"There is no draft '{field}' in this scenario type. Drafts: {string.Join(", ", state.ScenarioType.Drafts.Select(d => d.Field))}.");
                 if (string.IsNullOrWhiteSpace(body.Text))
                     return ErrorResults.BadRequest("TEXT_REQUIRED", $"The {field} draft needs text.");
-                if (state.Scenario.Stage < draft.DueAfterStage || !Ledger.StageAnswered(state.Kind, draft.DueAfterStage, state.Decisions))
+                if (state.Scenario.Stage < draft.DueAfterStage || !Ledger.StageAnswered(state.ScenarioType, draft.DueAfterStage, state.Decisions))
                     return ErrorResults.Conflict("DRAFT_NOT_DUE",
                         $"The {field} draft is due once stage {draft.DueAfterStage}'s questions are answered.");
 

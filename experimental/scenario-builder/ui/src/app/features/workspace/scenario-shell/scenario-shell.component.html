@@ -9,16 +9,16 @@
 <div class="body" [class.no-rail]="!onQuestions()">
   @if (onQuestions()) {
     <aside class="rail">
-      @if (store.kind(); as kind) {
+      @if (store.scenarioType(); as scenarioType) {
         @if (store.progress(); as progress) {
-          <app-stage-rail [kind]="kind" [progress]="progress" [selected]="store.selectedStage()" (select)="pick($event)" />
+          <app-stage-rail [scenarioType]="scenarioType" [progress]="progress" [selected]="store.selectedStage()" (select)="pick($event)" />
         }
       }
     </aside>
   }
 
   <main class="page">
-    <app-kind-update />
+    <app-scenario-type-update />
     @if (store.error(); as error) {
       <p class="error" role="alert">{{ error }}</p>
     }

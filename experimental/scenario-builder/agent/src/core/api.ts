@@ -42,9 +42,9 @@ export interface Gate {
 }
 
 export interface Progress {
-  kindId: string;
-  /** The kind version the scenario was made on, which it runs on. */
-  kindVersion: string;
+  scenarioTypeId: string;
+  /** The scenario type version the scenario was made on, which it runs on. */
+  scenarioTypeVersion: string;
   stage: number;
   stageTitle: string;
   lastStage: boolean;
@@ -130,8 +130,8 @@ export class BuilderApi {
     return this.call("GET", `/scenarios/${scenarioId}/progress`);
   }
 
-  kind(kindId: string, version: string): Promise<any> {
-    return this.call("GET", `/kinds/${encodeURIComponent(kindId)}?version=${encodeURIComponent(version)}`);
+  scenarioType(scenarioTypeId: string, version: string): Promise<any> {
+    return this.call("GET", `/scenario-types/${encodeURIComponent(scenarioTypeId)}?version=${encodeURIComponent(version)}`);
   }
 
   putDecision(scenarioId: number, questionId: string, body: DecisionBody): Promise<AnsweredView> {
@@ -170,8 +170,8 @@ export class BuilderApi {
     return this.call("POST", `/scenarios/${scenarioId}/proposals/${proposalId}/discard`);
   }
 
-  createScenario(name: string, kindId: string): Promise<{ id: number }> {
-    return this.call("POST", "/scenarios", { name, kindId });
+  createScenario(name: string, scenarioTypeId: string): Promise<{ id: number }> {
+    return this.call("POST", "/scenarios", { name, scenarioTypeId });
   }
 
   pull(scenarioId: number): Promise<Record<string, any>> {
