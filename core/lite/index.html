@@ -822,6 +822,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#scenario-executions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenario executions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#sample-timeline" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1934,6 +1945,8 @@
       
         
       
+        
+      
     
     
     
@@ -1994,6 +2007,34 @@
     
   
     Managing Timelines
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/terrain/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Terrain (GraySpace)
   
 
     
@@ -2572,6 +2613,8 @@ tail<span class="w"> </span>-f<span class="w"> </span>logs/clientupdates.log
 <li><strong>Network Shares</strong>: Accesses network resources</li>
 <li><strong>Basic Commands</strong>: Executes lightweight system commands</li>
 </ul>
+<h3 id="scenario-executions">Scenario executions<a class="headerlink" href="#scenario-executions" title="Permanent link">&para;</a></h3>
+<p>Bind scenario NPCs to hosts running the full client, not GHOSTS LITE. LITE runs only the BrowserChrome, BrowserFirefox, Word, Excel and PowerPoint handlers and ignores every other handler type, including NpcSystem. A scenario execution learns that an NPC carried out a timeline item from the NpcSystem report sent after the action, so a LITE client never reports one: items sent to NPCs on LITE clients stay Deployed until White Cell completes them or the run ends. LITE does carry out browser, Word, Excel and PowerPoint actions from their <code>commandArgs</code>; it just never says so.</p>
 <h3 id="sample-timeline">Sample Timeline<a class="headerlink" href="#sample-timeline" title="Permanent link">&para;</a></h3>
 <p>Here's a basic timeline configuration for GHOSTS LITE:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">TimeLineHandlers</span><span class="p">:</span>

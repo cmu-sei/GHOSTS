@@ -1973,6 +1973,8 @@
       
         
       
+        
+      
     
     
     
@@ -2033,6 +2035,34 @@
     
   
     Managing Timelines
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/terrain/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Terrain (GraySpace)
   
 
     
@@ -2533,13 +2563,14 @@
 <p>RDP Handlers require <a href="https://github.com/cmu-sei/GHOSTS/issues/429#issuecomment-2403269945">registering AutoIt dlls</a>.</p>
 </details>
 <h2 id="linux-client">Linux Client<a class="headerlink" href="#linux-client" title="Permanent link">&para;</a></h2>
-<p>GHOSTS on Linux requires the <a href="https://dotnet.microsoft.com/download">Microsoft dotnetcore runtime version 8.0</a>. We have tested with Ubuntu 24.04 using the <a href="https://learn.microsoft.com/en-us/dotnet/core/install/linux-ubuntu-install?pivots=os-linux-ubuntu-2404&amp;tabs=dotnet8">snap instructions here</a>, but other distributions should work.</p>
+<p>GHOSTS on Linux requires the <a href="https://dotnet.microsoft.com/download">Microsoft .NET runtime version 10.0</a>. We have tested with Ubuntu 24.04 using the <a href="https://learn.microsoft.com/en-us/dotnet/core/install/linux-ubuntu-install?pivots=os-linux-ubuntu-2404&amp;tabs=dotnet8">snap instructions here</a>, but other distributions should work.</p>
 <h3 id="linux-installation">Linux Installation<a class="headerlink" href="#linux-installation" title="Permanent link">&para;</a></h3>
 <ul>
 <li><a href="https://github.com/cmu-sei/GHOSTS/releases/latest">Download the latest Linux client</a> and unzip it to a folder such as <code>~/ghosts</code>.</li>
 <li>Running the client as root may cause display issues with web browsers.</li>
 </ul>
 <h3 id="linux-service-configuration">Linux Service Configuration<a class="headerlink" href="#linux-service-configuration" title="Permanent link">&para;</a></h3>
+<p><code>configuration/client-install/linux/install.sh</code> does all of the steps below in one command: it unpacks the client, writes its config, and installs and starts the service. See <code>configuration/client-install/README.md</code>.</p>
 <p>To ensure the GHOSTS client runs automatically on system startup, you can configure it as a service using <code>systemd</code>.</p>
 <h4 id="step-1-create-the-service-file">Step 1: Create the Service File<a class="headerlink" href="#step-1-create-the-service-file" title="Permanent link">&para;</a></h4>
 <p>Create a new service file for the GHOSTS client by running the following command:</p>
@@ -2552,7 +2583,7 @@
 <span class="na">After</span><span class="o">=</span><span class="s">network.target</span>
 
 <span class="k">[Service]</span>
-<span class="na">ExecStart</span><span class="o">=</span><span class="s">/usr/bin/dotnet /path/to/ghosts/ghosts.client.linux.dll</span>
+<span class="na">ExecStart</span><span class="o">=</span><span class="s">/usr/bin/dotnet /path/to/ghosts/Ghosts.Client.Universal.dll</span>
 <span class="na">WorkingDirectory</span><span class="o">=</span><span class="s">/path/to/ghosts</span>
 <span class="na">Restart</span><span class="o">=</span><span class="s">always</span>
 <span class="na">User</span><span class="o">=</span><span class="s">ghosts_user</span>
@@ -2867,7 +2898,7 @@
 <p>Both scripts stop the GHOSTS client and any browser/driver processes it spawned.</p>
 <h3 id="universallinux-client-wont-start">Universal/Linux Client Won't Start<a class="headerlink" href="#universallinux-client-wont-start" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>Check .NET version:</strong> Run <code>dotnet --version</code> and confirm .NET 9 (or later) is installed. The Universal client does not run on .NET 8.</li>
+<li><strong>Check .NET version:</strong> Run <code>dotnet --version</code> and confirm .NET 10 (or later) is installed. The Universal client targets .NET 10.</li>
 <li><strong>Permission denied:</strong> Ensure <code>ghosts.client.universal.dll</code> is readable. Do not run as root — browser drivers may fail under root.</li>
 <li><strong>Missing libicu:</strong> On minimal Linux images, install ICU: <code>sudo apt install libicu-dev</code> (Debian/Ubuntu) or <code>sudo dnf install libicu</code> (Fedora/RHEL).</li>
 <li><strong>Configuration errors:</strong> Verify <code>config/application.yaml</code> exists and <code>ApiRootUrl</code> points to a reachable API (include the <code>/api</code> suffix).</li>
