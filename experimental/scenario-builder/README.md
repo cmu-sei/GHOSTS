@@ -12,7 +12,7 @@ local or frontier model. It is separate from GHOSTS; GHOSTS and others pull the 
 | `api/` | .NET 10 minimal API: kinds, ledger, gates, proposals, log, pull API, model pass-through |
 | `agent/` | TypeScript agent (Pi SDK 1.4): core, browser bundle, evaluation |
 | `ui/` | Angular 22 workspace with the agent panel |
-| `kinds/` | Kind files; `crucible-tabletop.kind.json` is stages 0–3 of a Crucible tabletop |
+| `kinds/` | Kind files that seed a fresh database; after that, kinds are made and published in Admin › Scenario Types (the UI calls a kind a scenario type) |
 | `schema/` | JSON Schema of what `GET /api/scenarios/{id}` returns |
 | `tools/` | LiteLLM config for Sonnet on Bedrock |
 

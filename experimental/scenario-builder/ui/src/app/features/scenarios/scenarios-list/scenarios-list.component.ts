@@ -25,7 +25,7 @@ export class ScenariosListComponent implements OnInit {
 
   protected readonly columns: { key: SortKey; label: string }[] = [
     { key: 'name', label: 'Name' },
-    { key: 'kind', label: 'Kind' },
+    { key: 'kind', label: 'Scenario Type' },
     { key: 'stage', label: 'Stage' },
     { key: 'owner', label: 'Owner' },
     { key: 'updated', label: 'Updated' }

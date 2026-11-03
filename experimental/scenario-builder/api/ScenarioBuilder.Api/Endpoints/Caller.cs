@@ -38,8 +38,8 @@ public sealed class AdminOnly(IConfiguration config) : IEndpointFilter
         if (Caller.IsAdmin(caller, config))
             return await next(context);
         return caller.IsAgent
-            ? ErrorResults.Forbidden("NOT_ADMIN", "The agent can't manage template libraries. An admin does that in Admin.")
-            : ErrorResults.Forbidden("NOT_ADMIN", $"Only admins manage template libraries, and {caller.User} isn't one. Admins are listed under Admins in the API's settings.");
+            ? ErrorResults.Forbidden("NOT_ADMIN", "The agent can't manage template libraries or scenario types. An admin does that in Admin.")
+            : ErrorResults.Forbidden("NOT_ADMIN", $"Only admins manage template libraries and scenario types, and {caller.User} isn't one. Admins are listed under Admins in the API's settings.");
     }
 }
 
@@ -55,6 +55,8 @@ public static class ErrorResults
     public static IResult BadRequest(string code, string message) => Error(StatusCodes.Status400BadRequest, code, message);
 
     public static IResult Forbidden(string code, string message) => Error(StatusCodes.Status403Forbidden, code, message);
+
+    public static IResult BadGateway(string code, string message) => Error(StatusCodes.Status502BadGateway, code, message);
 
     public static IResult NotImplemented(string code, string message) => Error(StatusCodes.Status501NotImplemented, code, message);
 

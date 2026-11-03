@@ -23,6 +23,18 @@ export const WORKSPACE_ROUTES: Routes = [
         loadComponent: () => import('./log-page/log-page.component').then(m => m.LogPageComponent)
       },
       {
+        path: 'topology',
+        loadComponent: () => import('./topology-page/topology-page.component').then(m => m.TopologyPageComponent)
+      },
+      {
+        path: 'topology/grayspace',
+        loadComponent: () => import('./grayspace-page/grayspace-page.component').then(m => m.GraySpacePageComponent)
+      },
+      {
+        path: 'topology/updraft',
+        loadComponent: () => import('./updraft-page/updraft-page.component').then(m => m.UpdraftPageComponent)
+      },
+      {
         path: 'finish',
         loadComponent: () => import('./finish-page/finish-page.component').then(m => m.FinishPageComponent)
       },

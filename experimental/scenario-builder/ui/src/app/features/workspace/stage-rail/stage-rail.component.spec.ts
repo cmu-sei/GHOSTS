@@ -16,7 +16,7 @@ const answered = (id: string, stage: number): AnsweredView =>
 
 function progress(overrides: Partial<Progress>): Progress {
   return {
-    kindId: 'k', stage: 1, stageTitle: 'Objectives', lastStage: false,
+    kindId: 'k', kindVersion: '0.1.0', stage: 1, stageTitle: 'Objectives', lastStage: false,
     gate: { passes: false, approved: false, findings: [] },
     open: [], answered: [answered('a', 0), answered('b', 0), answered('c', 1)], draftsDue: [], delegated: false, ...overrides
   };

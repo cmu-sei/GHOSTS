@@ -34,6 +34,10 @@
   min-height: 0;
   display: grid;
   grid-template-columns: 236px minmax(0, 1fr) 400px;
+
+  &.no-rail {
+    grid-template-columns: minmax(0, 1fr) 400px;
+  }
 }
 
 .rail {
@@ -66,6 +70,10 @@
 @media (max-width: 1280px) {
   .body {
     grid-template-columns: 220px minmax(0, 1fr) 340px;
+
+    &.no-rail {
+      grid-template-columns: minmax(0, 1fr) 340px;
+    }
   }
 }
 
@@ -73,6 +81,11 @@
   .body {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto minmax(0, 1fr) 360px;
+
+    &.no-rail {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: minmax(0, 1fr) 360px;
+    }
   }
 
   .rail {

@@ -3,12 +3,12 @@
 <section class="sheet">
   <header class="head">
     <h1>Scenarios</h1>
-    <p class="sub">Each scenario starts with the context you have, then walks through its kind's questions, stage by stage.</p>
+    <p class="sub">Each scenario starts with the context you have, then walks through its scenario type's questions, stage by stage.</p>
   </header>
 
   <form class="create" (submit)="$event.preventDefault(); create()">
     <input class="sb-field name" placeholder="Name a new scenario" aria-label="Scenario name" [value]="name()" (input)="typed($event)" />
-    <select class="sb-field kind" aria-label="Kind" [value]="kindId()" (change)="picked($event)">
+    <select class="sb-field kind" aria-label="Scenario type" [value]="kindId()" (change)="picked($event)">
       @for (kind of kinds(); track kind.id) {
         <option [value]="kind.id" [selected]="kind.id === kindId()">{{ kind.name }}</option>
       }
@@ -17,7 +17,7 @@
   </form>
 
   <div class="tools">
-    <input class="sb-field search" type="search" placeholder="Search by name, kind or owner" aria-label="Search scenarios"
+    <input class="sb-field search" type="search" placeholder="Search by name, scenario type or owner" aria-label="Search scenarios"
       [value]="query()" (input)="searched($event)" />
     <label class="archived-toggle">
       <input type="checkbox" [checked]="showArchived()" (change)="showArchived.set($any($event.target).checked)" />

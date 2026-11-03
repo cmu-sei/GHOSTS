@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
-  AnsweredView, AnswerValue, DocumentView, Kind, KindSummary, LogEntry, PluginView, Progress, ProposalView, ScenarioSummary, SourceView
+  AnsweredView, AnswerValue, DocumentView, Kind, KindSummary, KindUpdatePlan, LogEntry, PluginView, Progress, ProposalView, ScenarioSummary, SourceView
 } from '../models/builder.model';
 
 /**
@@ -18,8 +18,20 @@ export class BuilderApiService {
     return this.http.get<KindSummary[]>(`${this.base}/kinds`);
   }
 
-  getKind(id: string): Observable<Kind> {
-    return this.http.get<Kind>(`${this.base}/kinds/${encodeURIComponent(id)}`);
+  /** A kind's latest version, or the one given: a scenario's kind is the version it was made on. */
+  getKind(id: string, version?: string): Observable<Kind> {
+    const query = version ? `?version=${encodeURIComponent(version)}` : '';
+    return this.http.get<Kind>(`${this.base}/kinds/${encodeURIComponent(id)}${query}`);
+  }
+
+  /** What updating to the latest version of the scenario's type would do. */
+  getKindUpdate(id: number): Observable<KindUpdatePlan> {
+    return this.http.get<KindUpdatePlan>(`${this.base}/scenarios/${id}/kind-update`);
+  }
+
+  /** As the owner: update to the version reviewed. */
+  applyKindUpdate(id: number, version: string): Observable<KindUpdatePlan> {
+    return this.http.post<KindUpdatePlan>(`${this.base}/scenarios/${id}/kind-update`, { version });
   }
 
   getScenarios(): Observable<ScenarioSummary[]> {

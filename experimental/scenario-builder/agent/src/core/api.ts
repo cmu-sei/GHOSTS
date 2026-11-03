@@ -43,6 +43,8 @@ export interface Gate {
 
 export interface Progress {
   kindId: string;
+  /** The kind version the scenario was made on, which it runs on. */
+  kindVersion: string;
   stage: number;
   stageTitle: string;
   lastStage: boolean;
@@ -128,8 +130,8 @@ export class BuilderApi {
     return this.call("GET", `/scenarios/${scenarioId}/progress`);
   }
 
-  kind(kindId: string): Promise<any> {
-    return this.call("GET", `/kinds/${encodeURIComponent(kindId)}`);
+  kind(kindId: string, version: string): Promise<any> {
+    return this.call("GET", `/kinds/${encodeURIComponent(kindId)}?version=${encodeURIComponent(version)}`);
   }
 
   putDecision(scenarioId: number, questionId: string, body: DecisionBody): Promise<AnsweredView> {

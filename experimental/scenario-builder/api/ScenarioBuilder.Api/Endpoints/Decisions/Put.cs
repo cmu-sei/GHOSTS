@@ -22,7 +22,7 @@ public class PutEndpoint : IEndpoint
                 if (state is null)
                     return ScenarioState.Missing(id);
                 if (state.Kind.Find(questionId) is not var (question, stage))
-                    return ErrorResults.NotFound("QUESTION_UNKNOWN", $"There is no question '{questionId}' in this kind.");
+                    return ErrorResults.NotFound("QUESTION_UNKNOWN", $"There is no question '{questionId}' in this scenario type.");
                 if (stage > state.Scenario.Stage)
                     return ErrorResults.Conflict("STAGE_NOT_OPEN",
                         $"'{questionId}' belongs to stage {stage}, which isn't open yet. Finish stage {state.Scenario.Stage} first.");

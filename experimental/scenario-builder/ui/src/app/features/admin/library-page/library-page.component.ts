@@ -5,13 +5,14 @@ import { KindSummary, LibraryDetail, TemplateSpec } from '../../../core/models/b
 import { AdminApiService } from '../../../core/services/admin-api.service';
 import { BuilderApiService, errorMessage } from '../../../core/services/builder-api.service';
 import { TopBarComponent } from '../../../shared/components/top-bar/top-bar.component';
+import { AdminNavComponent } from '../admin-nav/admin-nav.component';
 import { AUDIENCES, FORMATS } from '../../../shared/labels/document-labels';
 
 /** One library: its details and kinds, its draft templates, and the versions publishing has made. */
 @Component({
   selector: 'app-library-page',
   standalone: true,
-  imports: [DatePipe, RouterLink, TopBarComponent],
+  imports: [DatePipe, RouterLink, TopBarComponent, AdminNavComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './library-page.component.html',
   styleUrls: ['./library-page.component.scss']

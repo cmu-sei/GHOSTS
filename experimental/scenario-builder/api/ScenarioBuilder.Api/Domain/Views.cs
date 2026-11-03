@@ -38,6 +38,9 @@ public record ProgressView(
     List<string> DraftsDue,
     bool Delegated)
 {
+    /// <summary>The version of the kind the scenario was made on, which is the one it runs on.</summary>
+    public string KindVersion { get; init; } = string.Empty;
+
     /// <summary>The context the person gave, so the agent knows what it can search. The progress endpoint fills it.</summary>
     public List<SourceSummary> Sources { get; init; } = [];
 }

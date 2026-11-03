@@ -28,7 +28,10 @@ public class CreateEndpoint : IEndpoint
             var kind = kinds.Find(body.KindId ?? string.Empty);
             if (kind is null)
                 return ErrorResults.BadRequest("KIND_UNKNOWN",
-                    $"There is no kind '{body.KindId}'. Kinds: {string.Join(", ", kinds.All.Select(k => k.Id))}.");
+                    $"There is no scenario type '{body.KindId}'. Scenario types: {string.Join(", ", kinds.Offered.Select(k => k.Id))}.");
+            if (kinds.IsRetired(kind.Id))
+                return ErrorResults.BadRequest("KIND_RETIRED",
+                    $"'{kind.Name}' is retired, so new scenarios can't use it. Scenario types: {string.Join(", ", kinds.Offered.Select(k => k.Id))}.");
 
             var taken = (await db.Scenarios.Select(s => s.Slug).ToListAsync(ct)).ToHashSet();
             var caller = Caller.From(http);

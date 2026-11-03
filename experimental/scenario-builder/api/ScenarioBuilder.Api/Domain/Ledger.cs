@@ -93,7 +93,7 @@ public static class Ledger
             open,
             kind.AllQuestions.Where(q => answered.ContainsKey(q.Id)).Select(q => AnsweredView.From(answered[q.Id])).ToList(),
             draftsDue,
-            scenario.Delegated);
+            scenario.Delegated) { KindVersion = kind.Version };
     }
 
     /// <summary>What an approval of <paramref name="stage"/> covers: its answers in kind order, then the drafts due after it.</summary>

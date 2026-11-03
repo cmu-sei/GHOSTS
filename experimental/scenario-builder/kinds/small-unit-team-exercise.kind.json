@@ -2,6 +2,7 @@
   "id": "small-unit-team-exercise",
   "version": "0.3.0",
   "name": "Small Unit Team Exercise",
+  "topology": true,
   "drafts": [
     {
       "field": "executiveSummary",

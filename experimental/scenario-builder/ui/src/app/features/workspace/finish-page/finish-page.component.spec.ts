@@ -164,7 +164,7 @@ describe('FinishPageComponent', () => {
 
   it('points admins to the admin area when no library serves the kind', async () => {
     const admin = await render([]);
-    expect(admin.root.textContent).toContain('No template library serves this kind yet.');
+    expect(admin.root.textContent).toContain('No template library serves this scenario type yet.');
     expect(byText(admin.root, 'a', 'Make one in Admin')!.getAttribute('href')).toBe('/admin');
 
     TestBed.resetTestingModule();

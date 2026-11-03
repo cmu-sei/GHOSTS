@@ -56,10 +56,10 @@ public partial record LibraryFile(
         if (string.IsNullOrWhiteSpace(f.Name))
             return "Give the library a name.";
         if (f.Kinds is null || f.Templates is null)
-            return "A library file lists its kinds and its templates.";
+            return "A library file lists its scenario types and its templates.";
         foreach (var kind in f.Kinds)
             if (kind is null || !knownKinds.Contains(kind))
-                return $"There is no kind \"{kind}\" here. Kinds: {string.Join(", ", knownKinds)}.";
+                return $"There is no scenario type \"{kind}\" here. Scenario types: {string.Join(", ", knownKinds)}.";
 
         var ids = new HashSet<string>();
         foreach (var t in f.Templates)

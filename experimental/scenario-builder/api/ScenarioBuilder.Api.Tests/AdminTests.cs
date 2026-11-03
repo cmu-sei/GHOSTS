@@ -219,7 +219,7 @@ public class AdminTests
                  {
                      (File(7, "markdown", Kind), "audience"),
                      (File("participants", 2, Kind), "format"),
-                     (File("participants", "markdown", null), "kind")
+                     (File("participants", "markdown", null), "scenario type")
                  })
         {
             var response = await Import(admin, file.ToJsonString());

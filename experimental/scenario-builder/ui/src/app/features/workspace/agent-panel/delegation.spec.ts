@@ -10,7 +10,7 @@ describe('delegatesAll', () => {
 });
 
 const progress = (overrides: Partial<Progress>): Progress => ({
-  kindId: 'k', stage: 0, stageTitle: 'S', lastStage: false,
+  kindId: 'k', kindVersion: '0.1.0', stage: 0, stageTitle: 'S', lastStage: false,
   gate: { passes: false, approved: false, findings: [] },
   open: [], answered: [], draftsDue: [], delegated: true, ...overrides
 });

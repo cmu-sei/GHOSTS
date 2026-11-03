@@ -4,6 +4,7 @@ import { formatProgress } from "../src/core/progress-text.ts";
 
 const base: Progress = {
   kindId: "small",
+  kindVersion: "0.1.0",
   stage: 0,
   stageTitle: "First",
   lastStage: false,

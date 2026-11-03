@@ -35,6 +35,12 @@ describe("ask_user", () => {
     expect(cards).toEqual([{ ...askA, answer: "text" }]);
   });
 
+  it("reads the questions from the kind version the scenario is on", async () => {
+    await run("ask_user", askA);
+
+    expect(api.kindFetches).toEqual(["small@0.2.0"]);
+  });
+
   it("refuses a second question in the same turn", async () => {
     await run("ask_user", askA);
 

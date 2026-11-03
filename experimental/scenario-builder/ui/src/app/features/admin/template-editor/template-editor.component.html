@@ -2,6 +2,7 @@
   @if (library(); as library) {
     <a class="back" [routerLink]="['/admin/libraries', libraryId]">{{ library.name }}</a>
   }
+  <app-admin-nav />
 </app-top-bar>
 
 @if (error(); as error) {
@@ -47,7 +48,7 @@
           }
         </div>
         @if (!scenarios().length) {
-          <p class="empty">Create a scenario of a kind this library serves to see a preview.</p>
+          <p class="empty">Create a scenario of a type this library serves to see a preview.</p>
         } @else if (templateError(); as message) {
           <div class="template-error" role="alert">{{ message }}</div>
         } @else if (page(); as page) {

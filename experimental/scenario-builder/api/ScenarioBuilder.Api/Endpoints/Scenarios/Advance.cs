@@ -22,7 +22,7 @@ public class AdvanceEndpoint : IEndpoint
                     $"Stage {progress.Stage} can't close yet: {string.Join(" ", progress.Gate.Findings.Select(f => f.Message))}");
             if (progress.LastStage)
                 return ErrorResults.Conflict("LAST_STAGE",
-                    $"Stage {progress.Stage} is the last stage in this version of the kind. Its gate has passed; the work is done.");
+                    $"Stage {progress.Stage} is the last stage in this version of the scenario type. Its gate has passed; the work is done.");
 
             state.Scenario.Stage++;
             state.Scenario.Updated = DateTime.UtcNow;

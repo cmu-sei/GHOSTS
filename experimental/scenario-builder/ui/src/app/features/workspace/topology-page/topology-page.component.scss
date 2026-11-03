@@ -1,0 +1,99 @@
+.sheet {
+  max-width: 820px;
+  margin: 20px auto 40px;
+  padding: 0 24px;
+}
+
+.head {
+  margin-bottom: 20px;
+}
+
+h1 {
+  font-size: var(--sb-title);
+}
+
+.sub,
+.empty {
+  margin: 4px 0 0;
+  color: var(--sb-muted);
+}
+
+// One card per deploy target, laid out as the Finish page's plugins are.
+.targets {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.target {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: 1fr auto;
+  gap: 10px 12px;
+  padding: 12px;
+  background: var(--sb-surface);
+  border: 1px solid var(--sb-line);
+  border-radius: var(--sb-radius);
+}
+
+.monogram {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #6b7385;
+  font-weight: 600;
+  color: #ffffff;
+
+  &[data-target='grayspace'] {
+    background: #4b5563;
+  }
+
+  &[data-target='updraft'] {
+    background: #0ea5e9;
+  }
+
+  &[data-target='crucible'] {
+    background: #b4462b;
+  }
+}
+
+.target-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.target-name {
+  font-weight: 600;
+}
+
+.target-description {
+  font-size: var(--sb-small);
+  line-height: 1.4;
+  color: var(--sb-muted);
+}
+
+.target-foot {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.target-foot a.sb-button {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.target-state {
+  font-size: var(--sb-small);
+  color: var(--sb-faint);
+}

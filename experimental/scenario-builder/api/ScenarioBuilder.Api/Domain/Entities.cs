@@ -135,6 +135,46 @@ public class LibraryVersion
     public DateTime Published { get; set; }
 }
 
+/// <summary>
+/// A kind as admins manage it: the draft they edit, the kind it was copied from, and whether new scenarios may still
+/// use it. Its published versions are <see cref="PublishedKind"/> rows; scenarios only ever run on those.
+/// </summary>
+public class ScenarioKind
+{
+    public int Id { get; set; }
+
+    /// <summary>The kind's id, such as crucible-tabletop. It never changes.</summary>
+    public string KindId { get; set; } = string.Empty;
+
+    /// <summary>The draft, as the kind's JSON. Its version is the latest published one, or 0.0.0 before the first publish.</summary>
+    public string Draft { get; set; } = "{}";
+
+    public string? BasedOn { get; set; }
+
+    /// <summary>Hidden from New scenario. Scenarios already on it carry on.</summary>
+    public bool Retired { get; set; }
+
+    public DateTime Created { get; set; }
+
+    public DateTime Updated { get; set; }
+}
+
+/// <summary>One published version of a kind, kept whole as its <c>.kind.json</c> file.</summary>
+public class PublishedKind
+{
+    public int Id { get; set; }
+
+    public string KindId { get; set; } = string.Empty;
+
+    public string Version { get; set; } = string.Empty;
+
+    public string Content { get; set; } = "{}";
+
+    public string PublishedBy { get; set; } = string.Empty;
+
+    public DateTime Published { get; set; }
+}
+
 /// <summary>Context the person gave for a scenario: pasted text, a fetched page, or a file's text. The file itself isn't kept.</summary>
 public class Source
 {

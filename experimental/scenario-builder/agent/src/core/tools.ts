@@ -73,8 +73,8 @@ interface KindQuestion {
 
 export function createTools(ctx: ToolContext): AgentTool<any, ToolDetails>[] {
   let kind: Promise<Map<string, { question: KindQuestion; stage: number }>> | undefined;
-  const questions = (kindId: string) =>
-    (kind ??= ctx.api.kind(kindId).then(
+  const questions = (kindId: string, version: string) =>
+    (kind ??= ctx.api.kind(kindId, version).then(
       k => new Map((k.stages as { number: number; questions: KindQuestion[] }[]).flatMap(s => s.questions.map(q => [q.id, { question: q, stage: s.number }] as const))),
       // A failed fetch isn't kept: the next ask tries again.
       e => {
@@ -132,7 +132,7 @@ export function createTools(ctx: ToolContext): AgentTool<any, ToolDetails>[] {
       if (progress.delegated)
         return refuse("DELEGATED", "The designer handed you every decision: don't ask. Decide the open questions yourself with record_answers.");
       const openIds = progress.open.map(q => q.id).join(", ") || "none";
-      const found = (await questions(progress.kindId)).get(params.questionId);
+      const found = (await questions(progress.kindId, progress.kindVersion)).get(params.questionId);
       if (!found) return refuse("UNKNOWN_QUESTION", `There is no question '${params.questionId}'. Open now: ${openIds}.`);
       const answered = progress.answered.find(a => a.id === params.questionId);
       if (answered)

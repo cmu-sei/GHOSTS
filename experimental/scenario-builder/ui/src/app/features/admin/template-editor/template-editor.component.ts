@@ -7,6 +7,7 @@ import { Audience, LibraryDetail, ScenarioSummary, TemplateFormat, TemplateSpec 
 import { AdminApiService } from '../../../core/services/admin-api.service';
 import { BuilderApiService, errorMessage } from '../../../core/services/builder-api.service';
 import { TopBarComponent } from '../../../shared/components/top-bar/top-bar.component';
+import { AdminNavComponent } from '../admin-nav/admin-nav.component';
 import { AUDIENCES, FORMATS } from '../../../shared/labels/document-labels';
 
 /**
@@ -16,7 +17,7 @@ import { AUDIENCES, FORMATS } from '../../../shared/labels/document-labels';
 @Component({
   selector: 'app-template-editor',
   standalone: true,
-  imports: [RouterLink, TopBarComponent],
+  imports: [RouterLink, TopBarComponent, AdminNavComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './template-editor.component.html',
   styleUrls: ['./template-editor.component.scss']

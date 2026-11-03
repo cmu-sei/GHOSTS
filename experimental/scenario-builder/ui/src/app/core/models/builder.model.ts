@@ -22,6 +22,9 @@ export interface KindQuestion {
   answer: AnswerType;
   options?: string[];
   path: string;
+  idPrefix?: string;
+  visibility?: string;
+  default?: string;
 }
 
 export interface KindStage {
@@ -29,11 +32,62 @@ export interface KindStage {
   title: string;
   questions: KindQuestion[];
   gate: { approval?: string };
+  /** What the stage settles; the model drafts its questions from it. */
+  purpose?: string;
 }
 
 export interface Kind extends KindSummary {
   stages: KindStage[];
-  drafts: { field: string; dueAfterStage: number; path: string }[];
+  drafts: { field: string; dueAfterStage: number; path: string; visibility?: string }[];
+  /** Its scenarios have a Topology page, where the range is built and deployed. */
+  topology?: boolean;
+  /** What kind of exercise it is. */
+  description?: string;
+}
+
+/**
+ * What updating a scenario to the latest version of its scenario type would do. From and to are the same when it's
+ * already on the latest. Only the owner can apply it.
+ */
+export interface KindUpdatePlan {
+  from: string;
+  to: string;
+  carried: { id: string; label: string; fromStage: number; toStage: number }[];
+  dropped: { id: string; label: string; why: string }[];
+  added: { id: string; label: string; stage: number }[];
+  draftsDropped: string[];
+  stageFrom: number;
+  stageTo: number;
+  owner: string;
+}
+
+/** A kind in Admin: its latest published version, if any, and how many scenarios are on it. */
+export interface KindAdminSummary {
+  id: string;
+  name: string;
+  latestVersion?: string;
+  draftChanged: boolean;
+  scenarios: number;
+  retired: boolean;
+}
+
+export interface KindVersionView {
+  version: string;
+  publishedBy: string;
+  published: string;
+  scenarios: number;
+}
+
+/** A kind's draft, which admins edit, and what's published of it. */
+export interface KindDetail {
+  id: string;
+  kind: Kind;
+  basedOn?: string;
+  retired: boolean;
+  latestVersion?: string;
+  draftChanged: boolean;
+  scenarios: number;
+  versions: KindVersionView[];
 }
 
 export interface ScenarioSummary {
@@ -102,6 +156,8 @@ export interface Gate {
 
 export interface Progress {
   kindId: string;
+  /** The kind version the scenario was made on, which it runs on. */
+  kindVersion: string;
   stage: number;
   stageTitle: string;
   lastStage: boolean;
@@ -125,7 +181,7 @@ export interface ProposalView {
 
 export interface LogEntry {
   time: string;
-  type: 'answer' | 'draft' | 'proposal' | 'approval';
+  type: 'answer' | 'draft' | 'proposal' | 'approval' | 'delegation' | 'update';
   target: string;
   before?: unknown;
   after?: unknown;

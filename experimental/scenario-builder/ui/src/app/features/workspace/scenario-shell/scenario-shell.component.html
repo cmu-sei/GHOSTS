@@ -1,21 +1,24 @@
 <app-top-bar [crumb]="store.name()">
   <nav class="pages" aria-label="Pages">
-    @for (page of pages; track page.path) {
+    @for (page of pages(); track page.path) {
       <a [routerLink]="page.path" routerLinkActive="active" ariaCurrentWhenActive="page">{{ page.label }}</a>
     }
   </nav>
 </app-top-bar>
 
-<div class="body">
-  <aside class="rail">
-    @if (store.kind(); as kind) {
-      @if (store.progress(); as progress) {
-        <app-stage-rail [kind]="kind" [progress]="progress" [selected]="store.selectedStage()" (select)="pick($event)" />
+<div class="body" [class.no-rail]="!onQuestions()">
+  @if (onQuestions()) {
+    <aside class="rail">
+      @if (store.kind(); as kind) {
+        @if (store.progress(); as progress) {
+          <app-stage-rail [kind]="kind" [progress]="progress" [selected]="store.selectedStage()" (select)="pick($event)" />
+        }
       }
-    }
-  </aside>
+    </aside>
+  }
 
   <main class="page">
+    <app-kind-update />
     @if (store.error(); as error) {
       <p class="error" role="alert">{{ error }}</p>
     }

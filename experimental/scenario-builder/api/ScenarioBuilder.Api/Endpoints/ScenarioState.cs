@@ -14,8 +14,8 @@ public sealed record ScenarioState(Scenario Scenario, Kind Kind, List<Decision> 
         var scenario = await db.Scenarios.FirstOrDefaultAsync(s => s.Id == id, ct);
         if (scenario is null)
             return null;
-        var kind = kinds.Find(scenario.KindId)
-                   ?? throw new InvalidOperationException($"Scenario {id} uses kind '{scenario.KindId}', which isn't loaded.");
+        var kind = kinds.Find(scenario.KindId, scenario.KindVersion)
+                   ?? throw new InvalidOperationException($"Scenario {id} is on kind '{scenario.KindId}' {scenario.KindVersion}, which isn't published here.");
         var decisions = await db.Decisions.Where(d => d.ScenarioId == id).ToListAsync(ct);
         var approvals = await db.Approvals.Where(a => a.ScenarioId == id).OrderBy(a => a.Id).ToListAsync(ct);
         return new ScenarioState(scenario, kind, decisions, approvals);

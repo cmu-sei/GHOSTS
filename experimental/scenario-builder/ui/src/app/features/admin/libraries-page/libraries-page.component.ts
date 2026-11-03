@@ -4,12 +4,13 @@ import { KindSummary, LibrarySummary } from '../../../core/models/builder.model'
 import { AdminApiService } from '../../../core/services/admin-api.service';
 import { BuilderApiService, errorMessage } from '../../../core/services/builder-api.service';
 import { TopBarComponent } from '../../../shared/components/top-bar/top-bar.component';
+import { AdminNavComponent } from '../admin-nav/admin-nav.component';
 
 /** Every template library, a new one, or one carried in from another installation as a .library.json file. */
 @Component({
   selector: 'app-libraries-page',
   standalone: true,
-  imports: [RouterLink, TopBarComponent],
+  imports: [RouterLink, TopBarComponent, AdminNavComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './libraries-page.component.html',
   styleUrls: ['./libraries-page.component.scss']
@@ -31,7 +32,7 @@ export class LibrariesPageComponent implements OnInit {
   }
 
   protected kindNames(ids: string[]): string {
-    return ids.length ? ids.map(id => this.kinds().find(k => k.id === id)?.name ?? id).join(', ') : 'No kinds';
+    return ids.length ? ids.map(id => this.kinds().find(k => k.id === id)?.name ?? id).join(', ') : 'No scenario types';
   }
 
   protected typed(event: Event): void {

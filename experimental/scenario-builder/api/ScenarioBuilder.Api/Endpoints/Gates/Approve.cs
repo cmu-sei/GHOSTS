@@ -28,7 +28,7 @@ public class ApproveEndpoint : IEndpoint
                 if (caller.User != state.Scenario.Owner)
                     return ErrorResults.Forbidden("NOT_OWNER", $"Only {state.Scenario.Owner}, the scenario's owner, can approve.");
                 if (stage < 0 || stage > state.Kind.LastStage)
-                    return ErrorResults.NotFound("STAGE_UNKNOWN", $"This kind has stages 0 to {state.Kind.LastStage}.");
+                    return ErrorResults.NotFound("STAGE_UNKNOWN", $"This scenario type has stages 0 to {state.Kind.LastStage}.");
                 if (stage > state.Scenario.Stage)
                     return ErrorResults.Conflict("STAGE_NOT_OPEN", $"Stage {stage} isn't open yet; stage {state.Scenario.Stage} is.");
                 if (state.Kind.Stages[stage].Gate.Approval is null)

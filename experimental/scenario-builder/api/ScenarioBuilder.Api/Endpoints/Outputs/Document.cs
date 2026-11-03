@@ -20,7 +20,7 @@ public class DocumentEndpoint : IEndpoint
                         return ScenarioState.Missing(id);
                     var file = (await DocumentsEndpoint.Published(db, state.Scenario.KindId, ct)).FirstOrDefault(f => f.Slug == library);
                     if (file?.Templates.FirstOrDefault(t => t.Id == template) is not { } spec)
-                        return ErrorResults.NotFound("DOCUMENT_UNKNOWN", $"No published library for this scenario's kind has a document {library}/{template}.");
+                        return ErrorResults.NotFound("DOCUMENT_UNKNOWN", $"No published library for this scenario's type has a document {library}/{template}.");
 
                     var input = Rendering.Input(state, spec.Audience, file.Name, file.Version);
                     string text;

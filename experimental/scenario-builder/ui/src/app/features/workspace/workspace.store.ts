@@ -31,7 +31,7 @@ export class WorkspaceStore {
   load(scenarioId: number): void {
     this.scenarioId.set(scenarioId);
     this.api.getProgress(scenarioId).pipe(
-      switchMap(progress => forkJoin({ progress: [progress], kind: this.api.getKind(progress.kindId), doc: this.api.pull(scenarioId) }))
+      switchMap(progress => forkJoin({ progress: [progress], kind: this.api.getKind(progress.kindId, progress.kindVersion), doc: this.api.pull(scenarioId) }))
     ).subscribe({
       next: ({ progress, kind, doc }) => {
         this.kind.set(kind);

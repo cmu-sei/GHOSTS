@@ -104,6 +104,15 @@ public class KindCatalogTests
         Assert.All(new[] { smallUnit, tabletop }, k => Assert.Equal("0.3.0", k.Version));
     }
 
+    [Fact]
+    public void Only_the_small_unit_kind_has_a_topology_page()
+    {
+        var catalog = new KindCatalog(ApiFactory.KindsDirectory);
+
+        Assert.True(catalog.Find(TestApi.SmallUnitKind)!.Topology);
+        Assert.False(catalog.Find(TestApi.Kind)!.Topology);
+    }
+
     // What the GHOSTS scenario builder captures from a person (its A1–E3 checklist and planner form), by the question here that captures it.
     private static readonly string[] GhostsChecklist =
     [

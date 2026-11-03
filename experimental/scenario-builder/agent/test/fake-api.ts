@@ -44,8 +44,12 @@ export class FakeApi implements ToolApi {
   /** The next kind fetch throws this, once. */
   failKind?: ApiError;
 
-  async kind(_id: string): Promise<any> {
+  /** Each kind fetch, as id@version. */
+  kindFetches: string[] = [];
+
+  async kind(id: string, version: string): Promise<any> {
     this.check();
+    this.kindFetches.push(`${id}@${version}`);
     const fail = this.failKind;
     this.failKind = undefined;
     if (fail) throw fail;
@@ -57,6 +61,7 @@ export class FakeApi implements ToolApi {
     const open = QUESTIONS.filter(q => q.stage === this.stage && !this.answers.has(q.id));
     return {
       kindId: "small",
+      kindVersion: "0.2.0",
       stage: this.stage,
       stageTitle: SMALL_KIND.stages[this.stage].title,
       lastStage: this.stage === 1,

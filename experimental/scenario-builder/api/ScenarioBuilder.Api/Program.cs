@@ -17,13 +17,9 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
 });
 
-// Read when first resolved, so a test host's settings apply.
-builder.Services.AddSingleton(sp =>
-{
-    var environment = sp.GetRequiredService<IWebHostEnvironment>();
-    var directory = sp.GetRequiredService<IConfiguration>()["Kinds:Directory"] ?? "../../kinds";
-    return new KindCatalog(Path.GetFullPath(directory, environment.ContentRootPath));
-});
+// Filled from the database at startup; publishing adds to it.
+builder.Services.AddSingleton<KindCatalog>();
+builder.Services.AddTransient<KindDrafter>();
 
 builder.Services.AddDbContext<BuilderDb>((sp, options) =>
     options.UseSqlite(sp.GetRequiredService<IConfiguration>().GetConnectionString("Builder") ?? "Data Source=scenario-builder.db"));
@@ -43,8 +39,11 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<BuilderDb>();
     db.Database.EnsureCreated();
+    var kinds = scope.ServiceProvider.GetRequiredService<KindCatalog>();
+    await KindStore.Seed(db, Path.GetFullPath(app.Configuration["Kinds:Directory"] ?? "../../kinds", app.Environment.ContentRootPath), CancellationToken.None);
+    await KindStore.Load(db, kinds, CancellationToken.None);
     var libraries = Path.GetFullPath(app.Configuration["Libraries:Directory"] ?? "../../libraries", app.Environment.ContentRootPath);
-    await LibrarySeeder.Seed(db, scope.ServiceProvider.GetRequiredService<KindCatalog>(), libraries, CancellationToken.None);
+    await LibrarySeeder.Seed(db, kinds, libraries, CancellationToken.None);
 }
 
 app.MapApiEndpoints();

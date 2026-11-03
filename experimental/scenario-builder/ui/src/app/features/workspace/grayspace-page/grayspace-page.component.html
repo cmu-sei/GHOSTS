@@ -1,0 +1,265 @@
+<section class="sheet">
+  <header class="head">
+    <a class="back" routerLink="..">Topology</a>
+    <h1>Deploy to GraySpace</h1>
+    <p class="sample" role="note">Not connected to GraySpace</p>
+  </header>
+
+  <!-- Read-only: a disabled fieldset disables every control inside it. -->
+  <fieldset disabled>
+    @for (d of decisions; track d.id; let i = $index) {
+      <section class="decision" [attr.aria-labelledby]="'gs-' + d.id">
+        <header class="decision-head">
+          <span class="step" aria-hidden="true">{{ i + 1 }}</span>
+          <div>
+            <h2 [id]="'gs-' + d.id">{{ d.title }}</h2>
+            <p class="decides">{{ d.decides }}</p>
+            <p class="api">
+              @for (route of d.api; track route) {
+                <code>{{ route }}</code>
+              }
+            </p>
+          </div>
+        </header>
+
+        @if (answersFor(d); as answers) {
+          @if (answers.length) {
+            <div class="answers">
+              <h3>From Your Answers</h3>
+              <dl>
+                @for (a of answers; track a.label) {
+                  <dt>{{ a.label }}</dt>
+                  <dd>
+                    @if (a.value === undefined) {
+                      <span class="none">No answer yet</span>
+                    } @else if (isList(a.value)) {
+                      <ul>
+                        @for (item of a.value; track $index) {
+                          <li>{{ item }}</li>
+                        }
+                      </ul>
+                    } @else {
+                      {{ a.value }}
+                    }
+                  </dd>
+                }
+              </dl>
+            </div>
+          }
+        }
+
+        <div class="offers">
+          <h3>GraySpace Offers</h3>
+          @switch (d.id) {
+            @case ('connection') {
+              <div class="fields">
+                <label>Address <input class="sb-field" type="url" placeholder="https://… GraySpace’s API" /></label>
+                <label>API key <input class="sb-field" type="password" placeholder="X-API-Key" /></label>
+              </div>
+              <dl class="facts">
+                <dt>Runs jobs</dt><dd>{{ sample.jobs ? 'Yes' : 'No' }}</dd>
+                <dt>Builds</dt><dd>{{ sample.features.join(', ') }}</dd>
+                <dt>Management subnet</dt><dd>{{ sample.managementSubnet }} (enclaves never overlap it)</dd>
+                <dt>Auto addresses from</dt><dd>{{ sample.pool }}</dd>
+                <dt>Capacity</dt><dd>Unknown until GraySpace reports its node</dd>
+              </dl>
+              <div class="buttons"><button class="sb-button primary" type="button">Connect</button></div>
+            }
+            @case ('base') {
+              <dl class="facts">
+                <dt>Status</dt><dd>{{ sample.base.status }}</dd>
+                <dt>Version</dt><dd>{{ sample.base.version }} ({{ sample.base.scope }})</dd>
+                <dt>Routers</dt><dd>{{ sample.base.routers }}</dd>
+                <dt>BGP sessions</dt><dd>{{ sample.base.bgp }}</dd>
+                <dt>Preflight</dt><dd>{{ sample.preflight.join(', ') }}: not checked</dd>
+              </dl>
+              <div class="buttons">
+                <button class="sb-button" type="button">Deploy base</button>
+                <button class="sb-button" type="button">Configure base</button>
+                <button class="sb-button" type="button">Destroy base</button>
+              </div>
+            }
+            @case ('enclave') {
+              <div class="choices">
+                <label><input type="radio" name="gs-enclave" checked /> New, from this scenario’s answers</label>
+                <label><input type="radio" name="gs-enclave" /> Reuse an enclave on GraySpace
+                  <select class="sb-field"><option>Enclaves on GraySpace</option></select>
+                </label>
+              </div>
+              <div class="fields">
+                <label>Name <input class="sb-field" [value]="slug()" /></label>
+                <label>Prefix <input class="sb-field" placeholder="a letter, then up to 7 letters or digits" /></label>
+                <label>Owner <input class="sb-field" value="scenario-builder" /></label>
+              </div>
+            }
+            @case ('sites') {
+              <table>
+                <caption>Attachment points</caption>
+                <thead><tr><th scope="col">Router</th><th scope="col">ISP</th><th scope="col">ASN</th><th scope="col">Location</th></tr></thead>
+                <tbody>
+                  @for (p of sample.attachmentPoints; track p.router) {
+                    <tr><td><code>{{ p.router }}</code></td><td>{{ p.isp }}</td><td>{{ p.asn }}</td><td>{{ p.location }}</td></tr>
+                  }
+                </tbody>
+              </table>
+              <div class="choices">
+                <label><input type="radio" name="gs-routing" checked /> NAT: the site sits behind one address on the ISP’s customer network</label>
+                <label><input type="radio" name="gs-routing" /> Routed: the site gets a public /24, and can dual-home to two attach points</label>
+              </div>
+              <div class="fields">
+                <label>Attach to <select class="sb-field"><option>An ISP, a location, or an exact router</option></select></label>
+                <label>Segment <input class="sb-field" placeholder="name" /></label>
+                <label>CIDR <input class="sb-field" value="auto" /></label>
+              </div>
+            }
+            @case ('hosts') {
+              <table>
+                <caption>Images</caption>
+                <thead><tr><th scope="col">Image</th><th scope="col">Type</th><th scope="col">OS</th><th scope="col">What it is</th></tr></thead>
+                <tbody>
+                  @for (image of sample.images; track image.name) {
+                    <tr><td><code>{{ image.name }}</code></td><td>{{ image.type }}</td><td>{{ image.os }}</td><td>{{ image.description }}</td></tr>
+                  }
+                </tbody>
+              </table>
+              <div class="fields">
+                <label>On <select class="sb-field"><option>A segment, or the internet</option></select></label>
+                <label>Image
+                  <select class="sb-field">
+                    @for (image of sample.images; track image.name) {
+                      <option>{{ image.name }}</option>
+                    }
+                  </select>
+                </label>
+                <label>Count <input class="sb-field" type="number" value="1" /></label>
+                <label>Cores <input class="sb-field" placeholder="the image’s" /></label>
+                <label>Memory (MiB) <input class="sb-field" placeholder="the image’s" /></label>
+                <label>Disk (GiB) <input class="sb-field" placeholder="the image’s" /></label>
+              </div>
+              <div class="choices">
+                <label><input type="checkbox" /> Public address on its site’s WAN (1:1 NAT)</label>
+                <label><input type="checkbox" /> <span>Simulated users’ host (label <code>ghosts.pool</code>)</span></label>
+              </div>
+              <div class="buttons">
+                <button class="sb-button" type="button">Add image</button>
+                <button class="sb-button" type="button">Delete image</button>
+              </div>
+            }
+            @case ('roles') {
+              <table>
+                <thead><tr><th scope="col">Role</th><th scope="col">What it sets up</th><th scope="col">OS families</th><th scope="col">Needs</th></tr></thead>
+                <tbody>
+                  @for (role of sample.roles; track role.name) {
+                    <tr>
+                      <td><code>{{ role.name }}</code></td>
+                      <td>{{ role.description }}</td>
+                      <td>{{ role.os.join(', ') }}</td>
+                      <td>
+                        @for (need of role.needs; track need) {
+                          <code>{{ need }}</code>
+                        } @empty {
+                          <span class="none">Nothing</span>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            }
+            @case ('dns') {
+              <dl class="facts">
+                <dt>Top-level domains</dt><dd>{{ sample.dns.tlds.join(', ') }}</dd>
+                <dt>Zone hosting</dt><dd>{{ sample.dns.hosting.join(', ') }}</dd>
+                <dt>Resolvers</dt><dd>{{ sample.dns.resolvers.join(', ') }}</dd>
+                <dt>Record types</dt><dd>{{ sample.dns.recordTypes.join(', ') }}</dd>
+                <dt>Certificate authorities</dt>
+                <dd>
+                  @for (ca of sample.cas; track ca.hostname) {
+                    {{ ca.name }} (<code>{{ ca.hostname }}</code>)
+                  }
+                </dd>
+              </dl>
+              <div class="fields">
+                <label>Domain <input class="sb-field" placeholder="e.g. meridian-bank.com" /></label>
+                <label>Record
+                  <select class="sb-field">
+                    @for (type of sample.dns.recordTypes; track type) {
+                      <option>{{ type }}</option>
+                    }
+                  </select>
+                </label>
+                <label>Certificate for <input class="sb-field" placeholder="a host, and its names" /></label>
+              </div>
+              <div class="buttons"><button class="sb-button" type="button">Download CA bundle</button></div>
+            }
+            @case ('conditions') {
+              <table>
+                <thead><tr><th scope="col">Link</th><th scope="col">Type</th><th scope="col">Latency (ms)</th><th scope="col">Jitter (ms)</th><th scope="col">Loss (%)</th><th scope="col">Bandwidth (Mbps)</th></tr></thead>
+                <tbody>
+                  @for (link of sample.links; track link.id) {
+                    <tr>
+                      <td><code>{{ link.id }}</code></td>
+                      <td>{{ link.type }}</td>
+                      <td><input class="sb-field" type="number" [attr.aria-label]="link.id + ' latency'" /></td>
+                      <td><input class="sb-field" type="number" [attr.aria-label]="link.id + ' jitter'" /></td>
+                      <td><input class="sb-field" type="number" [attr.aria-label]="link.id + ' loss'" /></td>
+                      <td><input class="sb-field" type="number" [attr.aria-label]="link.id + ' bandwidth'" /></td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            }
+            @case ('deploy') {
+              <ol class="steps">
+                <li>
+                  <div><span class="step-name">Validate</span><span class="step-text">Findings come back as errors or warnings, each with where it is and a suggested fix.</span></div>
+                  <button class="sb-button" type="button">Validate</button>
+                </li>
+                <li>
+                  <div><span class="step-name">Plan</span><span class="step-text">A job that previews the addresses it would take, the plan and the capacity it needs.</span></div>
+                  <button class="sb-button" type="button">Plan</button>
+                </li>
+                <li>
+                  <div>
+                    <span class="step-name">Create Instance</span>
+                    <span class="step-text">Runs a version of the enclave under a prefix; another prefix runs a second copy.</span>
+                    <span class="fields inline">
+                      <input class="sb-field" placeholder="prefix" aria-label="Instance prefix" />
+                      <select class="sb-field" aria-label="Enclave version"><option>Latest version</option></select>
+                    </span>
+                  </div>
+                  <button class="sb-button primary" type="button">Create instance</button>
+                </li>
+                <li>
+                  <div>
+                    <span class="step-name">Follow the Job</span>
+                    <span class="step-text">Its log, through {{ sample.createStages.join(' → ') }}, with job, instance and map updates on the event stream.</span>
+                  </div>
+                  <span class="buttons">
+                    <button class="sb-button" type="button">Cancel</button>
+                    <button class="sb-button" type="button">Retry</button>
+                  </span>
+                </li>
+                <li>
+                  <div>
+                    <span class="step-name">Act on It</span>
+                    <span class="step-text">
+                      @for (action of sample.actions; track action) {
+                        <code>{{ action }}</code>
+                      }
+                    </span>
+                  </div>
+                  <button class="sb-button" type="button">Run action</button>
+                </li>
+                <li>
+                  <div><span class="step-name">Destroy</span><span class="step-text">Takes the instance down and undoes its actions; GraySpace keeps the record.</span></div>
+                  <button class="sb-button" type="button">Destroy instance</button>
+                </li>
+              </ol>
+            }
+          }
+        </div>
+      </section>
+    }
+  </fieldset>
+</section>

@@ -21,7 +21,7 @@ public static partial class ScenarioMarkdown
 
         if (findings.Count > 0)
             md.Append($"> Draft: {findings.Count} {(findings.Count == 1 ? "finding" : "findings")} open.\n\n");
-        md.Append($"# {scenario.Name}\n\n{kind.Name}, kind version {scenario.KindVersion}. Open stage: {scenario.Stage}.\n");
+        md.Append($"# {scenario.Name}\n\n{kind.Name}, scenario type version {scenario.KindVersion}. Open stage: {scenario.Stage}.\n");
 
         foreach (var stage in kind.Stages)
         {

@@ -19,7 +19,7 @@ public class CreateEndpoint : IEndpoint
                 if (state is null)
                     return ScenarioState.Missing(id);
                 if (state.Kind.Find(body.QuestionId ?? string.Empty) is not var (question, _))
-                    return ErrorResults.NotFound("QUESTION_UNKNOWN", $"There is no question '{body.QuestionId}' in this kind.");
+                    return ErrorResults.NotFound("QUESTION_UNKNOWN", $"There is no question '{body.QuestionId}' in this scenario type.");
                 var existing = state.Decisions.FirstOrDefault(d => d.QuestionId == question.Id);
                 if (existing?.Who != Who.Stated)
                     return ErrorResults.Conflict("NOT_STATED", $"'{question.Id}' isn't stated. Record it with record_answer instead.");

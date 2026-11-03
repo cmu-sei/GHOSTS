@@ -1,0 +1,252 @@
+<section class="sheet">
+  <header class="head">
+    <a class="back" routerLink="..">Topology</a>
+    <h1>Deploy to Updraft</h1>
+    <p class="sample" role="note">Not connected to Updraft</p>
+  </header>
+
+  <!-- Read-only: a disabled fieldset disables every control inside it. -->
+  <fieldset disabled>
+    @for (d of decisions; track d.id; let i = $index) {
+      <section class="decision" [attr.aria-labelledby]="'ud-' + d.id">
+        <header class="decision-head">
+          <span class="step" aria-hidden="true">{{ i + 1 }}</span>
+          <div>
+            <h2 [id]="'ud-' + d.id">{{ d.title }}</h2>
+            <p class="decides">{{ d.decides }}</p>
+            <p class="api">
+              @for (command of d.commands; track command) {
+                <code>{{ command }}</code>
+              }
+            </p>
+          </div>
+        </header>
+
+        @if (answersFor(d); as answers) {
+          @if (answers.length) {
+            <div class="answers">
+              <h3>From Your Answers</h3>
+              <dl>
+                @for (a of answers; track a.label) {
+                  <dt>{{ a.label }}</dt>
+                  <dd>
+                    @if (a.value === undefined) {
+                      <span class="none">No answer yet</span>
+                    } @else if (isList(a.value)) {
+                      <ul>
+                        @for (item of a.value; track $index) {
+                          <li>{{ item }}</li>
+                        }
+                      </ul>
+                    } @else {
+                      {{ a.value }}
+                    }
+                  </dd>
+                }
+              </dl>
+            </div>
+          }
+        }
+
+        <div class="offers">
+          <h3>Updraft Offers</h3>
+          @switch (d.id) {
+            @case ('connection') {
+              <div class="fields">
+                <label>Gitea <input class="sb-field" type="url" [value]="sample.giteaUrl" /></label>
+                <label>Owner <input class="sb-field" placeholder="UPDRAFT_OWNER" /></label>
+                <label>AWS region <input class="sb-field" placeholder="AWS_REGION" /></label>
+                <label>State bucket <input class="sb-field" placeholder="UPDRAFT_STATE_BUCKET" /></label>
+                <label>Slot broker <input class="sb-field" type="url" placeholder="UPDRAFT_BROKER_URL" /></label>
+              </div>
+              <dl class="facts">
+                <dt>Settings from</dt><dd><code>~/.updraft/env</code>; real environment variables win</dd>
+                <dt>Gitea token</dt>
+                <dd>
+                  @for (source of sample.token; track source; let last = $last) {
+                    <code>{{ source }}</code>{{ last ? '' : ' or ' }}
+                  }; never on argv or stdout
+                </dd>
+                <dt>Labs cloned to</dt><dd><code>{{ sample.labsDir }}/&lt;owner&gt;/&lt;repo&gt;</code></dd>
+                <dt>Your labs</dt><dd>Unknown until connected</dd>
+              </dl>
+              <div class="buttons"><button class="sb-button primary" type="button">Connect</button></div>
+            }
+            @case ('lab') {
+              <div class="choices">
+                <label><input type="radio" name="ud-lab" checked /> New, from <code>{{ sample.labTemplate }}</code></label>
+                <label><input type="radio" name="ud-lab" /> Open a lab you have
+                  <select class="sb-field"><option>Your labs on Gitea</option></select>
+                </label>
+              </div>
+              <div class="fields">
+                <label>Org <select class="sb-field"><option>An org you can create repos in, or your account</option></select></label>
+                <label>Name <input class="sb-field" name="lab-name" [value]="slug()" /></label>
+                <label>Description <input class="sb-field" placeholder="what the lab is for" /></label>
+              </div>
+              <div class="choices">
+                <label><input type="checkbox" /> Private</label>
+              </div>
+              <dl class="facts">
+                <dt>Status</dt><dd>Branch, uncommitted changes, ahead or behind, and its projections: not checked</dd>
+              </dl>
+            }
+            @case ('images') {
+              <table>
+                <caption>Public images</caption>
+                <thead><tr><th scope="col">Alias</th><th scope="col">Platform</th></tr></thead>
+                <tbody>
+                  @for (image of sample.publicImages; track image.alias) {
+                    <tr><td><code>{{ image.alias }}</code></td><td>{{ image.windows ? 'Windows' : 'Linux' }}</td></tr>
+                  }
+                </tbody>
+              </table>
+              <dl class="facts">
+                <dt>Library images</dt><dd>Unknown until connected</dd>
+                <dt>Looked up in</dt><dd>{{ sample.resolution.join(', then ') }}</dd>
+                <dt>AMI name</dt><dd><code>{{ sample.amiName }}</code></dd>
+              </dl>
+              <div class="fields">
+                <label>Name <input class="sb-field" placeholder="image name" /></label>
+                <label>From
+                  <select class="sb-field">
+                    <option>A library image</option>
+                    @for (image of sample.publicImages; track image.alias) {
+                      <option>{{ image.alias }}</option>
+                    }
+                  </select>
+                </label>
+              </div>
+              <div class="choices">
+                <label><input type="radio" name="ud-version" checked /> v1, if there’s none yet</label>
+                <label><input type="radio" name="ud-version" /> One past the highest version (<code>--bump</code>)</label>
+                <label><input type="radio" name="ud-version" /> Rebuild a version in place (<code>--replace</code>)</label>
+              </div>
+              <div class="buttons">
+                <button class="sb-button" type="button">New image</button>
+                <button class="sb-button" type="button">Build image</button>
+                <button class="sb-button" type="button">Promote to library</button>
+              </div>
+            }
+            @case ('hosts') {
+              <div class="fields">
+                <label>Name <input class="sb-field" placeholder="host name" /></label>
+                <label>Image
+                  <select class="sb-field">
+                    <option>A library or own image</option>
+                    @for (image of sample.publicImages; track image.alias) {
+                      <option>{{ image.alias }}</option>
+                    }
+                  </select>
+                </label>
+                <label>Type <input class="sb-field" placeholder="instance type" /></label>
+                <label>Number <input class="sb-field" type="number" [placeholder]="'next free: ' + sample.hostNumbers.join(', ') + ', …'" /></label>
+                <label>Console <input class="sb-field" placeholder="console" /></label>
+                <label>Username <input class="sb-field" placeholder="username" /></label>
+              </div>
+              <div class="fields">
+                <label>Clone from <input class="sb-field" placeholder="&lt;org&gt;/&lt;repo&gt;@v&lt;N&gt;:&lt;host&gt;" /></label>
+                <label>As <input class="sb-field" placeholder="the same name" /></label>
+              </div>
+              <dl class="facts">
+                <dt>Published labs</dt><dd>Unknown until connected</dd>
+                <dt>Cloning</dt><dd>Copies the host from the lab’s tag, with its services and image, and adds the zones they need (at most {{ sample.cloneZones }})</dd>
+              </dl>
+              <div class="buttons">
+                <button class="sb-button" type="button">Add host</button>
+                <button class="sb-button" type="button">Clone host</button>
+                <button class="sb-button" type="button">Remove host</button>
+              </div>
+            }
+            @case ('services') {
+              <div class="fields">
+                <label>Host <select class="sb-field"><option>A host in this lab</option></select></label>
+                <label>DNS name <input class="sb-field" placeholder="the name it serves" /></label>
+                <label>Zone <input class="sb-field" placeholder="its parent domain" /></label>
+              </div>
+              <div class="choices">
+                <label><input type="checkbox" /> Serve it over TLS</label>
+              </div>
+              <dl class="facts">
+                <dt>Zones</dt><dd>A service’s zone is added to <code>lab.yaml</code> when no zone covers it</dd>
+              </dl>
+              <div class="buttons">
+                <button class="sb-button" type="button">Add service</button>
+                <button class="sb-button" type="button">Remove service</button>
+              </div>
+            }
+            @case ('deploy') {
+              <ol class="steps">
+                <li>
+                  <div>
+                    <span class="step-name">Deploy</span>
+                    <span class="step-text">Applies the lab with Terraform as a projection, then gives its Guacamole link. Its mode and availability zone are kept for later deploys.</span>
+                    <span class="fields inline">
+                      <input class="sb-field" [value]="sample.projection" aria-label="Projection name" />
+                      <input class="sb-field" placeholder="mode" aria-label="Mode" />
+                      <input class="sb-field" placeholder="availability zone" aria-label="Availability zone" />
+                    </span>
+                  </div>
+                  <button class="sb-button primary" type="button">Deploy</button>
+                </li>
+                <li>
+                  <div>
+                    <span class="step-name">When the Broker Refuses</span>
+                    <span class="step-text">
+                      @for (r of sample.refusals; track r.exit) {
+                        <span>{{ r.reason }} (exit {{ r.exit }}).</span>
+                      }
+                    </span>
+                  </div>
+                </li>
+                <li>
+                  <div><span class="step-name">Status</span><span class="step-text">Each host’s instance, state, address, SSM and console.</span></div>
+                  <button class="sb-button" type="button">Check status</button>
+                </li>
+                <li>
+                  <div><span class="step-name">Down</span><span class="step-text">Destroys the projection with Terraform, and forgets its mode, availability zone and players.</span></div>
+                  <button class="sb-button" type="button">Take down</button>
+                </li>
+              </ol>
+            }
+            @case ('players') {
+              <dl class="facts">
+                <dt>Players</dt><dd>Unknown until connected</dd>
+                <dt>Kept</dt><dd>Per projection, and passed on every later deploy</dd>
+              </dl>
+              <div class="fields">
+                <label>Emails <input class="sb-field" placeholder="one or more" /></label>
+              </div>
+              <div class="buttons">
+                <button class="sb-button" type="button">Grant</button>
+                <button class="sb-button" type="button">Remove</button>
+              </div>
+            }
+            @case ('publish') {
+              <ol class="steps">
+                <li>
+                  <div>
+                    <span class="step-name">Publish</span>
+                    <span class="step-text">Checks the lab is valid, committed and pushed and that every image is in the library or public, tags the version, and opens a PR to the library. A re-run resumes.</span>
+                    <span class="fields inline">
+                      <input class="sb-field" placeholder="the next version" aria-label="Version" />
+                    </span>
+                  </div>
+                  <button class="sb-button primary" type="button">Publish</button>
+                </li>
+                <li>
+                  <div><span class="step-name">Release Status</span><span class="step-text">Its tag, its PR, each image’s library copy, and whether it’s available.</span></div>
+                  <button class="sb-button" type="button">Check release</button>
+                </li>
+                <li>
+                  <div><span class="step-name">Library Labs</span><span class="step-text">The published labs, each available once every image it uses has a library copy.</span></div>
+                  <button class="sb-button" type="button">List labs</button>
+                </li>
+              </ol>
+            }
+          }
+        </div>
+      </section>
+    }
+  </fieldset>
+</section>

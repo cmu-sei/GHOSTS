@@ -6,10 +6,10 @@ namespace ScenarioBuilder.Api.Endpoints.Kinds;
 
 public record KindSummary(string Id, string Version, string Name);
 
-/// <summary>GET /kinds — the kinds a scenario can be created from.</summary>
+/// <summary>GET /kinds — the kinds a scenario can be created from: each one's latest version, retired ones left out.</summary>
 public class ListEndpoint : IEndpoint
 {
     public RouteHandlerBuilder Register(RouteGroupBuilder group, string tag) =>
-        group.MapGet("/kinds", (KindCatalog kinds) => kinds.All.Select(k => new KindSummary(k.Id, k.Version, k.Name)))
+        group.MapGet("/kinds", (KindCatalog kinds) => kinds.Offered.Select(k => new KindSummary(k.Id, k.Version, k.Name)))
             .WithTags(tag);
 }

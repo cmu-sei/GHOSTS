@@ -20,7 +20,7 @@ public class CreateEndpoint : IEndpoint
                     return ErrorResults.BadRequest("NAME_REQUIRED", "Give the library a name.");
                 var known = kinds.All.Select(k => k.Id).ToList();
                 if ((body.Kinds ?? []).FirstOrDefault(k => !known.Contains(k)) is { } unknown)
-                    return ErrorResults.BadRequest("KIND_UNKNOWN", $"There is no kind '{unknown}'. Kinds: {string.Join(", ", known)}.");
+                    return ErrorResults.BadRequest("KIND_UNKNOWN", $"There is no scenario type '{unknown}'. Scenario types: {string.Join(", ", known)}.");
 
                 var taken = (await db.Libraries.Select(l => l.Slug).ToListAsync(ct)).ToHashSet();
                 var now = DateTime.UtcNow;

@@ -7,7 +7,7 @@ using ScenarioBuilder.Api.Infrastructure;
 
 namespace ScenarioBuilder.Api.Endpoints.Scenarios;
 
-/// <summary>One thing that happened. Type is answer, draft, proposal, approval or delegation.</summary>
+/// <summary>One thing that happened. Type is answer, draft, proposal, approval, delegation or update (to a new version of the scenario type).</summary>
 public record LogEntry(DateTime Time, string Type, string Target, JsonNode? Before, JsonNode? After, string By, Via Via, string? Reason);
 
 /// <summary>GET /scenarios/{id}/log — every answer, draft, proposal and approval, in time order.</summary>
@@ -24,7 +24,7 @@ public class LogEndpoint : IEndpoint
             var edits = await db.Edits.Where(e => e.ScenarioId == id).OrderBy(e => e.Id).ToListAsync(ct);
             var proposals = await db.Proposals.Where(p => p.ScenarioId == id).OrderBy(p => p.Id).ToListAsync(ct);
             var entries = edits
-                .Select(e => new LogEntry(e.Time, e.Target == DelegationEndpoint.Target ? "delegation" : draftFields.Contains(e.Target) ? "draft" : "answer", e.Target,
+                .Select(e => new LogEntry(e.Time, e.Target == DelegationEndpoint.Target ? "delegation" : e.Target == KindUpdateApplyEndpoint.Target ? "update" : draftFields.Contains(e.Target) ? "draft" : "answer", e.Target,
                     Parse(e.Before), Parse(e.After), e.By, e.Via, null))
                 .Concat(proposals.Select(p => new LogEntry(p.Created, "proposal", p.QuestionId,
                     Parse(p.Before), Parse(p.After), p.ProposedBy, p.Via, p.Reason)))

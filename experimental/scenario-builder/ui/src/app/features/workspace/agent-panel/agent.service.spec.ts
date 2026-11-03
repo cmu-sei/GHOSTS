@@ -7,7 +7,7 @@ import { WorkspaceStore } from '../workspace.store';
 import { AgentService } from './agent.service';
 
 const progress = (answeredCount: number, delegated: boolean, overrides: Partial<Progress> = {}): Progress => ({
-  kindId: 'k', stage: 0, stageTitle: 'S', lastStage: false,
+  kindId: 'k', kindVersion: '0.1.0', stage: 0, stageTitle: 'S', lastStage: false,
   gate: { passes: false, approved: false, findings: [] }, open: [], draftsDue: [], delegated,
   answered: Array.from({ length: answeredCount }, (_, i) => ({ id: `q${i}`, stage: 0, value: 'x', who: 'proposed' as const, by: 'dev', via: 'agent' as const, time: 't' })),
   ...overrides

@@ -1,0 +1,33 @@
+<section class="sheet">
+  <header class="head">
+    <h1>Topology</h1>
+    @if (store.kind()?.topology) {
+      <p class="sub">Build the range from this scenario’s network answers, then deploy it to one of these.</p>
+    }
+  </header>
+
+  @if (store.kind()?.topology) {
+    <ul class="targets">
+      @for (t of targets; track t.id) {
+        <li class="target">
+          <span class="monogram" [attr.data-target]="t.id" aria-hidden="true">{{ t.name[0] }}</span>
+          <div class="target-text">
+            <span class="target-name">{{ t.name }}</span>
+            <span class="target-description">{{ t.description }}</span>
+          </div>
+          <div class="target-foot">
+            @if (t.open) {
+              <span class="target-state">Not connected</span>
+              <a class="sb-button" [routerLink]="t.open" [attr.aria-label]="'Open ' + t.name">Open</a>
+            } @else {
+              <span class="target-state">Not built yet</span>
+              <button class="sb-button" type="button" disabled [attr.aria-label]="'Deploy to ' + t.name">Deploy</button>
+            }
+          </div>
+        </li>
+      }
+    </ul>
+  } @else {
+    <p class="empty">This type of scenario has no topology.</p>
+  }
+</section>
