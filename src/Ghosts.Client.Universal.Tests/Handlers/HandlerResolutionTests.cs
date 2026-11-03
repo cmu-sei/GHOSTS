@@ -63,6 +63,8 @@ public class HandlerResolutionTests
     [InlineData(HandlerType.Aws)]
     [InlineData(HandlerType.Azure)]
     [InlineData(HandlerType.Word)]
+    [InlineData(HandlerType.Excel)]
+    [InlineData(HandlerType.PowerPoint)]
     public void RunHandler_ResolvesHandlerTypes_ToConcreteClass(HandlerType handlerType)
     {
         var timeline = CreateTimeline();
@@ -87,31 +89,6 @@ public class HandlerResolutionTests
             // Other exceptions (NotImplementedException, InvalidOperationException, etc.)
             // are acceptable - they mean the handler was resolved but failed during execution
         }
-    }
-
-    /// <summary>
-    /// Excel and PowerPoint handler classes are named ExcelHandler/PowerPointHandler
-    /// rather than matching the enum name. This test documents that the current
-    /// RunHandler resolution does not find them (known naming discrepancy).
-    /// </summary>
-    [Theory]
-    [InlineData(HandlerType.Excel)]
-    [InlineData(HandlerType.PowerPoint)]
-    public void RunHandler_HandlerTypesWithNamingMismatch_ThrowNotSupported(HandlerType handlerType)
-    {
-        var timeline = CreateTimeline();
-        var handler = CreateHandler(handlerType);
-        var cts = new CancellationTokenSource();
-
-        var ex = Record.Exception(() =>
-        {
-            _ = Orchestrator.RunHandler(handlerType, timeline, handler, cts.Token);
-        });
-
-        // These throw because the class name doesn't match the enum name
-        // (e.g., ExcelHandler vs Excel)
-        Assert.NotNull(ex);
-        Assert.IsType<NotSupportedException>(ex);
     }
 
     [Fact]

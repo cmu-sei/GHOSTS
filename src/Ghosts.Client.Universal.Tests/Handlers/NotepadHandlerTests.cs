@@ -105,6 +105,9 @@ public class NotepadHandlerTests
     [Fact]
     public void Notepad_Run_CreatesTextFile_InOutputDirectory()
     {
+        // The handler drives notepad.exe and returns early on any other OS
+        if (!OperatingSystem.IsWindows()) return;
+
         // Acceptance: files created and reported
         var outputDir = Path.Combine(Path.GetTempPath(), $"ghosts_notepad_test_{Guid.NewGuid():N}");
         Directory.CreateDirectory(outputDir);
