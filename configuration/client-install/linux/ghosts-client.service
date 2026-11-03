@@ -1,0 +1,18 @@
+[Unit]
+Description=GHOSTS NPC client
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/usr/bin/dotnet __DIR__/Ghosts.Client.Universal.dll
+WorkingDirectory=__DIR__
+Environment=BASE_URL=__GHOSTS_API__
+Environment=DOTNET_CLI_TELEMETRY_OPTOUT=1
+Environment=DISPLAY=:0
+User=__USER__
+Group=__USER__
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

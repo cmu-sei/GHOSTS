@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- The top bar's mark: a rounded square split corner to corner, cobalt over violet. -->
+  <defs>
+    <clipPath id="tile">
+      <rect width="32" height="32" rx="9" />
+    </clipPath>
+  </defs>
+  <g clip-path="url(#tile)">
+    <rect width="32" height="32" fill="#7a4fd6" />
+    <path d="M0 0H32L0 32Z" fill="#2f5bea" />
+  </g>
+</svg>

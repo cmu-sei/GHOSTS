@@ -1,0 +1,159 @@
+<app-top-bar crumb="Admin"><app-admin-nav /></app-top-bar>
+
+@if (error(); as error) {
+  <p class="error" role="alert">{{ error }}</p>
+}
+
+@if (detail(); as d) {
+  @if (draft(); as k) {
+    <section class="sheet">
+      <header class="head">
+        <div>
+          <h1>{{ k.name }}</h1>
+          <p class="sub">
+            {{ d.latestVersion ? 'Version ' + d.latestVersion + ' is what new scenarios get.' : 'Not published yet, so new scenarios can’t use it.' }}
+            @if (d.retired) {
+              <span class="retired">Retired</span>
+            }
+            @if (d.draftChanged) {
+              <span class="changed">Draft changes</span>
+            }
+          </p>
+        </div>
+        <div class="actions">
+          <button class="sb-button" type="button" [disabled]="!dirty() || !!drafting()" (click)="save()">Save draft</button>
+          <button class="sb-button primary" type="button" [disabled]="dirty() || !d.draftChanged || !!drafting()" (click)="publish()">Publish</button>
+        </div>
+      </header>
+
+      @if (drafting(); as doing) {
+        <p class="drafting" role="status"><span class="pulse" aria-hidden="true"></span>{{ doing }}</p>
+      } @else {
+        <p class="note" role="status">{{ note() }}</p>
+      }
+
+      <div class="tabs" role="tablist" aria-label="Views of the draft">
+        <button type="button" role="tab" [class.active]="tab() === 'outline'" [attr.aria-selected]="tab() === 'outline'" (click)="tab.set('outline')">Outline</button>
+        <button type="button" role="tab" [class.active]="tab() === 'json'" [attr.aria-selected]="tab() === 'json'" [disabled]="!!drafting()" (click)="showJson()">JSON</button>
+      </div>
+
+      @if (tab() === 'outline') {
+        <fieldset [disabled]="!!drafting()">
+          <section class="card">
+            <h2>Settings</h2>
+            <label class="field">Name <input class="sb-field" [value]="k.name" (input)="setSetting({ name: value($event) })" /></label>
+            <label class="field">
+              What It Is
+              <textarea class="sb-field" rows="3" [value]="k.description ?? ''" (input)="setSetting({ description: value($event) })"></textarea>
+            </label>
+            <label class="check">
+              <input type="checkbox" [checked]="!!k.topology" (change)="setSetting({ topology: checked($event) })" />
+              Its scenarios build a range (a Topology page)
+            </label>
+            @if (d.basedOn) {
+              <p class="meta">Started as a copy of <code>{{ d.basedOn }}</code>.</p>
+            }
+          </section>
+
+          <section class="card model">
+            <label class="field inline">
+              Model
+              <select class="sb-field" (change)="model.set(value($event))">
+                @for (m of models(); track m) {
+                  <option [value]="m" [selected]="m === model()">{{ m }}</option>
+                }
+              </select>
+            </label>
+            <button class="sb-button" type="button" [disabled]="dirty() || !model()" (click)="draftAll(model())">
+              {{ k.stages.length ? 'Redraft every stage' : 'Draft with the model' }}
+            </button>
+            @if (failed() !== null) {
+              <button class="sb-button primary" type="button" [disabled]="dirty() || !model()" (click)="resume()">Retry from stage {{ failed()! + 1 }}</button>
+            }
+            <span class="hint">
+              @if (dirty()) {
+                Save your changes before the model drafts.
+              } @else {
+                The model plans the stages from the settings above, then writes each stage’s questions.
+              }
+            </span>
+          </section>
+
+          @for (s of k.stages; track $index; let i = $index) {
+            <section class="card stage" [attr.aria-label]="'Stage ' + (i + 1)">
+              <header class="stage-head">
+                <span class="step" aria-hidden="true">{{ i + 1 }}</span>
+                <input class="sb-field title" aria-label="Stage title" [value]="s.title" (input)="setStage(i, { title: value($event) })" />
+                <button class="sb-button ghost" type="button" [disabled]="dirty() || !model()" (click)="redraft(i)">Redraft</button>
+                <button class="sb-button ghost" type="button" (click)="removeStage(i)">Remove stage</button>
+              </header>
+              <div class="stage-fields">
+                <label class="field">
+                  What It Settles
+                  <input class="sb-field" [value]="s.purpose ?? ''" (input)="setStage(i, { purpose: value($event) })" />
+                </label>
+                <label class="field">
+                  Approval at Its Gate
+                  <input class="sb-field" placeholder="None: the stage closes once its questions are answered" [value]="s.gate.approval ?? ''"
+                    (input)="setStage(i, { gate: { approval: value($event) } })" />
+                </label>
+              </div>
+              <ol class="questions">
+                @for (q of s.questions; track $index; let j = $index) {
+                  <li class="question">
+                    <textarea class="sb-field wording" rows="2" placeholder="The question, as it’s asked" aria-label="Question" [value]="q.text"
+                      (input)="setQuestion(i, j, { text: value($event) })"></textarea>
+                    <select class="sb-field" aria-label="Answer type" (change)="setQuestion(i, j, { answer: $any(value($event)) })">
+                      @for (t of answerTypes; track t.type) {
+                        <option [value]="t.type" [selected]="q.answer === t.type">{{ t.label }}</option>
+                      }
+                    </select>
+                    <button class="sb-button ghost" type="button" [attr.aria-label]="'Remove ' + (q.label || 'the question')" (click)="removeQuestion(i, j)">Remove</button>
+                    @if (q.answer === 'choice') {
+                      <input class="sb-field options" placeholder="Options, separated by commas" aria-label="Options" [value]="(q.options ?? []).join(', ')"
+                        (change)="setOptions(i, j, value($event))" />
+                    }
+                  </li>
+                } @empty {
+                  <li class="none">No questions yet.</li>
+                }
+              </ol>
+              <button class="sb-button ghost add" type="button" (click)="addQuestion(i)">Add question</button>
+            </section>
+          }
+          <button class="sb-button" type="button" (click)="addStage()">Add stage</button>
+        </fieldset>
+      } @else {
+        <section class="card">
+          <p class="meta">The whole draft, every setting included. Saving checks it as the outline does; switching back to the outline drops unsaved JSON.</p>
+          <textarea class="sb-field code" spellcheck="false" aria-label="The draft as JSON" [value]="json()" (input)="json.set(value($event))"></textarea>
+          <div class="buttons"><button class="sb-button" type="button" (click)="saveJson()">Save JSON</button></div>
+        </section>
+      }
+
+      <section class="card">
+        <h2>Versions</h2>
+        @if (d.versions.length) {
+          <table>
+            <thead><tr><th scope="col">Version</th><th scope="col">Published by</th><th scope="col">When</th><th scope="col">Scenarios on it</th></tr></thead>
+            <tbody>
+              @for (v of d.versions; track v.version) {
+                <tr><td>{{ v.version }}</td><td>{{ v.publishedBy }}</td><td>{{ v.published | date: 'MMM d, y, HH:mm' }}</td><td>{{ v.scenarios }}</td></tr>
+              }
+            </tbody>
+          </table>
+        } @else {
+          <p class="meta">Not published yet.</p>
+        }
+        <div class="buttons">
+          @if (d.latestVersion) {
+            <a class="sb-button" [href]="exportUrl()" download>Export</a>
+            <button class="sb-button" type="button" (click)="retire(!d.retired)">{{ d.retired ? 'Offer again' : 'Retire' }}</button>
+          } @else {
+            <button class="sb-button" type="button" [disabled]="!!drafting()" (click)="remove()">Delete</button>
+          }
+        </div>
+      </section>
+    </section>
+  }
+}

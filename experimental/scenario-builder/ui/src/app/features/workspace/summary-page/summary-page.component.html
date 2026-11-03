@@ -1,0 +1,18 @@
+<section class="sheet">
+  <header class="head">
+    <h1>Executive Summary</h1>
+    <p class="sub">Drafted from what's been decided once stage {{ dueAfter() }} is answered. Approving it closes stage {{ dueAfter() }}.</p>
+  </header>
+
+  @if (isGateStage() && store.progress(); as progress) {
+    <app-gate-panel [gate]="progress.gate" [stage]="progress.stage" [lastStage]="progress.lastStage" (approve)="approve($event)" />
+  }
+
+  <div class="editor">
+    <textarea class="sb-field" rows="16" placeholder="Nothing drafted yet." [value]="text()" (input)="typed($event)" aria-label="Executive summary"></textarea>
+    <div class="actions">
+      <span class="state">{{ text() === saved() ? (saved() ? 'Saved' : '') : 'Unsaved changes' }}</span>
+      <button class="sb-button primary" type="button" [disabled]="text() === saved() || !text().trim()" (click)="save()">Save</button>
+    </div>
+  </div>
+</section>

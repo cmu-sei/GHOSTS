@@ -118,16 +118,17 @@ public class NpcsController(
     }
 
     /// <summary>
-    /// Returns name and Id for all NPCs in the system (caution, could return a large amount of data)
+    /// Returns name and Id for all NPCs in the system (caution, could return a large amount of data).
+    /// With executionId, only that run's pool NPCs and its scenario's compiled NPCs; with unbound=true, only NPCs with no machine.
     /// </summary>
     /// <returns>IEnumerable&lt;NpcNameId&gt;</returns>
     [ProducesResponseType(typeof(ActionResult<IEnumerable<NpcNameId>>), (int)HttpStatusCode.OK)]
     [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(ActionResult<IEnumerable<NpcNameId>>))]
     [SwaggerOperation("NpcsGetList")]
     [HttpGet("list")]
-    public async Task<ActionResult<IEnumerable<NpcNameId>>> NpcsGetList()
+    public async Task<ActionResult<IEnumerable<NpcNameId>>> NpcsGetList([FromQuery] int? executionId = null, [FromQuery] bool unbound = false)
     {
-        return Ok(await service.GetListAsync());
+        return Ok(await service.GetListAsync(executionId, unbound));
     }
 
     /// <summary>

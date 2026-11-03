@@ -1,0 +1,574 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://grayspace/schemas/grayspace-slice-v1.json",
+  "title": "SliceSpec",
+  "$defs": {
+    "Attach": {
+      "additionalProperties": false,
+      "description": "Where something joins the base: an ISP and/or location, or an exact router.",
+      "properties": {
+        "isp": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "ISP name, e.g. Lumen",
+          "title": "Isp"
+        },
+        "location": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Location name, e.g. Chicago",
+          "title": "Location"
+        },
+        "router": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "An exact router from /attachment-points, e.g. lum-chi",
+          "title": "Router"
+        }
+      },
+      "title": "Attach",
+      "type": "object"
+    },
+    "Conditions": {
+      "additionalProperties": false,
+      "properties": {
+        "links": {
+          "additionalProperties": {
+            "$ref": "#/$defs/LinkCondition"
+          },
+          "description": "Keyed by link ID (r1:r2), as in /map",
+          "title": "Links",
+          "type": "object"
+        }
+      },
+      "title": "Conditions",
+      "type": "object"
+    },
+    "Dns": {
+      "additionalProperties": false,
+      "properties": {
+        "domains": {
+          "items": {
+            "$ref": "#/$defs/DnsDomain"
+          },
+          "title": "Domains",
+          "type": "array"
+        },
+        "records": {
+          "items": {
+            "$ref": "#/$defs/DnsRecord"
+          },
+          "title": "Records",
+          "type": "array"
+        }
+      },
+      "title": "Dns",
+      "type": "object"
+    },
+    "DnsDomain": {
+      "additionalProperties": false,
+      "properties": {
+        "domain": {
+          "description": "e.g. meridian-bank.com; its TLD must be in the base",
+          "maxLength": 253,
+          "pattern": "^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z]{2,63}$",
+          "title": "Domain",
+          "type": "string"
+        },
+        "hosting_server": {
+          "description": "A base hosting DNS server, e.g. dns-cloudflare",
+          "title": "Hosting Server",
+          "type": "string"
+        }
+      },
+      "required": [
+        "domain",
+        "hosting_server"
+      ],
+      "title": "DnsDomain",
+      "type": "object"
+    },
+    "DnsRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "description": "Fully qualified, inside one of the slice's domains",
+          "maxLength": 253,
+          "pattern": "^(\\*\\.)?([a-z0-9_]([a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z]{2,63}$",
+          "title": "Name",
+          "type": "string"
+        },
+        "type": {
+          "default": "A",
+          "enum": [
+            "A",
+            "CNAME",
+            "TXT",
+            "MX"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "host": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A records: the slice host it resolves to (its reachable address)",
+          "title": "Host"
+        },
+        "data": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Record data, for records that don't name a host",
+          "title": "Data"
+        },
+        "ttl": {
+          "default": 3600,
+          "maximum": 604800,
+          "minimum": 60,
+          "title": "Ttl",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "DnsRecord",
+      "type": "object"
+    },
+    "Host": {
+      "additionalProperties": false,
+      "description": "A host in a site segment, or an internet host placed on the base itself.",
+      "properties": {
+        "name": {
+          "maxLength": 40,
+          "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?$",
+          "title": "Name",
+          "type": "string"
+        },
+        "count": {
+          "anyOf": [
+            {
+              "maximum": 500,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Make this many hosts, named <name>-01 \u2026",
+          "title": "Count"
+        },
+        "segment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The site segment the host joins",
+          "title": "Segment"
+        },
+        "internet": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Attach"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Place the host directly on a base router's customer network, outside any site"
+        },
+        "image": {
+          "description": "An image from /capabilities",
+          "title": "Image",
+          "type": "string"
+        },
+        "roles": {
+          "description": "Roles from /capabilities",
+          "items": {
+            "type": "string"
+          },
+          "title": "Roles",
+          "type": "array"
+        },
+        "size": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Size"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Defaults to the image's size"
+        },
+        "labels": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Free-form, returned in the manifest (e.g. ghosts.pool)",
+          "title": "Labels",
+          "type": "object"
+        },
+        "env": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Environment variables for OCI images",
+          "title": "Env",
+          "type": "object"
+        },
+        "publish": {
+          "default": false,
+          "description": "Give a site host a public address on its site's WAN (1:1 NAT)",
+          "title": "Publish",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name",
+        "image"
+      ],
+      "title": "Host",
+      "type": "object"
+    },
+    "LinkCondition": {
+      "additionalProperties": false,
+      "description": "Conditions on a base link, applied while the instance exists (Phase C).",
+      "properties": {
+        "latency_ms": {
+          "anyOf": [
+            {
+              "maximum": 10000.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Latency Ms"
+        },
+        "jitter_ms": {
+          "anyOf": [
+            {
+              "maximum": 5000.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Jitter Ms"
+        },
+        "packet_loss_percent": {
+          "anyOf": [
+            {
+              "maximum": 100.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Packet Loss Percent"
+        },
+        "bandwidth_mbps": {
+          "anyOf": [
+            {
+              "maximum": 10000.0,
+              "minimum": 0.1,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bandwidth Mbps"
+        }
+      },
+      "title": "LinkCondition",
+      "type": "object"
+    },
+    "Segment": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "maxLength": 24,
+          "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?$",
+          "title": "Name",
+          "type": "string"
+        },
+        "cidr": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "IPv4 network, e.g. 192.168.20.0/24. Omitted or 'auto': allocated by GraySpace",
+          "title": "Cidr"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "Segment",
+      "type": "object"
+    },
+    "Site": {
+      "additionalProperties": false,
+      "description": "An enterprise site: an edge router on the base and the segments behind it.",
+      "properties": {
+        "name": {
+          "maxLength": 24,
+          "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?$",
+          "title": "Name",
+          "type": "string"
+        },
+        "attach": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Attach"
+            },
+            {
+              "items": {
+                "$ref": "#/$defs/Attach"
+              },
+              "type": "array"
+            }
+          ],
+          "description": "Where the edge's WAN joins the base. A list dual-homes the site (routed sites only)",
+          "title": "Attach"
+        },
+        "routed": {
+          "default": false,
+          "description": "false: the edge NATs the site behind one address on a base customer network. true: the site gets a public /24 from the ISP's block and the edge peers with the base over eBGP",
+          "title": "Routed",
+          "type": "boolean"
+        },
+        "segments": {
+          "items": {
+            "$ref": "#/$defs/Segment"
+          },
+          "minItems": 1,
+          "title": "Segments",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "attach",
+        "segments"
+      ],
+      "title": "Site",
+      "type": "object"
+    },
+    "Size": {
+      "additionalProperties": false,
+      "properties": {
+        "cores": {
+          "maximum": 64,
+          "minimum": 1,
+          "title": "Cores",
+          "type": "integer"
+        },
+        "memory": {
+          "description": "MiB",
+          "maximum": 262144,
+          "minimum": 128,
+          "title": "Memory",
+          "type": "integer"
+        },
+        "disk": {
+          "description": "GiB",
+          "maximum": 4096,
+          "minimum": 1,
+          "title": "Disk",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "cores",
+        "memory",
+        "disk"
+      ],
+      "title": "Size",
+      "type": "object"
+    },
+    "Tls": {
+      "additionalProperties": false,
+      "properties": {
+        "host": {
+          "description": "The slice host that serves the certificate",
+          "title": "Host",
+          "type": "string"
+        },
+        "names": {
+          "description": "Names on the certificate",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Names",
+          "type": "array"
+        },
+        "ca": {
+          "description": "A base CA, e.g. ca-graytrust",
+          "title": "Ca",
+          "type": "string"
+        }
+      },
+      "required": [
+        "host",
+        "names",
+        "ca"
+      ],
+      "title": "Tls",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "A named, versioned addition to the base.",
+  "properties": {
+    "apiVersion": {
+      "const": "grayspace/v1",
+      "enum": [
+        "grayspace/v1"
+      ],
+      "title": "Apiversion",
+      "type": "string"
+    },
+    "kind": {
+      "const": "Slice",
+      "enum": [
+        "Slice"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "slug": {
+      "pattern": "^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$",
+      "title": "Slug",
+      "type": "string"
+    },
+    "prefix": {
+      "description": "Hostname prefix, unique among instances",
+      "pattern": "^[a-z][a-z0-9]{0,7}$",
+      "title": "Prefix",
+      "type": "string"
+    },
+    "description": {
+      "default": "",
+      "title": "Description",
+      "type": "string"
+    },
+    "owner": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Who manages the slice, e.g. ghosts. Informational",
+      "title": "Owner"
+    },
+    "sites": {
+      "items": {
+        "$ref": "#/$defs/Site"
+      },
+      "title": "Sites",
+      "type": "array"
+    },
+    "hosts": {
+      "items": {
+        "$ref": "#/$defs/Host"
+      },
+      "title": "Hosts",
+      "type": "array"
+    },
+    "dns": {
+      "$ref": "#/$defs/Dns"
+    },
+    "tls": {
+      "items": {
+        "$ref": "#/$defs/Tls"
+      },
+      "title": "Tls",
+      "type": "array"
+    },
+    "conditions": {
+      "$ref": "#/$defs/Conditions"
+    },
+    "role_vars": {
+      "additionalProperties": {
+        "type": "object"
+      },
+      "description": "Variables per role, passed to the role unchanged (e.g. ghosts-client.api_url)",
+      "title": "Role Vars",
+      "type": "object"
+    }
+  },
+  "required": [
+    "apiVersion",
+    "kind",
+    "slug",
+    "prefix"
+  ],
+  "type": "object"
+}

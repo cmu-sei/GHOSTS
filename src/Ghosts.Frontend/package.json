@@ -1,6 +1,6 @@
 {
   "name": "Ghosts.Frontend",
-  "version": "9.7.0",
+  "version": "9.7.257",
   "scripts": {
     "ng": "ng",
     "start": "node start.js",

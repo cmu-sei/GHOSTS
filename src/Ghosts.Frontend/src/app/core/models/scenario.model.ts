@@ -159,7 +159,7 @@ export interface ScenarioExtras {
   context?: { situation?: string };
   audience?: { role?: string; size?: number; proficiency?: string; mandate?: string };
   terrain?: {
-    reference?: { provider?: string; slice?: string };
+    reference?: { provider?: string; enclave?: string; base?: string; slice?: string }; // slice: the 1.1.0 name for enclave
     segments?: TerrainSegment[];
     hosts?: TerrainHost[];
     services?: TerrainService[];

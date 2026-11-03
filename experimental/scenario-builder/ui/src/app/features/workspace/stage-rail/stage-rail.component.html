@@ -1,0 +1,26 @@
+<nav class="rail" aria-label="Stages">
+  <ol>
+    @for (stage of stages(); track stage.number) {
+      <li>
+        <button
+          type="button"
+          class="stage"
+          [attr.data-state]="stage.state"
+          [attr.aria-current]="stage.number === selected() ? 'step' : null"
+          (click)="select.emit(stage.number)">
+          <span class="number">{{ stage.number }}</span>
+          <span class="body">
+            <span class="title">{{ stage.title }}</span>
+            <span class="meter" aria-hidden="true">
+              <span class="fill" [style.width.%]="stage.total ? (100 * stage.answered) / stage.total : 0"></span>
+            </span>
+            <span class="meta">
+              <span class="count">{{ stage.answered }}/{{ stage.total }}</span>
+              <span class="note">{{ stage.note }}</span>
+            </span>
+          </span>
+        </button>
+      </li>
+    }
+  </ol>
+</nav>

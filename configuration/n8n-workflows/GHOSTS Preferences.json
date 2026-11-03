@@ -70,7 +70,7 @@
     },
     {
       "parameters": {
-        "url": "http://ghosts-api:5000/api/npcs/list",
+        "url": "=http://ghosts-api:5000/api/npcs/list?executionId={{ $('Webhook').isExecuted ? ($('Webhook').first().json.query.executionId ?? '') : '' }}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",

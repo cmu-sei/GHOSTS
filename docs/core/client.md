@@ -36,7 +36,7 @@ GHOSTS on Windows (supporting Win7, 10, 11, and corresponding server versions) i
 
 ## Linux Client
 
-GHOSTS on Linux requires the [Microsoft dotnetcore runtime version 8.0](https://dotnet.microsoft.com/download). We have tested with Ubuntu 24.04 using the [snap instructions here](https://learn.microsoft.com/en-us/dotnet/core/install/linux-ubuntu-install?pivots=os-linux-ubuntu-2404&tabs=dotnet8), but other distributions should work.
+GHOSTS on Linux requires the [Microsoft .NET runtime version 10.0](https://dotnet.microsoft.com/download). We have tested with Ubuntu 24.04 using the [snap instructions here](https://learn.microsoft.com/en-us/dotnet/core/install/linux-ubuntu-install?pivots=os-linux-ubuntu-2404&tabs=dotnet8), but other distributions should work.
 
 ### Linux Installation
 
@@ -44,6 +44,8 @@ GHOSTS on Linux requires the [Microsoft dotnetcore runtime version 8.0](https://
 - Running the client as root may cause display issues with web browsers.
 
 ### Linux Service Configuration
+
+`configuration/client-install/linux/install.sh` does all of the steps below in one command: it unpacks the client, writes its config, and installs and starts the service. See `configuration/client-install/README.md`.
 
 To ensure the GHOSTS client runs automatically on system startup, you can configure it as a service using `systemd`.
 
@@ -65,7 +67,7 @@ Description=GHOSTS Client Service
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/dotnet /path/to/ghosts/ghosts.client.linux.dll
+ExecStart=/usr/bin/dotnet /path/to/ghosts/Ghosts.Client.Universal.dll
 WorkingDirectory=/path/to/ghosts
 Restart=always
 User=ghosts_user
@@ -418,7 +420,7 @@ Both scripts stop the GHOSTS client and any browser/driver processes it spawned.
 
 ### Universal/Linux Client Won't Start
 
-- **Check .NET version:** Run `dotnet --version` and confirm .NET 9 (or later) is installed. The Universal client does not run on .NET 8.
+- **Check .NET version:** Run `dotnet --version` and confirm .NET 10 (or later) is installed. The Universal client targets .NET 10.
 - **Permission denied:** Ensure `ghosts.client.universal.dll` is readable. Do not run as root — browser drivers may fail under root.
 - **Missing libicu:** On minimal Linux images, install ICU: `sudo apt install libicu-dev` (Debian/Ubuntu) or `sudo dnf install libicu` (Fedora/RHEL).
 - **Configuration errors:** Verify `config/application.yaml` exists and `ApiRootUrl` points to a reachable API (include the `/api` suffix).

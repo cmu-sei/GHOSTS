@@ -31,6 +31,9 @@ namespace Ghosts.Api.Infrastructure.Models
 
         public Timeline Update { get; set; }
 
+        /// <summary>The scenario run a queued one-shot belongs to; the run withdraws it when it stops running.</summary>
+        public int? ExecutionId { get; set; }
+
         public MachineUpdate()
         {
             var now = DateTime.UtcNow;

@@ -1,0 +1,79 @@
+<header class="head">
+  <span class="title">Agent</span>
+  @if (agent.models().length) {
+    <select class="model" aria-label="Model" [value]="agent.model()" [disabled]="agent.busy()" (change)="picked($event)">
+      @for (model of agent.models(); track model.id) {
+        <option [value]="model.id" [selected]="model.id === agent.model()">{{ model.id }}</option>
+      }
+    </select>
+  }
+</header>
+@if (agent.delegated()) {
+  <div class="delegated" role="status">
+    <span>The agent is deciding the rest of this scenario.</span>
+    <button class="sb-button" type="button" (click)="agent.takeBack()">Take back control</button>
+  </div>
+}
+@if (agent.busy()) {
+  <div class="working">
+    <span class="pulse" aria-hidden="true"></span>
+    <span>Thinking</span>
+    <button class="sb-button ghost stop" type="button" (click)="agent.stop()">Stop</button>
+  </div>
+}
+
+<div class="log" #log aria-live="polite">
+  @if (agent.items().length === 0 && !agent.error()) {
+    <div class="intro">
+      <p>The agent walks you through this stage's questions one at a time, recommending an answer for each. You can also answer any row yourself.</p>
+      <p>Say "you decide" at any point and it makes every remaining decision itself, to the end.</p>
+      <button class="sb-button primary" type="button" [disabled]="agent.busy() || !agent.models().length" (click)="start()">Start with the agent</button>
+    </div>
+  }
+  @for (item of agent.items(); track $index) {
+    @switch (item.kind) {
+      @case ('user') {
+        <div class="user">{{ item.text }}</div>
+      }
+      @case ('assistant') {
+        <div class="assistant">{{ item.text }}</div>
+      }
+      @case ('tool') {
+        <div class="tool" [class.refused]="!!item.error">
+          {{ item.name }}: {{ item.summary }}@if (item.error) {<span class="refusal">. {{ item.error }}</span>}
+        </div>
+      }
+      @case ('question') {
+        <app-question-card
+          [card]="item.card"
+          [disabled]="agent.busy()"
+          (answer)="answered(item.card, $event)"
+          (delegate)="agent.delegateCard(item.card)" />
+      }
+      @case ('proposal') {
+        <app-proposal-card
+          [proposal]="item.proposal"
+          (apply)="agent.decide(item.proposal, 'apply')"
+          (discard)="agent.decide(item.proposal, 'discard')" />
+      }
+      @case ('error') {
+        <div class="error">{{ item.text }}</div>
+      }
+    }
+  }
+</div>
+
+@if (agent.error(); as error) {
+  <div class="banner" role="alert">{{ error }} Every page still works by hand.</div>
+}
+<footer class="input">
+  <textarea
+    class="sb-field box"
+    rows="2"
+    placeholder="Tell the agent something, or answer in your own words"
+    [value]="draft()"
+    [disabled]="agent.busy() || !!agent.error()"
+    (input)="typed($event)"
+    (keydown.enter)="enter($event)"></textarea>
+  <button class="sb-button primary" type="button" [disabled]="agent.busy() || !draft().trim() || !!agent.error()" (click)="send()">Send</button>
+</footer>

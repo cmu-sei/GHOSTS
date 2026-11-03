@@ -76,6 +76,23 @@ public class Execution
     /// </summary>
     public string ErrorDetails { get; set; } = "{}";
 
+    /// <summary>When the run was paused, while it is paused; null otherwise.</summary>
+    public DateTime? PausedAt { get; set; }
+
+    /// <summary>Total seconds the run has spent paused. The exercise clock is wall time since start minus this.</summary>
+    public double PausedSeconds { get; set; }
+
+    /// <summary>The run's ground truth: flags, facts, objectives met and decisions recorded (ExecutionRunState).</summary>
+    [Column(TypeName = "jsonb")]
+    public string? RunState { get; set; }
+
+    /// <summary>The terrain provider's status for this run's instance (queued, building, ready, failed, tearing-down, deleted); null before any build.</summary>
+    public string? TerrainStatus { get; set; }
+
+    /// <summary>This run's terrain: provider, base, enclave, instance id, progress, log and manifest (ExecutionTerrainDto).</summary>
+    [Column(TypeName = "jsonb")]
+    public string? Terrain { get; set; }
+
     // Navigation properties
     public Scenario Scenario { get; set; } = null!;
     public ICollection<ExecutionEvent> Events { get; set; } = new List<ExecutionEvent>();
@@ -228,6 +245,10 @@ public class ExecutionTimelineItem
     public DateTime? LastFiredAt { get; set; }
     public int FireCount { get; set; }
 
+    /// <summary>The scenario event's extras (EventExtrasDto: document id, effects, expected response, indicators), copied at create.</summary>
+    [Column(TypeName = "jsonb")]
+    public string? Extras { get; set; }
+
     public Execution Execution { get; set; } = null!;
 }
 
@@ -323,7 +344,8 @@ public record ExecutionTimelineItemDto(
     string? Schedule,
     string? TriggerCondition,
     DateTime? LastFiredAt,
-    int FireCount
+    int FireCount,
+    string? Extras
 );
 
 public record CompleteTimelineItemDto(

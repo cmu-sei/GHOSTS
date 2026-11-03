@@ -1,6 +1,6 @@
 # Phishing Drill: First Contact — exercise plan
 
-*Rendered from `phishing-drill.scenario.json` (schema 1.1.0). A view, not a source: regenerate it after every edit. What gets signed is the plan; what gets loaded is the document.*
+*Rendered from `phishing-drill.scenario.json` (schema 1.2.0). A view, not a source: regenerate it after every edit. What gets signed is the plan; what gets loaded is the document.*
 
 A small SOC-defense rehearsal. You are the on-shift Blue Team analyst at Meridian Logistics. An adversary opens with a spear-phishing campaign against the finance team. How fast you detect and contain it decides whether the intrusion stops at the inbox or turns into hands-on-keyboard lateral movement.
 

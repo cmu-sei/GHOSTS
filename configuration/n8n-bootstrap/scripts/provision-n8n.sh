@@ -43,7 +43,9 @@ if [ -f "$SENTINEL" ]; then
     });
   " 2>/dev/null || echo "yes")
   if [ "$SETUP_CHECK" = "no" ]; then
-    echo "[provisioner] Sentinel exists and owner is configured — already provisioned. Exiting."
+    echo "[provisioner] Sentinel exists and owner is configured — already provisioned."
+    # Bring installed workflows up to date with the shipped files (fixes reach existing installs).
+    N8N_HOST="$N8N_HOST" WORKFLOW_DIR="$WORKFLOW_DIR" node "$(dirname "$0")/sync-workflows.mjs" || echo "[provisioner] WARNING: workflow sync failed."
     exit 0
   fi
   echo "[provisioner] Sentinel exists but n8n needs setup (DB was recreated). Re-provisioning..."
@@ -297,6 +299,9 @@ if [ -n "$N8N_OWNER_EMAIL" ] && [ -n "$N8N_OWNER_PASSWORD" ]; then
     echo "[provisioner] WARNING: Failed to create API key."
   fi
 fi
+
+# Record the shipped workflows' content so later boots update only what changed
+N8N_HOST="$N8N_HOST" WORKFLOW_DIR="$WORKFLOW_DIR" node "$(dirname "$0")/sync-workflows.mjs" || echo "[provisioner] WARNING: workflow sync failed."
 
 # Write sentinel
 touch "$SENTINEL"

@@ -120,7 +120,7 @@ public static class ScenarioReadiness
         new("E2", "Terrain", "What terrain already exists, what does this exercise add, and what may not be touched?",
             d =>
             {
-                var slice = Str(d?["terrain"]?["reference"]?["slice"]);
+                var slice = Str(d?["terrain"]?["reference"]?["enclave"]) ?? Str(d?["terrain"]?["reference"]?["slice"]);
                 var segments = Arr(d?["terrain"]?["segments"])?.Count ?? 0;
                 var hosts = Arr(d?["terrain"]?["hosts"])?.Count ?? 0;
                 if (slice == null && segments == 0 && hosts == 0) return null;

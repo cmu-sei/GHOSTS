@@ -1,0 +1,31 @@
+<div class="card" [class.done]="done()">
+  <div class="question">{{ card().question }}</div>
+  <div class="picks">
+    @for (option of picks(); track option; let first = $first) {
+      <button
+        type="button"
+        class="pick"
+        [class.recommended]="first && !!card().recommended"
+        [disabled]="locked()"
+        (click)="pick(option)">{{ option }}</button>
+      @if (first && card().recommended) {
+        <div class="why">{{ card().recommended!.why }}</div>
+      }
+    }
+  </div>
+  @if (card().answer !== 'choice') {
+    <textarea
+      class="sb-field own"
+      rows="2"
+      [placeholder]="card().answer === 'list' ? 'Your own, one item per line' : 'Your own answer'"
+      [disabled]="locked()"
+      [value]="own()"
+      (input)="typed($event)"></textarea>
+  }
+  <div class="actions">
+    <button class="sb-button agent" type="button" [disabled]="locked()" (click)="youDecide()">You decide</button>
+    @if (card().answer !== 'choice') {
+      <button class="sb-button primary" type="button" [disabled]="locked() || !own().trim()" (click)="useOwn()">Use mine</button>
+    }
+  </div>
+</div>

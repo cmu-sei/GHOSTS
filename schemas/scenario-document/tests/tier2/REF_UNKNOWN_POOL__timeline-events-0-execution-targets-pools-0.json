@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "1.2.0",
+  "slug": "ref-unknown-pool",
+  "name": "Event aimed at a pool that is not declared",
+  "description": "The event targets the night shift, and the only pool is office staff.",
+  "population": { "pools": [ { "role": "office staff", "count": 2 } ] },
+  "timeline": {
+    "events": [
+      { "id": "read-news", "at": "T+5m", "owner": "green-cell", "description": "Staff read the newsletter",
+        "execution": { "mode": "npc", "action": { "handler": "BrowserChrome", "commandArgs": ["http://intranet.office.local/news"] }, "targets": { "pools": ["night shift"] } } }
+    ]
+  }
+}

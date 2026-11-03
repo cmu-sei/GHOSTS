@@ -1,0 +1,259 @@
+// The full width of the page: its tables and fields need the room.
+.sheet {
+  margin: 20px 0 40px;
+  padding: 0 24px;
+}
+
+.head {
+  margin-bottom: 16px;
+}
+
+.back {
+  font-size: var(--sb-small);
+  color: var(--sb-muted);
+  text-decoration: none;
+
+  &::before {
+    content: '← ';
+  }
+
+  &:hover {
+    color: var(--sb-ink);
+  }
+}
+
+h1 {
+  margin-top: 4px;
+  font-size: var(--sb-title);
+}
+
+.sample {
+  display: inline-block;
+  margin: 10px 0 0;
+  padding: 4px 8px;
+  border-radius: var(--sb-pill);
+  background: var(--sb-attention-soft);
+  color: var(--sb-attention);
+  font-size: var(--sb-small);
+}
+
+fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.decision {
+  margin-bottom: 12px;
+  padding: 14px 16px;
+  background: var(--sb-surface);
+  border: 1px solid var(--sb-line);
+  border-radius: var(--sb-radius);
+}
+
+.decision-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+}
+
+.step {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--sb-line-strong);
+  border-radius: 50%;
+  font-size: var(--sb-small);
+  color: var(--sb-muted);
+}
+
+h2 {
+  margin: 2px 0 0;
+  font-size: var(--sb-text);
+}
+
+.decides {
+  margin: 2px 0 0;
+  color: var(--sb-muted);
+}
+
+.api {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 6px 0 0;
+}
+
+code {
+  padding: 1px 5px;
+  border-radius: var(--sb-pill);
+  background: var(--sb-canvas);
+  font-family: ui-monospace, 'IBM Plex Mono', Menlo, monospace;
+  font-size: 11px;
+  color: #3d4557;
+}
+
+h3 {
+  margin: 0 0 6px;
+  font-size: var(--sb-small);
+  font-weight: 600;
+  color: var(--sb-muted);
+}
+
+// What the designer already said, in the person's colour, above what GraySpace offers.
+.answers {
+  margin: 12px 0 0 36px;
+  padding: 10px 12px;
+  border-radius: var(--sb-radius);
+  background: var(--sb-person-soft);
+
+  dl {
+    display: grid;
+    grid-template-columns: 150px minmax(0, 1fr);
+    gap: 6px 12px;
+    margin: 0;
+  }
+
+  dt {
+    font-weight: 500;
+  }
+
+  dd {
+    margin: 0;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 16px;
+  }
+}
+
+.none {
+  color: var(--sb-faint);
+}
+
+.offers {
+  margin: 12px 0 0 36px;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 4px 12px;
+  margin: 0 0 10px;
+
+  dt {
+    color: var(--sb-muted);
+  }
+
+  dd {
+    margin: 0;
+  }
+}
+
+table {
+  width: 100%;
+  margin-bottom: 10px;
+  border-collapse: collapse;
+  font-size: var(--sb-small);
+
+  caption {
+    padding-bottom: 4px;
+    text-align: left;
+    color: var(--sb-muted);
+  }
+
+  th {
+    padding: 4px 8px 4px 0;
+    border-bottom: 1px solid var(--sb-line);
+    text-align: left;
+    font-weight: 500;
+    color: var(--sb-muted);
+  }
+
+  td {
+    padding: 5px 8px 5px 0;
+    border-bottom: 1px solid var(--sb-line);
+    vertical-align: top;
+  }
+
+  td .sb-field {
+    width: 72px;
+  }
+}
+
+.fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin-bottom: 10px;
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-size: var(--sb-small);
+    color: var(--sb-muted);
+  }
+
+  &.inline {
+    margin: 6px 0 0;
+
+    .sb-field {
+      width: 200px;
+    }
+  }
+}
+
+.choices {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+
+  label {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 12px;
+    padding: 8px 0;
+
+    & + li {
+      border-top: 1px solid var(--sb-line);
+    }
+  }
+
+  .step-name {
+    display: block;
+    font-weight: 500;
+  }
+
+  .step-text {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    font-size: var(--sb-small);
+    color: var(--sb-muted);
+  }
+}

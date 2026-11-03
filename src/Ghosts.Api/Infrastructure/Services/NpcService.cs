@@ -18,7 +18,7 @@ public interface INpcService
 {
     public Task<IEnumerable<NpcRecord>> GetAll();
     public Task<IEnumerable<NpcRecord>> GetEnclave(string campaign, string enclave);
-    public Task<IEnumerable<NpcNameId>> GetListAsync();
+    public Task<IEnumerable<NpcNameId>> GetListAsync(int? executionId, bool unbound);
     public Task SaveListAsync(Guid id, string username, string originUrl);
     public Task<IEnumerable<NpcRecord>> GetTeam(string campaign, string enclave, string team);
     public Task<NpcRecord> GetById(Guid id);
@@ -70,10 +70,27 @@ public class NpcService(ApplicationDbContext context, IEvidenceProcessor evidenc
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<NpcNameId>> GetListAsync()
+    /// <summary>
+    /// NPC names and ids, optionally for one execution: its pool NPCs and its scenario's compiled NPCs (no
+    /// execution of their own). With unbound, only NPCs that have no machine, which act through n8n and Pandora alone.
+    /// </summary>
+    public async Task<IEnumerable<NpcNameId>> GetListAsync(int? executionId, bool unbound)
     {
+        var query = _context.Npcs.AsQueryable();
+        if (executionId.HasValue)
+        {
+            var scenarioId = await _context.Executions
+                .Where(e => e.Id == executionId.Value)
+                .Select(e => (int?)e.ScenarioId)
+                .FirstOrDefaultAsync();
+            query = query.Where(n => n.ExecutionId == executionId.Value
+                                     || (n.ExecutionId == null && scenarioId != null && n.ScenarioId == scenarioId));
+        }
+        if (unbound)
+            query = query.Where(n => n.MachineId == null);
+
         // Load NPCs first, then project in memory to properly deserialize JSONB
-        var npcs = await _context.Npcs.ToListAsync();
+        var npcs = await query.ToListAsync();
         return npcs.Select(item => new NpcNameId
         {
             Id = item.Id,

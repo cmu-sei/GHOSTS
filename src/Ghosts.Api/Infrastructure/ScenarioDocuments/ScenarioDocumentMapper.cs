@@ -422,7 +422,7 @@ public static class ScenarioDocumentMapper
                 NullIfEmpty(when),
                 execution == null ? "Manual" : Capitalize(Str(execution, "mode")),
                 NullIfEmpty(Str(execution, "workflowRef")),
-                Extras<EventExtrasDto>(e, "at", "displayTime", "owner", "description", "objectives", "schedule", "when", "execution")));
+                EventExtras(e, execution)));
         }
 
         var pools = Arr(Obj(doc, "population"), "pools")
@@ -525,7 +525,14 @@ public static class ScenarioDocumentMapper
             "terrain", "population", "rulesOfPlay", "assessment", "timeline", "workflows", "entities", "edges");
         Put(rest, "context", Remainder(context, "political"));
         Put(rest, "audience", Remainder(audience, "rulesOfEngagement"));
-        Put(rest, "terrain", Remainder(terrain, "summary", "vulnerabilities"));
+        var terrainRest = Remainder(terrain, "summary", "vulnerabilities");
+        // 1.1.0 called the enclave "slice": stored as the enclave, so an export writes 1.2.0's name.
+        if (terrainRest["reference"] is JsonObject reference && reference["slice"] is { } slice && reference["enclave"] == null)
+        {
+            reference.Remove("slice");
+            reference["enclave"] = slice.DeepClone();
+        }
+        Put(rest, "terrain", terrainRest);
         var ropRest = Remainder(rop, "pacing", "duration", "adjudication", "telemetry", "escalationLadder", "branching");
         Put(ropRest, "escalationLadder", Remainder(Obj(rop, "escalationLadder"), "summary"));
         Put(rest, "rulesOfPlay", ropRest);
@@ -575,7 +582,7 @@ public static class ScenarioDocumentMapper
         Owners.TryGetValue(assigned ?? string.Empty, out var o) ? o
         : Owners.TryGetValue((assigned ?? string.Empty).Trim(), out var t) ? t : "unassigned";
 
-    private static string CellName(string owner) =>
+    internal static string CellName(string owner) =>
         Owners.FirstOrDefault(kv => kv.Value == owner && kv.Key.Length > 0).Key ?? string.Empty;
 
     private static string MinutesToDuration(int minutes)
@@ -714,6 +721,17 @@ public static class ScenarioDocumentMapper
     }
 
     /// <summary>A row's extras from its document object, or null when the object says nothing its columns do not.</summary>
+    /// <summary>
+    /// A timeline event's extras. Mode and workflow have columns; the rest of execution (1.2.0's NPC action and
+    /// targets) stays in the extras, and export merges it back beside the columns.
+    /// </summary>
+    private static EventExtrasDto EventExtras(JsonNode e, JsonObject execution)
+    {
+        var extras = Extras<EventExtrasDto>(e, "at", "displayTime", "owner", "description", "objectives", "schedule", "when", "execution");
+        var rest = Extras<EventExecutionDto>(execution, "mode", "workflowRef");
+        return rest == null ? extras : (extras ?? new EventExtrasDto()) with { Execution = rest };
+    }
+
     private static T Extras<T>(JsonNode node, params string[] columns) where T : class
     {
         var rest = Remainder(node as JsonObject, columns);

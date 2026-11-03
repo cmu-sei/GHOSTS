@@ -1,0 +1,72 @@
+.sheet {
+  max-width: 1080px;
+  margin: 20px auto 40px;
+  padding: 0 24px;
+}
+
+.head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+h1 {
+  font-size: var(--sb-title);
+}
+
+.sub {
+  margin: 2px 0 0;
+  font-size: var(--sb-small);
+  color: var(--sb-muted);
+}
+
+.tally {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  color: var(--sb-muted);
+
+  .big {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--sb-ink);
+  }
+}
+
+.note {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 12px;
+  padding: 9px 12px;
+  border-radius: var(--sb-radius);
+  background: var(--sb-surface);
+  border: 1px solid var(--sb-line);
+  color: var(--sb-muted);
+
+  &.done {
+    color: var(--sb-pass);
+    background: var(--sb-pass-soft);
+    border-color: transparent;
+  }
+
+  &.stale {
+    color: var(--sb-attention);
+    background: var(--sb-attention-soft);
+    border-color: transparent;
+  }
+}
+
+.ledger {
+  background: var(--sb-surface);
+  border: 1px solid var(--sb-line);
+  border-radius: var(--sb-radius);
+  overflow: hidden;
+}
+
+.ledger app-question-row:last-child ::ng-deep .row {
+  border-bottom: 0;
+}

@@ -40,8 +40,17 @@
   "REF_UNKNOWN_OBJECTIVE__timeline-events-0-objectives-0.json": {
     "code": "REF_UNKNOWN_OBJECTIVE", "path": "/timeline/events/0/objectives/0", "severity": "error"
   },
+  "REF_UNKNOWN_HOST__timeline-events-0-execution-targets-hosts-0.json": {
+    "code": "REF_UNKNOWN_HOST", "path": "/timeline/events/0/execution/targets/hosts/0", "severity": "error"
+  },
+  "REF_UNKNOWN_POOL__timeline-events-0-execution-targets-pools-0.json": {
+    "code": "REF_UNKNOWN_POOL", "path": "/timeline/events/0/execution/targets/pools/0", "severity": "error"
+  },
   "REF_UNKNOWN_REFERENCE__assessment-purpose.json": {
     "code": "REF_UNKNOWN_REFERENCE", "path": "/assessment/purpose", "severity": "error"
+  },
+  "REF_UNKNOWN_SEGMENT__population-pools-0-segments-0.json": {
+    "code": "REF_UNKNOWN_SEGMENT", "path": "/population/pools/0/segments/0", "severity": "error"
   },
   "REF_UNKNOWN_SEGMENT__terrain-hosts-0-segment.json": {
     "code": "REF_UNKNOWN_SEGMENT", "path": "/terrain/hosts/0/segment", "severity": "error"

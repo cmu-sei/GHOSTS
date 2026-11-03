@@ -1,6 +1,6 @@
 # Meridian Under Pressure: Hybrid Intrusion — exercise plan
 
-*Rendered from `meridian-hybrid.scenario.json` (schema 1.1.0). A view, not a source: regenerate it after every edit. What gets signed is the plan; what gets loaded is the document.*
+*Rendered from `meridian-hybrid.scenario.json` (schema 1.2.0). A view, not a source: regenerate it after every edit. What gets signed is the plan; what gets loaded is the document.*
 
 You are the incident commander at Meridian Logistics. An adversary is inside your network AND running an influence campaign to break your board's nerve. Deny them their objective before the clock — and the narrative — runs away from you.
 

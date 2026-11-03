@@ -1,6 +1,6 @@
 ---
 name: author-scenario
-description: Turn an exercise developer's plain-English intent into a validated GHOSTS scenario document — interview from the elicitation checklist, draft against schema 1.1.0, validate and revise until clean, render an exercise plan for review, and import only when told to. Use when someone wants to author, draft, revise, or import a GHOSTS scenario, or asks to turn an exercise intent into a scenario.
+description: Turn an exercise developer's plain-English intent into a validated GHOSTS scenario document — interview from the elicitation checklist, draft against schema 1.2.0, validate and revise until clean, render an exercise plan for review, and import only when told to. Use when someone wants to author, draft, revise, or import a GHOSTS scenario, or asks to turn an exercise intent into a scenario.
 ---
 
 # Author a scenario document
@@ -96,7 +96,7 @@ than encode — a flag no event sets because a white cell decides it — gets a 
 
 ### c. Draft
 
-Write `<slug>.scenario.json` against **schema 1.1.0** (`schemas/scenario-document/v1/`). Read the
+Write `<slug>.scenario.json` against **schema 1.2.0** (`schemas/scenario-document/v1/`). Read the
 schema; do not write the document from recall of it. `schemas/scenario-document/examples/` has four
 worked documents — `operation-overlord.scenario.json` is the fullest.
 
@@ -116,7 +116,7 @@ Non-negotiable properties of the draft:
   `startingConditions` — or it is a row in `decisions.md` listed as adjudicated. Tier 2 reports
   `REF_UNSET_FLAG`; a clean run means you already resolved it deliberately.
 - **Terrain is structured**: `terrain.hosts[]` and `terrain.segments[]`, not a prose summary, plus
-  `terrain.reference` naming the base slice the intent names. `TERRAIN_UNSTRUCTURED` is the check.
+  `terrain.reference` naming the enclave and base the intent names. `TERRAIN_UNSTRUCTURED` is the check.
 - Offsets are `T+`-form and inside `rulesOfPlay.duration`. Compute them from the intent's dates; that is
   arithmetic, not a question.
 

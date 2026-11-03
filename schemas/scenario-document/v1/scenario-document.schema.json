@@ -8,9 +8,9 @@
   "required": ["schemaVersion", "slug", "name", "description"],
   "properties": {
     "schemaVersion": {
-      "description": "Version of this schema the document was written against. Semantic versioning; a major bump means an older reader must refuse the file. 1.1.0 declares the defaults canonical form omits; a 1.0.0 document is read unchanged.",
+      "description": "Version of this schema the document was written against. Semantic versioning; a major bump means an older reader must refuse the file. 1.1.0 declares the defaults canonical form omits; a 1.0.0 document is read unchanged. 1.2.0 adds the terrain reference's enclave and base, an event's NPC action, targets and choices, and a pool's placement; a 1.1.0 document is read unchanged and its slice is the enclave.",
       "type": "string",
-      "enum": ["1.0.0", "1.1.0"]
+      "enum": ["1.0.0", "1.1.0", "1.2.0"]
     },
     "slug": {
       "$ref": "#/$defs/slug",
@@ -129,13 +129,16 @@
       "additionalProperties": false,
       "properties": {
         "reference": {
-          "description": "The base network this exercise runs on, by name, in a terrain provider such as GraySpace. The document does not restate what the provider knows.",
+          "description": "The terrain this exercise runs on, by name, in a terrain provider such as GraySpace: an enclave built on a base network. The document does not restate what the provider knows.",
           "type": "object",
           "additionalProperties": false,
-          "required": ["provider", "slice"],
+          "required": ["provider"],
+          "anyOf": [{ "required": ["enclave"] }, { "required": ["slice"] }],
           "properties": {
             "provider": { "type": "string", "minLength": 1 },
-            "slice": { "type": "string", "minLength": 1 }
+            "enclave": { "type": "string", "minLength": 1, "description": "The enclave the provider builds for this exercise." },
+            "base": { "type": "string", "minLength": 1, "description": "The base network the enclave is built on. When absent, the provider's own base for the enclave." },
+            "slice": { "type": "string", "minLength": 1, "description": "The 1.1.0 name for enclave. Read as the enclave." }
           }
         },
         "summary": {
@@ -243,7 +246,9 @@
             "properties": {
               "role": { "type": "string", "minLength": 1 },
               "count": { "type": "integer", "minimum": 0 },
-              "description": { "type": "string", "description": "Who these people are: employer, unit, working hours, what they use. The generator reads this instead of inventing a persona." }
+              "description": { "type": "string", "description": "Who these people are: employer, unit, working hours, what they use. The generator reads this instead of inventing a persona." },
+              "segments": { "type": "array", "description": "Segments this pool's people sit on, by name in terrain.segments.", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+              "hosts": { "type": "array", "description": "Hosts this pool's people use, by name in terrain.hosts.", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true }
             }
           }
         }
@@ -505,6 +510,32 @@
       "type": "string",
       "enum": ["white-cell", "red-team", "blue-team", "green-cell", "unassigned"]
     },
+    "npcAction": {
+      "description": "What an NPC's client runs for an event: an everyday handler, its initial value, its commands and their arguments.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["handler"],
+      "properties": {
+        "handler": { "type": "string", "enum": ["BrowserChrome", "BrowserFirefox", "Outlook", "Word", "Excel", "PowerPoint", "Notepad", "Print"] },
+        "initial": { "type": "string", "description": "The handler's initial value, such as the browser's start page." },
+        "commands": { "type": "array", "description": "The handler's commands, in order, such as browse or random for a browser. Absent: the handler's default, random for a browser, create for Word, Excel, PowerPoint and Notepad, print for Print, read for Outlook.", "items": { "type": "string", "minLength": 1 } },
+        "commandArgs": { "type": "array", "description": "The arguments every command gets: the pages a browser browses or picks from; the save directory, then options, for Word, Excel and PowerPoint; the files Print prints. Outlook's send takes eight; read and reply take none.", "items": { "type": "string", "minLength": 1 } },
+        "args": { "type": "object", "description": "Handler arguments, as strings.", "additionalProperties": { "type": "string" } }
+      },
+      "if": { "properties": { "handler": { "enum": ["BrowserChrome", "BrowserFirefox", "Word", "Excel", "PowerPoint", "Print"] } } },
+      "then": { "required": ["commandArgs"], "properties": { "commandArgs": { "type": "array", "minItems": 1 } } }
+    },
+    "targets": {
+      "description": "Which NPCs carry out an event: by pool role, by the segments they sit on, or by host name. Absent: every NPC bound to the run.",
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "pools": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+        "segments": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+        "hosts": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true }
+      }
+    },
     "effects": {
       "description": "Changes to ground truth when this fires.",
       "type": "object",
@@ -567,8 +598,25 @@
           "additionalProperties": false,
           "minProperties": 1,
           "properties": {
-            "mode": { "type": "string", "enum": ["manual", "workflow"], "default": "manual" },
-            "workflowRef": { "type": "string", "description": "A ref in this document's workflows list." }
+            "mode": { "type": "string", "enum": ["manual", "workflow", "npc"], "default": "manual", "description": "manual: a person carries it out. workflow: an n8n workflow does. npc: the targeted NPCs' clients run its action." },
+            "workflowRef": { "type": "string", "description": "A ref in this document's workflows list." },
+            "action": { "$ref": "#/$defs/npcAction" },
+            "targets": { "$ref": "#/$defs/targets" }
+          }
+        },
+        "choices": {
+          "type": "array",
+          "description": "The answers to a decision point. White Cell records the one taken, and its effects apply.",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "label"],
+            "properties": {
+              "id": { "$ref": "#/$defs/slug" },
+              "label": { "type": "string", "minLength": 1 },
+              "effects": { "$ref": "#/$defs/effects" }
+            }
           }
         }
       }

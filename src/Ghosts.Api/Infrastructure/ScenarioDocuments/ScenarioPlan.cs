@@ -269,8 +269,12 @@ public static class ScenarioPlan
         Heading(out_, 2, "The terrain");
         var reference = Get(t, "reference");
         if (reference != null)
-            Para(out_, $"**Base.** The `{S(Get(reference, "slice"))}` slice from {S(Get(reference, "provider"))}. " +
+        {
+            var enclave = Truthy(Get(reference, "enclave")) ? S(Get(reference, "enclave")) : S(Get(reference, "slice"));
+            var onBase = Truthy(Get(reference, "base")) ? $" on the `{S(Get(reference, "base"))}` base" : "";
+            Para(out_, $"**Base.** The `{enclave}` enclave{onBase} from {S(Get(reference, "provider"))}. " +
                        "Everything below is what this exercise adds to it or relies on from it.");
+        }
         var summary = Get(t, "summary");
         if (Truthy(Get(summary, "topology"))) Para(out_, $"**Topology.** {S(Get(summary, "topology"))}");
         if (Truthy(Get(summary, "assets"))) Para(out_, $"**Assets.** {S(Get(summary, "assets"))}");

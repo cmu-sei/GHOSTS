@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "1.2.0",
+  "slug": "ref-unknown-target-host",
+  "name": "Event aimed at a host that is not declared",
+  "description": "The event targets desk-99, and the terrain declares only desk-01.",
+  "terrain": {
+    "segments": [ { "name": "Office LAN" } ],
+    "hosts": [ { "name": "desk-01", "segment": "Office LAN" } ]
+  },
+  "timeline": {
+    "events": [
+      { "id": "print-agenda", "at": "T+5m", "owner": "green-cell", "description": "Staff print the agenda",
+        "execution": { "mode": "npc", "action": { "handler": "Print", "commandArgs": ["C:\\Users\\Public\\agenda.txt"] }, "targets": { "hosts": ["desk-99"] } } }
+    ]
+  }
+}

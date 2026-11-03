@@ -104,6 +104,16 @@
               <span class="toggle-thumb"></span>
             </span>
           </label>
+          @if (graySpaceSummary(); as gs) {
+          <label class="lyr-row" title="GraySpace's simulated internet and this run's enclave">
+            <span class="lyr-dot" style="background:#22c55e"></span>
+            <span class="lyr-name">GraySpace</span>
+            <span class="lyr-ct">{{ gs.routers }} routers · {{ gs.links }} link{{ gs.links === 1 ? '' : 's' }}@if (gs.down) { · {{ gs.down }} down } · {{ gs.sites }} sites</span>
+            <span class="toggle-track" [class.on]="showGraySpace()" (click)="$event.preventDefault(); toggleGraySpace()">
+              <span class="toggle-thumb"></span>
+            </span>
+          </label>
+          }
 
           <!-- Filters -->
           <div class="filter-section">

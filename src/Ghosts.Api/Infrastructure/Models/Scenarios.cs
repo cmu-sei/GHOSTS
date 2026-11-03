@@ -225,7 +225,9 @@ public enum TriggerKind
 public enum ExecutionType
 {
     Manual,
-    Workflow
+    Workflow,
+    /// <summary>Dispatched to the clients of the targeted NPCs (scenario document 1.2.0, execution.mode "npc").</summary>
+    Npc
 }
 
 [Table("scenario_timeline_events")]

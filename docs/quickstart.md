@@ -129,7 +129,7 @@ GHOSTS clients simulate realistic user activity on target machines. Install one 
 | Client | Runtime | OS | Best For |
 |--------|---------|----|----------|
 | **Windows** | [.NET Framework 4.6.1+](https://go.microsoft.com/fwlink/?LinkId=2099467) | Windows 7/10/11, Server 2012+ | Full Office/browser/RDP automation. Use when participants observe the desktop. |
-| **Universal** | [.NET 9](https://dotnet.microsoft.com/download/dotnet/9.0) | Windows, Linux, macOS | Cross-platform, 38+ handlers. **Default choice** for Linux or mixed environments. |
+| **Universal** | [.NET 10](https://dotnet.microsoft.com/download/dotnet/10.0) | Windows, Linux, macOS | Cross-platform, 38+ handlers. **Default choice** for Linux or mixed environments. |
 | **Lite** | [.NET 8](https://dotnet.microsoft.com/download/dotnet/8.0) | Windows, Linux | Lightweight traffic generation without real apps. Run 100-500+ NPCs per host. |
 
 > **Not sure?** Start with **Universal**. Switch to **Windows** only if you need Office automation, or to **Lite** if you need high NPC density on limited hardware.
@@ -160,7 +160,7 @@ For browser automation, GHOSTS uses the WebDriver in the same directory as the G
 
 ### :material-linux: Linux / Universal Client
 
-**Requirements:** [.NET 9 runtime](https://dotnet.microsoft.com/download/dotnet/9.0) (runtime only, SDK not required).
+**Requirements:** [.NET 10 runtime](https://dotnet.microsoft.com/download/dotnet/10.0) (runtime only, SDK not required).
 
 For Ubuntu 24.04, use the [snap installation](https://learn.microsoft.com/en-us/dotnet/core/install/linux-ubuntu-install?pivots=os-linux-ubuntu-2404&tabs=dotnet8).
 

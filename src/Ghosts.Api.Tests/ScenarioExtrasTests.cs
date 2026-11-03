@@ -117,7 +117,7 @@ public class ScenarioExtrasTests
 
         var terrain = document["terrain"] as JsonObject ?? new JsonObject();
         document["terrain"] = terrain;
-        terrain["reference"] = new JsonObject { ["provider"] = "topomojo", ["slice"] = "corp-base" };
+        terrain["reference"] = new JsonObject { ["provider"] = "topomojo", ["enclave"] = "corp-base" };
         terrain["segments"] = new JsonArray(new JsonObject { ["name"] = "corp", ["cidr"] = "10.0.0.0/24", ["description"] = "Office LAN" });
         terrain["services"] = new JsonArray(new JsonObject { ["name"] = "mail", ["description"] = "Exchange", ["hosts"] = new JsonArray("mx01") });
         terrain["defenses"] = new JsonArray(new JsonObject { ["name"] = "EDR", ["description"] = "On every workstation", ["covers"] = new JsonArray("corp") });

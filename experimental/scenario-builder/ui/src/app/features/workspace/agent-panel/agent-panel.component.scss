@@ -1,0 +1,133 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 44px;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--sb-line);
+
+  .title {
+    font-weight: 600;
+  }
+}
+
+.model {
+  font: 500 var(--sb-small) var(--sb-font);
+  color: var(--sb-ink);
+  padding: 4px 8px;
+  border: 1px solid var(--sb-line-strong);
+  border-radius: var(--sb-radius);
+  background: var(--sb-surface);
+}
+
+.delegated {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px 8px 14px;
+  font-size: var(--sb-small);
+  font-weight: 500;
+  color: #4b2d8f;
+  background: var(--sb-agent-soft);
+  border-bottom: 1px solid #e3d8f7;
+}
+
+.working {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px 6px 14px;
+  font-size: var(--sb-small);
+  color: var(--sb-agent);
+  background: var(--sb-agent-soft);
+
+  .stop {
+    margin-left: auto;
+  }
+}
+
+// The one moving thing: a slow pulse while the agent is working.
+.pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--sb-agent);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+.log {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 8px 14px 12px;
+}
+
+.intro {
+  margin-top: 8px;
+  color: var(--sb-muted);
+
+  p {
+    margin: 0 0 12px;
+  }
+}
+
+.user {
+  margin: 10px 0 10px 48px;
+  padding: 8px 10px;
+  border-radius: var(--sb-radius);
+  background: var(--sb-person-soft);
+  white-space: pre-wrap;
+}
+
+.assistant {
+  margin: 10px 24px 10px 0;
+  white-space: pre-wrap;
+}
+
+.tool {
+  margin: 3px 0;
+  font-size: 11.5px;
+  color: var(--sb-faint);
+
+  &.refused .refusal {
+    color: var(--sb-error);
+  }
+}
+
+.error {
+  margin: 8px 0;
+  color: var(--sb-error);
+}
+
+.banner {
+  padding: 8px 14px;
+  font-size: var(--sb-small);
+  background: #fdecee;
+  color: var(--sb-error);
+}
+
+.input {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  padding: 10px 14px 12px;
+  border-top: 1px solid var(--sb-line);
+
+  .box {
+    flex: 1;
+  }
+}

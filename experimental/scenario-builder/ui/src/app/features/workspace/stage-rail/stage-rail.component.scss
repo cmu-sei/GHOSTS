@@ -1,0 +1,135 @@
+:host {
+  display: block;
+}
+
+.rail ol {
+  list-style: none;
+  margin: 0;
+  padding: 12px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stage {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  gap: 10px;
+  width: 100%;
+  padding: 10px 10px 11px;
+  border: 0;
+  border-radius: var(--sb-radius);
+  background: transparent;
+  color: var(--sb-ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--sb-canvas);
+  }
+
+  &[aria-current='step'] {
+    background: var(--sb-person-soft);
+  }
+}
+
+// The stage number sits in a ring whose fill says where the stage stands.
+.number {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid var(--sb-line-strong);
+  font-size: var(--sb-small);
+  font-weight: 600;
+  color: var(--sb-muted);
+  box-sizing: border-box;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.title {
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.meter {
+  height: 3px;
+  border-radius: 2px;
+  background: var(--sb-line);
+  overflow: hidden;
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  background: var(--sb-person);
+}
+
+.meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: var(--sb-small);
+  color: var(--sb-muted);
+}
+
+.count {
+  font-weight: 500;
+}
+
+[data-state='open'] .number {
+  border-color: var(--sb-person);
+  color: var(--sb-person);
+}
+
+[data-state='done'] {
+  .number {
+    border-color: var(--sb-pass);
+    background: var(--sb-pass);
+    color: #ffffff;
+  }
+
+  .fill {
+    background: var(--sb-pass);
+  }
+}
+
+[data-state='attention'] {
+  .number {
+    border-color: var(--sb-attention);
+    background: var(--sb-attention-soft);
+    color: var(--sb-attention);
+  }
+
+  .note {
+    color: var(--sb-attention);
+  }
+}
+
+[data-state='locked'] {
+  .title,
+  .number {
+    color: var(--sb-faint);
+  }
+}
+
+// Narrow screens: the rail becomes a strip across the top.
+@media (max-width: 1000px) {
+  .rail ol {
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 8px;
+  }
+
+  .stage {
+    min-width: 200px;
+  }
+}

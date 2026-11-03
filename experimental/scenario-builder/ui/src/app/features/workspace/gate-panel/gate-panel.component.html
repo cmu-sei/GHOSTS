@@ -1,0 +1,29 @@
+<section class="gate" [attr.data-state]="gate().passes ? 'passes' : waitsForApproval() ? 'approval' : 'open'">
+  @if (gate().passes) {
+    @if (lastStage()) {
+      <span class="text">The last stage is complete. The work is done.</span>
+    } @else {
+      <span class="text">Every question is answered and approved.</span>
+      <button class="sb-button primary" type="button" (click)="advance.emit()">Open the next stage</button>
+    }
+  } @else if (waitsForApproval()) {
+    <span class="text">{{ openFindings()[0].message }}</span>
+    <button class="sb-button primary" type="button" (click)="approve.emit(stage())">{{ gate().approval }}</button>
+  } @else if (openFindings().length) {
+    <span class="text">
+      @if (openCount()) {
+        {{ openCount() }} {{ openCount() === 1 ? 'question' : 'questions' }} open.
+      }
+      @for (finding of otherFindings(); track finding.message) {
+        {{ finding.message }}
+      }
+    </span>
+  }
+</section>
+
+@for (finding of staleClosed(); track finding.stage) {
+  <section class="gate" data-state="attention">
+    <span class="text">{{ finding.message }}</span>
+    <button class="sb-button" type="button" (click)="approve.emit(finding.stage)">Approve stage {{ finding.stage }} again</button>
+  </section>
+}

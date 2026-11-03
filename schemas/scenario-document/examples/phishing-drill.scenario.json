@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.1.0",
+  "schemaVersion": "1.2.0",
   "slug": "phishing-drill",
   "name": "Phishing Drill: First Contact",
   "description": "A small SOC-defense rehearsal. You are the on-shift Blue Team analyst at Meridian Logistics. An adversary opens with a spear-phishing campaign against the finance team. How fast you detect and contain it decides whether the intrusion stops at the inbox or turns into hands-on-keyboard lateral movement.",

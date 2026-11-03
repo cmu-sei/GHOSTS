@@ -21,7 +21,7 @@ public interface IManageableHostedService : IHostedService
     new Task StartAsync(CancellationToken cancellationToken);
     new Task StopAsync(CancellationToken cancellationToken);
 
-    Task StartWorkflowJob(string workflowId, string webhookUrl, string schedule, CancellationToken cancellationToken, string jobKey = null);
+    Task StartWorkflowJob(string workflowId, string webhookUrl, string schedule, CancellationToken cancellationToken, string jobKey = null, string query = null);
     Task StopWorkflowJob(string jobKey);
     bool IsWorkflowRunning(string jobKey);
 
@@ -95,7 +95,7 @@ public class AnimationsManager(IHubContext<ActivityHub> activityHubContext, IHtt
         return _jobs.TryRemove(jobName, out _);
     }
 
-    public Task StartWorkflowJob(string workflowId, string webhookUrl, string schedule, CancellationToken cancellationToken, string jobKey = null)
+    public Task StartWorkflowJob(string workflowId, string webhookUrl, string schedule, CancellationToken cancellationToken, string jobKey = null, string query = null)
     {
         // jobKey distinguishes concurrent runs of the same workflow (e.g. per-execution);
         // defaults to workflowId to preserve the standalone workflow-runner behavior.
@@ -115,6 +115,7 @@ public class AnimationsManager(IHubContext<ActivityHub> activityHubContext, IHtt
             WorkflowId = workflowId,
             WebhookUrl = webhookUrl,
             Schedule = schedule,
+            Query = query,
             N8nApiUrl = N8nConfig.GetApiUrl(),
             N8nApiKey = N8nConfig.GetApiKey()
         };

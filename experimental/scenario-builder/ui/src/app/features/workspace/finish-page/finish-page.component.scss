@@ -1,0 +1,286 @@
+.sheet {
+  max-width: 820px;
+  margin: 20px auto 40px;
+  padding: 0 24px;
+}
+
+.head {
+  margin-bottom: 20px;
+}
+
+h1 {
+  font-size: var(--sb-title);
+}
+
+.sub {
+  margin: 4px 0 0;
+  color: var(--sb-muted);
+}
+
+.draft {
+  display: inline-block;
+  margin: 10px 0 0;
+  padding: 4px 8px;
+  border-radius: var(--sb-pill);
+  background: var(--sb-attention-soft);
+  color: var(--sb-attention);
+  font-size: var(--sb-small);
+}
+
+.error {
+  color: var(--sb-error);
+}
+
+.block {
+  margin-bottom: 24px;
+
+  h2 {
+    margin-bottom: 8px;
+    font-size: var(--sb-text);
+  }
+}
+
+.panel {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: var(--sb-surface);
+  border: 1px solid var(--sb-line);
+  border-radius: var(--sb-radius);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 12px;
+
+  & + .row {
+    border-top: 1px solid var(--sb-line);
+  }
+}
+
+.document {
+  grid-template-columns: minmax(0, 1fr) 96px 72px auto;
+}
+
+.what {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.name {
+  font-weight: 500;
+}
+
+.meta {
+  font-size: var(--sb-small);
+  color: var(--sb-muted);
+}
+
+.audience {
+  justify-self: start;
+  padding: 2px 6px;
+  border: 1px solid var(--sb-line-strong);
+  border-radius: var(--sb-pill);
+  font-size: var(--sb-small);
+  color: var(--sb-ink);
+
+  // Not for participants: these carry what exercise control knows.
+  &:not([data-audience='participants']) {
+    border-color: var(--sb-attention);
+    color: var(--sb-attention);
+  }
+}
+
+.format {
+  font-size: var(--sb-small);
+  color: var(--sb-muted);
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+
+  a.sb-button {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+  }
+}
+
+pre {
+  margin: 0;
+  padding: 12px;
+  max-height: 480px;
+  overflow: auto;
+  border-top: 1px solid var(--sb-line);
+  font-size: 12px;
+  line-height: 1.55;
+  color: #2a3142;
+}
+
+.empty {
+  padding: 14px 12px;
+  color: var(--sb-muted);
+}
+
+.section-sub {
+  margin: -4px 0 8px;
+  font-size: var(--sb-small);
+  color: var(--sb-muted);
+}
+
+// One card per app, as an extensions gallery shows them: who it is, what it does, how to use it.
+.plugins {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.plugin {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: 1fr auto;
+  gap: 10px 12px;
+  padding: 12px;
+  background: var(--sb-surface);
+  border: 1px solid var(--sb-line);
+  border-radius: var(--sb-radius);
+
+  &:hover {
+    border-color: var(--sb-line-strong);
+  }
+}
+
+// Each app's own colour, so the gallery reads at a glance; unknown apps stay neutral.
+.monogram {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #6b7385;
+  font-weight: 600;
+  color: #ffffff;
+
+  &[data-plugin='blueprint'] {
+    background: #0b84c6;
+  }
+
+  &[data-plugin='cite'] {
+    background: #d9622b;
+  }
+
+  &[data-plugin='gallery'] {
+    background: #c2408a;
+  }
+
+  &[data-plugin='player'] {
+    background: #5a55d2;
+  }
+
+  &[data-plugin='steamfitter'] {
+    background: #56677d;
+  }
+
+  &[data-plugin='ghosts'] {
+    background: #1e9a5b;
+  }
+}
+
+.plugin-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.plugin-name {
+  font-weight: 600;
+}
+
+.plugin-description {
+  font-size: var(--sb-small);
+  line-height: 1.4;
+  color: var(--sb-muted);
+}
+
+.plugin-foot {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+.plugin-state {
+  font-size: var(--sb-small);
+  color: var(--sb-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Connected: the dot and the address say where Send goes.
+.plugin.connected .plugin-state {
+  color: var(--sb-ink);
+
+  &::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    margin-right: 6px;
+    border-radius: 50%;
+    background: var(--sb-pass);
+    vertical-align: middle;
+  }
+}
+
+.plugin-actions {
+  display: flex;
+  flex: none;
+  gap: 6px;
+}
+
+.connect {
+  width: 28px;
+  padding: 0;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.plugin-connect {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 8px;
+
+  .spacer {
+    flex: 1;
+  }
+
+  .plugin-foot {
+    gap: 6px;
+  }
+}
+
+.plugin-error {
+  margin: 0;
+  font-size: var(--sb-small);
+  color: var(--sb-error);
+}
+
+.note {
+  min-height: 1.45em;
+  margin: 6px 0 0;
+  font-size: var(--sb-small);
+  color: var(--sb-muted);
+}
