@@ -42,6 +42,7 @@ var facebook = builder.AddProject<Projects.Ghosts_Pandora>("facebook")
     .WithEnvironment("DATABASE_PROVIDER", "PostgreSQL")
     .WithEnvironment("MODE_TYPE", "social")
     .WithEnvironment("DEFAULT_THEME", "facebook")
+    .WithEnvironment("GHOSTS_API_URL", "http://localhost:5000/api")
     .WithEnvironment("LD_PRELOAD", freetypeLib)
     .WithHttpEndpoint(port: 8800, name: "http", isProxied: false)
     .WithExternalHttpEndpoints();

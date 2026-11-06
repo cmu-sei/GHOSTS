@@ -262,7 +262,30 @@ environment:
 docker run -e MODE_TYPE=social -e DEFAULT_THEME=twitter ghosts-pandora
 ```
 
-Environment variables take precedence over `appsettings.json` values.
+Settings are resolved in this order, highest first:
+
+1. The short variables above, plus `GHOSTS_API_URL`. The Docker image sets defaults for the five mode variables, so in a container the mode can only be changed through them.
+2. Any other `ApplicationConfiguration` setting, named by its path in `appsettings.json` with `__` between levels:
+   ```bash
+   ApplicationConfiguration__CleanupAge__Days=30
+   ApplicationConfiguration__Pandora__OllamaEnabled=true
+   ```
+3. `appsettings.json`.
+
+### Database
+
+Social media data is stored in SQLite by default, in `db/pandora.db` under the application directory (`/app/db` in the container). To use PostgreSQL instead:
+
+```bash
+DATABASE_PROVIDER=PostgreSQL
+CONNECTION_STRING="Host=ghosts-postgres;Port=5432;Database=pandora;Username=ghosts;Password=..."
+```
+
+The database is created on first use if it does not exist.
+
+### Reporting Activity to the GHOSTS API
+
+Set `GHOSTS_API_URL` (for example `http://ghosts-api:5000/api`) to have Pandora report posts, likes, comments and direct messages to a GHOSTS API as NPC activity. It is empty by default, which turns reporting off.
 
 ### Payload Configuration
 
@@ -318,12 +341,24 @@ Configure dynamic content generation:
 
 ## Running the Server
 
+Pandora runs either on its own or as part of the GHOSTS stack. Each works with no extra configuration:
+
+| | Standalone | In the GHOSTS stack |
+|---|---|---|
+| Started with | `docker run`, or `docker compose up -d` in `src/Ghosts.Pandora/src` | `docker compose up -d` in `src/Ghosts.Api` (service `ghosts-pandora`), or the Aspire host |
+| Database | SQLite in `/app/db` | PostgreSQL on `ghosts-postgres`, database `pandora` |
+| Activity reporting to the GHOSTS API | off; set `GHOSTS_API_URL` to turn it on | on |
+| Address | http://localhost:8000 | http://localhost:8800 (`PANDORA_PORT`); `http://ghosts-pandora:5000` on the compose network |
+
 ### Docker
 
-**Quick Start:**
+**Quick Start** (builds the image from source):
 ```bash
-docker-compose up -d
+cd src
+docker compose up -d
 ```
+
+A prebuilt image is published as `ghcr.io/cmu-sei/ghosts/pandora` (`latest` follows `master`).
 
 **Docker Run with Custom Configuration:**
 ```bash
@@ -331,8 +366,9 @@ docker-compose up -d
 docker run -d -p 8000:5000 \
   -e MODE_TYPE=social \
   -e DEFAULT_THEME=facebook \
-  -v ./Payloads:/app/Payloads \
-  dustinupdyke/ghosts-pandora:latest
+  -v pandora-db:/app/db \
+  -v pandora-images:/app/wwwroot/images \
+  ghcr.io/cmu-sei/ghosts/pandora:latest
 
 # Website mode (News)
 docker run -d -p 8000:5000 \
@@ -340,33 +376,38 @@ docker run -d -p 8000:5000 \
   -e SITE_TYPE=news \
   -e SITE_NAME="Breaking News" \
   -v ./Payloads:/app/Payloads \
-  dustinupdyke/ghosts-pandora:latest
+  ghcr.io/cmu-sei/ghosts/pandora:latest
 ```
 
 **Docker Compose with Environment Variables:**
 ```yaml
-version: "3.6"
 services:
   pandora:
-    image: dustinupdyke/ghosts-pandora:latest
+    image: ghcr.io/cmu-sei/ghosts/pandora:latest
     ports:
       - "8000:5000"
     environment:
       - MODE_TYPE=social
       - DEFAULT_THEME=instagram
     volumes:
-      - ./Payloads:/app/Payloads
-      - ./data:/app/_data
+      - pandora-db:/app/db
+      - pandora-images:/app/wwwroot/images
     restart: always
+
+volumes:
+  pandora-db:
+  pandora-images:
 ```
 
 **Multiple Instances:**
 
-See `docker-compose.examples.yml` for examples of running multiple instances with different configurations (Facebook, Instagram, Twitter, News site, Shopping site, etc.).
+To run several sites (for example one per theme), start one container per site, each with its own port and volumes.
 
 **Volume Mounts:**
-- `./Payloads:/app/Payloads` - Custom payload files
-- `./data:/app/_data` - Cached generated content
+- `/app/db` - SQLite database
+- `/app/wwwroot/images` - Images uploaded with posts
+- `/app/Payloads` - Custom payload files
+- `/app/_data` - Cached generated content
 - `./appsettings.json:/app/appsettings.json:ro` - Custom configuration (optional)
 
 ### Building from Source
@@ -455,7 +496,7 @@ Migrating to **GHOSTS Pandora** is straightforward:
    docker run -p 80:80 dustinupdyke/ghosts-pandora:latest
 
    # New
-   docker run -p 80:5000 -e MODE_TYPE=website dustinupdyke/ghosts-pandora:latest
+   docker run -p 80:5000 -e MODE_TYPE=website ghcr.io/cmu-sei/ghosts/pandora:latest
    ```
 
 2. **Update port mappings**: Pandora runs on port 5000 by default (the old Pandora used port 80)

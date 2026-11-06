@@ -46,6 +46,7 @@ services:
     environment:
       N8N_API_URL: ${N8N_API_URL:-http://ghosts-n8n:5678/api/v1/workflows}
       N8N_API_KEY: ${N8N_API_KEY:-replace-me}
+      PANDORA_HOST: ${PANDORA_HOST:-http://ghosts-pandora:5000}
       # Terrain provider (GraySpace Terrain API 1.3.0). Unset, Build terrain fails with not_configured. To try GHOSTS's
       # own simulator: TERRAIN_STUB=true TERRAIN_BASE_URL=http://localhost:5000/stubs/grayspace TERRAIN_TOKEN=dev-token
       TerrainProvider__BaseUrl: ${TERRAIN_BASE_URL:-}
@@ -53,6 +54,26 @@ services:
       TerrainProvider__ClientUrl: ${TERRAIN_CLIENT_URL:-}
       TerrainProvider__GhostsApiUrl: ${TERRAIN_GHOSTS_API_URL:-}
       TerrainProvider__EnableStub: ${TERRAIN_STUB:-false}
+    restart: unless-stopped
+  ghosts-pandora:
+    build:
+      context: ../Ghosts.Pandora/src
+      target: prod
+    container_name: ghosts-pandora
+    depends_on:
+      ghosts-postgres:
+        condition: service_healthy
+    ports:
+      - "${PANDORA_PORT:-8800}:5000"
+    environment:
+      MODE_TYPE: ${PANDORA_MODE_TYPE:-social}
+      DEFAULT_THEME: ${PANDORA_DEFAULT_THEME:-facebook}
+      DATABASE_PROVIDER: PostgreSQL
+      CONNECTION_STRING: Host=ghosts-postgres;Port=5432;Database=pandora;Username=ghosts;Password=${POSTGRES_PASSWORD:-Scotty@@1!}
+      GHOSTS_API_URL: http://ghosts-api:5000/api
+    volumes:
+      - ghosts-pandora-data:/app/_data
+      - ghosts-pandora-images:/app/wwwroot/images
     restart: unless-stopped
 
   ghosts-n8n:
@@ -65,8 +86,8 @@ services:
       - N8N_SECURE_COOKIE=false
       - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=false
       - N8N_DIAGNOSTICS_ENABLED=false
-      # The social workflows post to Pandora at $env.PANDORA_URL; point it at your Pandora (no Pandora runs in this file).
-      - PANDORA_URL=${PANDORA_URL:-http://host.docker.internal:8000}
+      # The social workflows post to Pandora at $env.PANDORA_URL; defaults to the ghosts-pandora service in this file.
+      - PANDORA_URL=${PANDORA_URL:-http://ghosts-pandora:5000}
       - N8N_BLOCK_ENV_ACCESS_IN_NODE=false
     # Wrapper entrypoint bundles any custom root CAs mounted at /opt/ghosts-certs into
     # NODE_EXTRA_CA_CERTS, so workflow HTTPS calls through TLS inspection don't fail
@@ -147,3 +168,5 @@ volumes:
   ghosts-n8n-data:
   ghosts-grafana-data:
   ghosts-baserow-data:
+  ghosts-pandora-data:
+  ghosts-pandora-images:

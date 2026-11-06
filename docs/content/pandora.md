@@ -1,7 +1,7 @@
 # GHOSTS PANDORA SERVER Overview
 
 ???+ info "Pandora is part of GHOSTS"
-    [Pandora is within the GHOSTS Source Code Repository](https://github.com/cmu-sei/GHOSTS/tree/master/src/ghosts.pandora) hosted on GitHub.
+    [Pandora is within the GHOSTS Source Code Repository](https://github.com/cmu-sei/GHOSTS/tree/master/src/Ghosts.Pandora) hosted on GitHub.
 
 GHOSTS PANDORA is a web server that responds to a myriad of request types with randomized content generated in real-time. It can operate in two modes:
 
@@ -14,27 +14,45 @@ The mode is controlled by configuration, making Pandora a unified content server
 
 ## Running this server
 
-### As a Docker Container
+Pandora runs as a Docker container, either on its own or as part of the GHOSTS stack. Each works with no extra configuration:
 
-Docker is the preferred way to run Pandora - mostly because this is how we run and test it before version releases.
+| | Standalone | In the GHOSTS stack |
+|---|---|---|
+| Database | SQLite in `/app/db` | PostgreSQL on `ghosts-postgres`, database `pandora` |
+| Activity reporting to the GHOSTS API | off; set `GHOSTS_API_URL` to turn it on | on |
+| Address | http://localhost:8000 | http://localhost:8800; `http://ghosts-pandora:5000` on the compose network |
 
-1. Review the repository [docker-compose.yml](https://raw.githubusercontent.com/cmu-sei/GHOSTS/master/src/ghosts.pandora/docker-compose.yml) file
-2. Run the following in your terminal 
+### Standalone
+
+Run the prebuilt image:
 
 ```cmd
-mkdir ghosts-pandora
-cd ghosts-pandora
-curl https://raw.githubusercontent.com/cmu-sei/GHOSTS/master/src/ghosts.pandora/docker-compose.yml -o docker-compose.yml
-docker-compose up -d
+docker run -d -p 8000:5000 -v pandora-db:/app/db -v pandora-images:/app/wwwroot/images ghcr.io/cmu-sei/ghosts/pandora:latest
 ```
 
-### Bare metal
+Or build it from source with the repository's [docker-compose.yml](https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Pandora/src/docker-compose.yml):
 
-This assumes the host server is a common Linux distribution. For images to render correctly, PIL or the more recent Pillow library is necessary. See here for more information on [Pillow installation and configuration](https://pillow.readthedocs.io/en/latest/installation.html).
+```cmd
+git clone https://github.com/cmu-sei/GHOSTS.git
+cd GHOSTS/src/Ghosts.Pandora/src
+docker compose up -d
+```
 
-1. Using a Python 3 distribution >= 3.6.2
-2. In the terminal run: `pip install -r requirements.txt`
-3. Then run `python app.py`
+To report posts, likes and comments to a GHOSTS API as NPC activity, set `GHOSTS_API_URL` (for example `-e GHOSTS_API_URL=http://ghosts-api:5000/api`).
+
+### In the GHOSTS stack
+
+The API's [docker-compose.yml](https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Api/docker-compose.yml) runs Pandora as the `ghosts-pandora` service, as does the Aspire host. It uses the stack's PostgreSQL, reports activity to `ghosts-api`, and is where the API (`PANDORA_HOST`) and the n8n social workflows (`PANDORA_URL`) post by default.
+
+Set these in the `.env` file next to that compose file to change it:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PANDORA_PORT` | `8800` | Host port Pandora is published on |
+| `PANDORA_MODE_TYPE` | `social` | `social` or `website` |
+| `PANDORA_DEFAULT_THEME` | `facebook` | Theme used in social mode |
+
+See the [Pandora readme](https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Pandora/readme.md) for all settings.
 
 ## Capabilities
 
