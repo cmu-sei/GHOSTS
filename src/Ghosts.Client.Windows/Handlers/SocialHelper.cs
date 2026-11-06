@@ -675,6 +675,41 @@ namespace Ghosts.Client.Handlers
             return true;
         }
 
+        /// <summary>
+        /// Logs in to the current site as social-username, if the browser is not that user already
+        /// </summary>
+        public void LoginAsUser(TimelineHandler handler)
+        {
+            if (string.IsNullOrWhiteSpace(userName) || theme == null) return;
+
+            // Pandora gives every visitor a username cookie and acts as that user
+            var cookie = Driver.Manage().Cookies.GetCookieNamed("username");
+            if (cookie == null || string.Equals(Uri.UnescapeDataString(cookie.Value), userName, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            baseHandler.MakeRequest(RequestConfiguration.Load(handler, header + site + "/login"));
+            // the login page does not preselect the theme of the site
+            var themeOption = Driver.FindElements(By.XPath("//select[@name='Theme']/option"))
+                .FirstOrDefault(option => option.GetAttribute("value") == theme);
+            if (themeOption == null)
+            {
+                // a site that cannot log in to this theme keeps the user it assigned
+                Log.Trace($"Social:: Site {site} has no login for theme {theme}, continuing without social-username.");
+                GotoHomeSite(handler);
+                return;
+            }
+            themeOption.Click();
+            IWebElement targetElement = Driver.FindElement(By.XPath("//input[@name='Username']"));
+            targetElement.Clear();
+            targetElement.SendKeys(userName);
+            // the login returns to the home site
+            Driver.FindElement(By.XPath("//button[@type='submit']")).Click();
+            Thread.Sleep(500);
+            Log.Trace($"Social:: Logged in to site {site} as {userName}.");
+        }
+
         public string GetUploadFile()
         {
             try
@@ -1012,6 +1047,8 @@ namespace Ghosts.Client.Handlers
                             baseHandler.SocialAbort = true;
                             return;
                         }
+
+                        LoginAsUser(handler);
 
                         string socialAction = GetNextAction();
 
