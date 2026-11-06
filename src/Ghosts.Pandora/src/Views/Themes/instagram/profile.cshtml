@@ -1,6 +1,7 @@
-@model List<Ghosts.Pandora.Infrastructure.Models.Post>
+@model Ghosts.Pandora.Infrastructure.Models.User
 @{
     Layout = null;
+    var posts = ViewBag.Posts as List<Ghosts.Pandora.Infrastructure.Models.Post>;
     var profileUsername = (ViewContext.RouteData.Values["username"] as string)?.Trim();
     if (string.IsNullOrWhiteSpace(profileUsername))
     {
@@ -9,7 +10,7 @@
 
     if (string.IsNullOrWhiteSpace(profileUsername))
     {
-        profileUsername = Model?.FirstOrDefault()?.Username ?? "user";
+        profileUsername = Model?.Username ?? "user";
     }
 }
 
@@ -109,7 +110,7 @@
                     </div>
                     <div class="profile-stats" data-profile-connections data-username="@profileUsername">
                         <div class="stat">
-                            <span class="stat-number">@(Model?.Count ?? 0)</span>
+                            <span class="stat-number">@(posts?.Count ?? 0)</span>
                             <span class="stat-label">posts</span>
                         </div>
                         <div class="stat">
@@ -132,13 +133,8 @@
                         </div>
                     </div>
                     <div class="profile-bio">
-                        <div class="display-name">John Doe</div>
-                        <div class="bio-text">
-                            Software Developer 💻 | Photography enthusiast 📸
-                            <br>Building amazing things with code
-                            <br>📍 San Francisco, CA
-                            <br>🔗 <a href="#">johndoe.dev</a>
-                        </div>
+                        <div class="display-name">@profileUsername</div>
+                        <div class="bio-text">@(string.IsNullOrWhiteSpace(Model.Bio) ? "No bio available." : Model.Bio)</div>
                     </div>
                 </div>
             </div>
