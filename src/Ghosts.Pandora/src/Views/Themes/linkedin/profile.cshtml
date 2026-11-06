@@ -1,6 +1,7 @@
-@model List<Ghosts.Pandora.Infrastructure.Models.Post>
+@model Ghosts.Pandora.Infrastructure.Models.User
 @{
     Layout = null;
+    var posts = ViewBag.Posts as List<Ghosts.Pandora.Infrastructure.Models.Post>;
     var profileUsername = (ViewContext.RouteData.Values["username"] as string)?.Trim();
     if (string.IsNullOrWhiteSpace(profileUsername))
     {
@@ -9,7 +10,7 @@
 
     if (string.IsNullOrWhiteSpace(profileUsername))
     {
-        profileUsername = Model?.FirstOrDefault()?.Username ?? "user";
+        profileUsername = Model?.Username ?? "user";
     }
 }
 
@@ -137,7 +138,7 @@
 
                     <div class="profile-details">
                         <h1 class="profile-name">@profileUsername</h1>
-                        <p class="profile-headline">Professional at Company</p>
+                        <p class="profile-headline">@(string.IsNullOrWhiteSpace(Model.Bio) ? "No headline provided." : Model.Bio)</p>
                         <p class="profile-location">📍 Location</p>
                         <p class="profile-connections"><span data-followers-count>0</span> followers • <span data-following-count>0</span> following</p>
                     </div>
@@ -240,9 +241,9 @@
 
                         <!-- Recent Posts -->
                         <div class="activity-posts">
-                            @if (Model != null)
+                            @if (posts != null)
                             {
-                                @foreach (var post in Model)
+                                @foreach (var post in posts)
                                 {
                                     <article class="activity-post">
                                         <div class="post-header">

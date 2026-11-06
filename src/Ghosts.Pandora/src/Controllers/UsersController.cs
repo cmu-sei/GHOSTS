@@ -74,10 +74,11 @@ public class UsersController(
         ViewBag.IsFollowing = isFollowing;
 
         var viewPath = $"~/Views/Themes/{theme}/profile.cshtml";
+        var posts = await postService.GetPostsByUserAndTheme(user.Username, theme, 100);
+        ViewBag.Posts = posts;
 
         if (string.Equals(theme, "default", StringComparison.OrdinalIgnoreCase))
         {
-            var posts = await postService.GetPostsByUserAndTheme(user.Username, theme, 100);
             return View(viewPath, posts);
         }
 

@@ -1,3 +1,4 @@
+@model Ghosts.Pandora.Infrastructure.Models.User
 @{
     var profileUsername = (ViewContext.RouteData.Values["username"] as string)?.Trim();
     if (string.IsNullOrWhiteSpace(profileUsername))
@@ -140,12 +141,7 @@
                         <div class="user-info-tab active">
                             <div class="info-section">
                                 <h3 class="section-title">ABOUT ME</h3>
-                                <div class="about-text">
-                                    Full-stack developer passionate about React, Node.js, and modern web technologies.
-                                    Always learning something new and sharing knowledge with the community.
-                                    <br><br>
-                                    🎮 Gamer | 💻 Developer | 🎵 Music Lover
-                                </div>
+                                <div class="about-text">@(string.IsNullOrWhiteSpace(Model.Bio) ? "No bio provided." : Model.Bio)</div>
                             </div>
 
                             <div class="info-section">
