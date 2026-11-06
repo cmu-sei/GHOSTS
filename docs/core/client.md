@@ -254,7 +254,7 @@ HandlersIsEnabled: true
 DisableStartup: false
 ```
 
-`ResourceControl.ManageProcesses` (default `true`) lets GHOSTS close the applications its timeline handlers run, such as browsers and their drivers, Office apps, `cmd`, and `powershell`. This happens at startup, at shutdown, when a timeline is stopped, and when a handler goes idle outside its `UtcTimeOn`/`UtcTimeOff` window (Outlook is left open then). Processes are matched by name, so this also closes copies of those applications that GHOSTS did not start. Set it to `false` on machines where people work alongside GHOSTS. `ResourceControl.ManageBrowserProcesses` (default `false`) additionally lets the universal client close excess browser processes while running.
+`ResourceControl.ManageProcesses` (default `true`) lets GHOSTS close the applications its timeline handlers run, such as browsers and their drivers and Office apps. This happens at startup, at shutdown, when a timeline is stopped, and when a handler goes idle outside its `UtcTimeOn`/`UtcTimeOff` window (Outlook is left open then). Processes are matched by name, so this also closes copies of those applications that GHOSTS did not start. On Windows, only processes in GHOSTS' own session are closed, so when GHOSTS runs in a user's session, services, SYSTEM tasks and other users' sessions are left alone. Shells (`cmd`, `powershell`) and `curl` are not closed by name, since their handlers wait for them to exit. Set it to `false` on machines where people work alongside GHOSTS. `ResourceControl.ManageBrowserProcesses` (default `false`) additionally lets the universal client close excess browser processes while running.
 
 ---
 
@@ -406,7 +406,7 @@ If you need to track the outcome of a specific timeline event (such as verifying
 
 ### Can I reset a client on a machine?
 
-Yes, launching a new instance of GHOSTS will automatically kill the previous one along with all associated tasks (e.g., Word, PowerShell instances). Only one instance of GHOSTS will run on a client machine at a time.
+Yes, launching a new instance of GHOSTS will automatically kill the previous one (on Windows, only one in the same session), along with its child processes and the applications its timeline runs (e.g., Word). Only one instance of GHOSTS runs per machine (per session on Windows) at a time.
 
 **Windows:** Run the `kill-ghosts.bat` script included in the distribution.
 

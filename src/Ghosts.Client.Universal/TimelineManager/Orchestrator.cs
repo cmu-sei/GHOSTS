@@ -4,7 +4,6 @@ using Ghosts.Domain;
 using Microsoft.Win32;
 using NLog;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -262,7 +261,7 @@ public class Orchestrator
                     if (processName == null) continue;
 
                     var handlerCount = timeline.TimeLineHandlers.Count(o => o.HandlerType == handler.HandlerType);
-                    var processCount = Process.GetProcessesByName(processName).Length;
+                    var processCount = ProcessManager.GetPids(processName).Count();
                     if (processCount > handlerCount + 1)
                     {
                         _log.Trace($"SafetyNet {handler.HandlerType} handlers: {handlerCount} processes: {processCount} - killing");
