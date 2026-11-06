@@ -7,6 +7,7 @@ using System.Threading;
 using Ghosts.Client.Infrastructure;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
+using Ghosts.Domain.Code.Helpers;
 using ReportItem = Ghosts.Domain.Code.ReportItem;
 
 namespace Ghosts.Client.Handlers
@@ -18,6 +19,7 @@ namespace Ghosts.Client.Handlers
         public string outFolder = "C:\\users\\public";
         public string folderpath = "C:\\temp";
         public int execWaitTime = 1000;
+        private Process _process;
         public ExecuteFile(TimelineHandler handler)
         {
             try
@@ -37,7 +39,7 @@ namespace Ghosts.Client.Handlers
             }
             catch (ThreadAbortException e)
             {
-                ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Command);
+                _process?.SafeKill();
                 Log.Trace($"Execute closing...");
             }
             catch (System.Exception e)
@@ -114,7 +116,7 @@ namespace Ghosts.Client.Handlers
                 {
                     FileInfo info = new FileInfo(fname);
                     Log.Trace($"Executing {info.Name}");
-                    var process = Process.Start(info.FullName);
+                    var process = _process = Process.Start(info.FullName);
                     Log.Trace($"Waiting {execWaitTime} before stopping process {info.Name}");
                     Thread.Sleep(execWaitTime);
                     if (process != null)
@@ -123,6 +125,7 @@ namespace Ghosts.Client.Handlers
                         process.Kill();
                         Thread.Sleep(10000);
                         process.Close();
+                        _process = null;
                         //this.Report(handler.HandlerType.ToString(), info.FullName, timelineEvent.TrackableId);
                         Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = info.FullName, Trackable = timelineEvent.TrackableId});
                     }

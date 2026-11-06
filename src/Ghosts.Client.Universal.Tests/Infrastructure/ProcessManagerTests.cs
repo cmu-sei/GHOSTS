@@ -84,6 +84,15 @@ public class ProcessManagerTests
         Assert.Empty(ProcessManager.GetProcessNames(handlerType));
     }
 
+    [Theory]
+    [InlineData(HandlerType.Command)]
+    [InlineData(HandlerType.PowerShell)]
+    [InlineData(HandlerType.Curl)]
+    public void GetProcessNames_ForHandlerThatWaitsOnItsProcess_ReturnsEmpty(HandlerType handlerType)
+    {
+        Assert.Empty(ProcessManager.GetProcessNames(handlerType));
+    }
+
     [Fact]
     public void ProcessNames_Chrome_ReturnsExpectedValue()
     {
