@@ -1,3 +1,6 @@
+using Microsoft.AspNetCore.Mvc.ApplicationParts;
+using Microsoft.AspNetCore.Mvc.Razor.Compilation;
+
 namespace Ghosts.Pandora.Infrastructure.Services;
 
 public interface IThemeService
@@ -18,34 +21,30 @@ public class ThemeInfo
 
 public class ThemeService : IThemeService
 {
-    private readonly IWebHostEnvironment _environment;
-    private readonly string _themesPath;
+    private readonly List<string> _themes;
 
-    public ThemeService(IWebHostEnvironment environment)
+    public ThemeService(ApplicationPartManager partManager)
     {
-        _environment = environment;
-        _themesPath = Path.Combine(_environment.ContentRootPath, "Views", "Themes");
-    }
-
-    public List<string> GetAvailableThemes()
-    {
-        if (!Directory.Exists(_themesPath))
-            return new List<string>();
-
-        return Directory.GetDirectories(_themesPath)
-            .Select(dir => Path.GetFileName(dir))
-            .Where(themeName => !string.IsNullOrEmpty(themeName))
+        // themes are read from the compiled views, as a published app has no view files on disk
+        var feature = new ViewsFeature();
+        partManager.PopulateFeature(feature);
+        _themes = feature.ViewDescriptors
+            .Select(view => view.RelativePath.Split('/'))
+            .Where(path => path.Length > 4 && path[1] == "Views" && path[2] == "Themes")
+            .Select(path => path[3])
+            .Distinct()
             .OrderBy(name => name)
             .ToList();
     }
 
+    public List<string> GetAvailableThemes()
+    {
+        return _themes;
+    }
+
     public bool ThemeExists(string themeName)
     {
-        if (string.IsNullOrEmpty(themeName))
-            return false;
-
-        var themePath = Path.Combine(_themesPath, themeName);
-        return Directory.Exists(themePath);
+        return _themes.Contains(themeName);
     }
 
     public ThemeInfo GetThemeInfo(string themeName)
