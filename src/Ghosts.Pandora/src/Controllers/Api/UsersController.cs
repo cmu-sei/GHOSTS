@@ -29,6 +29,24 @@ public class UsersController(ILogger logger, IUserService service, IPostService 
     }
 
     [SwaggerOperation(
+        Summary = "Set the bio and status of a user",
+        Description = "Creates the user if needed, then sets whichever of bio and status was sent.",
+        OperationId = "UpdateUser")]
+    [ProducesResponseType(typeof(User), (int)HttpStatusCode.OK)]
+    [HttpPost("{username}")]
+    public async Task<User> UpdateUser(string username, [FromForm] string bio, [FromForm] string status)
+    {
+        var theme = Request.Query["theme"].ToString();
+        if (string.IsNullOrWhiteSpace(theme))
+            theme = ThemeRead();
+        if (string.IsNullOrWhiteSpace(theme))
+            theme = "default";
+
+        await service.GetOrCreateUserAsync(username, theme);
+        return await service.UpdateUserAsync(username, theme, bio, status);
+    }
+
+    [SwaggerOperation(
         Summary = "Retrieve all posts for a user",
         Description = "Returns a list of posts created by a username.",
         OperationId = "GetPosts")]

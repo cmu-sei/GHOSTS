@@ -22,6 +22,7 @@ public interface INpcService
     public Task SaveListAsync(Guid id, string username, string originUrl);
     public Task<IEnumerable<NpcRecord>> GetTeam(string campaign, string enclave, string team);
     public Task<NpcRecord> GetById(Guid id);
+    public Task<NpcRecord> GetBySocialHandle(string username);
     public Task<IEnumerable<NpcActivity>> GetActivity(Guid id);
     public Task<NpcActivity> CreateActivity(Guid id, string activityType, string detail);
     public Task<IEnumerable<NpcPreference>> GetPreferences(Guid id);
@@ -144,6 +145,54 @@ public class NpcService(ApplicationDbContext context, IEvidenceProcessor evidenc
             .Include(n => n.Beliefs)
             .Include(n => n.Preferences)
             .FirstOrDefaultAsync(x => x.Id == id);
+    }
+
+    /// <summary>
+    /// The account name an NPC uses on the social site: the username its machine reports, else its
+    /// email name, else first.last, else the start of its id.
+    /// </summary>
+    public static string SocialHandle(NpcRecord npc, string machineUsername)
+    {
+        if (!string.IsNullOrWhiteSpace(machineUsername))
+            return machineUsername.Trim().ToLowerInvariant();
+
+        var email = npc.NpcProfile?.Email;
+        if (!string.IsNullOrWhiteSpace(email) && email.Contains('@'))
+            return email.Split('@')[0].ToLowerInvariant();
+
+        var name = npc.NpcProfile?.Name;
+        var handle = string.Join(".", new[] { name?.First, name?.Last }.Where(p => !string.IsNullOrWhiteSpace(p)))
+            .Replace(" ", string.Empty).ToLowerInvariant();
+        return string.IsNullOrWhiteSpace(handle) ? npc.Id.ToString("N")[..8] : handle;
+    }
+
+    public async Task<NpcRecord> GetBySocialHandle(string username)
+    {
+        if (string.IsNullOrWhiteSpace(username))
+            return null;
+
+        // NpcProfile is jsonb and an NPC has no machine navigation, so handles are matched in memory
+        var npcs = await _context.Npcs.ToListAsync();
+        var machineIds = npcs.Where(n => n.MachineId.HasValue).Select(n => n.MachineId.Value).ToList();
+        var machineUsernames = await _context.Machines
+            .Where(m => machineIds.Contains(m.Id))
+            .ToDictionaryAsync(m => m.Id, m => m.CurrentUsername);
+
+        // Several NPCs can share a handle: the one whose machine reports it wins, then the oldest
+        var match = npcs
+            .Select(n => new
+            {
+                Npc = n,
+                MachineUsername = n.MachineId.HasValue ? machineUsernames.GetValueOrDefault(n.MachineId.Value) : null
+            })
+            .Where(x => string.Equals(SocialHandle(x.Npc, x.MachineUsername), username.Trim(),
+                StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(x => !string.IsNullOrWhiteSpace(x.MachineUsername))
+            .ThenBy(x => x.Npc.CreatedUtc)
+            .ThenBy(x => x.Npc.Id)
+            .FirstOrDefault();
+
+        return match == null ? null : await GetById(match.Npc.Id);
     }
 
     public async Task<IEnumerable<NpcActivity>> GetActivity(Guid id)

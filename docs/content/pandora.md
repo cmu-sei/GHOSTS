@@ -131,3 +131,24 @@ Each record must be an incrementing integer with no duplication. The values are:
 - The MIME type of the response
 
 So for 1 in the example above, requests to /1/ return the a.zip file as an application/zip file.
+
+## Seeding social content and reporting NPC activity
+
+In social mode, posts and profiles can be loaded by script. Both endpoints create the user if it does not exist, and take the theme from the `theme` query parameter, then the `theme` cookie, then `default`.
+
+| Request | Form fields |
+| ------- | ----------- |
+| `POST` /api/posts | `user`, `message`, and optionally `created` (an ISO-8601 date, UTC unless it carries an offset) to backdate the post and `file` to attach an image |
+| `POST` /api/users/{username} | `bio` and `status`; a field that is not sent is left as it was |
+
+```bash
+curl -X POST 'http://localhost:5000/api/posts?theme=linkedin' \
+  -d user=jsmith -d 'message=Starting a new role this week' -d created=2025-03-01T14:30:00Z
+
+curl -X POST 'http://localhost:5000/api/users/jsmith?theme=linkedin' \
+  -d 'bio=Control systems engineer' -d status=Active
+```
+
+Sending the same backdated post twice stores it once. The cleanup job removes posts older than `CleanupAge` (60 hours by default), so raise it to keep older history.
+
+When `GHOSTS_API_URL` is set (for example `http://ghosts-api:5000/api`), every post, like, comment and direct message is reported to the GHOSTS API as activity of the NPC that owns the username, found with `GET /api/npcs/lookup?username=`: the username the NPC's machine reports, else the name part of the NPC's email, else `first.last`. Usernames with no NPC are skipped. Reports are sent in the background and carry the time they were sent, so a backdated post is recorded as activity of the moment it was loaded.

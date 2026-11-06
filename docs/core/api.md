@@ -141,6 +141,7 @@ Used by the frontend and operators:
 | Machine Timelines | `/api/machinetimelines` |
 | Machine Updates | `/api/machineupdates` |
 | NPCs | `/api/npcs` |
+| NPC by social media username | `/api/npcs/lookup?username=` |
 | NPC Generation | `/api/npcs/generate` |
 | Scenarios | `/api/scenarios` |
 | Executions | `/api/executions` |
