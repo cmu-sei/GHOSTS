@@ -21,11 +21,23 @@ public static class ProcessManager
         return currentProcess.Id;
     }
 
+    /// <summary>
+    /// On Windows, processes in other sessions belong to services and other users, not to ghosts
+    /// </summary>
+    private static IEnumerable<Process> GetProcessesInSession(string processName)
+    {
+        var processes = Process.GetProcessesByName(processName);
+        if (!OperatingSystem.IsWindows()) return processes;
+
+        var thisSession = Process.GetCurrentProcess().SessionId;
+        return processes.Where(p => p.SessionId == thisSession);
+    }
+
     public static IEnumerable<int> GetPids(string processName)
     {
         try
         {
-            var processes = Process.GetProcessesByName(processName);
+            var processes = GetProcessesInSession(processName);
             return processes.Select(proc => proc.Id).ToArray();
         }
         catch (Exception e)
@@ -41,7 +53,7 @@ public static class ProcessManager
 
         try
         {
-            var processes = Process.GetProcessesByName(procName).ToList();
+            var processes = GetProcessesInSession(procName).ToList();
             var thisPid = GetThisProcessPid();
 
             foreach (var process in processes)
@@ -92,7 +104,7 @@ public static class ProcessManager
     public static IEnumerable<int> GetDotnetHostedPids(string assemblyName)
     {
         var dll = $"{assemblyName}.dll";
-        return Process.GetProcessesByName("dotnet")
+        return GetProcessesInSession("dotnet")
             .Where(p => GetCommandLine(p.Id) is { } commandLine
                         && commandLine.Contains(dll, StringComparison.OrdinalIgnoreCase)
                         && !commandLine.Contains("--handle")) //a one-shot --handle run isn't another agent
@@ -141,10 +153,9 @@ public static class ProcessManager
         HandlerType.Word => [ProcessNames.Word],
         HandlerType.Excel => [ProcessNames.Excel],
         HandlerType.PowerPoint => [ProcessNames.PowerPoint],
-        HandlerType.Command => [ProcessNames.Command],
-        HandlerType.PowerShell => [ProcessNames.PowerShell],
-        HandlerType.Curl => [ProcessNames.Curl],
-        _ => [] //includes Outlook/Outlookv2, which send over MailKit and run no process
+        //Outlook/Outlookv2 send over MailKit and run no process; Command/PowerShell/Curl wait on their process,
+        //so by-name cleanup would mostly hit processes ghosts didn't start
+        _ => []
     };
 
     public static class ProcessNames
