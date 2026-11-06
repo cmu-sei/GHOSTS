@@ -207,6 +207,51 @@ Direct endpoint access:
 
 `GET /pandora/about` - Returns information about Pandora capabilities
 
+### Seeding Social Content
+
+In social mode, posts and profiles can be loaded by script, for example to give a scenario its
+history before it starts. Both endpoints create the user if it does not exist, and take the theme
+from the `theme` query parameter, then the `theme` cookie, then `default` (not `DEFAULT_THEME`), so
+pass `?theme=` to choose the site the content shows up on.
+
+`POST /api/posts` creates a post. Form fields:
+
+| Field | Description |
+|-------|-------------|
+| `user` | Username of the author (required) |
+| `message` | Text of the post (required) |
+| `created` | Optional ISO-8601 date to backdate the post, read as UTC unless it carries an offset. A value that is not a date is refused with `400`. |
+| `file` | Optional image to attach |
+
+```bash
+curl -X POST 'http://localhost:5000/api/posts?theme=linkedin' \
+  -d user=jsmith -d 'message=Starting a new role this week' -d created=2025-03-01T14:30:00Z
+```
+
+A post is dropped as a duplicate when the same user already has the same message dated no more than
+`MinutesToCheckForDuplicatePost` before it, or any time after it, so sending the same backdated post
+twice stores it once. The cleanup job removes posts older than `CleanupAge` (60 hours by default):
+raise it to keep older history.
+
+`POST /api/users/{username}` sets the form fields `bio` (up to 500 characters) and `status` (up to
+50) of a user, leaving a field that is not sent as it was, and returns the user.
+
+```bash
+curl -X POST 'http://localhost:5000/api/users/jsmith?theme=linkedin' \
+  -d 'bio=Control systems engineer' -d status=Active
+```
+
+### Reporting Activity to GHOSTS
+
+When `Ghosts.ApiUrl` is set (environment variable `GHOSTS_API_URL`, for example
+`http://ghosts-api:5000/api`), every post, like, comment and direct message is reported to the
+GHOSTS API as activity of the NPC that owns the username. Pandora asks the API for that NPC with
+`GET /api/npcs/lookup?username=`, which matches the username the NPC's machine reports, else the
+name part of the NPC's email, else `first.last`. Usernames with no NPC are skipped, and the answer
+is remembered for two minutes either way. Reports are sent in the background, so an unreachable API
+does not slow the site down, and carry the time they were sent: a backdated post is recorded as
+activity of the moment it was loaded.
+
 ## Configuration
 
 Edit `appsettings.json` to configure all features:

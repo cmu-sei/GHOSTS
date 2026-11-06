@@ -444,20 +444,24 @@ public class NpcChatService(
         }
 
         var activityType = DetectActivityType(message);
-        await npcService.CreateActivity(npc.Id, activityType.ToString(), $"{platform}: {text}");
 
-        var username = SocialUsername(npc);
+        var username = NpcService.SocialHandle(npc, machine?.CurrentUsername);
         action.Ok = true;
         action.Argument = $"{platform} as {username}";
         action.Detail = text;
 
         // A direct message is not a public post, so it stays in NPC history only
+        var published = false;
         if (activityType != NpcActivity.ActivityTypes.SocialMediaDirectMessage)
         {
-            var published = await PostToSocialHost(username, platform, text, ct);
-            if (published != null)
-                action.Detail = $"{text} ({published})";
+            (published, var note) = await PostToSocialHost(username, platform, text, ct);
+            action.Detail = $"{text} ({note})";
         }
+
+        // The social site reports what it publishes back as activity of the NPC with this username,
+        // so recording a published post here as well would store it twice
+        if (!published)
+            await npcService.CreateActivity(npc.Id, activityType.ToString(), $"{platform}: {text}");
 
         var sent = activityType switch
         {
@@ -472,11 +476,11 @@ public class NpcChatService(
 
     /// <summary>
     /// Publishes the post to the social site (Pandora) under the NPC's own account, so a post made in
-    /// chat shows up on the simulated platform attributed to that one NPC. Returns a note for the
-    /// operator, or null when nothing was published - the NPC history record stands either way.
+    /// chat shows up on the simulated platform attributed to that one NPC. Returns whether the post
+    /// was published, and a note for the operator.
     /// </summary>
-    private async Task<string> PostToSocialHost(string username, string platform, string text,
-        CancellationToken ct)
+    private async Task<(bool Published, string Note)> PostToSocialHost(string username, string platform,
+        string text, CancellationToken ct)
     {
         var host = (Environment.GetEnvironmentVariable("PANDORA_HOST")
                     ?? configuration["NpcChat:SocialHost"]
@@ -497,10 +501,10 @@ public class NpcChatService(
 
             using var response = await client.PostAsync($"{host}/?theme={theme}", form, ct);
             if (response.IsSuccessStatusCode)
-                return $"published to {host}/?theme={theme}";
+                return (true, $"published to {host}/?theme={theme}");
 
             _log.Warn($"NPC chat could not publish to {host} ({theme}): {(int)response.StatusCode}");
-            return $"social site returned {(int)response.StatusCode}, recorded in NPC history only";
+            return (false, $"social site returned {(int)response.StatusCode}, recorded in NPC history only");
         }
         // An HttpClient timeout also arrives as a cancellation, so only a caller's own token rethrows
         catch (OperationCanceledException) when (ct.IsCancellationRequested)
@@ -510,22 +514,8 @@ public class NpcChatService(
         catch (Exception ex)
         {
             _log.Warn($"NPC chat could not reach the social site on {host}: {ex.Message}");
-            return "social site unreachable, recorded in NPC history only";
+            return (false, "social site unreachable, recorded in NPC history only");
         }
-    }
-
-    /// <summary>
-    /// The account name the NPC posts under. Their email name keeps posts by the same NPC together.
-    /// </summary>
-    private static string SocialUsername(NpcRecord npc)
-    {
-        var email = npc.NpcProfile?.Email;
-        if (!string.IsNullOrWhiteSpace(email) && email.Contains('@'))
-            return email.Split('@')[0].ToLowerInvariant();
-
-        var name = npc.NpcProfile?.Name;
-        var handle = Join(".", name?.First, name?.Last).Replace(" ", string.Empty).ToLowerInvariant();
-        return string.IsNullOrWhiteSpace(handle) ? npc.Id.ToString("N")[..8] : handle;
     }
 
     /// <summary>
