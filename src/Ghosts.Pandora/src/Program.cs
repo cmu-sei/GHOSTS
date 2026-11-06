@@ -50,12 +50,6 @@ builder.Services.AddSingleton(configuration);
 
 // Configure database provider
 var databaseProvider = builder.Configuration.GetValue<string>("Database:Provider") ?? "SQLite";
-var connectionString = databaseProvider.ToUpper() switch
-{
-    "POSTGRESQL" => builder.Configuration.GetConnectionString("PostgreSQL"),
-    "SQLITE" => builder.Configuration.GetConnectionString("DefaultConnection"),
-    _ => builder.Configuration.GetConnectionString("DefaultConnection")
-};
 
 // Override from environment variables
 var dbProviderEnv = Environment.GetEnvironmentVariable("DATABASE_PROVIDER");
@@ -63,6 +57,13 @@ if (!string.IsNullOrEmpty(dbProviderEnv))
 {
     databaseProvider = dbProviderEnv;
 }
+
+var connectionString = databaseProvider.ToUpper() switch
+{
+    "POSTGRESQL" => builder.Configuration.GetConnectionString("PostgreSQL"),
+    "SQLITE" => builder.Configuration.GetConnectionString("DefaultConnection"),
+    _ => builder.Configuration.GetConnectionString("DefaultConnection")
+};
 
 var connectionStringEnv = Environment.GetEnvironmentVariable("CONNECTION_STRING");
 if (!string.IsNullOrEmpty(connectionStringEnv))

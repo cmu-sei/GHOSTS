@@ -78,6 +78,7 @@ docker compose up -d
 | GHOSTS API | http://localhost:5000 | REST API + Swagger at `/swagger` |
 | Grafana | http://localhost:3000 | Activity dashboards |
 | n8n | http://localhost:5678 | Workflow automation |
+| Pandora | http://localhost:8800 | Social media and content site |
 | PostgreSQL | localhost:5432 | Database |
 
 Then [install a client](https://cmu-sei.github.io/GHOSTS/quickstart/#ghosts-clients) on each machine you want to simulate and point it at `http://YOUR-API-HOST:5000/api`.

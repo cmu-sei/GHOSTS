@@ -20,8 +20,8 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS prod
 # Install SkiaSharp dependencies
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
-    apt-get update -o Acquire::AllowInsecureRepositories=true -o Acquire::AllowDowngradeToInsecureRepositories=true && \
-    apt-get install -y -o APT::Get::AllowUnauthenticated=true \
+    apt-get update && \
+    apt-get install -y \
     libfontconfig1 \
     libfreetype6 \
     libx11-6 \
