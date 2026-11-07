@@ -22,6 +22,7 @@ public interface INpcService
     public Task SaveListAsync(Guid id, string username, string originUrl);
     public Task<IEnumerable<NpcRecord>> GetTeam(string campaign, string enclave, string team);
     public Task<NpcRecord> GetById(Guid id);
+    public Task<NpcRecord> GetBySocialHandle(string username);
     public Task<IEnumerable<NpcActivity>> GetActivity(Guid id);
     public Task<NpcActivity> CreateActivity(Guid id, string activityType, string detail);
     public Task<IEnumerable<NpcPreference>> GetPreferences(Guid id);
@@ -40,6 +41,7 @@ public interface INpcService
     public Task DeleteById(Guid id);
     public Task<IEnumerable<string>> GetKeys(string key);
     public Task SyncWithMachineUsernames();
+    public Task CreateForMachine(Machine machine);
     public Task<IEnumerable<NpcRecord>> GetByScenarioId(int scenarioId);
 }
 
@@ -146,6 +148,64 @@ public class NpcService(ApplicationDbContext context, IEvidenceProcessor evidenc
             .FirstOrDefaultAsync(x => x.Id == id);
     }
 
+    /// <summary>
+    /// The account name an NPC uses on the social site: the username its machine reports, else its
+    /// email name, else first.last, else the start of its id.
+    /// </summary>
+    public static string SocialHandle(NpcRecord npc, string machineUsername)
+    {
+        if (!string.IsNullOrWhiteSpace(machineUsername))
+            return machineUsername.Trim().ToLowerInvariant();
+
+        var email = npc.NpcProfile?.Email;
+        if (!string.IsNullOrWhiteSpace(email) && email.Contains('@'))
+            return email.Split('@')[0].ToLowerInvariant();
+
+        var name = npc.NpcProfile?.Name;
+        var handle = string.Join(".", new[] { name?.First, name?.Last }.Where(p => !string.IsNullOrWhiteSpace(p)))
+            .Replace(" ", string.Empty).ToLowerInvariant();
+        return string.IsNullOrWhiteSpace(handle) ? npc.Id.ToString("N")[..8] : handle;
+    }
+
+    public async Task<NpcRecord> GetBySocialHandle(string username)
+    {
+        if (string.IsNullOrWhiteSpace(username))
+            return null;
+
+        // The NPC whose machine reports the username wins, so try that in the database first
+        var key = username.Trim().ToLower();
+        var machineNpc = await (from n in _context.Npcs
+                                join m in _context.Machines on n.MachineId equals (Guid?)m.Id
+                                where m.CurrentUsername.Trim().ToLower() == key
+                                orderby n.CreatedUtc, n.Id
+                                select n.Id).FirstOrDefaultAsync();
+        if (machineNpc != Guid.Empty)
+            return await GetById(machineNpc);
+
+        // NpcProfile is jsonb and an NPC has no machine navigation, so other handles are matched in memory
+        var npcs = await _context.Npcs.AsNoTracking().ToListAsync();
+        var machineIds = npcs.Where(n => n.MachineId.HasValue).Select(n => n.MachineId.Value).ToList();
+        var machineUsernames = await _context.Machines
+            .Where(m => machineIds.Contains(m.Id))
+            .ToDictionaryAsync(m => m.Id, m => m.CurrentUsername);
+
+        // Several NPCs can share a handle: the one whose machine reports it wins, then the oldest
+        var match = npcs
+            .Select(n => new
+            {
+                Npc = n,
+                MachineUsername = n.MachineId.HasValue ? machineUsernames.GetValueOrDefault(n.MachineId.Value) : null
+            })
+            .Where(x => string.Equals(SocialHandle(x.Npc, x.MachineUsername), username.Trim(),
+                StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(x => !string.IsNullOrWhiteSpace(x.MachineUsername))
+            .ThenBy(x => x.Npc.CreatedUtc)
+            .ThenBy(x => x.Npc.Id)
+            .FirstOrDefault();
+
+        return match == null ? null : await GetById(match.Npc.Id);
+    }
+
     public async Task<IEnumerable<NpcActivity>> GetActivity(Guid id)
     {
         return await _context.NpcActivities
@@ -156,6 +216,10 @@ public class NpcService(ApplicationDbContext context, IEvidenceProcessor evidenc
 
     public async Task<NpcActivity> CreateActivity(Guid id, string activityType, string detail)
     {
+        var repeated = await RepeatedPost(id, activityType, detail);
+        if (repeated != null)
+            return repeated;
+
         var npcActivity = new NpcActivity
         {
             NpcId = id,
@@ -189,6 +253,24 @@ public class NpcService(ApplicationDbContext context, IEvidenceProcessor evidenc
         }
 
         return npcActivity;
+    }
+
+    private static readonly TimeSpan RepeatedPostWindow = TimeSpan.FromMinutes(5);
+
+    /// <summary>
+    /// The same post or comment stored for this NPC in the last few minutes: NPC chat records an activity
+    /// that the social site it publishes to reports again as a post.
+    /// </summary>
+    private async Task<NpcActivity> RepeatedPost(Guid id, string activityType, string detail)
+    {
+        if (!string.Equals(activityType, nameof(NpcActivity.ActivityTypes.SocialMediaPost), StringComparison.OrdinalIgnoreCase))
+            return null;
+
+        var since = DateTime.UtcNow - RepeatedPostWindow;
+        return await _context.NpcActivities.FirstOrDefaultAsync(a => a.NpcId == id &&
+            (a.ActivityType == NpcActivity.ActivityTypes.SocialMediaPost ||
+             a.ActivityType == NpcActivity.ActivityTypes.SocialMediaComment) &&
+            a.Detail == detail && a.CreatedUtc >= since);
     }
 
     public async Task<IEnumerable<NpcPreference>> GetPreferences(Guid id)
@@ -599,6 +681,38 @@ public class NpcService(ApplicationDbContext context, IEvidenceProcessor evidenc
 
         await _context.SaveChangesAsync();
         _log.Trace("NPCs created for each username in machines");
+    }
+
+    // A new client registers over HTTP and over the hub at once, so creation is serialised
+    private static readonly SemaphoreSlim MachineNpcLock = new(1, 1);
+
+    public async Task CreateForMachine(Machine machine)
+    {
+        await MachineNpcLock.WaitAsync();
+        try
+        {
+            var npcs = await _context.Npcs.ToListAsync();
+            if (npcs.Any(x => x.MachineId == machine.Id))
+                return;
+            if (npcs.Any(x => string.Equals(x.NpcProfile?.Name?.ToString()?.Replace(" ", "."),
+                    machine.CurrentUsername, StringComparison.InvariantCultureIgnoreCase)))
+                return;
+
+            var npc = NpcRecord.TransformToNpc(Npc.Generate(MilitaryUnits.GetServiceBranch(), machine.CurrentUsername));
+
+            //todo: need to be sure user is aligned with the machine currentusername
+
+            npc.Id = npc.NpcProfile.Id;
+            npc.CreatedUtc = DateTime.UtcNow;
+            npc.MachineId = machine.Id;
+            _context.Npcs.Add(npc);
+            await _context.SaveChangesAsync();
+            _log.Trace($"NPC created for {machine.CurrentUsername}...");
+        }
+        finally
+        {
+            MachineNpcLock.Release();
+        }
     }
 
     public async Task<IEnumerable<NpcRecord>> GetByScenarioId(int scenarioId)

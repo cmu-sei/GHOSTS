@@ -207,6 +207,51 @@ Direct endpoint access:
 
 `GET /pandora/about` - Returns information about Pandora capabilities
 
+### Seeding Social Content
+
+In social mode, posts and profiles can be loaded by script, for example to give a scenario its
+history before it starts. Both endpoints create the user if it does not exist, and take the theme
+from the `theme` query parameter, then the `theme` cookie, then `DEFAULT_THEME`, so pass `?theme=`
+to choose the site the content shows up on.
+
+`POST /api/posts` creates a post. Form fields:
+
+| Field | Description |
+|-------|-------------|
+| `user` | Username of the author (required) |
+| `message` | Text of the post (required) |
+| `created` | Optional ISO-8601 date to backdate the post, read as UTC unless it carries an offset. A value that is not a date is refused with `400`. |
+| `file` | Optional image to attach |
+
+```bash
+curl -X POST 'http://localhost:5000/api/posts?theme=linkedin' \
+  -d user=jsmith -d 'message=Starting a new role this week' -d created=2025-03-01T14:30:00Z
+```
+
+A post is dropped as a duplicate when the same user already has the same message dated within
+`MinutesToCheckForDuplicatePost` of it, so sending the same backdated post twice stores it once. The
+cleanup job removes posts older than `CleanupAge` (60 hours by default) by their post date, so
+deployments that seed backdated posts must raise it.
+
+`POST /api/users/{username}` sets the form fields `bio` (up to 500 characters) and `status` (up to
+50) of a user, leaving a field that is not sent as it was, and returns the user.
+
+```bash
+curl -X POST 'http://localhost:5000/api/users/jsmith?theme=linkedin' \
+  -d 'bio=Control systems engineer' -d status=Active
+```
+
+### Reporting Activity to GHOSTS
+
+When `Ghosts.ApiUrl` is set (environment variable `GHOSTS_API_URL`, for example
+`http://ghosts-api:5000/api`), every post, like, comment and direct message is reported to the
+GHOSTS API as activity of the NPC that owns the username. Pandora asks the API for that NPC with
+`GET /api/npcs/lookup?username=`, which matches the username the NPC's machine reports, else the
+name part of the NPC's email, else `first.last`. Usernames with no NPC are skipped, and the answer
+is remembered for two minutes either way. Reports are sent in the background, so an unreachable API
+does not slow the site down, and carry the time they were sent: a backdated post is recorded as
+activity of the moment it was loaded.
+
 ## Configuration
 
 Edit `appsettings.json` to configure all features:
@@ -262,7 +307,30 @@ environment:
 docker run -e MODE_TYPE=social -e DEFAULT_THEME=twitter ghosts-pandora
 ```
 
-Environment variables take precedence over `appsettings.json` values.
+Settings are resolved in this order, highest first:
+
+1. The short variables above, plus `GHOSTS_API_URL`. The Docker image sets defaults for the five mode variables, so in a container the mode can only be changed through them.
+2. Any other `ApplicationConfiguration` setting, named by its path in `appsettings.json` with `__` between levels:
+   ```bash
+   ApplicationConfiguration__CleanupAge__Days=30
+   ApplicationConfiguration__Pandora__OllamaEnabled=true
+   ```
+3. `appsettings.json`.
+
+### Database
+
+Social media data is stored in SQLite by default, in `db/pandora.db` under the application directory (`/app/db` in the container). To use PostgreSQL instead:
+
+```bash
+DATABASE_PROVIDER=PostgreSQL
+CONNECTION_STRING="Host=ghosts-postgres;Port=5432;Database=pandora;Username=ghosts;Password=..."
+```
+
+The database is created on first use if it does not exist.
+
+### Reporting Activity to the GHOSTS API
+
+Set `GHOSTS_API_URL` (for example `http://ghosts-api:5000/api`) to have Pandora report posts, likes, comments and direct messages to a GHOSTS API as NPC activity. It is empty by default, which turns reporting off.
 
 ### Payload Configuration
 
@@ -318,12 +386,26 @@ Configure dynamic content generation:
 
 ## Running the Server
 
+Pandora runs either on its own or under the Aspire host with the rest of the GHOSTS stack. Each works with no extra configuration:
+
+| | Standalone | Aspire host |
+|---|---|---|
+| Started with | `docker run`, or `docker compose up -d` in `src/Ghosts.Pandora/src` | the Aspire host in `src/apphost` |
+| Database | SQLite in `/app/db` | PostgreSQL on `ghosts-postgres`, database `pandora` |
+| Activity reporting to the GHOSTS API | off; set `GHOSTS_API_URL` to turn it on | on |
+| Address | http://localhost:8000 | http://localhost:8800 |
+
+The API's compose stack does not run Pandora; its `PANDORA_URL` (n8n) defaults to a standalone Pandora at `http://host.docker.internal:8000`, and NPC chat posts to `PANDORA_HOST` on the API.
+
 ### Docker
 
-**Quick Start:**
+**Quick Start** (builds the image from source):
 ```bash
-docker-compose up -d
+cd src
+docker compose up -d
 ```
+
+A prebuilt image is published as `ghcr.io/cmu-sei/ghosts/pandora` (`latest` follows `master`).
 
 **Docker Run with Custom Configuration:**
 ```bash
@@ -331,8 +413,9 @@ docker-compose up -d
 docker run -d -p 8000:5000 \
   -e MODE_TYPE=social \
   -e DEFAULT_THEME=facebook \
-  -v ./Payloads:/app/Payloads \
-  dustinupdyke/ghosts-pandora:latest
+  -v pandora-db:/app/db \
+  -v pandora-images:/app/wwwroot/images \
+  ghcr.io/cmu-sei/ghosts/pandora:latest
 
 # Website mode (News)
 docker run -d -p 8000:5000 \
@@ -340,33 +423,38 @@ docker run -d -p 8000:5000 \
   -e SITE_TYPE=news \
   -e SITE_NAME="Breaking News" \
   -v ./Payloads:/app/Payloads \
-  dustinupdyke/ghosts-pandora:latest
+  ghcr.io/cmu-sei/ghosts/pandora:latest
 ```
 
 **Docker Compose with Environment Variables:**
 ```yaml
-version: "3.6"
 services:
   pandora:
-    image: dustinupdyke/ghosts-pandora:latest
+    image: ghcr.io/cmu-sei/ghosts/pandora:latest
     ports:
       - "8000:5000"
     environment:
       - MODE_TYPE=social
       - DEFAULT_THEME=instagram
     volumes:
-      - ./Payloads:/app/Payloads
-      - ./data:/app/_data
+      - pandora-db:/app/db
+      - pandora-images:/app/wwwroot/images
     restart: always
+
+volumes:
+  pandora-db:
+  pandora-images:
 ```
 
 **Multiple Instances:**
 
-See `docker-compose.examples.yml` for examples of running multiple instances with different configurations (Facebook, Instagram, Twitter, News site, Shopping site, etc.).
+To run several sites (for example one per theme), start one container per site, each with its own port and volumes.
 
 **Volume Mounts:**
-- `./Payloads:/app/Payloads` - Custom payload files
-- `./data:/app/_data` - Cached generated content
+- `/app/db` - SQLite database
+- `/app/wwwroot/images` - Images uploaded with posts
+- `/app/Payloads` - Custom payload files
+- `/app/_data` - Cached generated content
 - `./appsettings.json:/app/appsettings.json:ro` - Custom configuration (optional)
 
 ### Building from Source
@@ -455,7 +543,7 @@ Migrating to **GHOSTS Pandora** is straightforward:
    docker run -p 80:80 dustinupdyke/ghosts-pandora:latest
 
    # New
-   docker run -p 80:5000 -e MODE_TYPE=website dustinupdyke/ghosts-pandora:latest
+   docker run -p 80:5000 -e MODE_TYPE=website ghcr.io/cmu-sei/ghosts/pandora:latest
    ```
 
 2. **Update port mappings**: Pandora runs on port 5000 by default (the old Pandora used port 80)

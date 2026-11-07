@@ -1,4 +1,6 @@
+@model Ghosts.Pandora.Infrastructure.Models.User
 @{
+    var posts = ViewBag.Posts as List<Ghosts.Pandora.Infrastructure.Models.Post>;
     var profileUsername = (ViewContext.RouteData.Values["username"] as string)?.Trim();
     if (string.IsNullOrWhiteSpace(profileUsername))
     {
@@ -138,7 +140,7 @@
                     <button class="back-btn">←</button>
                     <div class="header-info">
                         <h1>@profileUsername</h1>
-                        <span class="post-count">@(Model?.Count ?? 0) posts</span>
+                        <span class="post-count">@(posts?.Count ?? 0) posts</span>
                     </div>
                 </div>
             </div>
@@ -164,12 +166,7 @@
                         <h2 class="profile-name">@profileUsername</h2>
                         <span class="profile-handle">@($"@{profileUsername}")</span>
 
-                        <div class="profile-bio">
-                            Software Developer 💻 | Tech Enthusiast | Building the future one line of code at a time
-                            <br>🌍 San Francisco, CA
-                            <br>🔗 <a href="#">johndoe.dev</a>
-                            <br>📅 Joined March 2020
-                        </div>
+                        <div class="profile-bio">@(string.IsNullOrWhiteSpace(Model.Bio) ? "No bio" : Model.Bio)</div>
 
                         <div class="profile-stats" data-profile-connections data-username="@profileUsername">
                             <a href="#" class="stat-item">

@@ -31,7 +31,7 @@ namespace Ghosts.Api.Infrastructure.Services
         Task AddActivity(Guid id, HistoryTimeline historyTimeline, CancellationToken ct);
     }
 
-    public class MachineService(ApplicationDbContext context, IHubContext<ActivityHub> activityHubContext) : IMachineService
+    public class MachineService(ApplicationDbContext context, IHubContext<ActivityHub> activityHubContext, INpcService npcService) : IMachineService
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         private readonly ApplicationDbContext _context = context;
@@ -193,6 +193,18 @@ namespace Ghosts.Api.Infrastructure.Services
             }
 
             AddToGroups(model, ct);
+
+            if (Program.ApplicationSettings.NpcPerMachine)
+            {
+                try
+                {
+                    await npcService.CreateForMachine(model);
+                }
+                catch (Exception e)
+                {
+                    _log.Error(e, $"Could not create an NPC for machine {model.Id}");
+                }
+            }
 
             return model.Id;
         }

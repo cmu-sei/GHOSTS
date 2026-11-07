@@ -176,10 +176,6 @@ public class RelationshipsController(
     {
         var queryTheme = HttpContext.Request.Query["theme"].ToString();
         var theme = !string.IsNullOrWhiteSpace(queryTheme) ? queryTheme : ThemeRead();
-        if (string.IsNullOrWhiteSpace(theme))
-        {
-            theme = "default";
-        }
 
         ThemeWrite(theme);
         return theme;

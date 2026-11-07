@@ -20,7 +20,8 @@ namespace Ghosts.Api.Infrastructure
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json");
+                .AddJsonFile("appsettings.json")
+                .AddEnvironmentVariables();
 
             var config = builder.Build();
             var appConfig = new ApplicationSettings();

@@ -44,10 +44,11 @@ public class PostService(DataContext context, ApplicationConfiguration applicati
 {
     public bool Duplicates(Post post)
     {
-        // has the same user tried to post the same message within the past x minutes?
+        // has the same user posted the same message within x minutes of this post?
         return context.Posts.Any(p => p.Message.ToLower() == post.Message.ToLower()
            && p.UserId == post.UserId
-           && p.CreatedUtc > post.CreatedUtc.AddMinutes(-applicationConfiguration.MinutesToCheckForDuplicatePost));
+           && p.CreatedUtc > post.CreatedUtc.AddMinutes(-applicationConfiguration.MinutesToCheckForDuplicatePost)
+           && p.CreatedUtc < post.CreatedUtc.AddMinutes(applicationConfiguration.MinutesToCheckForDuplicatePost));
     }
 
     public async Task RemovePosts()

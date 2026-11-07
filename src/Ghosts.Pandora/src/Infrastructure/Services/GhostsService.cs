@@ -1,4 +1,6 @@
+using System.Net;
 using Ghosts.Pandora.Infrastructure.Models;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Ghosts.Pandora.Infrastructure.Services;
 
@@ -9,119 +11,105 @@ public interface IGhostsService
     Task CreateLike(Like like);
     Task CreateComment(Comment comment);
     Task CreateDirectMessage(DirectMessage directMessage);
-    Task CreateUser(User user);
 }
 
-public class GhostsService(ApplicationConfiguration applicationConfiguration) : IGhostsService
+public class GhostsService(ApplicationConfiguration applicationConfiguration, DataContext context) : IGhostsService
 {
-    private readonly HttpClient _httpClient = new();
+    // Shared by every request: the service itself is scoped
+    private static readonly HttpClient HttpClient = new() { Timeout = TimeSpan.FromSeconds(5) };
+    private static readonly MemoryCache NpcIds = new(new MemoryCacheOptions());
+
+    // NPCs are created after their users first show up here, so a miss is only remembered briefly
+    private static readonly TimeSpan NpcIdLifetime = TimeSpan.FromMinutes(2);
 
     public bool IsActive()
     {
         return !string.IsNullOrEmpty(applicationConfiguration.Ghosts.ApiUrl);
     }
 
-    public async Task CreateUser(User user)
+    public Task CreatePost(Post post)
     {
-        var url = $"{applicationConfiguration.Ghosts.ApiUrl}/npcs/list" +
-                  $"?id={Uri.EscapeDataString(user.Id.ToString())}" +
-                  $"&username={Uri.EscapeDataString(user.Username)}" +
-                  $"&originUrl={Uri.EscapeDataString(user.Theme)}";
-
-        var request = new HttpRequestMessage(HttpMethod.Post, url);
-
-        try
-        {
-            var response = await _httpClient.SendAsync(request);
-            response.EnsureSuccessStatusCode();
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-        }
-    }
-
-    public async Task CreatePost(Post post)
-    {
-        var activityType = "SocialMediaPost";
-
-        var url = $"{applicationConfiguration.Ghosts.ApiUrl}/npcs/{post.UserId}/activity" +
-                  $"?activityType={Uri.EscapeDataString(activityType)}" +
-                  $"&detail={Uri.EscapeDataString(post.Message)}";
-
-        var request = new HttpRequestMessage(HttpMethod.Post, url);
-
-        try
-        {
-            var response = await _httpClient.SendAsync(request);
-            response.EnsureSuccessStatusCode();
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-        }
+        Report(post.Username, "SocialMediaPost", post.Message);
+        return Task.CompletedTask;
     }
 
     public async Task CreateComment(Comment comment)
     {
-        var activityType = "SocialMediaComment";
-
-        var url = $"{applicationConfiguration.Ghosts.ApiUrl}/npcs/{comment.UserId}/activity" +
-                  $"?activityType={Uri.EscapeDataString(activityType)}" +
-                  $"&detail={Uri.EscapeDataString(comment.Message)}";
-
-        var request = new HttpRequestMessage(HttpMethod.Post, url);
-
-        try
-        {
-            var response = await _httpClient.SendAsync(request);
-            response.EnsureSuccessStatusCode();
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-        }
+        Report(await Username(comment.UserId), "SocialMediaComment", comment.Message);
     }
 
     public async Task CreateLike(Like like)
     {
-        var activityType = "SocialMediaLike";
-
-        var url = $"{applicationConfiguration.Ghosts.ApiUrl}/npcs/{like.UserId}/activity" +
-                  $"?activityType={Uri.EscapeDataString(activityType)}" +
-                  $"&detail={Uri.EscapeDataString($"Liked {like.PostId.ToString()}")}";
-
-        var request = new HttpRequestMessage(HttpMethod.Post, url);
-
-        try
-        {
-            var response = await _httpClient.SendAsync(request);
-            response.EnsureSuccessStatusCode();
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-        }
+        Report(await Username(like.UserId), "SocialMediaLike", $"Liked {like.PostId.ToString()}");
     }
 
     public async Task CreateDirectMessage(DirectMessage directMessage)
     {
-        var activityType = "SocialMediaDirectMessage";
+        Report(await Username(directMessage.FromUserId), "SocialMediaDirectMessage", directMessage.Message);
+    }
 
-        var url = $"{applicationConfiguration.Ghosts.ApiUrl}/npcs/{directMessage.FromUserId}/activity" +
-                  $"?activityType={Uri.EscapeDataString(activityType)}" +
-                  $"&detail={Uri.EscapeDataString(directMessage.Message)}";
+    private async Task<string> Username(Guid userId)
+    {
+        return (await context.Users.FindAsync(userId))?.Username;
+    }
 
-        var request = new HttpRequestMessage(HttpMethod.Post, url);
+    /// <summary>
+    /// Records the activity for the NPC with this username, if there is one. The request does not wait
+    /// for the GHOSTS API, so nothing request-scoped may be used once the task is running.
+    /// </summary>
+    private void Report(string username, string activityType, string detail)
+    {
+        if (string.IsNullOrWhiteSpace(username))
+            return;
+
+        var apiUrl = applicationConfiguration.Ghosts.ApiUrl;
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                var npcId = await NpcId(apiUrl, username);
+                if (npcId == null)
+                    return;
+
+                var url = $"{apiUrl}/npcs/{npcId}/activity" +
+                          $"?activityType={Uri.EscapeDataString(activityType)}" +
+                          $"&detail={Uri.EscapeDataString(detail)}";
+
+                using var response = await HttpClient.PostAsync(url, null);
+                response.EnsureSuccessStatusCode();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Could not report {activityType} by {username} to GHOSTS: {e.Message}");
+            }
+        });
+    }
+
+    private static async Task<Guid?> NpcId(string apiUrl, string username)
+    {
+        var key = username.Trim().ToLowerInvariant();
+        if (NpcIds.TryGetValue(key, out Guid? npcId))
+            return npcId;
 
         try
         {
-            var response = await _httpClient.SendAsync(request);
-            response.EnsureSuccessStatusCode();
+            using var response = await HttpClient.GetAsync($"{apiUrl}/npcs/lookup?username={Uri.EscapeDataString(key)}");
+            if (response.StatusCode != HttpStatusCode.NotFound)
+            {
+                response.EnsureSuccessStatusCode();
+                npcId = (await response.Content.ReadFromJsonAsync<Npc>())?.Id;
+            }
         }
-        catch (Exception e)
+        catch
         {
-            Console.WriteLine(e);
+            // A failed lookup is remembered like a miss, so an unreachable API is not asked on every action
+            NpcIds.Set(key, (Guid?)null, NpcIdLifetime);
+            throw;
         }
+
+        return NpcIds.Set(key, npcId, NpcIdLifetime);
     }
+
+    private record Npc(Guid Id);
 }

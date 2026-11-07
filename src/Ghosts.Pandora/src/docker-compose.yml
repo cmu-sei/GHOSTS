@@ -1,9 +1,16 @@
-version: "3.6"
-
 services:
   pandora:
-    image: dustinupdyke/ghosts-pandora:latest
+    build:
+      context: .
+      target: prod
     container_name: pandora
     ports:
       - "8000:5000"
+    volumes:
+      - pandora-db:/app/db
+      - pandora-images:/app/wwwroot/images
     restart: always
+
+volumes:
+  pandora-db:
+  pandora-images:
