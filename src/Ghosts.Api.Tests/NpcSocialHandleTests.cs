@@ -97,6 +97,25 @@ public class NpcSocialHandleTests
         Assert.IsType<NotFoundResult>((await controller.NpcsLookup("nobody")).Result);
     }
 
+    [Fact]
+    public async Task Syncing_machines_makes_one_npc_per_username()
+    {
+        await using var context = TestDb.New("npc-handle");
+        var existing = AddNpc(context, machineUsername: "jsmith");
+        foreach (var username in new[] { "JSmith", "apond", "apond", "rwilliams" })
+            context.Machines.Add(new Machine { Id = Guid.NewGuid(), Name = "workstation-02", CurrentUsername = username });
+        context.SaveChanges();
+
+        var service = Service(context);
+        await service.SyncWithMachineUsernames();
+        await service.SyncWithMachineUsernames();
+
+        Assert.Equal(3, context.Npcs.Count());
+        Assert.Equal(existing, (await service.GetBySocialHandle("jsmith")).Id);
+        Assert.NotNull(await service.GetBySocialHandle("apond"));
+        Assert.NotNull(await service.GetBySocialHandle("rwilliams"));
+    }
+
     private static NpcService Service(ApplicationDbContext context) => new(context, new Mock<IEvidenceProcessor>().Object);
 
     private static Guid AddNpc(ApplicationDbContext context, string? email = null, string? first = null,

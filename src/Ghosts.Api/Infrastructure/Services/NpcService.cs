@@ -624,21 +624,24 @@ public class NpcService(ApplicationDbContext context, IEvidenceProcessor evidenc
 
     public async Task SyncWithMachineUsernames()
     {
-        var machines = _context.Machines.ToList();
-        var npcs = _context.Npcs.ToArray();
+        var machines = await _context.Machines.ToListAsync();
+        var npcs = await _context.Npcs.ToListAsync();
+        var usernames = machines.ToDictionary(m => m.Id, m => m.CurrentUsername);
+
+        // One NPC per social handle: a client that registers twice must not become two NPCs
+        var linked = npcs.Where(n => n.MachineId.HasValue).Select(n => n.MachineId.Value).ToHashSet();
+        var handles = npcs.Select(n => SocialHandle(n, n.MachineId.HasValue ? usernames.GetValueOrDefault(n.MachineId.Value) : null))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         foreach (var machine in machines)
         {
-            if (npcs.Any(x => x.MachineId == machine.Id))
+            if (linked.Contains(machine.Id))
                 continue;
-            if (npcs.Any(x => string.Equals(x.NpcProfile.Name.ToString()?.Replace(" ", "."),
-                    machine.CurrentUsername, StringComparison.InvariantCultureIgnoreCase)))
+            var handle = machine.CurrentUsername?.Trim();
+            if (!string.IsNullOrEmpty(handle) && !handles.Add(handle))
                 continue;
 
             var npc = NpcRecord.TransformToNpc(Npc.Generate(MilitaryUnits.GetServiceBranch(), machine.CurrentUsername));
-
-            //todo: need to be sure user is aligned with the machine currentusername
-
             npc.Id = npc.NpcProfile.Id;
             npc.CreatedUtc = DateTime.UtcNow;
             npc.MachineId = machine.Id;
