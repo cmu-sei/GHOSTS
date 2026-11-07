@@ -303,14 +303,14 @@ namespace Ghosts.Client.Handlers
             // will be reset to the top
             try
                 {
-                    // this is hacky -- element may be out of view, scroll to it
+                    // scroll the button to the middle of the viewport so a fixed header cannot cover it
                     var targetXpath = GetThemeAction(theme, "Like");
                     var targetElement = Driver.FindElement(By.XPath(targetXpath));
                     if (targetElement != null)
                     {
                         // this uses Javascript for compatibility with older Selenium
                         IJavaScriptExecutor js = (IJavaScriptExecutor)Driver;
-                        js.ExecuteScript("arguments[0].scrollIntoView(true);", targetElement);
+                        js.ExecuteScript("arguments[0].scrollIntoView({block: \"center\"});", targetElement);
                         Thread.Sleep(500);
                         targetElement = Driver.FindElement(By.XPath(targetXpath));
                         BrowserHelperSupport.ElementClick(Driver, targetElement);
