@@ -19,6 +19,7 @@ async function render() {
   const api = {
     getScenarios: vi.fn(() => of([rail, harbor, old])),
     getScenarioTypes: () => of([{ id: 'crucible-tabletop', version: '0.1.0', name: 'Crucible tabletop exercise' }]),
+    getScenarioType: () => of({ id: 'crucible-tabletop', version: '0.1.0', name: 'Crucible tabletop exercise', drafts: [], stages: [] }),
     createScenario: vi.fn(() => of(scenario(9, 'New One'))),
     archive: vi.fn((id: number, archived: boolean) => of({ ...[harbor, rail, old].find(s => s.id === id)!, archived }))
   };

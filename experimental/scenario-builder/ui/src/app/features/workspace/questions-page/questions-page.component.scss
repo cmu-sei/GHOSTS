@@ -54,6 +54,12 @@ h1 {
   }
 }
 
+.ledger-caption {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0 2px 8px;
+}
+
 .ledger {
   background: var(--sb-surface);
   border: 1px solid var(--sb-line);

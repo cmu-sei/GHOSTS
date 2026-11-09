@@ -1,4 +1,4 @@
-<section class="gate" [attr.data-state]="gate().passes ? 'passes' : 'open'">
+<section class="gate" data-tour="gate" [attr.data-state]="gate().passes ? 'passes' : 'open'">
   @if (gate().passes) {
     @if (lastStage()) {
       <span class="text">The last stage is complete. The work is done.</span>

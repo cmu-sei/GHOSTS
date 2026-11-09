@@ -27,7 +27,10 @@
     <div class="intro">
       <p>The agent walks you through this stage's questions one at a time, recommending an answer for each. You can also answer any row yourself.</p>
       <p>Say "you decide" at any point and it makes every remaining decision itself, to the end.</p>
-      <button class="sb-button primary" type="button" [disabled]="agent.busy() || !agent.models().length" (click)="start()">Start with the agent</button>
+      <div class="intro-actions">
+        <button class="sb-button primary" type="button" [disabled]="agent.busy() || !agent.models().length" (click)="start()">Start with the agent</button>
+        <button class="sb-button ghost" type="button" (click)="help.show('how', 'agent')">How the agent works</button>
+      </div>
     </div>
   }
   @for (item of agent.items(); track $index) {

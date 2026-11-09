@@ -2,6 +2,8 @@ import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/c
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { BuilderApiService, errorMessage } from '../../../core/services/builder-api.service';
 import { AnswerValue } from '../../../core/models/builder.model';
+import { LegendComponent } from '../../../shared/help/legend/legend.component';
+import { TermTextComponent } from '../../../shared/help/term-text/term-text.component';
 import { GatePanelComponent } from '../gate-panel/gate-panel.component';
 import { WorkspaceStore } from '../workspace.store';
 import { QuestionRowComponent } from './question-row/question-row.component';
@@ -10,7 +12,7 @@ import { QuestionRowComponent } from './question-row/question-row.component';
 @Component({
   selector: 'app-questions-page',
   standalone: true,
-  imports: [MatSnackBarModule, QuestionRowComponent, GatePanelComponent],
+  imports: [MatSnackBarModule, QuestionRowComponent, GatePanelComponent, LegendComponent, TermTextComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './questions-page.component.html',
   styleUrls: ['./questions-page.component.scss']

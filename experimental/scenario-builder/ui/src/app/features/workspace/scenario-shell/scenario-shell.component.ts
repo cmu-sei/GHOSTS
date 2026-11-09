@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, effect, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs';
 import { TopBarComponent } from '../../../shared/components/top-bar/top-bar.component';
+import { HelpService } from '../../../shared/help/help.service';
 import { AgentPanelComponent } from '../agent-panel/agent-panel.component';
 import { ScenarioTypeUpdateComponent } from '../scenario-type-update/scenario-type-update.component';
 import { StageRailComponent } from '../stage-rail/stage-rail.component';
@@ -38,6 +39,19 @@ export class ScenarioShellComponent implements OnInit {
     ...(this.store.scenarioType()?.topology ? [{ path: 'topology', label: 'Topology' }] : []),
     { path: 'finish', label: 'Finish' }
   ]);
+
+  constructor() {
+    // The Guide and the tour follow the scenario and the stage shown.
+    const help = inject(HelpService);
+    effect(() => {
+      const scenarioType = this.store.scenarioType();
+      const progress = this.store.progress();
+      help.scenario.set(scenarioType && progress
+        ? { id: this.store.scenarioId(), scenarioType, stage: this.store.selectedStage(), openStage: progress.stage }
+        : null);
+    });
+    inject(DestroyRef).onDestroy(() => help.scenario.set(null));
+  }
 
   ngOnInit(): void {
     this.store.load(Number(this.route.snapshot.paramMap.get('id')));

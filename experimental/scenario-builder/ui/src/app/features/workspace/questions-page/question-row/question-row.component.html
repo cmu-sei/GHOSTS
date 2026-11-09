@@ -3,8 +3,18 @@
   <span class="status visually-hidden">{{ status() }}</span>
 
   <div class="name">
-    <span class="label">{{ label() }}</span>
-    <span class="question">{{ question().text }}</span>
+    <span class="label-line">
+      <span class="label">{{ label() }}</span>
+      @if (question().why && !editing()) {
+        <button type="button" class="why-toggle" [class.on-hover]="!whyShown()" [attr.aria-expanded]="whyShown()" (click)="whyShown.set(!whyShown())">
+          <span class="chevron" aria-hidden="true"></span>Why this matters
+        </button>
+      }
+    </span>
+    <span class="question"><app-term-text [text]="question().text" /></span>
+    @if (question().why && !editing() && whyShown()) {
+      <span class="why-text">{{ question().why }}</span>
+    }
   </div>
 
   <div class="answer">

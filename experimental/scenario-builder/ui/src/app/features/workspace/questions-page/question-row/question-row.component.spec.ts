@@ -128,4 +128,17 @@ describe('QuestionRowComponent', () => {
 
     expect(el(fixture, 'button.edit')).toBeNull();
   });
+
+  it('keeps the why a click away while not editing', async () => {
+    const { fixture } = await render(audience);
+    const toggle = el<HTMLButtonElement>(fixture, 'button.why-toggle');
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    expect(el(fixture, '.why-text')).toBeNull();
+
+    toggle.click();
+    await fixture.whenStable();
+
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    expect(el(fixture, '.why-text').textContent?.trim()).toBe('Sets vocabulary.');
+  });
 });

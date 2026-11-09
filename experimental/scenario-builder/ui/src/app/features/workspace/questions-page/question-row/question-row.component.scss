@@ -57,6 +57,52 @@
   line-height: 1.4;
 }
 
+.label-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 10px;
+}
+
+// The why, a click away while the row isn't being edited.
+.why-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: 500 11.5px var(--sb-font);
+  color: var(--sb-faint);
+  cursor: pointer;
+
+  &:hover,
+  &[aria-expanded='true'] {
+    color: var(--sb-person);
+  }
+
+  .chevron {
+    width: 5px;
+    height: 5px;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: rotate(-45deg);
+    transition: transform 140ms;
+  }
+
+  &[aria-expanded='true'] .chevron {
+    transform: rotate(45deg) translate(-1px, -1px);
+  }
+}
+
+.why-text {
+  margin-top: 4px;
+  padding-left: 10px;
+  border-left: 2px solid var(--sb-person-soft);
+  font: italic 400 var(--sb-small) / 1.5 var(--sb-serif);
+  color: #3b4356;
+}
+
 .answer {
   min-width: 0;
 }
@@ -149,6 +195,16 @@
 
   .row:hover .edit.on-hover,
   .row:focus-within .edit.on-hover {
+    opacity: 1;
+  }
+
+  .why-toggle.on-hover {
+    opacity: 0;
+    transition: opacity 120ms;
+  }
+
+  .row:hover .why-toggle.on-hover,
+  .row:focus-within .why-toggle.on-hover {
     opacity: 1;
   }
 }

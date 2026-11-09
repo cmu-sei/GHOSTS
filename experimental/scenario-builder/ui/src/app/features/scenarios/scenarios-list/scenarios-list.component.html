@@ -6,6 +6,8 @@
     <p class="sub">Each scenario starts with the context you have, then walks through its scenario type's questions, stage by stage.</p>
   </header>
 
+  <app-welcome [scenarioTypes]="scenarioTypes()" />
+
   <form class="create" (submit)="$event.preventDefault(); create()">
     <input class="sb-field name" placeholder="Name a new scenario" aria-label="Scenario name" [value]="name()" (input)="typed($event)" />
     <select class="sb-field scenario-type" aria-label="Scenario type" [value]="scenarioTypeId()" (change)="picked($event)">
