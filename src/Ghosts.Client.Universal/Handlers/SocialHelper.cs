@@ -303,14 +303,14 @@ public class SocialHelperV1 : SocialHelper
         // will be reset to the top
         try
         {
-            // this is hacky -- element may be out of view, scroll to it
+            // scroll the button to the middle of the viewport so a fixed header cannot cover it
             var targetXpath = GetThemeAction(theme, "Like");
             var targetElement = Driver.FindElement(By.XPath(targetXpath));
             if (targetElement != null)
             {
                 // this uses Javascript for compatibility with older Selenium
                 IJavaScriptExecutor js = (IJavaScriptExecutor)Driver;
-                js.ExecuteScript("arguments[0].scrollIntoView(true);", targetElement);
+                js.ExecuteScript("arguments[0].scrollIntoView({block: \"center\"});", targetElement);
                 if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
                 targetElement = Driver.FindElement(By.XPath(targetXpath));
                 BrowserHelperSupport.ElementClick(Driver, targetElement);
@@ -656,6 +656,41 @@ public abstract partial class SocialHelper : BrowserHelper
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// Logs in to the current site as social-username, if the browser is not that user already
+    /// </summary>
+    public void LoginAsUser(TimelineHandler handler)
+    {
+        if (string.IsNullOrWhiteSpace(userName)) return;
+
+        // Pandora gives every visitor a username cookie and acts as that user
+        var cookie = Driver.Manage().Cookies.GetCookieNamed("username");
+        if (cookie == null || string.Equals(Uri.UnescapeDataString(cookie.Value), userName, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        baseHandler.MakeRequest(RequestConfiguration.Load(handler, header + site + "/login"));
+        // the login page does not preselect the theme of the site
+        var themeOption = Driver.FindElements(By.XPath("//select[@name='Theme']/option"))
+            .FirstOrDefault(option => option.GetAttribute("value") == theme);
+        if (themeOption == null)
+        {
+            // a site that cannot log in to this theme keeps the user it assigned
+            Log.Trace($"Social:: Site {site} has no login for theme {theme}, continuing without social-username.");
+            GotoHomeSite(handler);
+            return;
+        }
+        themeOption.Click();
+        var targetElement = Driver.FindElement(By.XPath("//input[@name='Username']"));
+        targetElement.Clear();
+        targetElement.SendKeys(userName);
+        // the login returns to the home site
+        Driver.FindElement(By.XPath("//button[@type='submit']")).Click();
+        if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
+        Log.Trace($"Social:: Logged in to site {site} as {userName}.");
     }
 
 
@@ -1004,9 +1039,9 @@ public abstract partial class SocialHelper : BrowserHelper
                     // also fills in siteToTheme cache
                     if (!DoInitialLogin(handler))
                     {
+                        // the site may still be starting: leave the state as it is and try again on the next event
                         Log.Trace(
-                            $"Social:: Target site {site} does not appear to be a socializer site, aborting Social browsing.");
-                        baseHandler.SocialAbort = true;
+                            $"Social:: Target site {site} is unreachable or not a socializer site, trying again later.");
                         return;
                     }
                    
@@ -1024,9 +1059,9 @@ public abstract partial class SocialHelper : BrowserHelper
                     // this always goes back to home site
                     if (!DoInitialLogin(handler))
                     {
+                        // the site may still be starting: leave the state as it is and try again on the next event
                         Log.Trace(
-                            $"Social:: Target site {site} does not appear to be a socializer site, aborting Social browsing.");
-                        baseHandler.SocialAbort = true;
+                            $"Social:: Target site {site} is unreachable or not a socializer site, trying again later.");
                         return;
                     }
 
@@ -1034,6 +1069,7 @@ public abstract partial class SocialHelper : BrowserHelper
                     // theme could be null if webpage temporarily unavaiable, will try again later
                     if (theme != null)
                     {
+                        LoginAsUser(handler);
                         var socialAction = GetNextAction();
                         if (socialAction == "post" || socialAction == "postWimage")
                         {

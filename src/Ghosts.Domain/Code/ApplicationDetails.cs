@@ -218,7 +218,8 @@ namespace Ghosts.Domain.Code
             public string Results => $"{_root}/clientresults";
             public string Updates => $"{_root}/clientupdates";
             public string Survey => $"{_root}/clientsurvey";
-            public string Socket => $"{_root.Replace("/api", "")}/clientHub";
+            // under the api root, so a host name containing "api" is left alone
+            public string Socket => $"{_root}/clientHub";
         }
     }
 }

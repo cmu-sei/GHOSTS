@@ -1,7 +1,7 @@
 # GHOSTS PANDORA SERVER Overview
 
 ???+ info "Pandora is part of GHOSTS"
-    [Pandora is within the GHOSTS Source Code Repository](https://github.com/cmu-sei/GHOSTS/tree/master/src/ghosts.pandora) hosted on GitHub.
+    [Pandora is within the GHOSTS Source Code Repository](https://github.com/cmu-sei/GHOSTS/tree/master/src/Ghosts.Pandora) hosted on GitHub.
 
 GHOSTS PANDORA is a web server that responds to a myriad of request types with randomized content generated in real-time. It can operate in two modes:
 
@@ -14,27 +14,39 @@ The mode is controlled by configuration, making Pandora a unified content server
 
 ## Running this server
 
-### As a Docker Container
+Pandora runs as a Docker container, either on its own or under the Aspire host with the rest of the GHOSTS stack. Each works with no extra configuration:
 
-Docker is the preferred way to run Pandora - mostly because this is how we run and test it before version releases.
+| | Standalone | Aspire host |
+|---|---|---|
+| Database | SQLite in `/app/db` | PostgreSQL on `ghosts-postgres`, database `pandora` |
+| Activity reporting to the GHOSTS API | off; set `GHOSTS_API_URL` to turn it on | on |
+| Address | http://localhost:8000 | http://localhost:8800 |
 
-1. Review the repository [docker-compose.yml](https://raw.githubusercontent.com/cmu-sei/GHOSTS/master/src/ghosts.pandora/docker-compose.yml) file
-2. Run the following in your terminal 
+### Standalone
+
+Run the prebuilt image:
 
 ```cmd
-mkdir ghosts-pandora
-cd ghosts-pandora
-curl https://raw.githubusercontent.com/cmu-sei/GHOSTS/master/src/ghosts.pandora/docker-compose.yml -o docker-compose.yml
-docker-compose up -d
+docker run -d -p 8000:5000 -v pandora-db:/app/db -v pandora-images:/app/wwwroot/images ghcr.io/cmu-sei/ghosts/pandora:latest
 ```
 
-### Bare metal
+Or build it from source with the repository's [docker-compose.yml](https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Pandora/src/docker-compose.yml):
 
-This assumes the host server is a common Linux distribution. For images to render correctly, PIL or the more recent Pillow library is necessary. See here for more information on [Pillow installation and configuration](https://pillow.readthedocs.io/en/latest/installation.html).
+```cmd
+git clone https://github.com/cmu-sei/GHOSTS.git
+cd GHOSTS/src/Ghosts.Pandora/src
+docker compose up -d
+```
 
-1. Using a Python 3 distribution >= 3.6.2
-2. In the terminal run: `pip install -r requirements.txt`
-3. Then run `python app.py`
+To report posts, likes and comments to a GHOSTS API as NPC activity, set `GHOSTS_API_URL` (for example `-e GHOSTS_API_URL=http://ghosts-api:5000/api`).
+
+### With the GHOSTS stack
+
+The API's [docker-compose.yml](https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Api/docker-compose.yml) does not run Pandora. The n8n social workflows post to `PANDORA_URL` on n8n, a standalone Pandora on the Docker host at `http://host.docker.internal:8000` by default; NPC chat posts to `PANDORA_HOST` on the API. Set either in the `.env` file next to that compose file to point elsewhere.
+
+The Aspire host runs Pandora with the rest of the stack, on the stack's PostgreSQL and reporting activity to `ghosts-api`.
+
+See the [Pandora readme](https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Pandora/readme.md) for all settings.
 
 ## Capabilities
 
@@ -113,3 +125,26 @@ Each record must be an incrementing integer with no duplication. The values are:
 - The MIME type of the response
 
 So for 1 in the example above, requests to /1/ return the a.zip file as an application/zip file.
+
+## Seeding social content and reporting NPC activity
+
+In social mode, posts and profiles can be loaded by script. Both endpoints create the user if it does not exist, and take the theme from the `theme` query parameter, then the `theme` cookie, then `DEFAULT_THEME`.
+
+| Request | Form fields |
+| ------- | ----------- |
+| `POST` /api/posts | `user`, `message`, and optionally `created` (an ISO-8601 date, UTC unless it carries an offset) to backdate the post and `file` to attach an image |
+| `POST` /api/users/{username} | `bio` and `status`; a field that is not sent is left as it was |
+
+```bash
+curl -X POST 'http://localhost:5000/api/posts?theme=linkedin' \
+  -d user=jsmith -d 'message=Starting a new role this week' -d created=2025-03-01T14:30:00Z
+
+curl -X POST 'http://localhost:5000/api/users/jsmith?theme=linkedin' \
+  -d 'bio=Control systems engineer' -d status=Active
+```
+
+Sending the same backdated post twice stores it once. Pandora's cleanup job removes posts older than `ApplicationConfiguration:CleanupAge` (60 hours by default) by their post date, so deployments that seed backdated posts must raise it.
+
+When `GHOSTS_API_URL` is set (for example `http://ghosts-api:5000/api`), every post, like, comment and direct message is reported to the GHOSTS API as activity of the NPC that owns the username, found with `GET /api/npcs/lookup?username=`: the username the NPC's machine reports, else the name part of the NPC's email, else `first.last`. Usernames with no NPC are skipped. Reports are sent in the background and carry the time they were sent, so a backdated post is recorded as activity of the moment it was loaded. The API stores one record for the same post reported twice within a few minutes, so a post or comment made in NPC chat and reported back by Pandora is kept once.
+
+For NPCs to exist for the usernames that clients log in with, the API can create one per machine as it first checks in: set `ApplicationSettings:NpcPerMachine` to `true` (`ApplicationSettings__NpcPerMachine=true` in the environment), or call `POST /api/npcs/generate/syncWithMachineUsernames` for the machines already known.

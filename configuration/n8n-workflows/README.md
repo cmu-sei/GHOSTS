@@ -44,7 +44,7 @@ Before importing these workflows, you need to:
    both under Docker Compose (same network) and under Aspire (host alias). Services that
    run on the Docker host rather than as GHOSTS containers still use `host.docker.internal`.
    - GHOSTS API: `http://ghosts-api:5000`
-   - Socializer: `http://host.docker.internal:5555/`
+   - Pandora: `$env.PANDORA_URL`, set on the n8n container (`http://host.docker.internal:8000` under Compose, `http://host.docker.internal:8800` under Aspire)
    - Ollama: `http://host.docker.internal:11434/api/generate`
 
 ## How to Import

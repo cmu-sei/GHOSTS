@@ -111,16 +111,8 @@ public class DirectMessagesController(
 
     private string ResolveThemeName()
     {
-        var cookieTheme = ThemeRead();
         var queryTheme = HttpContext.Request.Query["theme"].ToString();
-        var selectedTheme = !string.IsNullOrWhiteSpace(queryTheme)
-            ? queryTheme
-            : cookieTheme;
-
-        if (string.IsNullOrWhiteSpace(selectedTheme))
-        {
-            selectedTheme = "default";
-        }
+        var selectedTheme = !string.IsNullOrWhiteSpace(queryTheme) ? queryTheme : ThemeRead();
 
         ThemeWrite(selectedTheme);
         return selectedTheme;

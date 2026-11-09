@@ -15,10 +15,6 @@ public class PostsController(ILogger logger, IPostService service, IUserService 
     public async Task<IActionResult> Index()
     {
         var theme = ThemeRead();
-        if (string.IsNullOrWhiteSpace(theme))
-        {
-            theme = "default";
-        }
 
         var posts = await service.GetPostsByTheme(theme);
         return View("Index", posts);
@@ -28,10 +24,6 @@ public class PostsController(ILogger logger, IPostService service, IUserService 
     public async Task<IActionResult> Detail(Guid id)
     {
         var theme = ThemeRead();
-        if (string.IsNullOrWhiteSpace(theme))
-        {
-            theme = "default";
-        }
 
         var post = await service.GetPostById(id);
 
@@ -49,10 +41,6 @@ public class PostsController(ILogger logger, IPostService service, IUserService 
     {
         var username = GetOrCreateUsernameCookie(this.HttpContext);
         var theme = ThemeRead();
-        if (string.IsNullOrWhiteSpace(theme))
-        {
-            theme = "default";
-        }
 
         var user = await userService.GetOrCreateUserAsync(username, theme);
 
@@ -71,10 +59,6 @@ public class PostsController(ILogger logger, IPostService service, IUserService 
     {
         var username = GetOrCreateUsernameCookie(this.HttpContext);
         var theme = ThemeRead();
-        if (string.IsNullOrWhiteSpace(theme))
-        {
-            theme = "default";
-        }
         var user = await userService.GetOrCreateUserAsync(username, theme);
 
         var comment = new Comment

@@ -14,14 +14,7 @@ public class BaseController : Controller
 
         // Check query parameter first (same logic as ThemeViewLocationExpander)
         var queryTheme = context.HttpContext.Request.Query["theme"].ToString();
-        var theme = !string.IsNullOrWhiteSpace(queryTheme) ? queryTheme : ThemeRead();
-
-        if (string.IsNullOrWhiteSpace(theme))
-        {
-            theme = DefaultTheme();
-        }
-
-        ViewBag.Theme = theme;
+        ViewBag.Theme = !string.IsNullOrWhiteSpace(queryTheme) ? queryTheme : ThemeRead();
 
         base.OnActionExecuting(context);
     }
@@ -32,13 +25,7 @@ public class BaseController : Controller
 
         ViewBag.Username = GetOrCreateUsernameCookie(filterContext.HttpContext);
 
-        var theme = ThemeRead();
-        if (string.IsNullOrWhiteSpace(theme))
-        {
-            theme = DefaultTheme();
-        }
-
-        ViewBag.Theme = theme;
+        ViewBag.Theme = ThemeRead();
         base.OnActionExecuted(filterContext);
     }
 
@@ -158,9 +145,11 @@ public class BaseController : Controller
         CookieWrite("theme", theme);
     }
 
+    /// <summary>The theme cookie, else the configured default theme.</summary>
     internal string ThemeRead()
     {
-        return CookieRead("theme");
+        var theme = CookieRead("theme");
+        return string.IsNullOrWhiteSpace(theme) ? DefaultTheme() : theme;
     }
 
     internal string DefaultTheme()
