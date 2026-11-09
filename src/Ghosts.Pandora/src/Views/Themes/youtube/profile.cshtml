@@ -1,6 +1,7 @@
-@model List<Ghosts.Pandora.Infrastructure.Models.Post>
+@model Ghosts.Pandora.Infrastructure.Models.User
 @{
     Layout = null;
+    var posts = ViewBag.Posts as List<Ghosts.Pandora.Infrastructure.Models.Post>;
     var profileUsername = (ViewContext.RouteData.Values["username"] as string)?.Trim();
     if (string.IsNullOrWhiteSpace(profileUsername))
     {
@@ -9,7 +10,7 @@
 
     if (string.IsNullOrWhiteSpace(profileUsername))
     {
-        profileUsername = Model?.FirstOrDefault()?.Username ?? "user";
+        profileUsername = Model?.Username ?? "user";
     }
 }
 
@@ -159,10 +160,7 @@
                                 <span class="channel-handle">@($"@{profileUsername}")</span>
                                 <span class="channel-stats"><span data-followers-count>0</span> subscribers • <span data-following-count>0</span> following</span>
                             </div>
-                        <div class="channel-description">
-                            Welcome to my channel! Here you'll find amazing content about technology, lifestyle, and more.
-                            Subscribe for weekly uploads!
-                        </div>
+                        <div class="channel-description">@(string.IsNullOrWhiteSpace(Model.Bio) ? "No description." : Model.Bio)</div>
                     </div>
 
                     <div class="channel-actions">
@@ -206,9 +204,9 @@
                     <!-- Featured Video Section -->
                     <div class="featured-section">
                         <h2 class="section-title">Featured</h2>
-                        @if (Model != null)
+                        @if (posts != null && posts.Any())
                         {
-                            var featuredPost = Model.First();
+                            var featuredPost = posts.First();
                             <div class="featured-video">
                                 <div class="video-thumbnail">
                                     {
@@ -235,9 +233,9 @@
                     <div class="videos-section">
                         <h2 class="section-title">Recent uploads</h2>
                         <div class="videos-grid">
-                            @if (Model != null)
+                            @if (posts != null)
                             {
-                                @foreach (var post in Model)
+                                @foreach (var post in posts)
                                 {
                                     <div class="video-card">
                                         <div class="video-thumbnail">

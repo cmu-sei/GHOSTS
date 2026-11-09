@@ -3,6 +3,8 @@ using Ghosts.Animator.Models;
 
 namespace Ghosts.Api.Tests;
 
+// Npc.Generate builds the profile in a static, so tests that generate NPCs cannot run in parallel
+[Collection("Npc.Generate")]
 public class NpcGenerationTests
 {
     /// <summary>

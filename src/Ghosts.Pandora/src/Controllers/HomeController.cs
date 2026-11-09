@@ -55,10 +55,6 @@ public class HomeController(
         }
 
         var theme = ThemeRead();
-        if (string.IsNullOrWhiteSpace(theme))
-        {
-            theme = DefaultTheme();
-        }
         var posts = await postService.GetLatestPostsByTheme(theme);
 
         return View("Index", posts);
@@ -76,8 +72,6 @@ public class HomeController(
         var queryTheme = Request.Query["theme"].ToString();
         if (string.IsNullOrEmpty(queryTheme))
             queryTheme = ThemeRead();
-        if (string.IsNullOrWhiteSpace(queryTheme))
-            queryTheme = DefaultTheme();
 
         var post = new Post
         {

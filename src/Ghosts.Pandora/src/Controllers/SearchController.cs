@@ -13,10 +13,6 @@ public class SearchController(ILogger logger, IUserService userService, IPostSer
     public async Task<IActionResult> Index([FromQuery] string q)
     {
         var theme = ThemeRead();
-        if (string.IsNullOrWhiteSpace(theme))
-        {
-            theme = "default";
-        }
 
         var viewModel = new SearchResultsViewModel
         {

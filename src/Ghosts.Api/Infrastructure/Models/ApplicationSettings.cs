@@ -17,6 +17,11 @@ public class ApplicationSettings
     /// </summary>
     public int SeedNpcCount { get; set; }
 
+    /// <summary>
+    /// Create an NPC for each machine's username as the machine first checks in.
+    /// </summary>
+    public bool NpcPerMachine { get; set; }
+
     public AnimatorSettingsDetail AnimatorSettings { get; set; }
     public GroupingOptions Grouping { get; set; }
 

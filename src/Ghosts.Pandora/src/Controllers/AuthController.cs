@@ -12,7 +12,7 @@ public class AuthController(ILogger logger, IUserService userService, IThemeServ
     public IActionResult Index(string returnUrl = "/")
     {
         ViewBag.Themes = themeService.GetAvailableThemes();
-        ViewBag.SelectedTheme = string.IsNullOrWhiteSpace(ThemeRead()) ? "default" : ThemeRead();
+        ViewBag.SelectedTheme = ThemeRead();
         ViewBag.ReturnUrl = LocalReturnUrl(returnUrl);
         return View("~/Views/Auth/Login.cshtml");
     }
@@ -31,7 +31,7 @@ public class AuthController(ILogger logger, IUserService userService, IThemeServ
         {
             ViewBag.Error = "Username is required.";
             ViewBag.Themes = themeService.GetAvailableThemes();
-            ViewBag.SelectedTheme = string.IsNullOrWhiteSpace(ThemeRead()) ? "default" : ThemeRead();
+            ViewBag.SelectedTheme = ThemeRead();
             ViewBag.ReturnUrl = LocalReturnUrl(model?.ReturnUrl);
             return View("~/Views/Auth/Login.cshtml");
         }
@@ -39,7 +39,7 @@ public class AuthController(ILogger logger, IUserService userService, IThemeServ
         var username = model.Username.Trim();
 
         var requestedTheme = string.IsNullOrWhiteSpace(model.Theme) ? ThemeRead() : model.Theme.Trim();
-        if (string.IsNullOrWhiteSpace(requestedTheme) || !themeService.ThemeExists(requestedTheme))
+        if (!themeService.ThemeExists(requestedTheme))
         {
             requestedTheme = "default";
         }

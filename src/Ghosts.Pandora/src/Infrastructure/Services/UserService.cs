@@ -16,7 +16,7 @@ public interface IUserService
     Task<List<User>> SearchUsersAsync(string searchTerm, string theme = null, int limit = 20);
 }
 
-public class UserService(DataContext context, IGhostsService ghostsService) : IUserService
+public class UserService(DataContext context) : IUserService
 {
     public async Task<List<User>> GetAllUsersAsync()
     {
@@ -77,9 +77,6 @@ public class UserService(DataContext context, IGhostsService ghostsService) : IU
 
         context.Users.Add(user);
         await context.SaveChangesAsync();
-
-        if (ghostsService.IsActive())
-            await ghostsService.CreateUser(user);
 
         return user;
     }

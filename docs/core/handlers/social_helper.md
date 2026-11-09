@@ -7,16 +7,16 @@ The supported themes by this helper are `default`, `facebook`, `linkedin`, `disc
 The handlerArgs for the `social` command are:
 
 - "social-version" - required, hardcode as "v1.0".
-- "social-username" - optional, used as username for post if social site supports user names.
+- "social-username" - optional, the Pandora user that the browser acts as. Before each action the helper logs in on the site's `/login` page, keeping the theme of the site, unless the browser is this user already. Posts and likes are then made by this user on every theme. If not set, or if the login page of an older Pandora does not offer the theme of the site, they are made by the random user that Pandora assigns to the browser.
 - "social-use-unique-user" - optional, boolean, if "true", then grab the username from the site.
 - "social-post-probability": optional, <0-100 integer>, default  0.
 - "social-like-probability": optional, <0-100 integer>, default 0.
 - "social-browse-probability": optional, <0-100 integer>, default 0, sum of post+like+browse <= 100.
-- "social-addimage-probability" : optional, <0-100 integer>, default 0, only used if a theme supports image posting when a post is done.
+- "social-addimage-probability" : optional, <0-100 integer>, default 0, only used when a post is done on a theme that supports image posting (the `default` theme).
 - "social-content-directory" : required - contains the absolute directory path to the social content used for posting. See the section below on the required format.
 - "social-topiclist" - optional, a string used to prune topic directories found a social content theme directory. If this is string it not null, then a content topic directory must contain this string in order for it be used as a topic source.
 
-The "CommandArgs" should be a list of URLs mapped to Pandora v9 Themes (each URLs will point to a Pandora V9 docker container that is configured for that theme).  The helper randomly selects a site, and then selects a browse/post/like option based on the probabilities.  The entries in the "CommandArgs" is formatted as `site:<URL>`, the keyword `site:` is required.
+The "CommandArgs" should be a list of URLs mapped to Pandora v9 Themes (each URLs will point to a Pandora V9 docker container that is configured for that theme).  The helper randomly selects a site, and then selects a browse/post/like option based on the probabilities. The first action on a theme is always a post.  The entries in the "CommandArgs" is formatted as `site:<URL>`, the keyword `site:` is required.
 
 A sample timeline is shown below.
 
@@ -191,7 +191,7 @@ If you were using the above docker compose and wanted to test with a browser on 
 
 ## Social Content Directory Structure
 
-The helper expects a social content directory structure as shown below. The sub directory names under the top directory must match the supported theme names as above. Each theme will have one or more topic sub directories (name unimportant) and each topic directory will have one or more post directories (name unimportant). A post directory must have a `post.txt` file that will be used for text posting. If the theme supports image posting, and if the post directory any `.png` or `.jpg` files, then a random image file is chosen to post with the `post.txt` file.
+The helper expects a social content directory structure as shown below. The sub directory names under the top directory must match the supported theme names as above. Each theme will have one or more topic sub directories (name unimportant) and each topic directory will have one or more post directories (name unimportant). A post directory must have a `post.txt` file that will be used for text posting. If the theme supports image posting, and if the post directory has any image files named `image*.png` or `image*.jpg` (e.g. `image1.jpg`), then a random one of these is chosen to post with the `post.txt` file. Image files with other names are ignored.
 
 When the social helper browses to a social theme web site, it infers the theme name from the page content, and then uses this theme name to choose a random topic directory, and then select a random post from that topic directory. 
 
@@ -203,10 +203,10 @@ The social helper will work with the Socializer container that was released prio
                           <topic1>/
                                     <dirname1>/
                                                post.txt
-                                               <aimage>.jpg
+                                               image<N>.jpg
                                     <dirname2>/
                                                post.txt
-                                              <aimage>.jpg
+                                              image<N>.jpg
                                     .......
                           <topic2>/
                                    ....

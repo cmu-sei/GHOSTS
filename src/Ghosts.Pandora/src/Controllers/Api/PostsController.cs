@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Globalization;
+using System.Net;
 using Ghosts.Pandora.Hubs;
 using Ghosts.Pandora.Infrastructure;
 using Ghosts.Pandora.Infrastructure.Models;
@@ -60,18 +61,25 @@ public class PostsController(ILogger logger, IHubContext<PostsHub> hubContext, I
         if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(post.Message))
             return BadRequest("User and message are required.");
 
+        // Optional date for a post that should read as written earlier, taken as UTC unless it has an offset
+        var created = Request.Form["created"].ToString();
+        if (!string.IsNullOrEmpty(created))
+        {
+            if (!DateTimeOffset.TryParse(created, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var createdUtc))
+                return BadRequest("Created must be an ISO-8601 date.");
+            post.CreatedUtc = createdUtc.UtcDateTime;
+        }
+
         var theme = Request.Query["theme"].ToString();
         if (string.IsNullOrWhiteSpace(theme))
             theme = ThemeRead();
-        if (string.IsNullOrWhiteSpace(theme))
-            theme = "default";
 
         // Get or create user
         var user = await userService.GetOrCreateUserAsync(username, theme);
 
         post.Username = user.Username;
         post.UserId = user.Id;
-        post.Theme = theme;
+        post.Theme = user.Theme;
         post.CreatedOnUrl = Request.Path.Value;
 
         var imagePath = string.Empty;
@@ -92,11 +100,14 @@ public class PostsController(ILogger logger, IHubContext<PostsHub> hubContext, I
             post.Message += $" <img src=\"{imagePath}\"/>";
         }
 
-        await service.CreatePost(user.Id, user.Username, user.Theme, post.Message);
+        // A duplicate is not saved, so it is not broadcast either
+        var duplicate = service.Duplicates(post);
+        await service.CreatePost(post);
 
         UserWrite(username);
 
-        await hubContext.Clients.All.SendAsync("SendMessage", post.Id, username, theme, post.Message, post.CreatedUtc);
+        if (!duplicate)
+            await hubContext.Clients.All.SendAsync("SendMessage", post.Id, username, theme, post.Message, post.CreatedUtc);
 
         return NoContent();
     }

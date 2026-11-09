@@ -146,6 +146,23 @@ public class NpcsController(
     }
 
     /// <summary>
+    /// Get the NPC that uses a social media username: the username its machine reports, else its
+    /// email name, else first.last
+    /// </summary>
+    /// <param name="username">The social media username, matched case-insensitively</param>
+    /// <returns>NpcRecord</returns>
+    [ProducesResponseType(typeof(ActionResult<NpcRecord>), (int)HttpStatusCode.OK)]
+    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(ActionResult<NpcRecord>))]
+    [SwaggerOperation("NpcsLookup")]
+    [HttpGet("lookup")]
+    public async Task<ActionResult<NpcRecord>> NpcsLookup([FromQuery] string username)
+    {
+        var result = await service.GetBySocialHandle(username);
+        if (result == null) return NotFound();
+        return Ok(result);
+    }
+
+    /// <summary>
     /// Get all activity records for a specific NPC
     /// </summary>
     /// <param name="id">The NPC ID</param>
