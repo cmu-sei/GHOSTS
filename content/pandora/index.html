@@ -2150,10 +2150,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#as-a-docker-container" class="md-nav__link">
+  <a href="#standalone" class="md-nav__link">
     <span class="md-ellipsis">
       
-        As a Docker Container
+        Standalone
       
     </span>
   </a>
@@ -2161,10 +2161,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#bare-metal" class="md-nav__link">
+  <a href="#with-the-ghosts-stack" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Bare metal
+        With the GHOSTS stack
       
     </span>
   </a>
@@ -2237,6 +2237,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#seeding-social-content-and-reporting-npc-activity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Seeding social content and reporting NPC activity
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2276,7 +2287,7 @@
 <h1 id="ghosts-pandora-server-overview">GHOSTS PANDORA SERVER Overview<a class="headerlink" href="#ghosts-pandora-server-overview" title="Permanent link">&para;</a></h1>
 <details class="info" open="open">
 <summary>Pandora is part of GHOSTS</summary>
-<p><a href="https://github.com/cmu-sei/GHOSTS/tree/master/src/ghosts.pandora">Pandora is within the GHOSTS Source Code Repository</a> hosted on GitHub.</p>
+<p><a href="https://github.com/cmu-sei/GHOSTS/tree/master/src/Ghosts.Pandora">Pandora is within the GHOSTS Source Code Repository</a> hosted on GitHub.</p>
 </details>
 <p>GHOSTS PANDORA is a web server that responds to a myriad of request types with randomized content generated in real-time. It can operate in two modes:</p>
 <ol>
@@ -2286,24 +2297,47 @@
 <p>The mode is controlled by configuration, making Pandora a unified content server for all GHOSTS content generation needs. Used in conjunction with <a href="https://github.com/cmu-sei/GHOSTS">GHOSTS</a> NPCs, Pandora provides agents with realistic content to download, post, and interact with beyond simple HTML and associated image, CSS, and js files.</p>
 <p><img alt="Pandora" src="../../assets/screens/pandora.gif" /></p>
 <h2 id="running-this-server">Running this server<a class="headerlink" href="#running-this-server" title="Permanent link">&para;</a></h2>
-<h3 id="as-a-docker-container">As a Docker Container<a class="headerlink" href="#as-a-docker-container" title="Permanent link">&para;</a></h3>
-<p>Docker is the preferred way to run Pandora - mostly because this is how we run and test it before version releases.</p>
-<ol>
-<li>Review the repository <a href="https://raw.githubusercontent.com/cmu-sei/GHOSTS/master/src/ghosts.pandora/docker-compose.yml">docker-compose.yml</a> file</li>
-<li>Run the following in your terminal </li>
-</ol>
-<div class="highlight"><pre><span></span><code>mkdir ghosts-pandora
-cd ghosts-pandora
-curl https://raw.githubusercontent.com/cmu-sei/GHOSTS/master/src/ghosts.pandora/docker-compose.yml -o docker-compose.yml
-docker-compose up -d
+<p>Pandora runs as a Docker container, either on its own or under the Aspire host with the rest of the GHOSTS stack. Each works with no extra configuration:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Standalone</th>
+<th>Aspire host</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Database</td>
+<td>SQLite in <code>/app/db</code></td>
+<td>PostgreSQL on <code>ghosts-postgres</code>, database <code>pandora</code></td>
+</tr>
+<tr>
+<td>Activity reporting to the GHOSTS API</td>
+<td>off; set <code>GHOSTS_API_URL</code> to turn it on</td>
+<td>on</td>
+</tr>
+<tr>
+<td>Address</td>
+<td>http://localhost:8000</td>
+<td>http://localhost:8800</td>
+</tr>
+</tbody>
+</table>
+<h3 id="standalone">Standalone<a class="headerlink" href="#standalone" title="Permanent link">&para;</a></h3>
+<p>Run the prebuilt image:</p>
+<div class="highlight"><pre><span></span><code>docker run -d -p 8000:5000 -v pandora-db:/app/db -v pandora-images:/app/wwwroot/images ghcr.io/cmu-sei/ghosts/pandora:latest
 </code></pre></div>
-<h3 id="bare-metal">Bare metal<a class="headerlink" href="#bare-metal" title="Permanent link">&para;</a></h3>
-<p>This assumes the host server is a common Linux distribution. For images to render correctly, PIL or the more recent Pillow library is necessary. See here for more information on <a href="https://pillow.readthedocs.io/en/latest/installation.html">Pillow installation and configuration</a>.</p>
-<ol>
-<li>Using a Python 3 distribution &gt;= 3.6.2</li>
-<li>In the terminal run: <code>pip install -r requirements.txt</code></li>
-<li>Then run <code>python app.py</code></li>
-</ol>
+<p>Or build it from source with the repository's <a href="https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Pandora/src/docker-compose.yml">docker-compose.yml</a>:</p>
+<div class="highlight"><pre><span></span><code>git clone https://github.com/cmu-sei/GHOSTS.git
+cd GHOSTS/src/Ghosts.Pandora/src
+docker compose up -d
+</code></pre></div>
+<p>To report posts, likes and comments to a GHOSTS API as NPC activity, set <code>GHOSTS_API_URL</code> (for example <code>-e GHOSTS_API_URL=http://ghosts-api:5000/api</code>).</p>
+<h3 id="with-the-ghosts-stack">With the GHOSTS stack<a class="headerlink" href="#with-the-ghosts-stack" title="Permanent link">&para;</a></h3>
+<p>The API's <a href="https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Api/docker-compose.yml">docker-compose.yml</a> does not run Pandora. The n8n social workflows post to <code>PANDORA_URL</code> on n8n, a standalone Pandora on the Docker host at <code>http://host.docker.internal:8000</code> by default; NPC chat posts to <code>PANDORA_HOST</code> on the API. Set either in the <code>.env</code> file next to that compose file to point elsewhere.</p>
+<p>The Aspire host runs Pandora with the rest of the stack, on the stack's PostgreSQL and reporting activity to <code>ghosts-api</code>.</p>
+<p>See the <a href="https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Pandora/readme.md">Pandora readme</a> for all settings.</p>
 <h2 id="capabilities">Capabilities<a class="headerlink" href="#capabilities" title="Permanent link">&para;</a></h2>
 <h3 id="handling-requests-by-directory">Handling requests by directory<a class="headerlink" href="#handling-requests-by-directory" title="Permanent link">&para;</a></h3>
 <ul>
@@ -2393,6 +2427,35 @@ docker-compose up -d
 <li>The MIME type of the response</li>
 </ul>
 <p>So for 1 in the example above, requests to /1/ return the a.zip file as an application/zip file.</p>
+<h2 id="seeding-social-content-and-reporting-npc-activity">Seeding social content and reporting NPC activity<a class="headerlink" href="#seeding-social-content-and-reporting-npc-activity" title="Permanent link">&para;</a></h2>
+<p>In social mode, posts and profiles can be loaded by script. Both endpoints create the user if it does not exist, and take the theme from the <code>theme</code> query parameter, then the <code>theme</code> cookie, then <code>DEFAULT_THEME</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Request</th>
+<th>Form fields</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>POST</code> /api/posts</td>
+<td><code>user</code>, <code>message</code>, and optionally <code>created</code> (an ISO-8601 date, UTC unless it carries an offset) to backdate the post and <code>file</code> to attach an image</td>
+</tr>
+<tr>
+<td><code>POST</code> /api/users/{username}</td>
+<td><code>bio</code> and <code>status</code>; a field that is not sent is left as it was</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s1">'http://localhost:5000/api/posts?theme=linkedin'</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="nv">user</span><span class="o">=</span>jsmith<span class="w"> </span>-d<span class="w"> </span><span class="s1">'message=Starting a new role this week'</span><span class="w"> </span>-d<span class="w"> </span><span class="nv">created</span><span class="o">=</span><span class="m">2025</span>-03-01T14:30:00Z
+
+curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s1">'http://localhost:5000/api/users/jsmith?theme=linkedin'</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s1">'bio=Control systems engineer'</span><span class="w"> </span>-d<span class="w"> </span><span class="nv">status</span><span class="o">=</span>Active
+</code></pre></div>
+<p>Sending the same backdated post twice stores it once. Pandora's cleanup job removes posts older than <code>ApplicationConfiguration:CleanupAge</code> (60 hours by default) by their post date, so deployments that seed backdated posts must raise it.</p>
+<p>When <code>GHOSTS_API_URL</code> is set (for example <code>http://ghosts-api:5000/api</code>), every post, like, comment and direct message is reported to the GHOSTS API as activity of the NPC that owns the username, found with <code>GET /api/npcs/lookup?username=</code>: the username the NPC's machine reports, else the name part of the NPC's email, else <code>first.last</code>. Usernames with no NPC are skipped. Reports are sent in the background and carry the time they were sent, so a backdated post is recorded as activity of the moment it was loaded. The API stores one record for the same post reported twice within a few minutes, so a post or comment made in NPC chat and reported back by Pandora is kept once.</p>
+<p>For NPCs to exist for the usernames that clients log in with, the API can create one per machine as it first checks in: set <code>ApplicationSettings:NpcPerMachine</code> to <code>true</code> (<code>ApplicationSettings__NpcPerMachine=true</code> in the environment), or call <code>POST /api/npcs/generate/syncWithMachineUsernames</code> for the machines already known.</p>
 
 
 
