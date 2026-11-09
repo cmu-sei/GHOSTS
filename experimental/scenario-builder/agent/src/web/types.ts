@@ -53,7 +53,6 @@ export interface WebAgent {
   /** The designer answered a card, which the page has already recorded. */
   answered(questionId: string, value: unknown): Promise<void>;
   delegated(questionId: string): Promise<void>;
-  approved(stage: number): Promise<void>;
   abort(): void;
   subscribe(listener: (event: WebAgentEvent) => void): () => void;
 }

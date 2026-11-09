@@ -7,9 +7,9 @@ export function delegatesAll(text: string): boolean {
   return HAND_OVER.test(text);
 }
 
-/** Whether a reply moved the scenario on: an answer, a draft, an approval, or a stage opened. */
+/** Whether a reply moved the scenario on: an answer, a draft, or a stage opened. */
 export function madeProgress(before: Progress, after: Progress): boolean {
-  const key = (p: Progress) => [p.answered.length, p.stage, p.gate.passes, p.gate.approved, p.draftsDue.join(',')].join('|');
+  const key = (p: Progress) => [p.answered.length, p.stage, p.gate.passes, p.draftsDue.join(',')].join('|');
   return key(before) !== key(after);
 }
 

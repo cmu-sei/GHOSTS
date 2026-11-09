@@ -25,25 +25,10 @@ export class QuestionsPageComponent {
     const stage = this.stage();
     return stage ? stage.questions.filter(q => this.store.answers().has(q.id)).length : 0;
   });
-  /** A closed stage changed since its approval: this page offers the renewal too. */
-  protected readonly staleHere = computed(() => {
-    const stage = this.stage();
-    return (this.store.progress()?.gate.findings ?? []).find(f => f.code === 'APPROVAL_STALE' && f.stage === stage?.number && f.stage !== this.store.progress()?.stage);
-  });
 
   protected save(questionId: string, value: AnswerValue): void {
     this.api.answer(this.store.scenarioId(), questionId, value).subscribe({
       next: () => this.store.refresh(),
-      error: e => this.snackBar.open(errorMessage(e), 'Close')
-    });
-  }
-
-  protected approve(stage: number): void {
-    this.api.approve(this.store.scenarioId(), stage).subscribe({
-      next: () => {
-        this.store.refresh();
-        this.store.approvals.next(stage);
-      },
       error: e => this.snackBar.open(errorMessage(e), 'Close')
     });
   }

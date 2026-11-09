@@ -31,7 +31,6 @@ export interface ScenarioTypeStage {
   number: number;
   title: string;
   questions: ScenarioTypeQuestion[];
-  gate: { approval?: string };
   /** What the stage settles; the model drafts its questions from it. */
   purpose?: string;
 }
@@ -143,14 +142,12 @@ export interface Finding {
   severity: 'stop' | 'warning';
   code: string;
   message: string;
-  /** The stage it is about: the open one, or a closed one whose approval went stale. */
+  /** The stage it is about. */
   stage: number;
 }
 
 export interface Gate {
   passes: boolean;
-  approval?: string;
-  approved: boolean;
   findings: Finding[];
 }
 
@@ -165,7 +162,7 @@ export interface Progress {
   open: QuestionView[];
   answered: AnsweredView[];
   draftsDue: string[];
-  /** The owner handed every remaining decision to the agent, gates included. */
+  /** The owner handed every remaining decision to the agent. */
   delegated: boolean;
 }
 
@@ -181,7 +178,7 @@ export interface ProposalView {
 
 export interface LogEntry {
   time: string;
-  type: 'answer' | 'draft' | 'proposal' | 'approval' | 'delegation' | 'update';
+  type: 'answer' | 'draft' | 'proposal' | 'delegation' | 'update';
   target: string;
   before?: unknown;
   after?: unknown;

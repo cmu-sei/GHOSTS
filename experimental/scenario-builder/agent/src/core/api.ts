@@ -30,14 +30,12 @@ export interface Finding {
   severity: "stop" | "warning";
   code: string;
   message: string;
-  /** The stage it is about: the open one, or a closed one whose approval went stale. */
+  /** The stage it is about. */
   stage?: number;
 }
 
 export interface Gate {
   passes: boolean;
-  approval?: string;
-  approved: boolean;
   findings: Finding[];
 }
 
@@ -52,7 +50,7 @@ export interface Progress {
   open: QuestionView[];
   answered: AnsweredView[];
   draftsDue: string[];
-  /** The owner handed every remaining decision to the agent, gates included. */
+  /** The owner handed every remaining decision to the agent. */
   delegated?: boolean;
   /** The context the designer gave: pasted text, fetched pages, documents. */
   sources?: SourceSummary[];
@@ -156,10 +154,6 @@ export class BuilderApi {
 
   advance(scenarioId: number): Promise<{ stage: number }> {
     return this.call("POST", `/scenarios/${scenarioId}/advance`);
-  }
-
-  async approve(scenarioId: number, stage: number): Promise<void> {
-    await this.call("POST", `/scenarios/${scenarioId}/gates/${stage}/approve`);
   }
 
   apply(scenarioId: number, proposalId: number): Promise<ProposalView> {

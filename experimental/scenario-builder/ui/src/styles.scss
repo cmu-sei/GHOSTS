@@ -1,6 +1,6 @@
 // Scenario Builder: a ledger of decisions moving through gated stages. Colour carries provenance
 // everywhere: cobalt is what a person stated, violet is what the agent proposed, a hollow ring
-// is still open. Green appears only for a gate that has passed, amber only for an approval to renew.
+// is still open. Green appears only for a gate that has passed.
 @use '@angular/material' as mat;
 
 :root {

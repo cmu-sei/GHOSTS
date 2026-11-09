@@ -47,7 +47,7 @@ export interface Observed {
   /** The text of each finished assistant message, with its prompt. */
   replies: { prompt: number; text: string }[];
   prompts: PromptRecord[];
-  /** Three prompts in a row with no question, approval or end. */
+  /** Three prompts in a row with no question or end. */
   stalled: boolean;
   /** The run hit maxPrompts. */
   stoppedAtLimit: boolean;

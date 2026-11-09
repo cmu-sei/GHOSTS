@@ -11,14 +11,16 @@ public class AudienceFilterTests
 {
     private static readonly Domain.ScenarioType Tabletop = new ScenarioTypeCatalog(ApiFactory.ScenarioTypesDirectory).Find(TestApi.TabletopType)!;
 
-    /// <summary>A finished scenario whose ground truth and motive say something recognisable.</summary>
+    /// <summary>
+    /// A scenario on its last stage whose ground truth and motive say something recognisable. The last stage's
+    /// questions stay open, so its findings aren't empty and a filter that drops them shows.
+    /// </summary>
     private static async Task<JsonObject> FinishedDocument()
     {
         using var factory = new ApiFactory();
         var owner = factory.Client();
         var id = await CreateScenario(owner);
-        await ReachStage(owner, id, 3);
-        await AnswerStage(owner, id, 3);
+        await ReachStage(owner, id, 4);
         await Put(owner, id, "groundTruth", new { value = new[] { "The generators failed their test" } });
         await Put(owner, id, "motive", new { value = "Fees" });
         return (await owner.GetFromJsonAsync<JsonObject>($"/api/scenarios/{id}"))!;

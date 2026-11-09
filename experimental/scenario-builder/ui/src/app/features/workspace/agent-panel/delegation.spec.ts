@@ -11,18 +11,17 @@ describe('delegatesAll', () => {
 
 const progress = (overrides: Partial<Progress>): Progress => ({
   scenarioTypeId: 'k', scenarioTypeVersion: '0.1.0', stage: 0, stageTitle: 'S', lastStage: false,
-  gate: { passes: false, approved: false, findings: [] },
+  gate: { passes: false, findings: [] },
   open: [], answered: [], draftsDue: [], delegated: true, ...overrides
 });
 const answered = (n: number) => Array.from({ length: n }, (_, i) =>
   ({ id: `q${i}`, stage: 0, value: 'x', who: 'proposed' as const, by: 'dev', via: 'agent' as const, time: 't' }));
 
 describe('madeProgress', () => {
-  it('counts a new answer, an approval, a draft written or a stage opened', () => {
+  it('counts a new answer, a draft written or a stage opened', () => {
     const before = progress({ answered: answered(2), draftsDue: ['executiveSummary'] });
 
     expect(madeProgress(before, progress({ answered: answered(3), draftsDue: ['executiveSummary'] }))).toBe(true);
-    expect(madeProgress(before, { ...before, gate: { ...before.gate, approved: true } })).toBe(true);
     expect(madeProgress(before, { ...before, draftsDue: [] })).toBe(true);
     expect(madeProgress(before, { ...before, stage: 1 })).toBe(true);
   });
@@ -36,8 +35,8 @@ describe('madeProgress', () => {
 
 describe('finished', () => {
   it('is the last stage with its gate passed', () => {
-    expect(finished(progress({ lastStage: true, gate: { passes: true, approved: true, findings: [] } }))).toBe(true);
+    expect(finished(progress({ lastStage: true, gate: { passes: true, findings: [] } }))).toBe(true);
     expect(finished(progress({ lastStage: true }))).toBe(false);
-    expect(finished(progress({ gate: { passes: true, approved: true, findings: [] } }))).toBe(false);
+    expect(finished(progress({ gate: { passes: true, findings: [] } }))).toBe(false);
   });
 });

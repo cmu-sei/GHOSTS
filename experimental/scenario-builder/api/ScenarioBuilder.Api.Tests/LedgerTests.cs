@@ -11,8 +11,8 @@ public class LedgerTests
     // A scenario type whose stage 0 gained question "b" after a scenario had already passed it.
     private static readonly Domain.ScenarioType Grown = new("grown", "2", "Grown",
     [
-        new ScenarioTypeStage(0, "First", [Text("a"), Text("b")], new ScenarioTypeGate("Confirm the first stage")),
-        new ScenarioTypeStage(1, "Second", [Text("c")], new ScenarioTypeGate(null))
+        new ScenarioTypeStage(0, "First", [Text("a"), Text("b")]),
+        new ScenarioTypeStage(1, "Second", [Text("c")])
     ], []);
 
     private static Decision Answer(string id, int stage) =>
@@ -23,24 +23,22 @@ public class LedgerTests
     {
         var scenario = new Scenario { Stage = 1 };
         var decisions = new List<Decision> { Answer("a", 0) };
-        var approvals = new List<Approval> { new() { Stage = 0, Hash = "approved-before-b-existed" } };
 
-        var progress = Ledger.Progress(Grown, scenario, decisions, approvals);
+        var progress = Ledger.Progress(Grown, scenario, decisions);
 
         Assert.Equal([("b", 0), ("c", 1)], progress.Open.Select(q => (q.Id, q.Stage)));
         Assert.Equal([("QUESTION_OPEN", 0), ("QUESTION_OPEN", 1)], progress.Gate.Findings.Select(f => (f.Code, f.Stage)));
     }
 
     [Fact]
-    public void A_closed_stage_asks_for_approval_again_once_its_new_questions_are_answered()
+    public void A_closed_stage_stops_nothing_once_its_new_questions_are_answered()
     {
         var scenario = new Scenario { Stage = 1 };
         var decisions = new List<Decision> { Answer("a", 0), Answer("b", 0), Answer("c", 1) };
-        var approvals = new List<Approval> { new() { Stage = 0, Hash = "approved-before-b-existed" } };
 
-        var progress = Ledger.Progress(Grown, scenario, decisions, approvals);
+        var progress = Ledger.Progress(Grown, scenario, decisions);
 
         Assert.Empty(progress.Open);
-        Assert.Equal([("APPROVAL_STALE", 0)], progress.Gate.Findings.Select(f => (f.Code, f.Stage)));
+        Assert.True(progress.Gate.Passes);
     }
 }

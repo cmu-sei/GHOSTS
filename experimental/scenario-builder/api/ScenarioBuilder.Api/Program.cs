@@ -31,6 +31,9 @@ builder.Services.AddHttpClient(ChatCompletionsEndpoint.Client)
 
 builder.Services.AddHttpClient(SourceText.WebClient, client => client.Timeout = TimeSpan.FromSeconds(20));
 
+builder.Services.AddHttpClient(GraySpaceClient.Client, client => client.Timeout = TimeSpan.FromSeconds(30));
+builder.Services.AddScoped<GraySpaceClient>();
+
 builder.AddApiEndpoints();
 
 var app = builder.Build();

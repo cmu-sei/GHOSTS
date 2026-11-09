@@ -6,7 +6,7 @@ import { WorkspaceStore } from '../workspace.store';
 
 const FIELD = 'executiveSummary';
 
-/** The executive summary: drafted by the agent or written here, then approved by the owner at stage 2's gate. */
+/** The executive summary: drafted by the agent or written here; stage 2's gate waits for it. */
 @Component({
   selector: 'app-summary-page',
   standalone: true,
@@ -36,16 +36,6 @@ export class SummaryPageComponent {
   protected save(): void {
     this.api.draft(this.store.scenarioId(), FIELD, this.text()).subscribe({
       next: () => this.store.refresh(),
-      error: e => this.snackBar.open(errorMessage(e), 'Close')
-    });
-  }
-
-  protected approve(stage: number): void {
-    this.api.approve(this.store.scenarioId(), stage).subscribe({
-      next: () => {
-        this.store.refresh();
-        this.store.approvals.next(stage);
-      },
       error: e => this.snackBar.open(errorMessage(e), 'Close')
     });
   }

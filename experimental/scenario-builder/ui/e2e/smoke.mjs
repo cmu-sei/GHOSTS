@@ -80,16 +80,15 @@ try {
     stage0[1].text, WAIT);
   step('You decide → proposed by agent');
 
-  // 6. The rest of stage 0 through the API as the person, then Approve on the page.
+  // 6. The rest of stage 0 through the API as the person: its gate passes once every question is answered.
   const answered = new Set((await api(`/scenarios/${id}/progress`)).answered.map(a => a.id));
   for (const q of stage0.filter(q => !answered.has(q.id)))
     await api(`/scenarios/${id}/decisions/${q.id}`, { method: 'PUT', body: JSON.stringify({ value: q.answer === 'choice' ? q.options[0] : q.answer === 'list' ? ['x'] : `Answer for ${q.id}` }) });
   await page.reload();
-  await page.click('button:has-text("Confirm the engagement settings")', WAIT);
-  await page.waitForSelector('app-gate-panel:has-text("Every question is answered and approved")', WAIT);
-  const afterApproval = await api(`/scenarios/${id}/progress`);
-  if (!(afterApproval.stage >= 1 || afterApproval.gate.passes)) throw new Error(`stage 0 gate didn't pass: ${JSON.stringify(afterApproval.gate)}`);
-  step('approve the stage 0 gate');
+  await page.waitForSelector('app-gate-panel:has-text("Every question is answered.")', WAIT);
+  const afterAnswers = await api(`/scenarios/${id}/progress`);
+  if (!(afterAnswers.stage >= 1 || afterAnswers.gate.passes)) throw new Error(`stage 0 gate didn't pass: ${JSON.stringify(afterAnswers.gate)}`);
+  step('the stage 0 gate passes once answered');
 
   // 7. An agent proposal survives a reload, and Apply changes the answer.
   await api(`/scenarios/${id}/proposals`, {

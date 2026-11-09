@@ -92,11 +92,6 @@
                   What It Settles
                   <input class="sb-field" [value]="s.purpose ?? ''" (input)="setStage(i, { purpose: value($event) })" />
                 </label>
-                <label class="field">
-                  Approval at Its Gate
-                  <input class="sb-field" placeholder="None: the stage closes once its questions are answered" [value]="s.gate.approval ?? ''"
-                    (input)="setStage(i, { gate: { approval: value($event) } })" />
-                </label>
               </div>
               <ol class="questions">
                 @for (q of s.questions; track $index; let j = $index) {

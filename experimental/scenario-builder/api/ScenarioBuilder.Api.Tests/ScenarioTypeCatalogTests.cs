@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json.Nodes;
 using ScenarioBuilder.Api.Domain;
+using ScenarioBuilder.Api.Infrastructure;
 
 namespace ScenarioBuilder.Api.Tests;
 
@@ -17,11 +18,8 @@ public class ScenarioTypeCatalogTests
         Assert.Equal("0.3.0", scenarioType.Version);
         Assert.Equal([0, 1, 2, 3, 4], scenarioType.Stages.Select(s => s.Number));
         Assert.Equal("Events, Decisions and Rules of Play", scenarioType.Stages[3].Title);
-        Assert.Equal("Approve the names", scenarioType.Stages[4].Gate.Approval);
         var groundTruth = scenarioType.Find("groundTruth")!.Value;
         Assert.Equal(("groundTruth", 2), (groundTruth.Question.Id, groundTruth.Stage));
-        Assert.Equal("Approve the executive summary", scenarioType.Stages[2].Gate.Approval);
-        Assert.Null(scenarioType.Stages[1].Gate.Approval);
         Assert.Equal(AnswerType.Choice, scenarioType.Find("actorType")!.Value.Question.Answer);
     }
 
@@ -55,12 +53,26 @@ public class ScenarioTypeCatalogTests
         Directory.CreateDirectory(dir);
         File.WriteAllText(Path.Combine(dir, "v.scenario-type.json"), """
             { "id": "v", "version": "1", "name": "V", "drafts": [],
-              "stages": [ { "number": 0, "title": "S", "gate": {}, "questions": [
+              "stages": [ { "number": 0, "title": "S", "questions": [
                 { "id": "a", "text": "A?", "why": "w", "answer": "text", "path": "/a", "visibility": "secret" } ] } ] }
             """);
 
         var ex = Assert.Throws<InvalidOperationException>(() => new ScenarioTypeCatalog(dir));
         Assert.Contains("'a'", ex.Message);
+    }
+
+    [Fact]
+    public void A_stage_gate_from_an_older_version_still_loads_and_is_not_written_back()
+    {
+        // Older published versions, kept in the database, have a "gate" on every stage.
+        var scenarioType = ScenarioTypeCatalog.Read("""
+            { "id": "g", "version": "1", "name": "G", "drafts": [],
+              "stages": [ { "number": 0, "title": "S", "gate": { "approval": "Approve it" }, "questions": [
+                { "id": "a", "text": "A?", "why": "w", "answer": "text", "path": "/a" } ] } ] }
+            """, "g.scenario-type.json");
+
+        Assert.Equal("S", scenarioType.Stages[0].Title);
+        Assert.DoesNotContain("gate", ScenarioTypeStore.Write(scenarioType));
     }
 
     [Fact]
@@ -97,7 +109,6 @@ public class ScenarioTypeCatalogTests
             network.Select(q => q.Id));
         Assert.All(network, q => Assert.StartsWith("/network/", q.Path));
         Assert.Equal(["simulatedUsers", "planted"], network.Where(q => q.Visibility == "excon").Select(q => q.Id));
-        Assert.Equal("Approve the network requirements", smallUnit.Stages[3].Gate.Approval);
 
         Assert.Equal((2, "/network/notional"), (tabletop.Find("notionalNetwork")!.Value.Stage, tabletop.Find("notionalNetwork")!.Value.Question.Path));
         Assert.Equal("/network/liveRange", tabletop.Find("liveRange")!.Value.Question.Path);
@@ -143,7 +154,7 @@ public class ScenarioTypeCatalogTests
         Directory.CreateDirectory(dir);
         File.WriteAllText(Path.Combine(dir, "d.scenario-type.json"), """
             { "id": "d", "version": "1", "name": "D", "drafts": [],
-              "stages": [ { "number": 0, "title": "S", "gate": {}, "questions": [
+              "stages": [ { "number": 0, "title": "S", "questions": [
                 { "id": "a", "text": "A?", "why": "w", "answer": "text", "path": "/a", "default": "ownerName" } ] } ] }
             """);
 
@@ -203,7 +214,7 @@ public class ScenarioTypeCatalogTests
             {
               "id": "small", "version": "0.0.1", "name": "Small",
               "stages": [
-                { "number": 0, "title": "Only", "gate": {}, "questions": [
+                { "number": 0, "title": "Only", "questions": [
                   { "id": "a", "text": "A?", "why": "w", "answer": "text", "path": "/a" },
                   { "id": "{{second}}", "text": "B?", "why": "w", "answer": "choice", "options": ["x", "y"],
                     "recommended": "{{recommended}}", "path": "/b" }

@@ -23,7 +23,7 @@ public class ScenarioTypeAdminTests
         id, version = "0.0.0", name = "Red Team Exercise", description = "A small team attacks a mock enterprise.", topology = true, drafts = Array.Empty<object>(),
         stages = new[]
         {
-            new { number = 0, title = "Target", gate = new { }, questions = new[] { new { id = "target", label = "Target", text, why = "Everything aims at it.", answer, path = "/scenario/target" } } }
+            new { number = 0, title = "Target", questions = new[] { new { id = "target", label = "Target", text, why = "Everything aims at it.", answer, path = "/scenario/target" } } }
         }
     };
 
@@ -155,7 +155,7 @@ public class ScenarioTypeAdminTests
             name = "Red Team Exercise", drafts = Array.Empty<object>(),
             stages = new object[]
             {
-                new { title = "Target", gate = new { approval = "" }, questions = new object[]
+                new { title = "Target", questions = new object[]
                 {
                     new { text = "What does the team attack first?", answer = "text" },
                     new { text = "What does the team attack first?", answer = "list" }
@@ -168,7 +168,6 @@ public class ScenarioTypeAdminTests
         Assert.Equal(HttpStatusCode.OK, saved.StatusCode);
         var stage = (await Body(saved))["scenarioType"]!["stages"]![0]!;
         Assert.Equal(0, (int)stage["number"]!);
-        Assert.Null(stage["gate"]!["approval"]);
         var questions = stage["questions"]!.AsArray();
         Assert.Equal(["teamAttackFirst", "teamAttackFirst2"], questions.Select(q => (string)q!["id"]!));
         Assert.Equal("Team Attack First", (string)questions[0]!["label"]!);

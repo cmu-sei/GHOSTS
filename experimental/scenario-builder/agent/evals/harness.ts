@@ -1,7 +1,6 @@
 // One evaluation run: a fresh scenario, the agent driven from Node on the same core the browser
 // runs, and a scripted person answering from the fixture the way the UI would: a card answer is
-// recorded as the person and then told to the agent; "You decide" is only told; an approval is
-// given once it's all the gate waits for.
+// recorded as the person and then told to the agent; "You decide" is only told.
 
 import type { StreamFn } from "@earendil-works/pi-agent-core";
 import { BuilderApi } from "../src/core/api.ts";
@@ -124,13 +123,6 @@ export async function runOnce(opts: RunOptions): Promise<Observed> {
       if (progress.lastStage && progress.gate.passes) {
         finished = true;
         break;
-      }
-      const findings = progress.gate.findings;
-      if (progress.gate.approval && !progress.gate.approved && findings.length && findings.every(f => f.code.startsWith("APPROVAL_"))) {
-        stalls = 0;
-        await person.approve(id, progress.stage);
-        await send(`[approved stage ${progress.stage}]`, () => session.approved(progress.stage));
-        continue;
       }
       if (++stalls >= maxStalls) {
         stalled = true;

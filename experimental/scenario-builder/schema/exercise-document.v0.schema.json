@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:ghosts:scenario-builder:exercise-document:v0",
   "title": "Scenario Builder exercise document, version 0",
-  "description": "What GET /api/scenarios/{id} returns: the Crucible Scenario Format. Version 0.4 covers the Tabletop Exercise (TTX) and Small Unit Team Exercise scenario types, and any an admin makes; a value under scenario or network may be text, a list of text, or a list of items. network holds what the network module needs to build the scenario's range.",
+  "description": "What GET /api/scenarios/{id} returns: the Crucible Scenario Format. Version 0.5 covers the Tabletop Exercise (TTX) and Small Unit Team Exercise scenario types, and any an admin makes; a value under scenario or network may be text, a list of text, or a list of items. network holds what the network module needs to build the scenario's range; deployments names the builder a deployment was built for.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -17,7 +17,7 @@
   ],
   "properties": {
     "schemaVersion": {
-      "const": "0.4.0"
+      "const": "0.5.0"
     },
     "scenarioType": {
       "type": "object",
@@ -150,9 +150,37 @@
       "items": {
         "$ref": "#/$defs/finding"
       }
+    },
+    "deployments": {
+      "type": "array",
+      "description": "The builders a deployment of the scenario's range was built for; absent until one is. For now there is at most one.",
+      "items": {
+        "$ref": "#/$defs/deployment"
+      }
     }
   },
   "$defs": {
+    "deployment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "target"
+      ],
+      "properties": {
+        "target": {
+          "type": "string",
+          "description": "The builder: grayspace."
+        },
+        "enclave": {
+          "type": "string",
+          "description": "The enclave's slug on GraySpace."
+        },
+        "version": {
+          "type": "string",
+          "description": "The enclave version GraySpace stored on the last save; absent before one."
+        }
+      }
+    },
     "texts": {
       "type": "object",
       "additionalProperties": {
@@ -260,7 +288,7 @@
         "stage": {
           "type": "integer",
           "minimum": 0,
-          "description": "The stage the finding is about: the open one, or a closed one whose approval went stale."
+          "description": "The stage the finding is about."
         }
       }
     }

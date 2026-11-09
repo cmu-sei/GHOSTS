@@ -10,7 +10,7 @@ const question = (id: string, label: string): ScenarioTypeQuestion => ({ id, lab
 const scenarioType: ScenarioType = {
   id: 'small-unit-team-exercise', version: '1', name: 'Small Unit Team Exercise', drafts: [], topology: true,
   stages: [{
-    number: 3, title: 'Network and Range', gate: {},
+    number: 3, title: 'Network and Range',
     questions: [question('segments', 'Network Segments'), question('services', 'Services'), question('platforms', 'Platforms')]
   }]
 };

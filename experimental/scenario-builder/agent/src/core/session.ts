@@ -15,7 +15,7 @@ export type SessionEvent =
   | { type: "agent"; event: AgentEvent }
   | { type: "question"; card: QuestionCard }
   | { type: "proposal"; proposal: ProposalView }
-  /** A prompt hit the turn limit: the model kept calling tools without asking or finishing. */
+  /** A prompt hit the turn limit: the model kept calling tools without saving, asking or finishing. */
   | { type: "limit"; turns: number };
 
 export interface SessionOptions {
@@ -23,11 +23,14 @@ export interface SessionOptions {
   api: ToolApi;
   scenarioId: number;
   systemPrompt?: string;
-  /** Model calls one prompt may make; default 12. Nothing in an interview step needs more. */
+  /** Model calls in a row, within one prompt, that save nothing; default 12. Nothing in an interview step needs more. */
   maxTurnsPerPrompt?: number;
   /** Replaces Pi's model call; tests pass the faux provider's. */
   streamFn?: StreamFn;
 }
+
+/** The tools that save something: a call to one of them is progress, not a loop. */
+const SAVES = new Set(["record_answer", "record_answers", "propose_change", "draft", "advance_stage"]);
 
 export class BuilderSession {
   readonly agent: Agent;
@@ -62,8 +65,10 @@ export class BuilderSession {
       finishTurn: turn => {
         // A question shown is the end of the turn: the designer answers next.
         if (turn.toolResults.some(r => r.toolName === "ask_user" && !r.isError)) return { action: "end" };
-        // A model that keeps calling tools without asking or finishing is stopped here, not left to loop.
-        if (++this.turns >= maxTurns) {
+        // Filling a stage from a source takes many calls; only calls that save nothing count.
+        if (turn.toolResults.some(r => SAVES.has(r.toolName) && !r.isError)) this.turns = 0;
+        // A model that keeps calling tools without saving, asking or finishing is stopped here, not left to loop.
+        else if (++this.turns >= maxTurns) {
           this.emit({ type: "limit", turns: this.turns });
           return { action: "end" };
         }
@@ -99,11 +104,6 @@ export class BuilderSession {
   /** The designer pressed "You decide" on a card. */
   delegated(questionId: string): Promise<void> {
     return this.prompt(`[delegated ${questionId}]`);
-  }
-
-  /** The owner approved a stage's gate. */
-  approved(stage: number): Promise<void> {
-    return this.prompt(`[approved stage ${stage}]`);
   }
 
   abort(): void {

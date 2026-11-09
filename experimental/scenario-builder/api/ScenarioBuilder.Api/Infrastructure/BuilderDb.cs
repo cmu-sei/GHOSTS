@@ -13,11 +13,12 @@ public class BuilderDb(DbContextOptions<BuilderDb> options) : DbContext(options)
     public DbSet<Decision> Decisions => Set<Decision>();
     public DbSet<Proposal> Proposals => Set<Proposal>();
     public DbSet<Edit> Edits => Set<Edit>();
-    public DbSet<Approval> Approvals => Set<Approval>();
     public DbSet<TemplateLibrary> Libraries => Set<TemplateLibrary>();
     public DbSet<LibraryVersion> LibraryVersions => Set<LibraryVersion>();
     public DbSet<Source> Sources => Set<Source>();
     public DbSet<PluginConnection> PluginConnections => Set<PluginConnection>();
+    public DbSet<GraySpaceConnection> GraySpaceConnections => Set<GraySpaceConnection>();
+    public DbSet<Enclave> Enclaves => Set<Enclave>();
     public DbSet<ScenarioTypeRecord> ScenarioTypes => Set<ScenarioTypeRecord>();
     public DbSet<PublishedScenarioType> PublishedScenarioTypes => Set<PublishedScenarioType>();
 
@@ -40,11 +41,11 @@ public class BuilderDb(DbContextOptions<BuilderDb> options) : DbContext(options)
         modelBuilder.Entity<Decision>().HasIndex(d => new { d.ScenarioId, d.QuestionId }).IsUnique();
         modelBuilder.Entity<Proposal>().HasIndex(p => p.ScenarioId);
         modelBuilder.Entity<Edit>().HasIndex(e => e.ScenarioId);
-        modelBuilder.Entity<Approval>().HasIndex(a => new { a.ScenarioId, a.Stage });
         modelBuilder.Entity<TemplateLibrary>().HasIndex(l => l.Slug).IsUnique();
         modelBuilder.Entity<LibraryVersion>().HasIndex(v => new { v.LibraryId, v.Number }).IsUnique();
         modelBuilder.Entity<Source>().HasIndex(s => s.ScenarioId);
         modelBuilder.Entity<PluginConnection>().HasIndex(c => c.Plugin).IsUnique();
+        modelBuilder.Entity<Enclave>().HasIndex(e => e.ScenarioId).IsUnique();
         modelBuilder.Entity<ScenarioTypeRecord>().HasIndex(k => k.ScenarioTypeId).IsUnique();
         modelBuilder.Entity<PublishedScenarioType>().HasIndex(p => new { p.ScenarioTypeId, p.Version }).IsUnique();
     }

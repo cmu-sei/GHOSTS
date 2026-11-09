@@ -227,7 +227,7 @@ fieldset {
 
 .stage-fields {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 0 12px;
 }
 
@@ -295,10 +295,4 @@ table {
 code {
   font-family: ui-monospace, 'IBM Plex Mono', Menlo, monospace;
   font-size: 11px;
-}
-
-@media (max-width: 720px) {
-  .stage-fields {
-    grid-template-columns: minmax(0, 1fr);
-  }
 }

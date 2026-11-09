@@ -12,7 +12,7 @@ public record DraftView(string Field, string Text);
 
 /// <summary>
 /// PUT /scenarios/{id}/drafts/{field} — write a drafted field, by the agent or the person. It is craft, so the agent
-/// writes it directly; the change is logged, and it voids any approval that covered the old text.
+/// writes it directly; the change is logged.
 /// </summary>
 public class PutEndpoint : IEndpoint
 {

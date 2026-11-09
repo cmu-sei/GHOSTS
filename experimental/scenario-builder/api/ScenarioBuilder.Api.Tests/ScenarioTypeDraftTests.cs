@@ -46,8 +46,8 @@ public class ScenarioTypeDraftTests
         Here you go:
         ```json
         { "stages": [
-            { "title": "Target and Rules", "purpose": "What the team attacks and the rules of engagement.", "approval": "Confirm the rules of engagement" },
-            { "title": "Story", "purpose": "The premise and the ground truth.", "approval": null } ],
+            { "title": "Target and Rules", "purpose": "What the team attacks and the rules of engagement." },
+            { "title": "Story", "purpose": "The premise and the ground truth." } ],
           "summaryAfterStage": 1 }
         ```
         """;
@@ -77,7 +77,6 @@ public class ScenarioTypeDraftTests
         Assert.Equal(HttpStatusCode.OK, planned.StatusCode);
         var scenarioType = (await Body(planned))["scenarioType"]!;
         Assert.Equal(["Target and Rules", "Story"], scenarioType["stages"]!.AsArray().Select(s => (string)s!["title"]!));
-        Assert.Equal("Confirm the rules of engagement", (string)scenarioType["stages"]![0]!["gate"]!["approval"]!);
         Assert.Equal("The premise and the ground truth.", (string)scenarioType["stages"]![1]!["purpose"]!);
         Assert.Empty(scenarioType["stages"]![0]!["questions"]!.AsArray());
         Assert.Equal(1, (int)scenarioType["drafts"]![0]!["dueAfterStage"]!);

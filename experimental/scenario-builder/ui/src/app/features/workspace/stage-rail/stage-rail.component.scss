@@ -102,18 +102,6 @@
   }
 }
 
-[data-state='attention'] {
-  .number {
-    border-color: var(--sb-attention);
-    background: var(--sb-attention-soft);
-    color: var(--sb-attention);
-  }
-
-  .note {
-    color: var(--sb-attention);
-  }
-}
-
 [data-state='locked'] {
   .title,
   .number {

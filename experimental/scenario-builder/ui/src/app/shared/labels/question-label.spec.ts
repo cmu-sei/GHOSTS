@@ -4,7 +4,7 @@ import { labelFor } from './question-label';
 const scenarioType: ScenarioType = {
   id: 'k', version: '1', name: 'K',
   drafts: [{ field: 'executiveSummary', dueAfterStage: 0, path: '/s' }],
-  stages: [{ number: 0, title: 'S', gate: {}, questions: [
+  stages: [{ number: 0, title: 'S', questions: [
     { id: 'plainEnglish', label: 'Plain English', text: 'Is English…?', why: 'w', answer: 'choice', options: ['Yes'], path: '/p' },
     { id: 'timeSlot', text: 'When?', why: 'w', answer: 'text', path: '/t' }
   ] }]

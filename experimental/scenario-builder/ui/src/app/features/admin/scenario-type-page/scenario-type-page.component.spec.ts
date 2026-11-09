@@ -7,7 +7,7 @@ import { AdminApiService } from '../../../core/services/admin-api.service';
 import { ScenarioTypePageComponent } from './scenario-type-page.component';
 
 const stage = (number: number, title: string, texts: string[] = []): ScenarioTypeStage => ({
-  number, title, purpose: `${title} settles things.`, gate: {},
+  number, title, purpose: `${title} settles things.`,
   questions: texts.map((text, i) => ({ id: `q${number}${i}`, label: `Q${number}${i}`, text, why: '', answer: 'text', path: `/scenario/q${number}${i}` }))
 });
 

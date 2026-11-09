@@ -15,19 +15,12 @@
       @if (stage.number === progress.stage) {
         <app-gate-panel
           [gate]="progress.gate"
-          [stage]="progress.stage"
           [lastStage]="progress.lastStage"
-          (approve)="approve($event)"
           (advance)="advance()" />
       } @else if (stage.number > progress.stage) {
         <p class="note">This stage opens once stage {{ progress.stage }} closes.</p>
-      } @else if (staleHere(); as stale) {
-        <div class="note stale">
-          <span>{{ stale.message }}</span>
-          <button class="sb-button" type="button" (click)="approve(stage.number)">Approve stage {{ stage.number }} again</button>
-        </div>
       } @else {
-        <p class="note done">Closed and approved.</p>
+        <p class="note done">Closed.</p>
       }
 
       <div class="ledger" role="list">

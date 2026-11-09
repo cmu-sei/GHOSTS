@@ -7,12 +7,13 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <footer class="footer">
-      <span class="notice">Scenario Builder. CERT © 2017. All rights reserved.</span>
+      <span class="notice">Crucible Scenario Builder</span>
+      <span class="notice">CERT © 2017. All rights reserved.</span>
     </footer>`,
   styles: [`
     :host { display: block; flex: none; }
     .footer {
-      display: flex; align-items: center;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
       height: 24px; padding: 0 16px;
       border-top: 1px solid var(--sb-line); background: var(--sb-surface);
       font-size: 11px; color: var(--sb-faint);

@@ -11,9 +11,9 @@ namespace ScenarioBuilder.Api.Domain;
 /// </summary>
 public static class ScenarioDocument
 {
-    public const string SchemaVersion = "0.4.0";
+    public const string SchemaVersion = "0.5.0";
 
-    public static JsonObject Build(ScenarioType scenarioType, Scenario scenario, IReadOnlyList<Decision> decisions, IReadOnlyList<Approval> approvals)
+    public static JsonObject Build(ScenarioType scenarioType, Scenario scenario, IReadOnlyList<Decision> decisions, Enclave? enclave = null)
     {
         var doc = new JsonObject
         {
@@ -53,10 +53,23 @@ public static class ScenarioDocument
                 Place(doc, draft.Path, text.DeepClone());
 
         doc["decisions"] = record;
-        doc["findings"] = new JsonArray(Ledger.Progress(scenarioType, scenario, decisions, approvals).Gate.Findings
+        doc["findings"] = new JsonArray(Ledger.Progress(scenarioType, scenario, decisions).Gate.Findings
             .Select(f => (JsonNode?)new JsonObject { ["severity"] = f.Severity, ["code"] = f.Code, ["message"] = f.Message, ["stage"] = f.Stage })
             .ToArray());
+        if (enclave is not null)
+            doc["deployments"] = new JsonArray(Deployment(enclave));
         return doc;
+    }
+
+    /// <summary>The deployment built for the scenario on GraySpace: its enclave's slug, and the version GraySpace stored once it's saved there.</summary>
+    private static JsonObject Deployment(Enclave enclave)
+    {
+        var deployment = new JsonObject { ["target"] = "grayspace" };
+        if (JsonNode.Parse(enclave.Spec)?["slug"] is JsonValue slug)
+            deployment["enclave"] = slug.DeepClone();
+        if (enclave.Version is not null)
+            deployment["version"] = enclave.Version;
+        return deployment;
     }
 
     /// <summary>A list answer with an id prefix or a visibility becomes items; every other answer stays as it is.</summary>

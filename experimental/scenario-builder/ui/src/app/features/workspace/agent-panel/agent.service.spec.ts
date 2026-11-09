@@ -8,7 +8,7 @@ import { AgentService } from './agent.service';
 
 const progress = (answeredCount: number, delegated: boolean, overrides: Partial<Progress> = {}): Progress => ({
   scenarioTypeId: 'k', scenarioTypeVersion: '0.1.0', stage: 0, stageTitle: 'S', lastStage: false,
-  gate: { passes: false, approved: false, findings: [] }, open: [], draftsDue: [], delegated,
+  gate: { passes: false, findings: [] }, open: [], draftsDue: [], delegated,
   answered: Array.from({ length: answeredCount }, (_, i) => ({ id: `q${i}`, stage: 0, value: 'x', who: 'proposed' as const, by: 'dev', via: 'agent' as const, time: 't' })),
   ...overrides
 });
@@ -17,7 +17,7 @@ function setup(initial: Progress) {
   const listeners: ((e: WebAgentEvent) => void)[] = [];
   const agent = {
     models: [{ id: 'm', contextWindow: 1 }], model: { id: 'm', contextWindow: 1 },
-    send: vi.fn(() => Promise.resolve()), answered: vi.fn(), delegated: vi.fn(), approved: vi.fn(), abort: vi.fn(), setModel: vi.fn(),
+    send: vi.fn(() => Promise.resolve()), answered: vi.fn(), delegated: vi.fn(), abort: vi.fn(), setModel: vi.fn(),
     subscribe: (l: (e: WebAgentEvent) => void) => { listeners.push(l); return () => {}; }
   } as unknown as WebAgent;
   let current = initial;
@@ -73,22 +73,46 @@ describe('AgentService delegation', () => {
     expect(agent.send).toHaveBeenCalledWith('[continue]');
   });
 
-  it('stops and says so after a reply that made no progress', async () => {
+  it('nudges once after a reply that made no progress, and stops and says so after a second', async () => {
     const { service, agent, emit, settle } = setup(progress(2, true));
 
     emit({ type: 'busy', busy: true });
     emit({ type: 'busy', busy: false });
     await settle();
 
-    expect(agent.send).not.toHaveBeenCalled();
+    expect(agent.send).toHaveBeenCalledTimes(1);
+    expect(agent.send).toHaveBeenCalledWith('[continue]');
+
+    emit({ type: 'busy', busy: true });
+    emit({ type: 'busy', busy: false });
+    await settle();
+
+    expect(agent.send).toHaveBeenCalledTimes(1);
     expect(service.items().at(-1)).toMatchObject({ kind: 'error', text: expect.stringContaining('stopped making progress') });
+  });
+
+  it('counts only replies in a row that made no progress', async () => {
+    const { agent, emit, settle, setProgress } = setup(progress(2, true));
+
+    emit({ type: 'busy', busy: true });
+    emit({ type: 'busy', busy: false });
+    await settle();
+    emit({ type: 'busy', busy: true });
+    setProgress(progress(5, true));
+    emit({ type: 'busy', busy: false });
+    await settle();
+    emit({ type: 'busy', busy: true });
+    emit({ type: 'busy', busy: false });
+    await settle();
+
+    expect(agent.send).toHaveBeenCalledTimes(3);
   });
 
   it('stops once the scenario is finished', async () => {
     const { agent, emit, settle, setProgress } = setup(progress(2, true));
 
     emit({ type: 'busy', busy: true });
-    setProgress(progress(3, true, { lastStage: true, gate: { passes: true, approved: true, findings: [] } }));
+    setProgress(progress(3, true, { lastStage: true, gate: { passes: true, findings: [] } }));
     emit({ type: 'busy', busy: false });
     await settle();
 
@@ -124,7 +148,7 @@ describe('AgentService delegation', () => {
   });
 
   it('leaves a finished delegated scenario alone when the panel opens', async () => {
-    const done = setup(progress(4, true, { lastStage: true, gate: { passes: true, approved: true, findings: [] } }));
+    const done = setup(progress(4, true, { lastStage: true, gate: { passes: true, findings: [] } }));
     await done.service.resumeIfDelegated();
     expect(done.agent.send).not.toHaveBeenCalled();
   });

@@ -4,6 +4,10 @@ import { Observable } from 'rxjs';
 import {
   AnsweredView, AnswerValue, DocumentView, ScenarioType, ScenarioTypeSummary, ScenarioTypeUpdatePlan, LogEntry, PluginView, Progress, ProposalView, ScenarioSummary, SourceView
 } from '../models/builder.model';
+import {
+  BaseJobView, EnclaveAnswer, EnclaveView, FollowView, GraySpaceOffers, GraySpaceStatus, GsPreflight, GsPutSliceResult, GsValidateResult,
+  SliceSpec
+} from '../models/grayspace.model';
 
 /**
  * The Scenario Builder API, called as the person at the keyboard: these calls never send X-Via,
@@ -94,10 +98,6 @@ export class BuilderApiService {
     return this.http.put<{ field: string; text: string }>(`${this.base}/scenarios/${id}/drafts/${encodeURIComponent(field)}`, { text });
   }
 
-  approve(id: number, stage: number): Observable<{ stage: number; hash: string }> {
-    return this.http.post<{ stage: number; hash: string }>(`${this.base}/scenarios/${id}/gates/${stage}/approve`, null);
-  }
-
   advance(id: number): Observable<{ stage: number }> {
     return this.http.post<{ stage: number }>(`${this.base}/scenarios/${id}/advance`, null);
   }
@@ -150,6 +150,88 @@ export class BuilderApiService {
   /** Hands the scenario to a connected plugin's app. Sending isn't built for any app yet, so this errors with the API's reason. */
   send(id: number, target: string): Observable<never> {
     return this.http.post<never>(`${this.base}/scenarios/${id}/send/${encodeURIComponent(target)}`, null);
+  }
+
+  getGraySpace(): Observable<GraySpaceStatus> {
+    return this.http.get<GraySpaceStatus>(`${this.base}/grayspace`);
+  }
+
+  /** As an admin: connect GraySpace by its address and GRAYSPACE_API_TOKEN. The API saves them once GraySpace accepts the token. */
+  connectGraySpace(url: string, token: string): Observable<GraySpaceStatus> {
+    return this.http.put<GraySpaceStatus>(`${this.base}/grayspace`, { url, token });
+  }
+
+  disconnectGraySpace(): Observable<void> {
+    return this.http.delete<void>(`${this.base}/grayspace`);
+  }
+
+  getGraySpaceOffers(): Observable<GraySpaceOffers> {
+    return this.http.get<GraySpaceOffers>(`${this.base}/grayspace/offers`);
+  }
+
+  /** As an admin: whether GraySpace's site can deploy a base version at a scope. */
+  getBasePreflight(version: string, scope: string): Observable<GsPreflight> {
+    return this.http.get<GsPreflight>(`${this.base}/grayspace/base/preflight`, { params: { version, scope } });
+  }
+
+  /** As an admin: deploy a base version at a scope, or configure the deployed base again. GraySpace runs either as a job. */
+  baseAction(action: 'deploy' | 'configure', version?: string, scope?: string): Observable<unknown> {
+    return this.http.post(`${this.base}/grayspace/base/${action}`, action === 'deploy' ? { version, scope } : null);
+  }
+
+  /** As an admin: destroy the base. GraySpace refuses while any instance is live. */
+  destroyBase(): Observable<unknown> {
+    return this.http.delete(`${this.base}/grayspace/base`);
+  }
+
+  followBase(): Observable<BaseJobView> {
+    return this.http.get<BaseJobView>(`${this.base}/grayspace/base/job`);
+  }
+
+  baseJobAction(action: 'cancel' | 'retry'): Observable<unknown> {
+    return this.http.post(`${this.base}/grayspace/base/job/${action}`, null);
+  }
+
+  getEnclave(id: number): Observable<EnclaveView> {
+    return this.http.get<EnclaveView>(`${this.base}/scenarios/${id}/enclave`);
+  }
+
+  putEnclave(id: number, spec: SliceSpec): Observable<EnclaveView> {
+    return this.http.put<EnclaveView>(`${this.base}/scenarios/${id}/enclave`, { spec });
+  }
+
+  /** Makes an enclave already on GraySpace this scenario's draft. */
+  reuseEnclave(id: number, slug: string): Observable<EnclaveAnswer> {
+    return this.http.post<EnclaveAnswer>(`${this.base}/scenarios/${id}/enclave/reuse`, { slug });
+  }
+
+  validateEnclave(id: number): Observable<EnclaveAnswer<GsValidateResult>> {
+    return this.http.post<EnclaveAnswer<GsValidateResult>>(`${this.base}/scenarios/${id}/enclave/validate`, null);
+  }
+
+  saveEnclave(id: number): Observable<EnclaveAnswer<GsPutSliceResult>> {
+    return this.http.post<EnclaveAnswer<GsPutSliceResult>>(`${this.base}/scenarios/${id}/enclave/save`, null);
+  }
+
+  planEnclave(id: number): Observable<EnclaveAnswer> {
+    return this.http.post<EnclaveAnswer>(`${this.base}/scenarios/${id}/enclave/plan`, null);
+  }
+
+  /** No version means the draft, saved first; a prefix other than the spec's runs a second copy. */
+  createInstance(id: number, prefix: string, version: string): Observable<EnclaveAnswer> {
+    return this.http.post<EnclaveAnswer>(`${this.base}/scenarios/${id}/enclave/instance`, { prefix: prefix || null, version: version || null });
+  }
+
+  followEnclave(id: number): Observable<FollowView> {
+    return this.http.get<FollowView>(`${this.base}/scenarios/${id}/enclave/instance`);
+  }
+
+  destroyInstance(id: number): Observable<EnclaveAnswer> {
+    return this.http.delete<EnclaveAnswer>(`${this.base}/scenarios/${id}/enclave/instance`);
+  }
+
+  jobAction(id: number, action: 'cancel' | 'retry'): Observable<EnclaveAnswer> {
+    return this.http.post<EnclaveAnswer>(`${this.base}/scenarios/${id}/enclave/job/${action}`, null);
   }
 }
 

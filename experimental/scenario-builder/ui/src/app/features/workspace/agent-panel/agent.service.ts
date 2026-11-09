@@ -36,17 +36,11 @@ export class AgentService {
   private agent: WebAgent | null = null;
   /** The scenario as the current reply found it, to tell whether the reply moved it on. */
   private before: Progress | null = null;
+  /** Replies in a row that didn't move a delegated scenario on. */
+  private stalls = 0;
 
   constructor() {
-    const approvals = this.store.approvals.subscribe(stage => {
-      if (this.agent && !this.busy()) {
-        this.run(() => this.agent!.approved(stage));
-      }
-    });
-    inject(DestroyRef).onDestroy(() => {
-      approvals.unsubscribe();
-      this.agent?.abort();
-    });
+    inject(DestroyRef).onDestroy(() => this.agent?.abort());
   }
 
   async start(scenarioId: number): Promise<void> {
@@ -106,7 +100,7 @@ export class AgentService {
 
   /**
    * What the designer typed. "You decide" and its kin first hand the decisions over, as the person, so the
-   * agent can approve gates and run to the end: the model can't grant itself that.
+   * agent can run to the end: the model can't grant itself that.
    */
   async send(text: string): Promise<void> {
     const trimmed = text.trim();
@@ -209,13 +203,17 @@ export class AgentService {
     }
   }
 
-  /** While delegated, carry on after each reply that moved the scenario on; stop at the end or when one didn't. */
+  /** While delegated, carry on after each reply; stop at the end, or after two replies in a row that didn't move the scenario on. */
   private async afterReply(): Promise<void> {
     const now = await this.reload().catch(() => null);
     if (!now?.delegated || !this.agent || finished(now)) {
+      this.stalls = 0;
       return;
     }
-    if (this.before && !madeProgress(this.before, now)) {
+    // A small model sometimes ends a reply without acting on it; one more nudge usually gets it going.
+    this.stalls = this.before && !madeProgress(this.before, now) ? this.stalls + 1 : 0;
+    if (this.stalls === 2) {
+      this.stalls = 0;
       this.push({ kind: 'error', text: 'The agent stopped making progress. Tell it what to do next, or take back control.' });
       return;
     }
