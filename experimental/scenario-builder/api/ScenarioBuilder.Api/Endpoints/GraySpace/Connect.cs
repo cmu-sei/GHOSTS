@@ -34,7 +34,7 @@ public class ConnectEndpoint : IEndpoint
                 connection.ConnectedBy = Caller.From(http).User;
                 connection.Connected = DateTime.UtcNow;
                 await db.SaveChangesAsync(ct);
-                return Results.Ok(GraySpaceView.From(connection));
+                return Results.Ok(GraySpaceView.From(connection, answering: true));
             })
             .AddEndpointFilter<AdminOnly>().AddEndpointFilter<GraySpaceFilter>().WithTags(tag);
 

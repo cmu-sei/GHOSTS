@@ -107,7 +107,10 @@ export class GraySpacePageComponent {
   protected readonly baseScope = signal('');
 
   protected readonly admin = computed(() => this.me.me()?.admin ?? false);
-  protected readonly connected = computed(() => this.status()?.connected ?? false);
+  /** A GraySpace is saved, though it may not answer now. */
+  protected readonly saved = computed(() => this.status()?.connected ?? false);
+  /** The saved GraySpace answered just now; every GraySpace step waits for it. */
+  protected readonly connected = computed(() => this.saved() && !!this.status()?.answering);
   protected readonly spec = computed(() => this.enclave()?.spec ?? null);
   protected readonly server = computed(() => this.offers()?.server ?? null);
   protected readonly capabilities = computed(() => this.offers()?.capabilities ?? null);
@@ -179,10 +182,12 @@ export class GraySpacePageComponent {
     this.api.getGraySpace().subscribe({
       next: s => {
         this.status.set(s);
-        if (s.connected) {
+        if (s.answering) {
           this.loadOffers();
           this.refresh();
           this.refreshBase();
+        } else if (s.problem) {
+          this.connectionError.set(s.problem);
         }
       },
       error: e => this.connectionError.set(errorMessage(e))

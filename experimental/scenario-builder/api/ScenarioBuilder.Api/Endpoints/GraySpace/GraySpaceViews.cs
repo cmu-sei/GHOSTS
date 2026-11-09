@@ -6,10 +6,11 @@ using ScenarioBuilder.Api.Infrastructure;
 
 namespace ScenarioBuilder.Api.Endpoints.GraySpace;
 
-/// <summary>Where GraySpace is connected. The token is never in it.</summary>
-public record GraySpaceView(bool Connected, string? Url, string? ConnectedBy, DateTime? Since)
+/// <summary>Where GraySpace is connected, and whether it answered just now (why not, if it didn't). The token is never in it.</summary>
+public record GraySpaceView(bool Connected, string? Url, string? ConnectedBy, DateTime? Since, bool Answering, string? Problem)
 {
-    public static GraySpaceView From(GraySpaceConnection? c) => new(c is not null, c?.Url, c?.ConnectedBy, c?.Connected);
+    public static GraySpaceView From(GraySpaceConnection? c, bool answering = false, string? problem = null) =>
+        new(c is not null, c?.Url, c?.ConnectedBy, c?.Connected, answering, problem);
 }
 
 /// <summary>A GraySpace call that didn't succeed: the builder's code and message, and GraySpace's own detail (its findings, if any).</summary>

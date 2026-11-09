@@ -82,6 +82,28 @@ public class GraySpaceTests
         Assert.True((bool)view["connected"]!);
         Assert.Equal(Address, (string)view["url"]!);
         Assert.Equal("dev", (string)view["connectedBy"]!);
+        Assert.True((bool)JsonNode.Parse(await connected.Content.ReadAsStringAsync())!["answering"]!);
+    }
+
+    [Fact]
+    public async Task Status_asks_the_saved_GraySpace_whether_it_answers_now()
+    {
+        using var factory = new ApiFactory();
+        var grayspace = new FakeGraySpace();
+        using var app = With(factory, grayspace);
+        var client = Client(app);
+        (await Connect(client)).EnsureSuccessStatusCode();
+
+        var answering = (await client.GetFromJsonAsync<JsonObject>("/api/grayspace"))!;
+        grayspace.Routes["GET /api/v1/server"] = () => throw new HttpRequestException("Connection refused");
+        var silent = (await client.GetFromJsonAsync<JsonObject>("/api/grayspace"))!;
+
+        Assert.True((bool)answering["answering"]!);
+        Assert.Null(answering["problem"]);
+        Assert.Equal(3, grayspace.Calls.Count(c => c.Route == "GET /api/v1/server" && c.Auth == $"Bearer {Token}"));   // Connect, then each status
+        Assert.True((bool)silent["connected"]!);
+        Assert.False((bool)silent["answering"]!);
+        Assert.Contains($"GraySpace at {Address} didn't answer (Connection refused)", (string)silent["problem"]!);
     }
 
     [Fact]

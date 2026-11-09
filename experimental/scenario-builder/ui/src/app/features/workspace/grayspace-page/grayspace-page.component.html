@@ -3,7 +3,9 @@
     <a class="back" routerLink="..">Topology</a>
     <h1>Deploy to GraySpace</h1>
     @if (status(); as s) {
-      <p class="pill" [class.on]="s.connected" role="note">{{ s.connected ? 'Connected to ' + s.url : 'Not connected to GraySpace' }}</p>
+      <p class="pill" [class.on]="connected()" role="note">{{ connected() ? 'Connected to ' + s.url : s.connected ? 'Not answering: ' + s.url : 'Not connected to GraySpace' }}</p>
+    } @else if (!connectionError()) {
+      <p class="pill" role="note">Checking GraySpace…</p>
     }
     @if (connected()) {
       <div class="quick">
@@ -65,8 +67,10 @@
         @switch (d.id) {
           @case ('connection') {
             @if (status(); as s) {
-              @if (s.connected) {
+              @if (connected()) {
                 <p class="state">Connected to <code>{{ s.url }}</code> by {{ s.connectedBy }}, {{ s.since | date: 'MMM d HH:mm' }}.</p>
+              } @else if (s.connected) {
+                <p class="state">Saved: <code>{{ s.url }}</code>, connected by {{ s.connectedBy }}, {{ s.since | date: 'MMM d HH:mm' }}. It isn’t answering now.</p>
               } @else if (!admin()) {
                 <p class="state">Not connected. An admin connects GraySpace here.</p>
               }
@@ -74,10 +78,10 @@
             @if (admin()) {
               <form class="fields" (submit)="$event.preventDefault(); connect()">
                 <label>Address <input class="sb-field wide" type="url" placeholder="http://grayspace.local:8000" [value]="draftUrl()" (input)="draftUrl.set(value($event))" /></label>
-                <label>Token <input class="sb-field" type="password" autocomplete="off" [placeholder]="connected() ? 'Saved; give it again to change' : 'GRAYSPACE_API_TOKEN'" [value]="draftToken()" (input)="draftToken.set(value($event))" /></label>
+                <label>Token <input class="sb-field" type="password" autocomplete="off" [placeholder]="saved() ? 'Saved; give it again to change' : 'GRAYSPACE_API_TOKEN'" [value]="draftToken()" (input)="draftToken.set(value($event))" /></label>
                 <span class="buttons end">
-                  <button class="sb-button primary" type="submit" [disabled]="(!!busy() && !connectingTo()) || !draftUrl().trim() || !draftToken()">{{ connected() ? 'Reconnect' : 'Connect' }}</button>
-                  @if (connected()) {
+                  <button class="sb-button primary" type="submit" [disabled]="(!!busy() && !connectingTo()) || !draftUrl().trim() || !draftToken()">{{ saved() ? 'Reconnect' : 'Connect' }}</button>
+                  @if (saved()) {
                     <button class="sb-button ghost" type="button" (click)="disconnect()">Disconnect</button>
                   }
                 </span>

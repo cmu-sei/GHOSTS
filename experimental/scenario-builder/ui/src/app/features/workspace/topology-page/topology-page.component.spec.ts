@@ -1,20 +1,21 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { of } from 'rxjs';
+import { NEVER, of } from 'rxjs';
 import { BuilderApiService } from '../../../core/services/builder-api.service';
 import { ScenarioType } from '../../../core/models/builder.model';
+import { GraySpaceStatus } from '../../../core/models/grayspace.model';
 import { WorkspaceStore } from '../workspace.store';
 import { TopologyPageComponent } from './topology-page.component';
 
 const scenarioType = (topology?: boolean): ScenarioType => ({ id: 'k', version: '1', name: 'K', stages: [], drafts: [], ...(topology === undefined ? {} : { topology }) });
 
-async function render(k: ScenarioType, connected = false, deployments?: { target: string }[]) {
+async function render(k: ScenarioType, grayspace: GraySpaceStatus | null = { connected: false }, deployments?: { target: string }[]) {
   TestBed.configureTestingModule({
     providers: [
       provideRouter([]),
       { provide: WorkspaceStore, useValue: { scenarioType: signal(k), scenarioId: signal(1) } },
-      { provide: BuilderApiService, useValue: { getGraySpace: () => of({ connected }), pull: () => of(deployments ? { deployments } : {}) } }
+      { provide: BuilderApiService, useValue: { getGraySpace: () => grayspace ? of(grayspace) : NEVER, pull: () => of(deployments ? { deployments } : {}) } }
     ]
   });
   const fixture = TestBed.createComponent(TopologyPageComponent);
@@ -37,17 +38,21 @@ describe('TopologyPageComponent', () => {
     expect(root.textContent).toContain('Not built yet');
   });
 
-  it('says whether GraySpace is connected', async () => {
-    const states = async (connected: boolean) =>
-      Array.from((await render(scenarioType(true), connected)).querySelectorAll('.target-state')).slice(0, 2).map(e => e.textContent?.trim());
+  it('says whether GraySpace is connected and answering', async () => {
+    const states = async (grayspace: GraySpaceStatus | null) =>
+      Array.from((await render(scenarioType(true), grayspace)).querySelectorAll('.target-state')).slice(0, 2).map(e => e.textContent?.trim());
 
-    expect(await states(false)).toEqual(['Not connected', 'Not connected']);
+    expect(await states({ connected: false })).toEqual(['Not connected', 'Not connected']);
     TestBed.resetTestingModule();
-    expect(await states(true)).toEqual(['Connected', 'Not connected']);
+    expect(await states({ connected: true, answering: true })).toEqual(['Connected', 'Not connected']);
+    TestBed.resetTestingModule();
+    expect(await states({ connected: true, answering: false })).toEqual(['Not answering', 'Not connected']);
+    TestBed.resetTestingModule();
+    expect(await states(null)).toEqual(['Checking…', 'Not connected']);
   });
 
   it('grays out the other targets once a deployment is built for one', async () => {
-    const root = await render(scenarioType(true), true, [{ target: 'grayspace' }]);
+    const root = await render(scenarioType(true), { connected: true, answering: true }, [{ target: 'grayspace' }]);
 
     const cards = Array.from(root.querySelectorAll('.target'));
     expect(cards.map(c => c.classList.contains('unavailable'))).toEqual([false, true, true, true]);

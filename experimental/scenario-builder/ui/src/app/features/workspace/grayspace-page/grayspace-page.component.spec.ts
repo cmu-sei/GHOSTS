@@ -2,7 +2,7 @@ import { signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { Observable, Subject, of, throwError } from 'rxjs';
+import { NEVER, Observable, Subject, of, throwError } from 'rxjs';
 import { AnsweredView, Me, ScenarioType, ScenarioTypeQuestion } from '../../../core/models/builder.model';
 import { BaseJobView, EnclaveView, FollowView, GraySpaceOffers, GraySpaceStatus, SliceSpec } from '../../../core/models/grayspace.model';
 import { BuilderApiService } from '../../../core/services/builder-api.service';
@@ -55,13 +55,14 @@ const failedJob: FollowView = {
 };
 
 async function render(
-  status: GraySpaceStatus = { connected: true, url: 'http://gs.local:8000', connectedBy: 'dev', since: '2026-11-06T09:00:00Z' }, me: Me = { user: 'dev', admin: true },
+  status: GraySpaceStatus | null = { connected: true, answering: true, url: 'http://gs.local:8000', connectedBy: 'dev', since: '2026-11-06T09:00:00Z' },
+  me: Me = { user: 'dev', admin: true },
   shown: GraySpaceOffers = offers
 ) {
   let enclave: EnclaveView = { spec: newSpec() };
   const api = {
-    getGraySpace: vi.fn(() => of(status)),
-    connectGraySpace: vi.fn((url: string): Observable<GraySpaceStatus> => of({ connected: true, url, connectedBy: 'dev', since: '2026-11-06T09:00:00Z' })),
+    getGraySpace: vi.fn((): Observable<GraySpaceStatus> => status ? of(status) : NEVER),
+    connectGraySpace: vi.fn((url: string): Observable<GraySpaceStatus> => of({ connected: true, answering: true, url, connectedBy: 'dev', since: '2026-11-06T09:00:00Z' })),
     disconnectGraySpace: vi.fn(() => of(undefined)),
     getGraySpaceOffers: vi.fn(() => of(shown)),
     getEnclave: vi.fn(() => of(enclave)),
@@ -142,6 +143,30 @@ describe('GraySpacePageComponent', () => {
     expect(section(root, 'Connection').textContent).toContain('192.168.0.0/16');
     expect(section(root, 'Hosts').textContent).toContain('ubuntu-24.04-vm');
     expect(section(root, 'DNS and Certificates').textContent).toContain(noBase);
+  });
+
+  it('says it’s checking GraySpace until the check answers', async () => {
+    const { root } = await render(null);
+
+    expect(root.querySelector('.pill')?.textContent).toContain('Checking GraySpace');
+    expect(root.querySelector('.pill')?.classList.contains('on')).toBe(false);
+  });
+
+  it('says so when the saved GraySpace doesn’t answer, and still offers Reconnect and Disconnect', async () => {
+    const problem = 'GraySpace at http://gs.local:8000 didn’t answer (Connection refused). Check the address, and that the builder’s API can reach it.';
+    const { root, api } = await render({ connected: true, answering: false, problem, url: 'http://gs.local:8000', connectedBy: 'dev', since: '2026-11-06T09:00:00Z' });
+
+    const pill = root.querySelector('.pill')!;
+    expect(pill.textContent).toContain('Not answering: http://gs.local:8000');
+    expect(pill.classList.contains('on')).toBe(false);
+    expect(section(root, 'Connection').textContent).toContain('isn’t answering now');
+    expect(section(root, 'Connection').querySelector('.error')?.textContent).toContain(problem);
+    expect(button(root, 'Reconnect')).toBeTruthy();
+    expect(button(root, 'Disconnect')).toBeTruthy();
+    expect(root.querySelector('.quick')).toBeNull();
+    expect(button(root, 'Validate').disabled).toBe(true);
+    expect(api.getGraySpaceOffers).not.toHaveBeenCalled();
+    expect(api.followEnclave).not.toHaveBeenCalled();
   });
 
   it('leaves connecting to an admin, and waits for a connection to deploy', async () => {

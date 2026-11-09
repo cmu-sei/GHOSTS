@@ -24,7 +24,7 @@
               <span class="target-state">Not available</span>
               <button class="sb-button" type="button" disabled [attr.aria-label]="(t.open ? 'Open ' : 'Deploy to ') + t.name">{{ t.open ? 'Open' : 'Deploy' }}</button>
             } @else if (t.open) {
-              <span class="target-state">{{ built() === t.id ? 'Deployment built' : t.id === 'grayspace' && grayspace() ? 'Connected' : 'Not connected' }}</span>
+              <span class="target-state">{{ built() === t.id ? 'Deployment built' : t.id === 'grayspace' ? grayspaceState() : 'Not connected' }}</span>
               <a class="sb-button" [routerLink]="t.open" [attr.aria-label]="'Open ' + t.name">Open</a>
             } @else {
               <span class="target-state">Not built yet</span>

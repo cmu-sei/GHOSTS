@@ -7,6 +7,9 @@ export interface GraySpaceStatus {
   url?: string;
   connectedBy?: string;
   since?: string;
+  /** Whether the connected GraySpace answered just now, and why not when it didn't. */
+  answering?: boolean;
+  problem?: string;
 }
 
 export interface GsImage {

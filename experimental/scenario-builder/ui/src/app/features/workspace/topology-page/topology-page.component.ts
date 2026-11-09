@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { GraySpaceStatus } from '../../../core/models/grayspace.model';
 import { BuilderApiService } from '../../../core/services/builder-api.service';
 import { WorkspaceStore } from '../workspace.store';
 
@@ -20,15 +21,19 @@ import { WorkspaceStore } from '../workspace.store';
 export class TopologyPageComponent {
   protected readonly store = inject(WorkspaceStore);
 
-  /** Whether an admin has connected GraySpace. */
-  protected readonly grayspace = signal(false);
+  /** Whether an admin has connected GraySpace, and whether it answered just now; none while the check runs. */
+  protected readonly grayspace = signal<GraySpaceStatus | null>(null);
+  protected readonly grayspaceState = computed(() => {
+    const s = this.grayspace();
+    return !s ? 'Checking…' : s.answering ? 'Connected' : s.connected ? 'Not answering' : 'Not connected';
+  });
   /** The target this scenario's deployment was built for, from a fresh pull document; none until one is. */
   protected readonly built = signal<string | null>(null);
   protected readonly builtName = computed(() => this.targets.find(t => t.id === this.built())?.name ?? this.built());
 
   constructor() {
     const api = inject(BuilderApiService);
-    api.getGraySpace().subscribe({ next: s => this.grayspace.set(s.connected), error: () => this.grayspace.set(false) });
+    api.getGraySpace().subscribe({ next: s => this.grayspace.set(s), error: () => this.grayspace.set({ connected: false }) });
     effect(() => {
       const id = this.store.scenarioId();
       if (id) {
