@@ -42,12 +42,11 @@ public static class ProcessManager
         HandlerType.BrowserChrome => [ProcessNames.Chrome, ProcessNames.ChromeDriver],
         HandlerType.BrowserEdge => [ProcessNames.MSEdge, ProcessNames.MSEdgeDriver],
         HandlerType.BrowserFirefox => [ProcessNames.Firefox, ProcessNames.GeckoDriver],
-        HandlerType.Command => [ProcessNames.Command],
-        HandlerType.PowerShell => [ProcessNames.PowerShell],
         HandlerType.Word => [ProcessNames.Word],
         HandlerType.Excel => [ProcessNames.Excel],
         HandlerType.PowerPoint => [ProcessNames.PowerPoint],
         HandlerType.Outlook or HandlerType.Outlookv2 => [ProcessNames.Outlook],
+        //Command/PowerShell wait on their process, so by-name cleanup would mostly hit processes ghosts didn't start
         _ => []
     };
 
@@ -56,7 +55,7 @@ public static class ProcessManager
         if (!Program.Configuration.ResourceControl.ManageProcesses) return;
         try
         {
-            var processes = Process.GetProcessesByName(procName).ToList();
+            var processes = GetProcessesInSession(procName).ToList();
             processes.Sort((x1, x2) => x1.StartTime.CompareTo(x2.StartTime));
 
             var thisPid = GetThisProcessPid();
@@ -140,11 +139,20 @@ public static class ProcessManager
         return ancestors;
     }
 
+    /// <summary>
+    /// Processes in other sessions belong to services and other users, not to ghosts
+    /// </summary>
+    private static IEnumerable<Process> GetProcessesInSession(string processName)
+    {
+        var thisSession = Process.GetCurrentProcess().SessionId;
+        return Process.GetProcessesByName(processName).Where(p => p.SessionId == thisSession);
+    }
+
     public static IEnumerable<int> GetPids(string processName)
     {
         try
         {
-            var processes = Process.GetProcessesByName(processName);
+            var processes = GetProcessesInSession(processName);
 
             return processes.Select(proc => proc.Id).ToArray();
         }
