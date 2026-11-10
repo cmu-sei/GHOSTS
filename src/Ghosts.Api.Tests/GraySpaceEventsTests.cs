@@ -79,6 +79,7 @@ public class GraySpaceEventsTests
         listener.Start();
         var accepted = 0;
         var pings = 0;
+        var threePings = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         _ = Task.Run(async () =>
         {
             while (listener.IsListening)
@@ -91,7 +92,7 @@ public class GraySpaceEventsTests
                 while (socket.State == WebSocketState.Open)
                 {
                     var got = await socket.ReceiveAsync(buffer, default);
-                    if (Encoding.UTF8.GetString(buffer, 0, got.Count) == "ping") Interlocked.Increment(ref pings);
+                    if (Encoding.UTF8.GetString(buffer, 0, got.Count) == "ping" && Interlocked.Increment(ref pings) == 3) threePings.TrySetResult();
                 }
             }
         });
@@ -101,7 +102,8 @@ public class GraySpaceEventsTests
         };
 
         await relay.StartAsync(default);
-        await Task.Delay(1500);
+        // Wait for the pings rather than a fixed window: the suite runs in parallel and can stall this process for a second or more.
+        await Task.WhenAny(threePings.Task, Task.Delay(TimeSpan.FromSeconds(10)));
         await relay.StopAsync(default);
 
         Assert.Equal(1, accepted);
