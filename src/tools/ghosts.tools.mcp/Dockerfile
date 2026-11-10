@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:11.0 AS build
 
 COPY .devcontainer/certs /usr/local/share/ca-certificates/custom/
 RUN find /usr/local/share/ca-certificates/custom -type f ! -name '*.crt' -delete \
@@ -11,7 +11,7 @@ COPY src/tools/ghosts.tools.mcp/. /src
 WORKDIR /src
 RUN dotnet publish -c Release -o /app
 
-FROM mcr.microsoft.com/dotnet/aspnet:10.0
+FROM mcr.microsoft.com/dotnet/aspnet:11.0
 
 WORKDIR /app
 COPY --from=build /app .

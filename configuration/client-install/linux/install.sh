@@ -11,7 +11,7 @@
 #            (for tests and image builds)
 #
 # The host must report a hostname equal to its name in the terrain manifest: GHOSTS matches clients by exact name.
-# Needs: unzip, and the .NET 10 runtime at /usr/bin/dotnet.
+# Needs: unzip, and the .NET 11 runtime at /usr/bin/dotnet.
 set -eu
 
 HERE=$(cd "$(dirname "$0")" && pwd)

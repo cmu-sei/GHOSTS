@@ -32,7 +32,7 @@ jobs:
 
       - uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: '10.0.x'
+          dotnet-version: '11.0.x'
 
       - name: Test
         run: dotnet test src/Ghosts.Client.Universal.Tests/Ghosts.Client.Universal.Tests.csproj --configuration Release
@@ -45,22 +45,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # The csproj multi-targets net10.0 and net10.0-windows; publish needs -f
+        # The csproj multi-targets net11.0 and net11.0-windows; publish needs -f
         include:
           - runtime: linux-x64
-            framework: net10.0
+            framework: net11.0
           - runtime: linux-arm64
-            framework: net10.0
+            framework: net11.0
           - runtime: win-x64
-            framework: net10.0-windows
+            framework: net11.0-windows
           - runtime: win-x86
-            framework: net10.0-windows
+            framework: net11.0-windows
     steps:
       - uses: actions/checkout@v7
 
       - uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: '10.0.x'
+          dotnet-version: '11.0.x'
 
       - name: Publish
         run: |

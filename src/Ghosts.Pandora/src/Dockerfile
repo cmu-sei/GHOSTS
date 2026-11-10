@@ -1,5 +1,5 @@
 # multi-stage target: dev
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS dev
+FROM mcr.microsoft.com/dotnet/sdk:11.0 AS dev
 
 ENV ASPNETCORE_URLS=http://*:5000 \
     ASPNETCORE_ENVIRONMENT=DEVELOPMENT
@@ -15,7 +15,7 @@ RUN dotnet publish -c Release -o /app/dist
 CMD ["dotnet", "run"]
 
 # multi-stage target: prod
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS prod
+FROM mcr.microsoft.com/dotnet/aspnet:11.0 AS prod
 
 # Install SkiaSharp dependencies
 RUN apt-get clean && \

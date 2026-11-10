@@ -20,7 +20,7 @@
         "ghcr.io/devcontainers-extra/features/ripgrep:1": {},
         "ghcr.io/jsburckhardt/devcontainer-features/fd:1": {},
         "ghcr.io/devcontainers/features/dotnet:2": {
-            "version": "10.0"
+            "version": "11.0"
         },
         // moby is not packaged for Debian trixie (the base image), so use Docker CE
         "ghcr.io/devcontainers/features/docker-in-docker:2": {

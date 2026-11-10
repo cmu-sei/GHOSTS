@@ -1,6 +1,6 @@
 # Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
-FROM mcr.microsoft.com/dotnet/sdk:10.0.101 AS dev
+FROM mcr.microsoft.com/dotnet/sdk:11.0.100 AS dev
 
 # Custom Cert Support — single source of truth in .devcontainer/certs.
 # The dir always exists (readme.md is committed); .crt files are gitignored,
@@ -15,9 +15,9 @@ COPY src/Ghosts.Client.Universal/. /app/Ghosts.Client.Universal
 COPY src/Ghosts.Domain/. /app/Ghosts.Domain
 
 WORKDIR /app/Ghosts.Client.Universal
-RUN dotnet publish -c Release -f net10.0 -o /app/dist
+RUN dotnet publish -c Release -f net11.0 -o /app/dist
 
-FROM mcr.microsoft.com/dotnet/runtime:10.0
+FROM mcr.microsoft.com/dotnet/runtime:11.0
 COPY --from=dev /app/dist /app
 WORKDIR /app
 

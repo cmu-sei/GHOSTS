@@ -420,7 +420,7 @@ Both scripts stop the GHOSTS client and any browser/driver processes it spawned.
 
 ### Universal/Linux Client Won't Start
 
-- **Check .NET version:** Run `dotnet --version` and confirm .NET 10 (or later) is installed. The Universal client targets .NET 10.
+- **Check .NET version:** Run `dotnet --version` and confirm .NET 11 (or later) is installed. The Universal client targets .NET 11.
 - **Permission denied:** Ensure `ghosts.client.universal.dll` is readable. Do not run as root — browser drivers may fail under root.
 - **Missing libicu:** On minimal Linux images, install ICU: `sudo apt install libicu-dev` (Debian/Ubuntu) or `sudo dnf install libicu` (Fedora/RHEL).
 - **Configuration errors:** Verify `config/application.yaml` exists and `ApiRootUrl` points to a reachable API (include the `/api` suffix).
