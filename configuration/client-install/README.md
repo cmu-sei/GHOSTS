@@ -28,7 +28,7 @@ Install on each host, as root:
 ```
 
 It unpacks the client to `/opt/ghosts`, writes `config/application.json` from `application.json` here, and installs
-and starts `ghosts-client.service`. The host needs `unzip` and the .NET 10 runtime at `/usr/bin/dotnet`.
+and starts `ghosts-client.service`. The host needs `unzip` and the .NET 11 runtime at `/usr/bin/dotnet`.
 
 `sh linux/test-install.sh` checks the installer against a temporary root.
 

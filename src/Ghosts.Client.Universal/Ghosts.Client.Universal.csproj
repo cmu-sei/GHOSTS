@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0-windows'">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net11.0-windows'">
       <DefineConstants>$(DefineConstants);WINDOWS_BUILD</DefineConstants>
       <UseWindowsForms>true</UseWindowsForms>
       <RuntimeIdentifiers>win-x64;win-x86</RuntimeIdentifiers>
       <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0'">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net11.0'">
       <RuntimeIdentifiers>linux-x64;osx-x64</RuntimeIdentifiers>
       <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
@@ -27,7 +27,7 @@
     <Description>GHOSTS NPC Orchestration Platform - please email ddupdyke[at]sei.cmu.edu with bugs/requests/other</Description>
     <Copyright>Carnegie Mellon University 2017</Copyright>
     <NoWarn>NU1701</NoWarn>
-    <TargetFrameworks>net10.0;net10.0-windows</TargetFrameworks>
+    <TargetFrameworks>net11.0;net11.0-windows</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>14</LangVersion>
     <InternalsVisibleTo>Ghosts.Client.Universal.Tests</InternalsVisibleTo>
@@ -48,8 +48,8 @@
     <PackageReference Include="SimpleTCP" Version="1.0.24"/>
     <PackageReference Include="SSH.NET" Version="2026.0.0"/>
     <PackageReference Include="MailKit" Version="4.18.0"/>
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.12"/>
-    <PackageReference Include="System.Management" Version="10.0.12"/>
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="11.0.0"/>
+    <PackageReference Include="System.Management" Version="11.0.0"/>
     <PackageReference Include="Microsoft.Office.Interop.Outlook" Version="15.0.4797.1004">
       <EmbedInteropTypes>true</EmbedInteropTypes>   
     </PackageReference>

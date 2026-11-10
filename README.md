@@ -32,7 +32,7 @@ There are two supported ways to get GHOSTS running: the **Dev Container** (best 
 
 ### 1. Dev Container
 
-The repository ships a fully configured [Dev Container](.devcontainer/devcontainer.json) with the .NET 10 SDK, Node.js, Python, and Docker-in-Docker preinstalled, so you can build and run every component without setting up a local toolchain.
+The repository ships a fully configured [Dev Container](.devcontainer/devcontainer.json) with the .NET 11 SDK, Node.js, Python, and Docker-in-Docker preinstalled, so you can build and run every component without setting up a local toolchain.
 
 **Prerequisites:** [Docker](https://www.docker.com/) and [VS Code](https://code.visualstudio.com/) with the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) (or any editor that supports the Dev Container spec).
 
@@ -92,7 +92,7 @@ For full setup instructions see the [Quick Start Guide](https://cmu-sei.github.i
 
 | Component | Tech | Description |
 |-----------|------|-------------|
-| **Ghosts.Api** | .NET 10 | Central command-and-control server. REST API, SignalR WebSocket hub, NPC orchestration, scenario management. |
+| **Ghosts.Api** | .NET 11 | Central command-and-control server. REST API, SignalR WebSocket hub, NPC orchestration, scenario management. |
 | **Ghosts.Frontend** | Angular 20 | Web UI for managing machines, groups, timelines, NPCs, scenarios, and workflow automation. |
 | **Ghosts.Client.Windows** | .NET Framework 4.6.2 | Full-featured Windows client with Office automation, browser control, SSH, RDP, and 27+ activity handlers. |
 | **Ghosts.Client.Universal** | .NET 9 | Cross-platform client for Linux/Windows with 38+ handlers. |
@@ -104,7 +104,7 @@ For full setup instructions see the [Quick Start Guide](https://cmu-sei.github.i
 | Service | Tech | Description |
 |---------|------|-------------|
 | **Ghosts.Animator** | .NET Standard 2.0 | NPC persona generation engine (names, careers, social networks, beliefs). |
-| **Ghosts.Pandora** | .NET 10 | Dynamic content generation server for realistic web content, blog posts, and documents. |
+| **Ghosts.Pandora** | .NET 11 | Dynamic content generation server for realistic web content, blog posts, and documents. |
 | **n8n** | Docker | Workflow automation platform. GHOSTS API can schedule and trigger n8n workflows via webhook. |
 | **Grafana** | Docker | Real-time dashboards for NPC activity, health metrics, and timeline execution. |
 
@@ -121,7 +121,7 @@ For full setup instructions see the [Quick Start Guide](https://cmu-sei.github.i
 
 ```
 src/
-├── Ghosts.Api/            # .NET 10 API server + docker-compose.yml
+├── Ghosts.Api/            # .NET 11 API server + docker-compose.yml
 ├── Ghosts.Domain/         # Shared domain library (netstandard2.0)
 ├── Ghosts.Frontend/       # Angular 20 management UI
 ├── Ghosts.Client.Windows/ # .NET 4.6.2 Windows client

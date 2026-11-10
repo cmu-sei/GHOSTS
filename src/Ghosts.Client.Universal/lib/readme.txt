@@ -31,12 +31,12 @@ either the 10.0 framework or 10.0-windows framework.
 A self-contained build be create using the following command:
 
 64bit build:
-dotnet publish -f net10.0-windows -c Release -r win-x64 --self-contained true
+dotnet publish -f net11.0-windows -c Release -r win-x64 --self-contained true
 
 x86 build (32-bit build):
-dotnet publish -f net10.0-windows -c Release -r win-x86 --self-contained true
+dotnet publish -f net11.0-windows -c Release -r win-x86 --self-contained true
 
-Obviously, the net10.0-windows builds will only work on Windows platforms.
+Obviously, the net11.0-windows builds will only work on Windows platforms.
 
-The Outlookv2 and Rdp handlers will build using the "net10.0" framework but they will not function
+The Outlookv2 and Rdp handlers will build using the "net11.0" framework but they will not function
 as expected.

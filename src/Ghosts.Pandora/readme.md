@@ -494,7 +494,7 @@ Interactive API documentation is available at `/swagger` when the server is runn
 ## Technology Stack
 
 **Backend:**
-- .NET 10.0 (C#)
+- .NET 11.0 (C#)
 - ASP.NET Core MVC
 - Entity Framework Core with SQLite
 - SignalR for real-time updates

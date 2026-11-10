@@ -19,7 +19,7 @@
 GHOSTS is a monorepo for realistic user/NPC behavior simulation.
 
 Core components:
-- `src/Ghosts.Api/`: .NET 10 API/server
+- `src/Ghosts.Api/`: .NET 11 API/server
 - `src/Ghosts.Domain/`: Shared timeline/domain/handler models
 - `src/Ghosts.Client.Windows/`: .NET Framework Windows client
 - `src/Ghosts.Client.Universal/`: Cross-platform client

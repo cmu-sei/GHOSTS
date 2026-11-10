@@ -3,7 +3,7 @@
 # Build context is the repo root: Ghosts.Api embeds files from schemas/, outside src/.
 
 # multi-stage target: dev
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS dev
+FROM mcr.microsoft.com/dotnet/sdk:11.0 AS dev
 
 COPY src/Ghosts.Api/. /app/Ghosts.Api
 COPY src/Ghosts.Domain/. /app/Ghosts.Domain
@@ -19,7 +19,7 @@ COPY src/Ghosts.Api/config /app/dist/config
 CMD ["dotnet", "run"]
 
 # multi-stage target: prod
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS prod
+FROM mcr.microsoft.com/dotnet/aspnet:11.0 AS prod
 ARG commit
 ENV COMMIT=$commit
 COPY --from=dev /app/dist /app
