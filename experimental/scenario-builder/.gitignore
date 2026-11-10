@@ -1,9 +1,0 @@
-*.db
-*.db-shm
-*.db-wal
-node_modules/
-dist/
-.angular/
-bin/
-obj/
-agent/evals/results/
