@@ -7,6 +7,12 @@
     <button class="sb-button primary" type="button" (click)="start()">Start the questions</button>
   </header>
 
+  <form class="panel rename" (submit)="$event.preventDefault(); rename()">
+    <label for="scenario-name">Name</label>
+    <input id="scenario-name" class="sb-field" aria-label="Scenario name" [value]="name()" (input)="field(name, $event)" />
+    <button class="sb-button" type="submit" [disabled]="!renamable()">Rename</button>
+  </form>
+
   <div class="panel add">
     <form class="part" (submit)="$event.preventDefault(); addText()">
       <h2>Paste Text</h2>

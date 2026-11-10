@@ -48,4 +48,25 @@ public class ScenarioListTests
         await Archive(owner, id, false);
         Assert.False((bool)(await Listed(owner, id))["archived"]!);
     }
+
+    [Fact]
+    public async Task Only_the_owner_as_a_person_renames_a_scenario_and_its_slug_stays()
+    {
+        using var factory = new ApiFactory();
+        var owner = factory.Client();
+        var id = await CreateScenario(owner);
+
+        Assert.Equal("NOT_OWNER", await Code(await Rename(factory.Client(user: "lee"), id, "Taken")));
+        Assert.Equal("AGENT_CANNOT_DECIDE", await Code(await Rename(factory.Client(agent: true), id, "Taken")));
+        Assert.Equal("NAME_REQUIRED", await Code(await Rename(owner, id, "  ")));
+        Assert.Equal("Harbor Blackout", (string)(await Listed(owner, id))["name"]!);
+
+        Assert.Equal(HttpStatusCode.OK, (await Rename(owner, id, "  Harbor Blackout II ")).StatusCode);
+        var pulled = (await owner.GetFromJsonAsync<JsonObject>($"/api/scenarios/{id}"))!;
+        Assert.Equal("Harbor Blackout II", (string)pulled["name"]!);
+        Assert.Equal("harbor-blackout", (string)pulled["slug"]!);
+    }
+
+    private static Task<HttpResponseMessage> Rename(HttpClient client, int id, string name) =>
+        client.PutAsJsonAsync($"/api/scenarios/{id}/name", new { name });
 }

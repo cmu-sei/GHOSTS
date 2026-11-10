@@ -51,6 +51,11 @@ export class BuilderApiService {
     return this.http.put<ScenarioSummary>(`${this.base}/scenarios/${id}/archive`, { archived });
   }
 
+  /** As the owner: give the scenario a new name. Its slug stays. */
+  rename(id: number, name: string): Observable<ScenarioSummary> {
+    return this.http.put<ScenarioSummary>(`${this.base}/scenarios/${id}/name`, { name });
+  }
+
   getSources(id: number): Observable<SourceView[]> {
     return this.http.get<SourceView[]>(`${this.base}/scenarios/${id}/sources`);
   }

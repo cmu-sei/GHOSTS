@@ -1,4 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router, provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
@@ -16,9 +17,10 @@ async function render(existing: SourceView[] = []) {
     addTextSource: vi.fn((_: number, name: string, text: string) => of(source(10, name, 'text', text.length))),
     addUrlSource: vi.fn((_: number, url: string) => of(source(11, 'Port notice', 'url', 900, url))),
     uploadSource: vi.fn((_: number, file: File) => of(source(12, file.name, 'file', 4200, file.name))),
-    removeSource: vi.fn(() => of(undefined))
+    removeSource: vi.fn(() => of(undefined)),
+    rename: vi.fn((id: number, name: string) => of({ id, name }))
   };
-  const store = { scenarioId: () => 7, refresh: vi.fn() };
+  const store = { scenarioId: () => 7, name: signal<string | null>('Harbor Blackout'), refresh: vi.fn() };
   TestBed.configureTestingModule({
     providers: [
       provideRouter([]),
@@ -42,6 +44,32 @@ const type = (root: HTMLElement, label: string, value: string) => {
 const sources = (root: HTMLElement) => Array.from(root.querySelectorAll('.source')).map(s => s.textContent ?? '');
 
 describe('ContextPageComponent', () => {
+  it('renames the scenario, and shows why it could not', async () => {
+    const { fixture, root, api, store } = await render();
+    const name = root.querySelector<HTMLInputElement>('[aria-label="Scenario name"]')!;
+    expect(name.value).toBe('Harbor Blackout');
+    expect(button(root, 'Rename')!.disabled).toBe(true);
+
+    type(root, 'Scenario name', '  Harbor Blackout II ');
+    await fixture.whenStable();
+    button(root, 'Rename')!.click();
+    await fixture.whenStable();
+
+    expect(api.rename).toHaveBeenCalledWith(7, 'Harbor Blackout II');
+    expect(store.name()).toBe('Harbor Blackout II');
+    expect(button(root, 'Rename')!.disabled).toBe(true);
+
+    api.rename.mockReturnValueOnce(throwError(() => new HttpErrorResponse({
+      status: 403, error: { code: 'NOT_OWNER', message: "Only dev, the scenario's owner, can rename it." }
+    })));
+    type(root, 'Scenario name', 'Someone else');
+    await fixture.whenStable();
+    button(root, 'Rename')!.click();
+    await fixture.whenStable();
+    expect(root.querySelector('[role="alert"]')!.textContent).toContain("scenario's owner");
+    expect(store.name()).toBe('Harbor Blackout II');
+  });
+
   it('adds pasted text and lists it with its size', async () => {
     const { fixture, root, api, store } = await render();
 
