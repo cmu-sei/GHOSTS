@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, Inject, inject } from '@angular/cor
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { LocalTimeline } from '../../../core/models';
+import { SavedTimeline } from '../../../core/models';
 
 @Component({
   selector: 'app-timeline-json-dialog',
@@ -59,7 +59,7 @@ export class TimelineJsonDialogComponent {
 
   private readonly snackBar = inject(MatSnackBar);
 
-  constructor(@Inject(MAT_DIALOG_DATA) timeline: LocalTimeline) {
+  constructor(@Inject(MAT_DIALOG_DATA) timeline: SavedTimeline) {
     this.json = JSON.stringify(
       {
         name: timeline.name,

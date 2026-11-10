@@ -68,6 +68,39 @@ namespace Ghosts.Api.Infrastructure.Data
 
             // Ensure the scenario authoring tables exist (EnsureCreated is a no-op for existing DBs)
             await EnsureAuthoringTablesExist(context, logger);
+
+            // Ensure the saved_timelines table exists (EnsureCreated is a no-op for existing DBs)
+            await EnsureSavedTimelinesTableExists(context, logger);
+        }
+
+        /// <summary>
+        /// Creates saved_timelines, the timeline editor's library, when it is missing. The DDL is what EnsureCreated builds from SavedTimeline.
+        /// </summary>
+        private static async Task EnsureSavedTimelinesTableExists(ApplicationDbContext context, ILogger<DbInitializer> logger)
+        {
+            try
+            {
+                var connection = context.Database.GetDbConnection();
+                if (connection.State != System.Data.ConnectionState.Open)
+                    await connection.OpenAsync();
+
+                using var createCmd = connection.CreateCommand();
+                createCmd.CommandText = @"
+                    CREATE TABLE IF NOT EXISTS saved_timelines (
+                        id               UUID NOT NULL,
+                        name             TEXT,
+                        timelinehandlers JSONB,
+                        createdutc       TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+                        updatedutc       TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+                        CONSTRAINT pk_saved_timelines PRIMARY KEY (id)
+                    );";
+                await createCmd.ExecuteNonQueryAsync();
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to create the saved_timelines table");
+                throw;
+            }
         }
 
         private static async Task EnsureNpcColumnsExist(ApplicationDbContext context, ILogger<DbInitializer> logger)

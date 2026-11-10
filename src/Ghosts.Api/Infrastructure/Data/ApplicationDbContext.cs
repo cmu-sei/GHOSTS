@@ -37,6 +37,7 @@ namespace Ghosts.Api.Infrastructure.Data
         public DbSet<HistoryTimeline> HistoryTimeline { get; set; }
         public DbSet<HistoryTrackable> HistoryTrackables { get; set; }
         public DbSet<MachineTimeline> MachineTimelines { get; set; }
+        public DbSet<SavedTimeline> SavedTimelines { get; set; }
         public DbSet<MachineUpdate> MachineUpdates { get; set; }
         public DbSet<Trackable> Trackables { get; set; }
         public DbSet<Webhook> Webhooks { get; set; }

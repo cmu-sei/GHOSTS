@@ -5,10 +5,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { TimelineLocalService } from '../../../core/services';
-import { LocalTimeline } from '../../../core/models';
+import { SavedTimelineService } from '../../../core/services';
+import { SavedTimeline } from '../../../core/models';
 import { TimelineJsonDialogComponent } from '../timeline-json-dialog/timeline-json-dialog.component';
 import { SearchBarComponent } from '../../../shared/components/search-bar/search-bar.component';
 
@@ -242,7 +242,7 @@ import { SearchBarComponent } from '../../../shared/components/search-bar/search
 })
 export class TimelinesListComponent implements OnInit {
   protected readonly displayedColumns = ['name', 'handlers', 'actions'];
-  protected readonly timelines = signal<LocalTimeline[]>([]);
+  protected readonly timelines = signal<SavedTimeline[]>([]);
   protected readonly loading = signal(true);
   protected readonly searchTerm = signal('');
 
@@ -259,7 +259,8 @@ export class TimelinesListComponent implements OnInit {
     );
   });
 
-  private readonly timelineLocalService = inject(TimelineLocalService);
+  private readonly savedTimelineService = inject(SavedTimelineService);
+  private readonly snackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
 
@@ -273,12 +274,19 @@ export class TimelinesListComponent implements OnInit {
 
   protected refresh(): void {
     this.loading.set(true);
-    const data = this.timelineLocalService.getAll();
-    this.timelines.set(data);
-    this.loading.set(false);
+    this.savedTimelineService.getAll().subscribe({
+      next: data => {
+        this.timelines.set(data);
+        this.loading.set(false);
+      },
+      error: err => {
+        this.snackBar.open(`Failed to load timelines: ${err.message}`, undefined, { duration: 3500 });
+        this.loading.set(false);
+      }
+    });
   }
 
-  protected getHandlerSummary(timeline: LocalTimeline): string {
+  protected getHandlerSummary(timeline: SavedTimeline): string {
     if (!timeline.timeLineHandlers.length) {
       return 'No handlers configured';
     }
@@ -287,7 +295,7 @@ export class TimelinesListComponent implements OnInit {
       .join('  →  ');
   }
 
-  protected getHandlerTooltip(timeline: LocalTimeline): string {
+  protected getHandlerTooltip(timeline: SavedTimeline): string {
     return timeline.timeLineHandlers
       .map((handler, index) => `${index + 1}. ${handler.handlerType || 'Unknown handler'}`)
       .join('\\n');
@@ -297,15 +305,17 @@ export class TimelinesListComponent implements OnInit {
     this.router.navigate(['/timelines', id, 'edit']);
   }
 
-  protected cloneTimeline(timeline: LocalTimeline): void {
-    this.timelineLocalService.create({
+  protected cloneTimeline(timeline: SavedTimeline): void {
+    this.savedTimelineService.create({
       name: `${timeline.name} copy`,
       timeLineHandlers: timeline.timeLineHandlers
+    }).subscribe({
+      next: () => this.refresh(),
+      error: err => this.snackBar.open(`Failed to duplicate timeline: ${err.message}`, undefined, { duration: 3500 })
     });
-    this.refresh();
   }
 
-  protected openJson(timeline: LocalTimeline): void {
+  protected openJson(timeline: SavedTimeline): void {
     this.dialog.open(TimelineJsonDialogComponent, {
       width: '720px',
       data: timeline,
@@ -314,12 +324,14 @@ export class TimelinesListComponent implements OnInit {
     });
   }
 
-  protected deleteTimeline(timeline: LocalTimeline): void {
+  protected deleteTimeline(timeline: SavedTimeline): void {
     const confirmed = window.confirm(`Delete timeline "${timeline.name}"?`);
     if (!confirmed) {
       return;
     }
-    this.timelineLocalService.delete(timeline.id);
-    this.refresh();
+    this.savedTimelineService.delete(timeline).subscribe({
+      next: () => this.refresh(),
+      error: err => this.snackBar.open(`Failed to delete timeline: ${err.message}`, undefined, { duration: 3500 })
+    });
   }
 }

@@ -3,8 +3,8 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { TimelineLocalService } from '../../../core/services';
-import { LocalTimeline } from '../../../core/models';
+import { SavedTimelineService } from '../../../core/services';
+import { SavedTimeline } from '../../../core/models';
 import { Machine } from '../../../core/models';
 
 @Component({
@@ -91,12 +91,12 @@ import { Machine } from '../../../core/models';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TimelineSelectorDialogComponent implements OnInit {
-  protected readonly timelines = signal<LocalTimeline[]>([]);
+  protected readonly timelines = signal<SavedTimeline[]>([]);
   protected readonly loading = signal(true);
-  protected readonly selectedTimeline = signal<LocalTimeline | null>(null);
+  protected readonly selectedTimeline = signal<SavedTimeline | null>(null);
   protected readonly machine: Machine;
 
-  private readonly timelineLocalService = inject(TimelineLocalService);
+  private readonly savedTimelineService = inject(SavedTimelineService);
   private readonly dialogRef = inject(MatDialogRef<TimelineSelectorDialogComponent>);
 
   constructor(@Inject(MAT_DIALOG_DATA) data: { machine: Machine }) {
@@ -109,9 +109,13 @@ export class TimelineSelectorDialogComponent implements OnInit {
 
   private loadTimelines(): void {
     this.loading.set(true);
-    const data = this.timelineLocalService.getAll();
-    this.timelines.set(data);
-    this.loading.set(false);
+    this.savedTimelineService.getAll().subscribe({
+      next: data => {
+        this.timelines.set(data);
+        this.loading.set(false);
+      },
+      error: () => this.loading.set(false)
+    });
   }
 
   protected onSelectionChange(event: any): void {
