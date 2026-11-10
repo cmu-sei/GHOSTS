@@ -32,6 +32,28 @@ h1 {
   border-radius: var(--sb-radius);
 }
 
+.rename {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 12px;
+
+  label {
+    flex: none;
+    font-weight: 500;
+  }
+
+  input {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .sb-button {
+    flex: none;
+  }
+}
+
 .add {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

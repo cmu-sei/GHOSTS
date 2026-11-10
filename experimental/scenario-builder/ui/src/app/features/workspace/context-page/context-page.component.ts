@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, linkedSignal, signal } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SourceKind, SourceView } from '../../../core/models/builder.model';
@@ -25,6 +25,9 @@ export class ContextPageComponent implements OnInit {
 
   protected readonly kinds: Record<SourceKind, string> = { text: 'Text', url: 'Link', file: 'Document' };
 
+  /** The name as typed; it goes back to the saved one whenever that changes. */
+  protected readonly name = linkedSignal(() => this.store.name() ?? '');
+  protected readonly renamable = computed(() => !!this.name().trim() && this.name().trim() !== this.store.name());
   protected readonly sources = signal<SourceView[]>([]);
   protected readonly textName = signal('');
   protected readonly text = signal('');
@@ -40,6 +43,14 @@ export class ContextPageComponent implements OnInit {
 
   protected field(target: { set(value: string): void }, event: Event): void {
     target.set((event.target as HTMLInputElement | HTMLTextAreaElement).value);
+  }
+
+  protected rename(): void {
+    this.error.set(null);
+    this.api.rename(this.store.scenarioId(), this.name().trim()).subscribe({
+      next: scenario => this.store.name.set(scenario.name),
+      error: e => this.error.set(errorMessage(e))
+    });
   }
 
   protected addText(): void {
