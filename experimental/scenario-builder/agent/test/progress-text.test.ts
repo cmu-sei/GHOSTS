@@ -8,7 +8,7 @@ const base: Progress = {
   stage: 0,
   stageTitle: "First",
   lastStage: false,
-  gate: { passes: false, approved: false, findings: [{ severity: "stop", code: "QUESTION_OPEN", message: "'b' is not answered." }] },
+  gate: { passes: false, findings: [{ severity: "stop", code: "QUESTION_OPEN", message: "'b' is not answered." }] },
   open: [
     { id: "a", stage: 0, text: "What is A?", why: "w", recommended: "A1", answer: "text" },
     { id: "b", stage: 0, text: "Pick one", why: "w", answer: "choice", options: ["x", "y"] },
@@ -35,7 +35,7 @@ describe("formatProgress", () => {
       open: [],
       answered: [{ id: "a", stage: 0, value: "A1", who: "stated", by: "dev", via: "person", time: "t" }],
       draftsDue: ["executiveSummary"],
-      gate: { passes: false, approved: false, findings: [{ severity: "stop", code: "DRAFT_MISSING", message: "The executiveSummary draft isn't written yet." }] },
+      gate: { passes: false, findings: [{ severity: "stop", code: "DRAFT_MISSING", message: "The executiveSummary draft isn't written yet." }] },
     });
 
     expect(text).toContain("Answered: a (stated by dev)");
@@ -63,29 +63,8 @@ describe("formatProgress", () => {
     expect(formatProgress(base)).not.toContain("Delegation");
   });
 
-  it("says when the gate waits only for the owner", () => {
-    const text = formatProgress({
-      ...base,
-      open: [],
-      gate: { passes: false, approval: "Approve it", approved: false, findings: [{ severity: "stop", code: "APPROVAL_MISSING", message: "Waiting for the owner: Approve it." }] },
-    });
-
-    expect(text).toContain("Gate: waiting for the owner. Waiting for the owner: Approve it.");
-  });
-
-  it("names a closed stage whose approval went stale", () => {
-    const text = formatProgress({
-      ...base,
-      stage: 1,
-      open: [],
-      gate: { passes: false, approval: "Approve it", approved: false, findings: [{ severity: "stop", code: "APPROVAL_STALE", message: "Stage 0: Confirm: what was approved has changed since.", stage: 0 }] },
-    });
-
-    expect(text).toContain("Gate: waiting for the owner. Stage 0: Confirm: what was approved has changed since.");
-  });
-
   it("tells the model to advance, or that the work is done", () => {
-    const passes = { ...base, open: [], gate: { passes: true, approved: false, findings: [] } };
+    const passes = { ...base, open: [], gate: { passes: true, findings: [] } };
 
     expect(formatProgress(passes)).toContain("Gate: passes. Call advance_stage.");
     expect(formatProgress({ ...passes, lastStage: true })).toContain("Gate: passes. This is the last stage; the work is done.");

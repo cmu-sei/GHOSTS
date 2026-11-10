@@ -11,8 +11,8 @@ public record PutDelegation(bool On);
 public record DelegationView(bool Delegated);
 
 /// <summary>
-/// PUT /scenarios/{id}/delegation — the owner hands the agent every remaining decision, gates included, or takes
-/// them back. A person's call only: the agent can't grant itself this, whatever the model says.
+/// PUT /scenarios/{id}/delegation — the owner hands the agent every remaining decision, or takes them back.
+/// A person's call only: the agent can't grant itself this, whatever the model says.
 /// </summary>
 public class DelegationEndpoint : IEndpoint
 {

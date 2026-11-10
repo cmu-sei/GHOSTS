@@ -33,6 +33,11 @@
               "node_modules/@fontsource/ibm-plex-sans/400.css",
               "node_modules/@fontsource/ibm-plex-sans/500.css",
               "node_modules/@fontsource/ibm-plex-sans/600.css",
+              "node_modules/@fontsource/ibm-plex-serif/400.css",
+              "node_modules/@fontsource/ibm-plex-serif/400-italic.css",
+              "node_modules/@fontsource/ibm-plex-serif/500.css",
+              "node_modules/@fontsource/ibm-plex-mono/400.css",
+              "node_modules/@fontsource/ibm-plex-mono/500.css",
               "src/styles.scss"
             ]
           },

@@ -2,7 +2,7 @@ export * from './config.service';
 export * from './machine.service';
 export * from './machine-group.service';
 export * from './timeline.service';
-export * from './timeline-local.service';
+export * from './saved-timeline.service';
 export * from './npc.service';
 export * from './npc-chat.service';
 export * from './activity.service';

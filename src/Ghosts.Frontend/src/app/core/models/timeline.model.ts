@@ -29,11 +29,11 @@ export interface Timeline {
   timeLineHandlers: TimelineHandler[];
 }
 
+/** POST /api/timelines body (the API's MachineUpdateViewModel) */
 export interface PostTimelineRequest {
-  machineId?: string;
-  groupId?: string;
-  timeline: Timeline;
-  updateType?: UpdateType;
+  machineId: string;
+  type: UpdateType;
+  update?: Timeline;
 }
 
 export type CommandShell = 'Bash' | 'Command' | 'PowerShell';
@@ -52,11 +52,20 @@ export interface SendCommandsResponse {
 export enum UpdateType {
   Timeline = 'Timeline',
   TimelinePartial = 'TimelinePartial',
-  TimelineHandler = 'TimelineHandler'
+  TimelineHandler = 'TimelineHandler',
+  RequestForTimeline = 'RequestForTimeline'
 }
 
-export interface LocalTimeline extends Timeline {
+export interface SavedTimeline extends Timeline {
   id: string;
 }
 
-export type CreateLocalTimelineRequest = Omit<Timeline, 'id' | 'status'>;
+export type SavedTimelineRequest = Omit<Timeline, 'id' | 'status'>;
+
+/** A timeline a client reported back; `timeline` is the client's own timeline JSON as text */
+export interface MachineTimeline {
+  id: number;
+  machineId: string;
+  timeline: string;
+  createdUtc: string;
+}

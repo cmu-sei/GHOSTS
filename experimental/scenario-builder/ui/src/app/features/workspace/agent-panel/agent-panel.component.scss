@@ -85,6 +85,12 @@
   }
 }
 
+.intro-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
 .user {
   margin: 10px 0 10px 48px;
   padding: 8px 10px;

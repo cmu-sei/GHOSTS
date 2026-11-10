@@ -7,10 +7,10 @@ using ScenarioBuilder.Api.Infrastructure;
 
 namespace ScenarioBuilder.Api.Endpoints.Scenarios;
 
-/// <summary>One thing that happened. Type is answer, draft, proposal, approval, delegation or update (to a new version of the scenario type).</summary>
+/// <summary>One thing that happened. Type is answer, draft, proposal, delegation or update (to a new version of the scenario type).</summary>
 public record LogEntry(DateTime Time, string Type, string Target, JsonNode? Before, JsonNode? After, string By, Via Via, string? Reason);
 
-/// <summary>GET /scenarios/{id}/log — every answer, draft, proposal and approval, in time order.</summary>
+/// <summary>GET /scenarios/{id}/log — every answer, draft, proposal, delegation and update, in time order.</summary>
 public class LogEndpoint : IEndpoint
 {
     public RouteHandlerBuilder Register(RouteGroupBuilder group, string tag) =>
@@ -28,8 +28,6 @@ public class LogEndpoint : IEndpoint
                     Parse(e.Before), Parse(e.After), e.By, e.Via, null))
                 .Concat(proposals.Select(p => new LogEntry(p.Created, "proposal", p.QuestionId,
                     Parse(p.Before), Parse(p.After), p.ProposedBy, p.Via, p.Reason)))
-                .Concat(state.Approvals.Select(a => new LogEntry(a.Time, "approval", $"stage {a.Stage}",
-                    null, null, a.ApprovedBy, a.Via, null)))
                 .OrderBy(e => e.Time);
             return Results.Ok(entries);
         }).WithTags(tag);

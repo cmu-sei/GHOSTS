@@ -73,6 +73,17 @@ describe("BuilderSession", () => {
     expect(faux.getPendingResponseCount()).toBe(30 - 12);
   });
 
+  it("doesn't count calls that save something toward the turn limit", async () => {
+    const { faux, s, events } = session();
+    const record = (i: number) => fauxAssistantMessage([fauxToolCall("record_answer", { questionId: `q${i}`, value: "v", who: "proposed", reason: "From the source." })], { stopReason: "toolUse" });
+    faux.setResponses([...Array.from({ length: 20 }, (_, i) => record(i)), fauxAssistantMessage("Done.")]);
+
+    await s.prompt("Fill it from the source.");
+
+    expect(events.filter(e => e.type === "limit")).toEqual([]);
+    expect(faux.getPendingResponseCount()).toBe(0);
+  });
+
   it("refuses a prompt while a turn is running, leaving that turn's state alone", async () => {
     const { faux, s, events } = session();
     let release!: () => void;
@@ -123,20 +134,18 @@ describe("BuilderSession", () => {
     expect(last).toContain('[answered a: \\"A1\\"]');
   });
 
-  it("delegated() and approved() send their notes", async () => {
+  it("delegated() sends its note", async () => {
     const { faux, s } = session();
     const seen: string[] = [];
     const capture = (context: any) => {
       seen.push(JSON.stringify(context.messages.at(-1).content));
       return fauxAssistantMessage("Ok.");
     };
-    faux.setResponses([capture, capture]);
+    faux.setResponses([capture]);
 
     await s.delegated("b");
-    await s.approved(0);
 
     expect(seen[0]).toContain("[delegated b]");
-    expect(seen[1]).toContain("[approved stage 0]");
   });
 });
 

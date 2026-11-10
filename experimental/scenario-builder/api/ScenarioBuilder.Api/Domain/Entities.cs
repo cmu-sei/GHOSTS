@@ -25,7 +25,7 @@ public class Scenario
     public string Drafts { get; set; } = "{}";
 
     /// <summary>
-    /// The owner handed the agent every remaining decision: while on, the agent may approve gates too.
+    /// The owner handed the agent every remaining decision.
     /// Only the owner, as a person, turns it on or off.
     /// </summary>
     public bool Delegated { get; set; }
@@ -88,21 +88,6 @@ public class Edit
     public string After { get; set; } = "null";
     public string By { get; set; } = string.Empty;
     public Via Via { get; set; }
-    public DateTime Time { get; set; }
-}
-
-/// <summary>The owner's approval of a stage gate. It holds only while the stage's content still hashes the same.</summary>
-public class Approval
-{
-    public int Id { get; set; }
-    public int ScenarioId { get; set; }
-    public int Stage { get; set; }
-    public string ApprovedBy { get; set; } = string.Empty;
-
-    /// <summary>Agent: approved under the owner's delegation.</summary>
-    public Via Via { get; set; }
-
-    public string Hash { get; set; } = string.Empty;
     public DateTime Time { get; set; }
 }
 
@@ -199,4 +184,41 @@ public class PluginConnection
     public string Url { get; set; } = string.Empty;
     public string ConnectedBy { get; set; } = string.Empty;
     public DateTime Connected { get; set; }
+}
+
+/// <summary>The one GraySpace scenarios deploy to, set by an admin. No row means it isn't connected.</summary>
+public class GraySpaceConnection
+{
+    public int Id { get; set; }
+
+    /// <summary>GraySpace's address, without /api/v1.</summary>
+    public string Url { get; set; } = string.Empty;
+
+    /// <summary>GraySpace's GRAYSPACE_API_TOKEN, sent as Authorization: Bearer. It never leaves the API.</summary>
+    public string Token { get; set; } = string.Empty;
+
+    public string ConnectedBy { get; set; } = string.Empty;
+    public DateTime Connected { get; set; }
+}
+
+/// <summary>A scenario's enclave on GraySpace: the slice spec being built, and what the page last did with it there.</summary>
+public class Enclave
+{
+    public int Id { get; set; }
+    public int ScenarioId { get; set; }
+
+    /// <summary>The slice spec (GraySpace's grayspace-slice-v1) as JSON, as last written.</summary>
+    public string Spec { get; set; } = "{}";
+
+    /// <summary>The version GraySpace stored on the last save or reuse; none before.</summary>
+    public string? Version { get; set; }
+
+    /// <summary>The last instance created from it.</summary>
+    public string? InstanceId { get; set; }
+
+    /// <summary>The last job started from the page: a plan, a create, a destroy or a retry.</summary>
+    public string? JobId { get; set; }
+
+    public string UpdatedBy { get; set; } = string.Empty;
+    public DateTime Updated { get; set; }
 }

@@ -9,7 +9,7 @@ const CLAIM = /\b(recorded|saved|noted|updated|stored)\b/i;
 const NEGATED = /\b(not|no|nothing|never|yet to)\b|n't\b/i;
 const WRITES = new Set(["record_answer", "draft", "propose_change", "advance_stage"]);
 /** Notes that mean the person's own action was saved, so the model may say so. */
-const PERSON_ACTION = /^\[(answered|approved|applied) /;
+const PERSON_ACTION = /^\[(answered|applied) /;
 
 const lower = (s: string) => s.toLowerCase();
 const squash = (s: string) => lower(s).replace(/\s+/g, " ").trim();

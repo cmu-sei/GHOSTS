@@ -7,7 +7,8 @@ describe('FooterComponent', () => {
     await fixture.whenStable();
     const root = fixture.nativeElement as HTMLElement;
 
-    expect(root.querySelector('footer')!.textContent?.trim()).toBe('Scenario Builder. CERT © 2017. All rights reserved.');
+    const notices = [...root.querySelectorAll('footer span')].map(s => s.textContent?.trim());
+    expect(notices).toEqual(['Crucible Scenario Builder', 'CERT © 2017. All rights reserved.']);
     expect(root.querySelectorAll('a')).toHaveLength(0);
   });
 });

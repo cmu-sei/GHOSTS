@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, ElementRef, OnInit, afterRenderEffect, inject, signal, viewChild } from '@angular/core';
 import type { QuestionCard } from '@scenario-builder/agent-web';
 import { AnswerValue } from '../../../core/models/builder.model';
+import { HelpService } from '../../../shared/help/help.service';
 import { WorkspaceStore } from '../workspace.store';
 import { AgentService } from './agent.service';
 import { ProposalCardComponent } from './proposal-card/proposal-card.component';
@@ -18,6 +19,7 @@ import { QuestionCardComponent } from './question-card/question-card.component';
 })
 export class AgentPanelComponent implements OnInit {
   protected readonly agent = inject(AgentService);
+  protected readonly help = inject(HelpService);
   private readonly store = inject(WorkspaceStore);
 
   protected readonly draft = signal('');

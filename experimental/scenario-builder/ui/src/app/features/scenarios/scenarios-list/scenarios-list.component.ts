@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { BuilderApiService, errorMessage } from '../../../core/services/builder-api.service';
 import { ScenarioTypeSummary, ScenarioSummary } from '../../../core/models/builder.model';
 import { TopBarComponent } from '../../../shared/components/top-bar/top-bar.component';
+import { WelcomeComponent } from '../welcome/welcome.component';
 
 type SortKey = 'name' | 'scenarioType' | 'stage' | 'owner' | 'updated';
 
@@ -14,7 +15,7 @@ type SortKey = 'name' | 'scenarioType' | 'stage' | 'owner' | 'updated';
 @Component({
   selector: 'app-scenarios-list',
   standalone: true,
-  imports: [DatePipe, RouterLink, TopBarComponent],
+  imports: [DatePipe, RouterLink, TopBarComponent, WelcomeComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './scenarios-list.component.html',
   styleUrls: ['./scenarios-list.component.scss']

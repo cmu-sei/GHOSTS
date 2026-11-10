@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -14,10 +14,10 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MAT_CHECKBOX_DEFAULT_OPTIONS } from '@angular/material/checkbox';
-import { TimelineLocalService } from '../../../core/services';
+import { SavedTimelineService } from '../../../core/services';
 import {
-  CreateLocalTimelineRequest,
-  LocalTimeline,
+  SavedTimelineRequest,
+  SavedTimeline,
   TimelineHandler,
   TimelineScheduleType,
   TimelineEvent
@@ -54,7 +54,7 @@ const HANDLER_TYPES: readonly string[] = [
   'AwsCli'
 ];
 
-const TIME_PATTERN = /^([01]?\d|2[0-3]):([0-5]\d):([0-5]\d)$/;
+const TIME_PATTERN = /^(([01]?\d|2[0-3]):([0-5]\d):([0-5]\d)|24:00:00)$/;
 
 @Component({
   selector: 'app-timeline-editor',
@@ -431,8 +431,9 @@ export class TimelineEditorComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly snackBar = inject(MatSnackBar);
-  private readonly timelineLocalService = inject(TimelineLocalService);
+  private readonly savedTimelineService = inject(SavedTimelineService);
   private readonly dialog = inject(MatDialog);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   get handlerArray(): FormArray<FormGroup> {
     return this.form.controls.timeLineHandlers as FormArray<FormGroup>;
@@ -480,7 +481,7 @@ export class TimelineEditorComponent implements OnInit {
   protected previewJson(): void {
     try {
       const payload = this.buildTimelinePayload();
-      const preview: LocalTimeline = {
+      const preview: SavedTimeline = {
         id: this.editingId ?? 'preview',
         name: payload.name,
         timeLineHandlers: payload.timeLineHandlers,
@@ -507,7 +508,7 @@ export class TimelineEditorComponent implements OnInit {
       return;
     }
     try {
-      const parsed = JSON.parse(input) as CreateLocalTimelineRequest;
+      const parsed = JSON.parse(input) as SavedTimelineRequest;
       if (!parsed.name || !Array.isArray(parsed.timeLineHandlers)) {
         throw new Error('Invalid timeline shape');
       }
@@ -530,33 +531,39 @@ export class TimelineEditorComponent implements OnInit {
       return;
     }
 
+    let payload: SavedTimelineRequest;
     try {
-      const payload = this.buildTimelinePayload();
-      if (this.editingId) {
-        this.timelineLocalService.update(this.editingId, payload);
-      } else {
-        const created = this.timelineLocalService.create(payload);
-        this.editingId = created.id;
-      }
-      this.router.navigate(['/timelines']);
+      payload = this.buildTimelinePayload();
     } catch (error) {
       this.snackBar.open(`Unable to save timeline: ${(error as Error).message}`, undefined, {
         duration: 3500
       });
+      return;
     }
+
+    const save = this.editingId
+      ? this.savedTimelineService.update(this.editingId, payload)
+      : this.savedTimelineService.create(payload);
+    save.subscribe({
+      next: () => this.router.navigate(['/timelines']),
+      error: err => this.snackBar.open(`Unable to save timeline: ${err.message}`, undefined, { duration: 3500 })
+    });
   }
 
   private loadTimeline(id: string): void {
-    const timeline = this.timelineLocalService.getById(id);
-    if (!timeline) {
-      this.snackBar.open('Timeline not found', undefined, { duration: 3500 });
-      this.router.navigate(['/timelines']);
-      return;
-    }
-    this.applyTimeline(timeline);
+    this.savedTimelineService.getById(id).subscribe({
+      next: timeline => {
+        this.applyTimeline(timeline);
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.snackBar.open('Timeline not found', undefined, { duration: 3500 });
+        this.router.navigate(['/timelines']);
+      }
+    });
   }
 
-  private applyTimeline(timeline: CreateLocalTimelineRequest | LocalTimeline): void {
+  private applyTimeline(timeline: SavedTimelineRequest | SavedTimeline): void {
     this.form.controls.name.setValue(timeline.name);
     this.handlerArray.clear();
     timeline.timeLineHandlers.forEach(handler => this.addHandler(handler));
@@ -605,7 +612,7 @@ export class TimelineEditorComponent implements OnInit {
     });
   }
 
-  private buildTimelinePayload(): CreateLocalTimelineRequest {
+  private buildTimelinePayload(): SavedTimelineRequest {
     const handlers = this.handlerArray.controls.map(handler => {
       const events = this.eventArray(handler)
         .controls

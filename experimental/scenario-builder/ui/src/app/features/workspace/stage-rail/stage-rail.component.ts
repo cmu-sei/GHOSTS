@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { ScenarioType, Progress } from '../../../core/models/builder.model';
 
-type StageState = 'done' | 'open' | 'locked' | 'attention';
+type StageState = 'done' | 'open' | 'locked';
 
 interface StageView {
   number: number;
@@ -28,13 +28,10 @@ export class StageRailComponent {
 
   protected readonly stages = computed<StageView[]>(() => {
     const progress = this.progress();
-    const stale = new Set(progress.gate.findings.filter(f => f.code === 'APPROVAL_STALE').map(f => f.stage));
     return this.scenarioType().stages.map(stage => {
       const answered = progress.answered.filter(a => a.stage === stage.number).length;
       const total = stage.questions.length;
-      const state: StageState = stale.has(stage.number) && stage.number < progress.stage
-        ? 'attention'
-        : stage.number < progress.stage ? 'done' : stage.number === progress.stage ? 'open' : 'locked';
+      const state: StageState = stage.number < progress.stage ? 'done' : stage.number === progress.stage ? 'open' : 'locked';
       return { number: stage.number, title: stage.title, answered, total, state, note: this.note(state, stage.number, answered, total) };
     });
   });
@@ -43,8 +40,6 @@ export class StageRailComponent {
     switch (state) {
       case 'done':
         return 'Closed';
-      case 'attention':
-        return 'Changed since approval';
       case 'locked':
         return `Opens after stage ${number - 1}`;
       default: {
@@ -52,7 +47,7 @@ export class StageRailComponent {
         if (gate.passes) {
           return this.progress().lastStage ? 'Complete' : 'Ready to close';
         }
-        return answered < total ? `${total - answered} open` : 'Waiting for approval';
+        return answered < total ? `${total - answered} open` : 'Draft due';
       }
     }
   }

@@ -52,16 +52,13 @@ public static class TestApi
             (await Put(client, scenarioId, q.Id, new { value = ValidValue(q) })).EnsureSuccessStatusCode();
     }
 
-    public static Task<HttpResponseMessage> Approve(HttpClient client, int scenarioId, int stage) =>
-        client.PostAsync($"/api/scenarios/{scenarioId}/gates/{stage}/approve", null);
-
     public static Task<HttpResponseMessage> Advance(HttpClient client, int scenarioId) =>
         client.PostAsync($"/api/scenarios/{scenarioId}/advance", null);
 
     public static Task<HttpResponseMessage> Draft(HttpClient client, int scenarioId, string text, string field = "executiveSummary") =>
         client.PutAsJsonAsync($"/api/scenarios/{scenarioId}/drafts/{field}", new { text });
 
-    /// <summary>Answers, drafts, approves and advances as the owner until <paramref name="target"/> is the open stage.</summary>
+    /// <summary>Answers, drafts and advances as the owner until <paramref name="target"/> is the open stage.</summary>
     public static async Task ReachStage(HttpClient owner, int scenarioId, int target, ScenarioType? scenarioType = null)
     {
         scenarioType ??= Tabletop;
@@ -70,8 +67,6 @@ public static class TestApi
             await AnswerStage(owner, scenarioId, stage, scenarioType);
             if (scenarioType.Drafts.Any(d => d.DueAfterStage == stage))
                 (await Draft(owner, scenarioId, "A summary.")).EnsureSuccessStatusCode();
-            if (scenarioType.Stages[stage].Gate.Approval is not null)
-                (await Approve(owner, scenarioId, stage)).EnsureSuccessStatusCode();
             (await Advance(owner, scenarioId)).EnsureSuccessStatusCode();
         }
     }

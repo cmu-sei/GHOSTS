@@ -5,7 +5,7 @@ using ScenarioBuilder.Api.Domain;
 namespace ScenarioBuilder.Api.Endpoints.ScenarioTypes;
 
 /// <summary>
-/// GET /scenario-types/{id}?version= — one published scenario type: stages, questions, gates and drafts. Its latest version, or the
+/// GET /scenario-types/{id}?version= — one published scenario type: stages, questions and drafts. Its latest version, or the
 /// version given, which is how a scenario gets the scenario type it was made on.
 /// </summary>
 public class RetrieveEndpoint : IEndpoint

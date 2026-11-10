@@ -1,5 +1,5 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { Subject, forkJoin, switchMap } from 'rxjs';
+import { forkJoin, switchMap } from 'rxjs';
 import { BuilderApiService, errorMessage } from '../../core/services/builder-api.service';
 import { AnsweredView, ScenarioType, Progress } from '../../core/models/builder.model';
 
@@ -22,9 +22,6 @@ export class WorkspaceStore {
   readonly selectedStage = signal(0);
 
   readonly answers = computed(() => new Map((this.progress()?.answered ?? []).map(a => [a.id, a] as const)));
-
-  /** Each gate the owner approves on a page, so the agent hears of it. */
-  readonly approvals = new Subject<number>();
 
   private openStage = -1;
 

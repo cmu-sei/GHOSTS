@@ -1,7 +1,5 @@
 // Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -47,12 +45,10 @@ public static class Ledger
     }
 
     /// <summary>
-    /// The open stage and its gate. The gate passes when every question is answered, every draft due after the stage is
-    /// written, and, when the stage names an approval, the owner's latest approval still matches the stage's content.
-    /// A closed stage's approval is checked again too: a change to what it covered stops the gate until the owner
-    /// approves that stage again.
+    /// The open stage and its gate. The gate passes when every question is answered and every draft due after the stage
+    /// is written.
     /// </summary>
-    public static ProgressView Progress(ScenarioType scenarioType, Scenario scenario, IReadOnlyList<Decision> decisions, IReadOnlyList<Approval> approvals)
+    public static ProgressView Progress(ScenarioType scenarioType, Scenario scenario, IReadOnlyList<Decision> decisions)
     {
         var stage = scenarioType.Stages[scenario.Stage];
         var answered = decisions.ToDictionary(d => d.QuestionId);
@@ -67,57 +63,19 @@ public static class Ledger
             : [];
         findings.AddRange(draftsDue.Select(f => new Finding("stop", "DRAFT_MISSING", $"The {f} draft isn't written yet.", stage.Number)));
 
-        var approved = false;
-        if (stage.Gate.Approval is { } approval)
-        {
-            approved = Approved(scenarioType, stage.Number, decisions, approvals, drafts, out var everApproved);
-            // The approval is the last step: ask for it only once nothing else in this stage is in the way.
-            if (!approved && findings.All(f => f.Stage != stage.Number))
-                findings.Add(everApproved
-                    ? new Finding("stop", "APPROVAL_STALE", $"{approval}: what was approved has changed since. The owner must approve again.", stage.Number)
-                    : new Finding("stop", "APPROVAL_MISSING", $"Waiting for the owner: {approval}.", stage.Number));
-        }
-
-        for (var closed = 0; closed < scenario.Stage; closed++)
-            if (scenarioType.Stages[closed].Gate.Approval is { } closedApproval && open.All(q => q.Stage != closed)
-                && !Approved(scenarioType, closed, decisions, approvals, drafts, out _))
-                findings.Add(new Finding("stop", "APPROVAL_STALE",
-                    $"Stage {closed}: {closedApproval}: what was approved has changed since. The owner must approve stage {closed} again.", closed));
-
         return new ProgressView(
             scenarioType.Id,
             scenario.Stage,
             stage.Title,
             scenario.Stage == scenarioType.LastStage,
-            new GateView(findings.Count == 0, stage.Gate.Approval, approved, findings),
+            new GateView(findings.Count == 0, findings),
             open,
             scenarioType.AllQuestions.Where(q => answered.ContainsKey(q.Id)).Select(q => AnsweredView.From(answered[q.Id])).ToList(),
             draftsDue,
             scenario.Delegated) { ScenarioTypeVersion = scenarioType.Version };
     }
 
-    /// <summary>What an approval of <paramref name="stage"/> covers: its answers in scenario type order, then the drafts due after it.</summary>
-    public static string StageHash(ScenarioType scenarioType, int stage, IReadOnlyList<Decision> decisions, JsonObject drafts)
-    {
-        var values = decisions.ToDictionary(d => d.QuestionId, d => d.Value);
-        var content = new JsonArray();
-        foreach (var q in scenarioType.Stages[stage].Questions)
-            content.Add(values.TryGetValue(q.Id, out var value) ? JsonNode.Parse(value) : null);
-        foreach (var draft in scenarioType.Drafts.Where(d => d.DueAfterStage == stage))
-            content.Add(drafts[draft.Field]?.DeepClone());
-        return Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(content.ToJsonString(Storage))));
-    }
-
     public static JsonObject ReadDrafts(Scenario scenario) => JsonNode.Parse(scenario.Drafts) as JsonObject ?? [];
-
-    /// <summary>Whether the owner's latest approval of <paramref name="stage"/> still matches what the stage holds.</summary>
-    private static bool Approved(ScenarioType scenarioType, int stage, IReadOnlyList<Decision> decisions, IReadOnlyList<Approval> approvals,
-        JsonObject drafts, out bool everApproved)
-    {
-        var latest = approvals.LastOrDefault(a => a.Stage == stage);
-        everApproved = latest is not null;
-        return latest is not null && latest.Hash == StageHash(scenarioType, stage, decisions, drafts);
-    }
 
     public static bool StageAnswered(ScenarioType scenarioType, int stage, IReadOnlyList<Decision> decisions) =>
         scenarioType.Stages[stage].Questions.All(q => decisions.Any(d => d.QuestionId == q.Id));

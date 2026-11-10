@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chronicle — Concept Brief</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0f172a;
+    --slate: #334155;
+    --muted: #64748b;
+    --faint: #94a3b8;
+    --line: #e2e8f0;
+    --old: #cbd5e1;
+    --coral: #f0524d;
+    --serif: 'Newsreader', Georgia, 'Times New Roman', serif;
+    --sans: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+    --mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+  }
+
+  @page { size: letter; margin: 0; }
+
+  * { box-sizing: border-box; }
+
+  html { background: #eef0f3; }
+
+  body {
+    margin: 0;
+    font: 400 12.5px/1.55 var(--sans);
+    color: var(--slate);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    width: 8.5in;
+    height: 11in;
+    margin: 32px auto;
+    padding: 0.55in 0.6in 0.8in;
+    background: #ffffff;
+    box-shadow: 0 30px 60px -30px rgb(15 23 42 / 30%), 0 1px 3px rgb(15 23 42 / 8%);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .page.continued { height: auto; margin-top: 24px; }
+
+  @media print {
+    html { background: #ffffff; }
+    .page { margin: 0; box-shadow: none; break-after: page; }
+    .page.continued { margin-top: 0; break-after: auto; }
+  }
+
+  .eyebrow, .label, .fig-num, th, .phase {
+    font: 500 9.5px/1 var(--mono);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .eyebrow { color: var(--coral); margin: 0; }
+
+  h1 {
+    margin: 10px 0 0;
+    font: 400 52px/1 var(--serif);
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+
+  .deck {
+    margin: 6px 0 0;
+    font: 400 19px/1.3 var(--serif);
+    color: var(--slate);
+  }
+
+  .deck em { color: var(--ink); }
+
+  .lede {
+    margin: 12px 0 0;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+    font: 400 13px/1.55 var(--serif);
+    color: var(--slate);
+    columns: 2;
+    column-gap: 28px;
+  }
+
+  .lede p { margin: 0; }
+  .lede strong { color: var(--ink); font-weight: 500; }
+
+  .body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 176px;
+    gap: 28px;
+    margin-top: 26px;
+  }
+
+  figure { margin: 0 0 28px; }
+  figure:last-child { margin-bottom: 0; }
+
+  .fig-head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 16px;
+  }
+
+  .fig-num { color: var(--coral); }
+
+  .fig-title { font: 500 15px/1.2 var(--serif); color: var(--ink); }
+
+  svg { display: block; width: 100%; height: auto; }
+
+  figcaption {
+    margin-top: 14px;
+    font-size: 11px;
+    line-height: 1.45;
+    color: var(--muted);
+  }
+
+  figcaption b { color: var(--ink); font-weight: 600; }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  th {
+    padding: 0 0 6px;
+    text-align: center;
+    color: var(--muted);
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    font-size: 8.5px;
+  }
+
+  th:first-child { text-align: left; }
+
+  td {
+    padding: 2px 0;
+    border-top: 1px solid var(--line);
+    text-align: center;
+    font-size: 13px;
+    line-height: 1.2;
+  }
+
+  td:first-child { text-align: left; font-size: 11.5px; color: var(--ink); }
+  td:first-child span { margin-left: 6px; font-size: 10px; color: var(--faint); }
+
+  .facts { border-left: 1px solid var(--line); padding-left: 18px; }
+
+  .fact { margin-bottom: 8px; }
+  .label { color: var(--coral); display: block; margin-bottom: 4px; }
+  .value { font: 400 13.5px/1.3 var(--serif); color: var(--ink); }
+  .value.small { font-size: 12.5px; color: var(--slate); }
+
+  .principles {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 22px;
+    padding-top: 10px;
+    margin-bottom: 14px;
+    border-top: 1px solid var(--line);
+  }
+
+  .continued .principles { margin-top: 12px; }
+  .eyebrow.section { margin-top: 34px; }
+
+  .principles h3 {
+    margin: 0 0 4px;
+    font: 500 15px/1.2 var(--serif);
+    color: var(--ink);
+  }
+
+  .principles p { margin: 0; font-size: 11.5px; line-height: 1.5; color: var(--muted); }
+
+  .principles .n { display: block; margin-bottom: 6px; font: 500 9.5px/1 var(--mono); letter-spacing: 0.14em; color: var(--coral); }
+
+  .continued footer { margin-top: 26px; }
+
+  /* Page 2: why the record matters for AI. */
+  h2 {
+    margin: 10px 0 0;
+    font: 400 32px/1.12 var(--serif);
+    letter-spacing: -0.015em;
+    color: var(--ink);
+  }
+
+  h2 em { color: var(--slate); }
+  h2 strong { font-weight: 500; color: var(--ink); }
+
+  .ai-text {
+    margin: 14px 0 28px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+    font: 400 13px/1.55 var(--serif);
+    columns: 2;
+    column-gap: 28px;
+  }
+
+  .ai-text p { margin: 0 0 6px; }
+  .ai-text strong { color: var(--ink); font-weight: 500; }
+
+  .roles td { padding: 6px 12px 6px 0; text-align: left; vertical-align: top; font-size: 11.5px; line-height: 1.45; color: var(--slate); }
+  .roles td:first-child { width: 30%; }
+  .roles td:first-child span:not(.tag) { display: block; margin: 2px 0 0; }
+  .roles td.never { color: var(--coral); width: 22%; }
+  .roles td.never.none { color: var(--faint); }
+  .roles th { text-align: left; padding-right: 12px; }
+
+  .roles td .tag {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 2px 5px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    font: 500 8px/1 var(--mono);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    vertical-align: 1px;
+  }
+
+  footer {
+    margin-top: auto;
+    padding-top: 8px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    font: 500 8.5px/1 var(--mono);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+</style>
+</head>
+<body>
+<main>
+<div class="page">
+  <p class="eyebrow">Concept Brief · November 2026</p>
+  <h1>Chronicle</h1>
+  <p class="deck">One living record of an event, <em>from the first idea to the last lesson.</em></p>
+
+  <div class="lede">
+    <p>Today an exercise lives in pieces: a scenario document, a network build, injects in a spreadsheet, activity in
+      logs, lessons in someone’s notes. <strong>Chronicle is one record for the whole event</strong>, whether training,
+      exercise or simulation. It begins as the scenario: what the world looks like, and what the event must achieve. Around
+      it, apps publish and subscribe: each one subscribes to the parts it needs and publishes what it built, did and saw. When the event
+      ends, the Chronicle <em>is</em> the event: complete, attributable, and ready to seed the next one.</p>
+  </div>
+
+  <div class="body">
+    <div>
+      <figure>
+        <div class="fig-head"><span class="fig-num">Fig. 1</span><span class="fig-title">The record grows with the event</span></div>
+        <svg viewBox="0 0 500 206" role="img" aria-label="Four stages. Imagine writes World and Intent; Build adds As Built; Run adds As Run; Remember adds Lessons, which seed the next event.">
+          <defs>
+            <marker id="arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0 0 L8 4 L0 8 z" fill="#94a3b8" />
+            </marker>
+          </defs>
+          <g font-family="IBM Plex Mono, ui-monospace, monospace" font-size="9" letter-spacing="1.4" font-weight="500">
+            <text x="28" y="18"><tspan fill="#f0524d">01</tspan><tspan fill="#64748b" dx="6">IMAGINE</tspan></text>
+            <text x="153" y="18"><tspan fill="#f0524d">02</tspan><tspan fill="#64748b" dx="6">BUILD</tspan></text>
+            <text x="278" y="18"><tspan fill="#f0524d">03</tspan><tspan fill="#64748b" dx="6">RUN</tspan></text>
+            <text x="403" y="18"><tspan fill="#f0524d">04</tspan><tspan fill="#64748b" dx="6">REMEMBER</tspan></text>
+          </g>
+          <g fill="#ffffff" stroke="#0f172a" stroke-width="1.2" stroke-linejoin="round">
+            <path d="M28 32 h58 l10 10 v40 h-68 z" />
+            <path d="M153 32 h58 l10 10 v54 h-68 z" />
+            <path d="M278 32 h58 l10 10 v68 h-68 z" />
+            <path d="M403 32 h58 l10 10 v82 h-68 z" />
+          </g>
+          <g fill="none" stroke="#0f172a" stroke-width="1.2" stroke-linejoin="round">
+            <path d="M86 32 v10 h10" /><path d="M211 32 v10 h10" /><path d="M336 32 v10 h10" /><path d="M461 32 v10 h10" />
+          </g>
+          <g stroke="#0f172a" stroke-width="2" stroke-linecap="round">
+            <line x1="36" y1="41" x2="60" y2="41" /><line x1="161" y1="41" x2="185" y2="41" />
+            <line x1="286" y1="41" x2="310" y2="41" /><line x1="411" y1="41" x2="435" y2="41" />
+          </g>
+          <!-- Layers: new ones in coral, earlier ones in grey. -->
+          <g>
+            <rect x="36" y="50" width="52" height="10" rx="2" fill="#f0524d" />
+            <rect x="36" y="64" width="52" height="10" rx="2" fill="#f0524d" />
+
+            <rect x="161" y="50" width="52" height="10" rx="2" fill="#cbd5e1" />
+            <rect x="161" y="64" width="52" height="10" rx="2" fill="#cbd5e1" />
+            <rect x="161" y="78" width="52" height="10" rx="2" fill="#f0524d" />
+
+            <rect x="286" y="50" width="52" height="10" rx="2" fill="#cbd5e1" />
+            <rect x="286" y="64" width="52" height="10" rx="2" fill="#cbd5e1" />
+            <rect x="286" y="78" width="52" height="10" rx="2" fill="#cbd5e1" />
+            <rect x="286" y="92" width="52" height="10" rx="2" fill="#f0524d" />
+
+            <rect x="411" y="50" width="52" height="10" rx="2" fill="#cbd5e1" />
+            <rect x="411" y="64" width="52" height="10" rx="2" fill="#cbd5e1" />
+            <rect x="411" y="78" width="52" height="10" rx="2" fill="#cbd5e1" />
+            <rect x="411" y="92" width="52" height="10" rx="2" fill="#cbd5e1" />
+            <rect x="411" y="106" width="52" height="10" rx="2" fill="#f0524d" />
+          </g>
+          <g stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arrow)">
+            <line x1="104" y1="57" x2="145" y2="57" />
+            <line x1="229" y1="57" x2="270" y2="57" />
+            <line x1="354" y1="57" x2="395" y2="57" />
+          </g>
+          <g font-family="Newsreader, Georgia, serif" font-size="14" fill="#0f172a">
+            <text x="28" y="140">World, Intent</text>
+            <text x="153" y="140">+ As Built</text>
+            <text x="278" y="140">+ As Run</text>
+            <text x="403" y="140">+ Lessons</text>
+          </g>
+          <g font-family="Inter, Helvetica Neue, Arial, sans-serif" font-size="10" fill="#64748b">
+            <text x="28" y="155">Scenario Builder</text>
+            <text x="28" y="167">and its agent</text>
+            <text x="153" y="155">GraySpace, Updraft,</text>
+            <text x="153" y="167">GHOSTS, Pandora</text>
+            <text x="278" y="155">GHOSTS, Player,</text>
+            <text x="278" y="167">Gallery, CITE,</text>
+            <text x="278" y="179">Steamfitter</text>
+            <text x="403" y="155">After-action review</text>
+            <text x="403" y="167">and analysis</text>
+          </g>
+          <path d="M437 182 C437 198 425 200 410 200 L76 200 C60 200 52 196 52 186" fill="none" stroke="#f0524d" stroke-width="1.2" stroke-dasharray="3 3" marker-end="url(#arrow)" />
+          <text x="244" y="195" text-anchor="middle" font-family="Newsreader, Georgia, serif" font-style="italic" font-size="12" fill="#64748b">lessons seed the next event</text>
+        </svg>
+        <figcaption><b>The scenario is the first page, not the whole book.</b> It sets the world and the intent; each app
+          that builds, runs or reviews the event adds its layer to the same record (new at each stage, in coral).</figcaption>
+      </figure>
+
+      <figure>
+        <div class="fig-head"><span class="fig-num">Fig. 2</span><span class="fig-title">Publish and subscribe, around one record</span></div>
+        <svg viewBox="0 16 500 210" role="img" aria-label="The Chronicle in the middle, with its five layers. Around it, each app publishes to the layers it owns and subscribes to the layers it needs.">
+          <defs>
+            <marker id="pub" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#f0524d" /></marker>
+            <marker id="sub" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#94a3b8" /></marker>
+            <style>
+              .app { font: 600 11px Inter, 'Helvetica Neue', Arial, sans-serif; fill: #0f172a; }
+              .pub { font: 500 9.5px Inter, 'Helvetica Neue', Arial, sans-serif; fill: #f0524d; }
+              .sub { font: 400 9.5px Inter, 'Helvetica Neue', Arial, sans-serif; fill: #64748b; }
+              .band { font: 400 12px Newsreader, Georgia, serif; fill: #0f172a; }
+              .pl { stroke: #f0524d; stroke-width: 1.3; marker-end: url(#pub); }
+              .sl { stroke: #94a3b8; stroke-width: 1.2; stroke-dasharray: 3 2; marker-end: url(#sub); }
+            </style>
+          </defs>
+          <rect x="185" y="22" width="130" height="200" rx="10" fill="#ffffff" stroke="#0f172a" stroke-width="1.2" />
+          <text x="250" y="45" text-anchor="middle" font-family="IBM Plex Mono, ui-monospace, monospace" font-size="9" font-weight="500" letter-spacing="1.6" fill="#0f172a">CHRONICLE</text>
+          <rect x="197" y="62" width="106" height="24" rx="3" fill="#f1f5f9" />
+          <text x="250" y="78" text-anchor="middle" class="band">World</text>
+          <rect x="197" y="92" width="106" height="24" rx="3" fill="#f1f5f9" />
+          <text x="250" y="108" text-anchor="middle" class="band">Intent</text>
+          <rect x="197" y="122" width="106" height="24" rx="3" fill="#f1f5f9" />
+          <text x="250" y="138" text-anchor="middle" class="band">As Built</text>
+          <rect x="197" y="152" width="106" height="24" rx="3" fill="#f1f5f9" />
+          <text x="250" y="168" text-anchor="middle" class="band">As Run</text>
+          <rect x="197" y="182" width="106" height="24" rx="3" fill="#f1f5f9" />
+          <text x="250" y="198" text-anchor="middle" class="band">Lessons</text>
+          <text x="142" y="43" text-anchor="end" class="app">Scenario Builder</text>
+          <text x="142" y="56" text-anchor="end" class="pub">publishes World, Intent</text>
+          <text x="142" y="68" text-anchor="end" class="sub">subscribes to Lessons</text>
+          <line x1="148" y1="49" x2="181" y2="49" class="pl" />
+          <line x1="181" y1="57" x2="148" y2="57" class="sl" />
+          <text x="142" y="93" text-anchor="end" class="app">Range builders</text>
+          <text x="142" y="106" text-anchor="end" class="pub">publishes As Built</text>
+          <text x="142" y="118" text-anchor="end" class="sub">subscribes to World, Intent</text>
+          <line x1="148" y1="99" x2="181" y2="99" class="pl" />
+          <line x1="181" y1="107" x2="148" y2="107" class="sl" />
+          <text x="142" y="143" text-anchor="end" class="app">GHOSTS and Animator</text>
+          <text x="142" y="156" text-anchor="end" class="pub">publishes As Built, As Run</text>
+          <text x="142" y="168" text-anchor="end" class="sub">subscribes to World, Intent</text>
+          <line x1="148" y1="149" x2="181" y2="149" class="pl" />
+          <line x1="181" y1="157" x2="148" y2="157" class="sl" />
+          <text x="142" y="193" text-anchor="end" class="app">Pandora</text>
+          <text x="142" y="206" text-anchor="end" class="pub">publishes As Built</text>
+          <text x="142" y="218" text-anchor="end" class="sub">subscribes to World, Intent</text>
+          <line x1="148" y1="199" x2="181" y2="199" class="pl" />
+          <line x1="181" y1="207" x2="148" y2="207" class="sl" />
+          <text x="358" y="63" class="app">Exercise apps</text>
+          <text x="358" y="76" class="pub">publishes As Run</text>
+          <text x="358" y="88" class="sub">subscribes to World to As Built</text>
+          <line x1="352" y1="69" x2="319" y2="69" class="pl" />
+          <line x1="319" y1="77" x2="352" y2="77" class="sl" />
+          <text x="358" y="118" class="app">Documents</text>
+          <text x="358" y="131" class="pub">publishes nothing</text>
+          <text x="358" y="143" class="sub">subscribes to all, per audience</text>
+          <line x1="319" y1="132" x2="352" y2="132" class="sl" />
+          <text x="358" y="173" class="app">After-action review</text>
+          <text x="358" y="186" class="pub">publishes Lessons</text>
+          <text x="358" y="198" class="sub">subscribes to Intent to As Run</text>
+          <line x1="352" y1="179" x2="319" y2="179" class="pl" />
+          <line x1="319" y1="187" x2="352" y2="187" class="sl" />
+        </svg>
+        <figcaption><b>Apps never call each other.</b> Each one publishes what it adds to its own part of the Chronicle and
+          subscribes to the parts it needs; when a part changes, every subscriber hears about it. A new app is a new
+          subscriber, not a new integration.</figcaption>
+      </figure>
+    </div>
+
+    <aside class="facts" aria-label="Facts">
+      <div class="fact"><span class="label">What It Is</span><span class="value">One JSON record per event, with a published, versioned schema.</span></div>
+      <div class="fact"><span class="label">How Apps Connect</span><span class="value">Publish and subscribe, around the record. No app calls another.</span></div>
+      <div class="fact"><span class="label">It Starts As</span><span class="value">The scenario: the world, and what the event must achieve.</span></div>
+      <div class="fact"><span class="label">It Ends As</span><span class="value">The event itself: built, run and reviewed.</span></div>
+      <div class="fact"><span class="label">For</span><span class="value">Training, exercises and simulations, at a table or on a live range.</span></div>
+      <div class="fact"><span class="label">Models</span><span class="value">Local or frontier. Works on a closed range.</span></div>
+      <div class="fact"><span class="label">Today</span><span class="value small">Scenario Builder writes the world and intent. GraySpace builds a range from them. GHOSTS runs the simulated users.</span></div>
+      <div class="fact"><span class="label">Next</span><span class="value small">Subscriptions, and every app writing back what it built, did and saw.</span></div>
+    </aside>
+  </div>
+
+
+  <footer><span>Chronicle · Concept Brief</span><span>Draft · November 2026 · 1 of 2</span></footer>
+</div>
+
+<div class="page continued">
+  <p class="eyebrow">Four Principles</p>
+  <section class="principles" aria-label="Principles">
+    <div><span class="n">01</span><h3>One Record, Many Authors</h3><p>Each app owns its part. It reads the rest, but writes only what it did.</p></div>
+    <div><span class="n">02</span><h3>Publish and Subscribe</h3><p>Apps subscribe to the parts they need and publish what they add. None of them call each other.</p></div>
+    <div><span class="n">03</span><h3>Nothing Is Overwritten</h3><p>Every change keeps who made it, when and why, so the record is also the event’s history.</p></div>
+    <div><span class="n">04</span><h3>The Right Eyes Only</h3><p>Ground truth stays with exercise control. Participants see only what they should, everywhere.</p></div>
+  </section>
+
+  <p class="eyebrow section">Why It Matters for AI</p>
+  <h2>AI is only as good as its context. <em>A Chronicle is <strong>all</strong> the context.</em></h2>
+
+  <div class="ai-text">
+    <p>A language model doesn’t know your exercise. Asked cold, it invents: a news story that contradicts the ground
+      truth, a simulated bank clerk who doesn’t know which bank they work for, an after-action summary that can’t tell
+      what was planned from what happened. <strong>Give it the Chronicle and it stops guessing.</strong> The record holds
+      the world, the intent, what was built and everything that happened, each part marked with who wrote it and who may
+      see it.</p>
+    <p>Because the record is structured, each AI is handed exactly the parts its job needs, not a pile of documents.
+      That matters most on a closed range, where a smaller local model has room for less. And because visibility travels
+      with the data, an AI playing a member of the public never learns the twist the participants are meant to find.
+      Every event makes the next one smarter: the lessons of the last Chronicle are context for the next scenario.</p>
+  </div>
+
+  <figure>
+    <div class="fig-head"><span class="fig-num">Fig. 3</span><span class="fig-title">Context by role, under the same rules as people</span></div>
+    <table class="roles">
+      <thead>
+        <tr><th scope="col">AI at Work</th><th scope="col">Reads from the Chronicle</th><th scope="col">Never Sees</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Scenario agent<span>drafts the scenario with the designer</span></td><td>The designer’s sources, the scenario so far and, in time, lessons from past events</td><td class="never none">Nothing held back: it works for the designer</td></tr>
+        <tr><td>Simulated users<span>GHOSTS: people at work on the range</span></td><td>Their persona and organization, the platforms they use, and events as they happen</td><td class="never">The ground truth and the plan</td></tr>
+        <tr><td>Content generation<span>Pandora: news, posts, email, files</span></td><td>The world, the information environment, and the planned events, so every piece stays consistent</td><td class="never">Designer-only notes</td></tr>
+        <tr><td>Exercise control assistant <span class="tag">Next</span><span>helps controllers steer play</span></td><td>The intent, the ground truth, the escalation steps, and what has happened so far</td><td class="never none">Nothing held back: it works for exercise control</td></tr>
+        <tr><td>After-action analyst <span class="tag">Next</span><span>compares the plan with reality</span></td><td>Everything: the intent, what was built, and every inject, decision and action</td><td class="never none">Nothing held back: it reports to designers</td></tr>
+      </tbody>
+    </table>
+    <figcaption><b>Context by role, not by copy and paste.</b> Each AI gets the parts of the record its job needs, under
+      the visibility rules that already keep ground truth from participants. Rows marked Next are where the record leads.</figcaption>
+  </figure>
+
+  <footer><span>Chronicle · Concept Brief</span><span>Draft · November 2026 · 2 of 2</span></footer>
+</div>
+</main>
+</body>
+</html>

@@ -15,9 +15,6 @@
     {
       "number": 0,
       "title": "Team and Setting",
-      "gate": {
-        "approval": "Confirm the team and setting"
-      },
       "questions": [
         {
           "id": "intent",
@@ -110,7 +107,6 @@
     {
       "number": 1,
       "title": "Tasks, Conditions and Standards",
-      "gate": {},
       "questions": [
         {
           "id": "tasks",
@@ -225,9 +221,6 @@
     {
       "number": 2,
       "title": "Scenario, Opposition and Ground Truth",
-      "gate": {
-        "approval": "Approve the executive summary"
-      },
       "questions": [
         {
           "id": "problem",
@@ -384,9 +377,6 @@
     {
       "number": 3,
       "title": "Network and Range",
-      "gate": {
-        "approval": "Approve the network requirements"
-      },
       "questions": [
         {
           "id": "rangeReference",
@@ -492,9 +482,6 @@
     {
       "number": 4,
       "title": "Control, Safety and Names",
-      "gate": {
-        "approval": "Approve the control plan and names"
-      },
       "questions": [
         {
           "id": "controlCell",

@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Timeline, PostTimelineRequest, SendCommandsRequest, SendCommandsResponse } from '../models';
+import { Timeline, PostTimelineRequest, SendCommandsRequest, SendCommandsResponse, MachineTimeline } from '../models';
 import { ConfigService } from './config.service';
 
 @Injectable({
@@ -17,6 +17,11 @@ export class TimelineService {
 
   postTimeline(request: PostTimelineRequest): Observable<void> {
     return this.http.post<void>(this.apiUrl, request);
+  }
+
+  /** The timelines a machine's client has reported back, one row per report */
+  getMachineTimelines(machineId: string): Observable<MachineTimeline[]> {
+    return this.http.get<MachineTimeline[]>(`${this.apiUrl}/${machineId}`);
   }
 
   getTimelineStatus(machineId: string, timelineId: string): Observable<Timeline> {

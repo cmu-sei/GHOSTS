@@ -33,7 +33,7 @@ public class PullTests
 
         var doc = await Pull(owner, id);
 
-        Assert.Equal("0.4.0", (string)doc["schemaVersion"]!);
+        Assert.Equal("0.5.0", (string)doc["schemaVersion"]!);
         Assert.Equal("crucible-tabletop", (string)doc["scenarioType"]!["id"]!);
         Assert.Equal("harbor-blackout", (string)doc["slug"]!);
         Assert.Equal("draft", (string)doc["status"]!);
@@ -132,6 +132,28 @@ public class PullTests
             Assert.True(result.IsValid, string.Join("; ", (result.Details ?? []).Where(d => d.Errors is not null)
                 .SelectMany(d => d.Errors!.Select(e => $"{d.InstanceLocation}: {e.Value}"))));
         }
+    }
+
+    [Fact]
+    public async Task Pull_and_export_name_the_builder_once_a_deployment_is_built()
+    {
+        using var factory = new ApiFactory();
+        var owner = factory.Client();
+        var id = await CreateScenario(owner);
+        Assert.Null((await Pull(owner, id))["deployments"]);
+
+        var spec = (await owner.GetFromJsonAsync<JsonObject>($"/api/scenarios/{id}/enclave"))!["spec"];
+        (await owner.PutAsJsonAsync($"/api/scenarios/{id}/enclave", new { spec })).EnsureSuccessStatusCode();
+        var doc = await Pull(owner, id);
+
+        var deployment = Assert.Single(doc["deployments"]!.AsArray())!;
+        Assert.Equal("grayspace", (string)deployment["target"]!);
+        Assert.Equal("harbor-blackout", (string)deployment["enclave"]!);
+        Assert.Null(deployment["version"]);
+        var exported = JsonNode.Parse(await owner.GetStringAsync($"/api/scenarios/{id}/export"))!;
+        Assert.Equal("grayspace", (string)exported["deployments"]![0]!["target"]!);
+        using var parsed = JsonDocument.Parse(doc.ToJsonString());
+        Assert.True(Schema.Evaluate(parsed.RootElement).IsValid);
     }
 
     [Fact]

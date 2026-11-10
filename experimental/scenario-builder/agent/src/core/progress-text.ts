@@ -7,7 +7,7 @@ export function formatProgress(p: Progress): string {
   const lines = [`Stage ${p.stage}: ${p.stageTitle}`];
   if (p.delegated)
     lines.push("Delegation: on. The designer handed you every decision: don't ask. Fill all open questions with record_answers " +
-      "(each proposed, with a one-sentence reason), write any draft that's due, approve_stage, then advance_stage. Keep going to the end.");
+      "(each proposed, with a one-sentence reason), write any draft that's due, then advance_stage. Keep going to the end.");
 
   if (p.sources?.length)
     lines.push(`Sources: ${p.sources.map(s => `${s.name} (${s.characters.toLocaleString("en-US")} characters)`).join(", ")}. ` +
@@ -37,9 +37,5 @@ export function formatProgress(p: Progress): string {
 
 function gateLine(p: Progress): string {
   if (p.gate.passes) return p.lastStage ? "Gate: passes. This is the last stage; the work is done." : "Gate: passes. Call advance_stage.";
-  const findings = p.gate.findings;
-  // The findings say which approval: the open stage's, or a closed stage's that went stale.
-  if (findings.length && findings.every(f => f.code.startsWith("APPROVAL_")))
-    return `Gate: waiting for the owner. ${findings.map(f => f.message).join(" ")}`;
-  return `Gate: closed. ${findings.map(f => f.message).join(" ")}`;
+  return `Gate: closed. ${p.gate.findings.map(f => f.message).join(" ")}`;
 }

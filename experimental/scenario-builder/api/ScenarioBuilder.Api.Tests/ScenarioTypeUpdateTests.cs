@@ -16,20 +16,20 @@ public class ScenarioTypeUpdateTests
     private static object Question(string id, string text, string answer = "text", string[]? options = null) =>
         new { id, text, why = "w", answer, options, path = $"/scenario/{id}" };
 
-    /// <summary>Version 0.1.0: two stages, the second behind an approval, and an executive summary after the first.</summary>
+    /// <summary>Version 0.1.0: two stages, and an executive summary after the first.</summary>
     private static readonly object First = new
     {
         id = Id, version = "0.0.0", name = "Red Team Dream", topology = false,
         drafts = new[] { new { field = "executiveSummary", dueAfterStage = 0, path = "/scenario/executiveSummary" } },
         stages = new object[]
         {
-            new { number = 0, title = "Target", gate = new { }, questions = new[]
+            new { number = 0, title = "Target", questions = new[]
             {
                 Question("target", "What does the team attack?"),
                 Question("rules", "How strict are the rules?", "choice", ["Strict", "Loose"]),
                 Question("notes", "Anything else?")
             } },
-            new { number = 1, title = "Story", gate = new { approval = "Approve the story" }, questions = new[] { Question("story", "What happened?") } }
+            new { number = 1, title = "Story", questions = new[] { Question("story", "What happened?") } }
         }
     };
 
@@ -42,7 +42,7 @@ public class ScenarioTypeUpdateTests
         id = Id, version = "0.0.0", name = "Red Team Dream", topology = true, drafts = Array.Empty<object>(),
         stages = new object[]
         {
-            new { number = 0, title = "Target", gate = new { }, questions = new[]
+            new { number = 0, title = "Target", questions = new[]
             {
                 Question("target", "Which network does the team attack?"),
                 Question("rules", "How strict are the rules?", "choice", ["Strict", "Medium"]),
@@ -58,7 +58,7 @@ public class ScenarioTypeUpdateTests
         (await admin.PostAsync($"/api/admin/scenario-types/{Id}/publish", null)).EnsureSuccessStatusCode();
     }
 
-    /// <summary>A scenario on 0.1.0 with every question answered, the summary drafted, stage 1 approved, then 0.2.0 published.</summary>
+    /// <summary>A scenario on 0.1.0 with every question answered and the summary drafted, then 0.2.0 published.</summary>
     private static async Task<int> OnTheFirstVersion(ApiFactory factory, HttpClient owner)
     {
         (await owner.PostAsJsonAsync("/api/admin/scenario-types", new { name = "Red Team Dream" })).EnsureSuccessStatusCode();
@@ -69,7 +69,6 @@ public class ScenarioTypeUpdateTests
         (await Draft(owner, id, "A summary.")).EnsureSuccessStatusCode();
         (await Advance(owner, id)).EnsureSuccessStatusCode();
         (await Put(owner, id, "story", new { value = "They got in." })).EnsureSuccessStatusCode();
-        (await Approve(owner, id, 1)).EnsureSuccessStatusCode();
         await Publish(owner, Second);
         return id;
     }
@@ -125,7 +124,6 @@ public class ScenarioTypeUpdateTests
 
         using var scope = factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<BuilderDb>();
-        Assert.Empty(db.Approvals.Where(a => a.ScenarioId == id));
         Assert.Equal("{}", db.Scenarios.Single(s => s.Id == id).Drafts.Replace(" ", ""));
     }
 

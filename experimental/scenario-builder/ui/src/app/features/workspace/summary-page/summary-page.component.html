@@ -1,11 +1,11 @@
 <section class="sheet">
   <header class="head">
     <h1>Executive Summary</h1>
-    <p class="sub">Drafted from what's been decided once stage {{ dueAfter() }} is answered. Approving it closes stage {{ dueAfter() }}.</p>
+    <p class="sub">Drafted from what's been decided once stage {{ dueAfter() }} is answered. Stage {{ dueAfter() }} can close once it's written.</p>
   </header>
 
   @if (isGateStage() && store.progress(); as progress) {
-    <app-gate-panel [gate]="progress.gate" [stage]="progress.stage" [lastStage]="progress.lastStage" (approve)="approve($event)" />
+    <app-gate-panel [gate]="progress.gate" [lastStage]="progress.lastStage" />
   }
 
   <div class="editor">

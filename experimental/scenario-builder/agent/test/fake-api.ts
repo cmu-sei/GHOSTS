@@ -26,7 +26,6 @@ export const SMALL_KIND = {
 export class FakeApi implements ToolApi {
   stage = 0;
   delegated = false;
-  readonly approved: number[] = [];
   readonly answers = new Map<string, AnsweredView>();
   readonly proposals: ProposalView[] = [];
   readonly drafts = new Map<string, string>();
@@ -67,7 +66,6 @@ export class FakeApi implements ToolApi {
       lastStage: this.stage === 1,
       gate: {
         passes: open.length === 0,
-        approved: false,
         findings: open.map((q): Finding => ({ severity: "stop", code: "QUESTION_OPEN", message: `'${q.id}' is not answered.`, stage: this.stage })),
       },
       open,
@@ -110,12 +108,6 @@ export class FakeApi implements ToolApi {
   async putDraft(_scenarioId: number, field: string, text: string): Promise<void> {
     this.check();
     this.drafts.set(field, text);
-  }
-
-  async approve(_scenarioId: number, stage: number): Promise<void> {
-    this.check();
-    if (!this.delegated) throw new ApiError(403, "AGENT_CANNOT_DECIDE", "Only the owner can approve, unless the owner hands you the decisions.");
-    this.approved.push(stage);
   }
 
   async advance(_scenarioId: number): Promise<{ stage: number }> {

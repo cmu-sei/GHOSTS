@@ -12,9 +12,9 @@ namespace ScenarioBuilder.Api.Domain;
 /// </summary>
 public static partial class ScenarioMarkdown
 {
-    public static string Build(ScenarioType scenarioType, Scenario scenario, IReadOnlyList<Decision> decisions, IReadOnlyList<Approval> approvals)
+    public static string Build(ScenarioType scenarioType, Scenario scenario, IReadOnlyList<Decision> decisions)
     {
-        var findings = Ledger.Progress(scenarioType, scenario, decisions, approvals).Gate.Findings;
+        var findings = Ledger.Progress(scenarioType, scenario, decisions).Gate.Findings;
         var byQuestion = decisions.ToDictionary(d => d.QuestionId);
         var drafts = Ledger.ReadDrafts(scenario);
         var md = new StringBuilder();

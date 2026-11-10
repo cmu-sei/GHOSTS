@@ -52,12 +52,12 @@ h1 {
     background: var(--sb-pass-soft);
     border-color: transparent;
   }
+}
 
-  &.stale {
-    color: var(--sb-attention);
-    background: var(--sb-attention-soft);
-    border-color: transparent;
-  }
+.ledger-caption {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0 2px 8px;
 }
 
 .ledger {

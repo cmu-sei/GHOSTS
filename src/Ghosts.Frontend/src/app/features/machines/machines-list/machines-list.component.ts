@@ -8,12 +8,13 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ChangeDetectionStrategy } from '@angular/core';
-import { Machine, MachineStatus, SendCommandsRequest } from '../../../core/models';
+import { Machine, MachineStatus, SendCommandsRequest, UpdateType } from '../../../core/models';
 import { MachineService, TimelineService } from '../../../core/services';
 import { MachineJsonDialogComponent } from '../machine-json-dialog/machine-json-dialog.component';
 import { TimelineSelectorDialogComponent } from '../timeline-selector-dialog/timeline-selector-dialog.component';
 import { SendCommandDialogComponent } from '../send-command-dialog/send-command-dialog.component';
 import { ActivityViewerDialogComponent } from '../activity-viewer-dialog/activity-viewer-dialog.component';
+import { ClientTimelinesDialogComponent } from '../client-timelines-dialog/client-timelines-dialog.component';
 import { SearchBarComponent } from '../../../shared/components/search-bar/search-bar.component';
 
 @Component({
@@ -93,6 +94,10 @@ import { SearchBarComponent } from '../../../shared/components/search-bar/search
                 <button mat-menu-item (click)="runTimeline(machine)">
                   <i class="fas fa-play"></i>
                   <span>Run Timeline</span>
+                </button>
+                <button mat-menu-item (click)="viewClientTimelines(machine)">
+                  <i class="fas fa-stream"></i>
+                  <span>Client Timelines</span>
                 </button>
                 <button mat-menu-item (click)="sendCommand(machine)">
                   <i class="fas fa-terminal"></i>
@@ -354,7 +359,9 @@ export class MachinesListComponent implements OnInit {
       if (selectedTimeline) {
         this.timelineService.postTimeline({
           machineId: machine.id,
-          timeline: {
+          type: UpdateType.TimelinePartial,
+          update: {
+            id: selectedTimeline.id,
             name: selectedTimeline.name,
             timeLineHandlers: selectedTimeline.timeLineHandlers
           }
@@ -392,6 +399,16 @@ export class MachinesListComponent implements OnInit {
           }
         });
       }
+    });
+  }
+
+  protected viewClientTimelines(machine: Machine): void {
+    this.dialog.open(ClientTimelinesDialogComponent, {
+      width: '800px',
+      maxWidth: '95vw',
+      data: { machine },
+      autoFocus: false,
+      restoreFocus: false
     });
   }
 

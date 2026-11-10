@@ -12,8 +12,8 @@ public record ApplyScenarioTypeUpdate(string? Version);
 
 /// <summary>
 /// POST /scenarios/{id}/scenario-type-update — moves the scenario to the latest published version of its scenario type, as the preview
-/// says: answers carry over, dropped ones are logged with their old value, approvals of stages that no longer exist
-/// go, and pending proposals on dropped questions are discarded. The owner's call, as a person.
+/// says: answers carry over, dropped ones are logged with their old value, and pending proposals on dropped questions
+/// are discarded. The owner's call, as a person.
 /// </summary>
 public class ScenarioTypeUpdateApplyEndpoint : IEndpoint
 {
@@ -62,7 +62,6 @@ public class ScenarioTypeUpdateApplyEndpoint : IEndpoint
                         proposal.Status = ProposalStatus.Discarded;
                         proposal.Decided = now;
                     }
-                db.Approvals.RemoveRange(state.Approvals.Where(a => a.Stage >= latest.Stages.Count));
                 var drafts = Ledger.ReadDrafts(scenario);
                 foreach (var field in plan.DraftsDropped)
                 {

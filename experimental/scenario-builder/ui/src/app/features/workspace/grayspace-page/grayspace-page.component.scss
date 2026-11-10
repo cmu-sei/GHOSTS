@@ -27,7 +27,9 @@ h1 {
   font-size: var(--sb-title);
 }
 
-.sample {
+// .sample is the Updraft page's, which shares this sheet.
+.sample,
+.pill {
   display: inline-block;
   margin: 10px 0 0;
   padding: 4px 8px;
@@ -35,6 +37,24 @@ h1 {
   background: var(--sb-attention-soft);
   color: var(--sb-attention);
   font-size: var(--sb-small);
+
+  &.on {
+    background: var(--sb-pass-soft);
+    color: var(--sb-pass);
+  }
+}
+
+.quick {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-top: 12px;
+
+  .state {
+    flex-basis: 100%;
+    margin: 0;
+  }
 }
 
 fieldset {
@@ -227,6 +247,10 @@ table {
   gap: 6px;
 }
 
+.base-actions {
+  margin-bottom: 12px;
+}
+
 .steps {
   margin: 0;
   padding: 0;
@@ -255,5 +279,110 @@ table {
     gap: 4px;
     font-size: var(--sb-small);
     color: var(--sb-muted);
+  }
+}
+
+.state,
+.note {
+  margin: 0 0 10px;
+}
+
+.aside {
+  color: var(--sb-muted);
+  font-size: var(--sb-small);
+}
+
+.error {
+  margin: 0 0 10px;
+  color: var(--sb-error);
+}
+
+// One site or host being edited.
+.item {
+  margin-bottom: 10px;
+  padding: 10px 12px 2px;
+  border: 1px solid var(--sb-line);
+  border-radius: var(--sb-radius);
+}
+
+.nested {
+  margin-left: 16px;
+}
+
+// The GraySpace page's editors only; the Updraft page shares this sheet.
+.grayspace .fields {
+  align-items: flex-end;
+
+  .end {
+    align-self: flex-end;
+  }
+
+  .sb-field {
+    width: 180px;
+  }
+
+  .wide {
+    width: 320px;
+  }
+
+  .narrow {
+    width: 90px;
+  }
+}
+
+.choices .roles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+}
+
+.choices .pool {
+  width: 120px;
+}
+
+.inline-fieldset {
+  display: inline-flex;
+}
+
+.log {
+  max-height: 260px;
+  margin: 8px 0 0;
+  padding: 8px 10px;
+  overflow: auto;
+  border-radius: var(--sb-radius);
+  background: var(--sb-canvas);
+  font: 11px / 1.5 ui-monospace, 'IBM Plex Mono', Menlo, monospace;
+  white-space: pre-wrap;
+}
+
+.findings tr.is-error td:first-child {
+  color: var(--sb-error);
+  font-weight: 500;
+}
+
+// A connect in flight: a small spinner beside the buttons, as tall as them.
+.connecting {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  color: var(--sb-muted);
+  font-size: var(--sb-small);
+}
+
+.spinner {
+  width: 12px;
+  height: 12px;
+  box-sizing: border-box;
+  border: 2px solid var(--sb-line-strong);
+  border-top-color: var(--sb-person);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }

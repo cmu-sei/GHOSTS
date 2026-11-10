@@ -9,7 +9,7 @@ import { ScenarioShellComponent } from './scenario-shell.component';
 @Component({ template: '' })
 class PageStub {}
 
-const scenarioType: ScenarioType = { id: 'k', version: '1', name: 'K', drafts: [], stages: [{ number: 0, title: 'Stage', gate: {}, questions: [] }] };
+const scenarioType: ScenarioType = { id: 'k', version: '1', name: 'K', drafts: [], stages: [{ number: 0, title: 'Stage', questions: [] }] };
 
 async function harness() {
   TestBed.configureTestingModule({

@@ -63,11 +63,6 @@ tr:last-child td {
   background: var(--sb-canvas);
   color: var(--sb-muted);
 
-  &[data-type='approval'] {
-    background: var(--sb-pass-soft);
-    color: var(--sb-pass);
-  }
-
   &[data-type='proposal'] {
     background: var(--sb-agent-soft);
     color: var(--sb-agent);

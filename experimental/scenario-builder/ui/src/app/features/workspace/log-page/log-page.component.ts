@@ -5,7 +5,7 @@ import { LogEntry } from '../../../core/models/builder.model';
 import { labelFor } from '../../../shared/labels/question-label';
 import { WorkspaceStore } from '../workspace.store';
 
-/** The decision log: every answer, draft, proposal and approval, and who made it. */
+/** The decision log: every answer, draft and proposal, and who made it. */
 @Component({
   selector: 'app-log-page',
   standalone: true,

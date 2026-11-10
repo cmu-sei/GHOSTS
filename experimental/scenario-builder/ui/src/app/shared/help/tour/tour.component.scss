@@ -1,0 +1,159 @@
+:host {
+  display: contents;
+}
+
+// The window dims everywhere but the spotlight: the spot's own shadow is the dimming.
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 950;
+}
+
+.spot {
+  position: absolute;
+  border-radius: 10px;
+  box-shadow:
+    0 0 0 2px rgb(255 255 255 / 85%),
+    0 0 0 9999px rgb(18 22 34 / 58%);
+  transition: top 260ms cubic-bezier(0.2, 0.8, 0.2, 1), left 260ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    width 260ms cubic-bezier(0.2, 0.8, 0.2, 1), height 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.card {
+  position: fixed;
+  z-index: 960;
+  width: 340px;
+  box-sizing: border-box;
+  padding: 18px 20px 16px;
+  border-radius: 12px;
+  background: var(--sb-surface);
+  box-shadow: 0 24px 60px -18px rgb(18 22 34 / 50%), 0 2px 8px rgb(18 22 34 / 12%);
+  opacity: 0;
+  transition: top 260ms cubic-bezier(0.2, 0.8, 0.2, 1), left 260ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 160ms;
+
+  &.placed {
+    opacity: 1;
+  }
+}
+
+.card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.count {
+  font: 500 10.5px/1 var(--sb-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--sb-muted);
+}
+
+.pips {
+  display: flex;
+  gap: 4px;
+}
+
+.pip {
+  width: 14px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--sb-line);
+  transition: background 200ms;
+
+  &.on {
+    background: var(--sb-person);
+  }
+}
+
+.title {
+  margin: 12px 0 0;
+  font: 500 21px/1.2 var(--sb-serif);
+  letter-spacing: -0.01em;
+  color: var(--sb-ink);
+}
+
+.text {
+  margin: 8px 0 0;
+  line-height: 1.6;
+  color: #3b4356;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 16px;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.leave {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: 500 var(--sb-small) var(--sb-font);
+  color: var(--sb-muted);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--sb-ink);
+  }
+}
+
+// The offer: a quiet card in the corner, made once.
+.offer {
+  position: fixed;
+  z-index: 880;
+  left: 18px;
+  bottom: 40px;
+  display: flex;
+  gap: 12px;
+  width: 336px;
+  box-sizing: border-box;
+  padding: 14px 16px;
+  border: 1px solid var(--sb-line);
+  border-radius: 12px;
+  background: var(--sb-surface);
+  box-shadow: 0 18px 40px -20px rgb(18 22 34 / 40%);
+  animation: offer-in 320ms cubic-bezier(0.2, 0.8, 0.2, 1) 600ms both;
+}
+
+@keyframes offer-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+.offer-mark svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: var(--sb-person);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+.offer-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.offer-title {
+  font: 500 16px/1.25 var(--sb-serif);
+  color: var(--sb-ink);
+}
+
+.offer-sub {
+  color: var(--sb-muted);
+}
+
+.offer-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}

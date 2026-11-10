@@ -60,7 +60,7 @@ export function decide(messages: any[]): Reply {
         };
       }
       if (text.includes("Gate: passes. Call")) return { tool: "advance_stage", args: {} };
-      return { text: "Please approve on the Questions page." };
+      return { text: "The work is done." };
     }
     if (name === "advance_stage" || name === "draft" || name === "record_answer") return { tool: "get_progress", args: {} };
   }

@@ -3,7 +3,7 @@
     <section class="sheet">
       <header class="head">
         <div class="titles">
-          <h1>{{ stage.title }}</h1>
+          <h1><app-term-text [text]="stage.title" /></h1>
           <p class="sub">Stage {{ stage.number }}</p>
         </div>
         <div class="tally">
@@ -15,24 +15,21 @@
       @if (stage.number === progress.stage) {
         <app-gate-panel
           [gate]="progress.gate"
-          [stage]="progress.stage"
           [lastStage]="progress.lastStage"
-          (approve)="approve($event)"
           (advance)="advance()" />
       } @else if (stage.number > progress.stage) {
         <p class="note">This stage opens once stage {{ progress.stage }} closes.</p>
-      } @else if (staleHere(); as stale) {
-        <div class="note stale">
-          <span>{{ stale.message }}</span>
-          <button class="sb-button" type="button" (click)="approve(stage.number)">Approve stage {{ stage.number }} again</button>
-        </div>
       } @else {
-        <p class="note done">Closed and approved.</p>
+        <p class="note done">Closed.</p>
       }
 
+      <div class="ledger-caption">
+        <app-legend />
+      </div>
       <div class="ledger" role="list">
-        @for (question of stage.questions; track question.id) {
+        @for (question of stage.questions; track question.id; let first = $first) {
           <app-question-row
+            [attr.data-tour]="first ? 'ledger' : null"
             [question]="question"
             [answer]="store.answer(question.id)"
             [editable]="stage.number <= progress.stage"

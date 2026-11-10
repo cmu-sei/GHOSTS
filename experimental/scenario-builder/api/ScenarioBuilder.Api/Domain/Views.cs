@@ -24,7 +24,7 @@ public record ProposalView(int Id, string QuestionId, JsonNode? Before, JsonNode
 /// <summary>Something in the way of closing a stage, and the stage it is about. Severity is "stop" or "warning".</summary>
 public record Finding(string Severity, string Code, string Message, int Stage);
 
-public record GateView(bool Passes, string? Approval, bool Approved, List<Finding> Findings);
+public record GateView(bool Passes, List<Finding> Findings);
 
 /// <summary>Where a scenario stands: the open stage, what's left in it, and everything answered so far.</summary>
 public record ProgressView(

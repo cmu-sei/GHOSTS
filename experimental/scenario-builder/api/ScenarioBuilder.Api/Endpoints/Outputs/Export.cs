@@ -3,6 +3,7 @@
 using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http.Json;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using ScenarioBuilder.Api.Domain;
 using ScenarioBuilder.Api.Infrastructure;
@@ -24,9 +25,9 @@ public class ExportEndpoint : IEndpoint
                     if (await ScenarioState.Load(db, scenarioTypes, id, ct) is not { } s)
                         return ScenarioState.Missing(id);
                     if (format == "markdown")
-                        return Results.File(Encoding.UTF8.GetBytes(ScenarioMarkdown.Build(s.ScenarioType, s.Scenario, s.Decisions, s.Approvals)),
+                        return Results.File(Encoding.UTF8.GetBytes(ScenarioMarkdown.Build(s.ScenarioType, s.Scenario, s.Decisions)),
                             "text/markdown; charset=utf-8", $"{s.Scenario.Slug}.scenario.md");
-                    var document = ScenarioDocument.Build(s.ScenarioType, s.Scenario, s.Decisions, s.Approvals);
+                    var document = ScenarioDocument.Build(s.ScenarioType, s.Scenario, s.Decisions, await db.Enclaves.FirstOrDefaultAsync(e => e.ScenarioId == id, ct));
                     return Results.File(JsonSerializer.SerializeToUtf8Bytes(document, json.Value.SerializerOptions),
                         "application/json", $"{s.Scenario.Slug}.scenario.json");
                 })

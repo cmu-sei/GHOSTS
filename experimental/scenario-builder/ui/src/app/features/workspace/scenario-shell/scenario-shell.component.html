@@ -1,5 +1,5 @@
 <app-top-bar [crumb]="store.name()">
-  <nav class="pages" aria-label="Pages">
+  <nav class="pages" aria-label="Pages" data-tour="pages">
     @for (page of pages(); track page.path) {
       <a [routerLink]="page.path" routerLinkActive="active" ariaCurrentWhenActive="page">{{ page.label }}</a>
     }
@@ -8,7 +8,7 @@
 
 <div class="body" [class.no-rail]="!onQuestions()">
   @if (onQuestions()) {
-    <aside class="rail">
+    <aside class="rail" data-tour="rail">
       @if (store.scenarioType(); as scenarioType) {
         @if (store.progress(); as progress) {
           <app-stage-rail [scenarioType]="scenarioType" [progress]="progress" [selected]="store.selectedStage()" (select)="pick($event)" />
@@ -25,7 +25,7 @@
     <router-outlet />
   </main>
 
-  <aside class="agent" aria-label="Agent">
+  <aside class="agent" aria-label="Agent" data-tour="agent">
     @if (store.scenarioId()) {
       <app-agent-panel />
     }

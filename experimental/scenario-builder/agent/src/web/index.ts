@@ -64,7 +64,6 @@ export const createWebAgent: CreateWebAgent = async (options: WebAgentOptions & 
     send: text => session.prompt(text),
     answered: (questionId, value) => session.answered(questionId, value),
     delegated: questionId => session.delegated(questionId),
-    approved: stage => session.approved(stage),
     abort: () => session.abort(),
     subscribe(listener) {
       listeners.add(listener);
@@ -83,7 +82,7 @@ function translate(
   if (event.type === "question") return emit({ type: "question", card: event.card });
   if (event.type === "proposal") return emit({ type: "proposal", proposal: event.proposal });
   if (event.type === "limit")
-    return emit({ type: "error", message: `The agent stopped after ${event.turns} model calls without asking anything. Send a message to carry on.` });
+    return emit({ type: "error", message: `The agent stopped after ${event.turns} model calls in a row without saving or asking anything. Send a message to carry on.` });
 
   const e = event.event;
   switch (e.type) {

@@ -1,4 +1,4 @@
-// The agent's nine tools. They hold the rules, so a small model can't get around them: a
+// The agent's eight tools. They hold the rules, so a small model can't get around them: a
 // refusal comes back as a result with a code (which the evaluation counts) and a message that
 // says what to do instead. API refusals pass through the same way.
 
@@ -9,7 +9,7 @@ import type { BuilderApi, PassageView, Progress, ProposalView, QuestionView } fr
 import { formatProgress } from "./progress-text.ts";
 
 /** What the tools need from the API; the tests pass an in-memory stand-in. */
-export type ToolApi = Pick<BuilderApi, "progress" | "scenarioType" | "putDecision" | "propose" | "putDraft" | "advance" | "approve" | "searchSources">;
+export type ToolApi = Pick<BuilderApi, "progress" | "scenarioType" | "putDecision" | "propose" | "putDraft" | "advance" | "searchSources">;
 
 export interface QuestionCard {
   questionId: string;
@@ -216,18 +216,6 @@ export function createTools(ctx: ToolContext): AgentTool<any, ToolDetails>[] {
     },
   });
 
-  const approveStage = tool({
-    name: "approve_stage",
-    label: "Approve",
-    description: "Approves the open stage's gate. Only works while the designer has handed you the decisions; otherwise ask them to approve.",
-    parameters: Type.Object({}),
-    execute: async () => {
-      const { stage } = await ctx.api.progress(ctx.scenarioId);
-      await ctx.api.approve(ctx.scenarioId, stage);
-      return ok(`Stage ${stage} approved.`, `approved stage ${stage}`);
-    },
-  });
-
   const proposeChange = tool({
     name: "propose_change",
     label: "Propose",
@@ -285,5 +273,5 @@ export function createTools(ctx: ToolContext): AgentTool<any, ToolDetails>[] {
     },
   });
 
-  return [getProgress, askUser, recordAnswer, recordAnswers, proposeChange, draft, approveStage, advanceStage, searchSources];
+  return [getProgress, askUser, recordAnswer, recordAnswers, proposeChange, draft, advanceStage, searchSources];
 }

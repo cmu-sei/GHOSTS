@@ -39,18 +39,17 @@ public sealed class ScenarioTypeDrafter(IHttpClientFactory clients, IOptions<Mod
     {
         const string system = """
             You design scenario types for a guided scenario builder. A scenario type is the interview a designer goes
-            through to build one scenario of that type: a few stages, each with its own questions. A stage ends at a gate,
-            and a gate may need the scenario owner's approval, named as a short instruction such as "Approve the
-            executive summary". After one of the stages there is enough to write an executive summary of the scenario.
+            through to build one scenario of that type: a few stages, each with its own questions. After one of the
+            stages there is enough to write an executive summary of the scenario.
 
             Plan the stages of the scenario type you're given: 3 to 6 stages, in the order a designer settles things. Give each a
             short title in Title Case and one sentence on what it settles.
 
             Reply with one JSON object and nothing else:
-            {"stages": [{"title": "...", "purpose": "...", "approval": "..." or null}], "summaryAfterStage": 0}
+            {"stages": [{"title": "...", "purpose": "..."}], "summaryAfterStage": 0}
             summaryAfterStage is the number of the stage, counting from 0, after which the executive summary is written.
             """;
-        var staging = example.Stages.Select(s => new { title = s.Title, approval = s.Gate.Approval });
+        var staging = example.Stages.Select(s => new { title = s.Title });
         var user = $"""
             {About(draft)}
 
@@ -70,7 +69,7 @@ public sealed class ScenarioTypeDrafter(IHttpClientFactory clients, IOptions<Mod
                     return (null, $"stage {planned.Count} has no title.");
                 if (planned.Any(p => p.Title == title))
                     return (null, $"two stages are titled \"{title}\".");
-                planned.Add(new ScenarioTypeStage(planned.Count, title, [], new ScenarioTypeGate(Text(node?["approval"])), Text(node?["purpose"]) ?? ""));
+                planned.Add(new ScenarioTypeStage(planned.Count, title, [], Text(node?["purpose"]) ?? ""));
             }
             var summary = reply["summaryAfterStage"] is JsonValue v && v.TryGetValue<int>(out var n) ? Math.Clamp(n, 0, planned.Count - 1) : Math.Min(2, planned.Count - 1);
             return (draft with { Stages = planned, Drafts = [new DraftedField(SummaryField, summary, $"{Section}/{SummaryField}", "excon")] }, null);

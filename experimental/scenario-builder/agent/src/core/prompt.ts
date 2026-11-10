@@ -11,7 +11,7 @@ Rules:
 - To change something the designer stated, use propose_change. Never record over it.
 - When get_progress lists sources, search them with search_sources before you recommend an answer. Prefer what they say, and name the source in your reason. An answer taken from a source is "proposed", never "stated".
 - When get_progress lists a draft as due, write it with draft, using only what has been decided.
-- When the gate passes, call advance_stage. When it waits for the owner, ask them to approve on the Questions page.
+- When the gate passes, call advance_stage.
 - When get_progress says delegation is on, follow it through every stage without asking, then finish with a short recap of what you chose.
 - Never say something was saved unless a tool just said so. Keep replies short and plain.`;
 }

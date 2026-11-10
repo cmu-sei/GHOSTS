@@ -1,0 +1,293 @@
+// The Guide's reference sections: the journey, the concepts and the glossary.
+// The journey: one line down the side, a node per page, the designer's place ringed.
+.journey {
+  position: relative;
+  margin: 26px 0 0;
+  padding: 0;
+  list-style: none;
+
+  > li {
+    position: relative;
+    padding: 0 0 18px 28px;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 5px;
+      top: 14px;
+      bottom: -2px;
+      width: 1px;
+      background: var(--sb-line-strong);
+    }
+
+    &:last-child::before {
+      display: none;
+    }
+  }
+
+  .node {
+    position: absolute;
+    left: 0;
+    top: 4px;
+    width: 11px;
+    height: 11px;
+    box-sizing: border-box;
+    border-radius: 50%;
+    border: 1.5px solid var(--sb-line-strong);
+    background: var(--sb-surface);
+  }
+
+  .here .node {
+    border-color: var(--sb-person);
+    background: var(--sb-person);
+    box-shadow: 0 0 0 4px var(--sb-person-soft);
+  }
+}
+
+.j-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.j-title {
+  font: 500 16px/1.25 var(--sb-serif);
+  color: var(--sb-ink);
+  text-decoration: none;
+}
+
+a.j-title:hover {
+  color: var(--sb-person);
+}
+
+.here-tag {
+  padding: 3px 7px;
+  border-radius: var(--sb-pill);
+  background: var(--sb-person-soft);
+  font: 500 9.5px/1 var(--sb-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--sb-person);
+}
+
+.j-line {
+  margin: 3px 0 0;
+  color: var(--sb-muted);
+}
+
+.j-stages {
+  margin: 10px 0 2px;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  li {
+    display: grid;
+    grid-template-columns: 18px minmax(0, 1fr);
+    gap: 8px;
+    align-items: center;
+    padding: 5px 8px;
+    border-radius: 6px;
+    font-size: var(--sb-small);
+    color: #3b4356;
+
+    &.here {
+      background: var(--sb-person-soft);
+      color: var(--sb-ink);
+      font-weight: 500;
+    }
+  }
+
+  .sn {
+    display: grid;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+    box-sizing: border-box;
+    border-radius: 50%;
+    border: 1.5px solid var(--sb-line-strong);
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--sb-muted);
+  }
+
+  [data-state='open'] .sn {
+    border-color: var(--sb-person);
+    color: var(--sb-person);
+  }
+
+  [data-state='done'] .sn {
+    border-color: var(--sb-pass);
+    background: var(--sb-pass);
+    color: #ffffff;
+  }
+
+  [data-state='locked'] {
+    color: var(--sb-faint);
+  }
+}
+
+// Concepts: separated by hairlines, not boxed.
+.concepts {
+  margin-top: 14px;
+}
+
+.concept {
+  padding: 18px 0 16px;
+  border-top: 1px solid var(--sb-line);
+  scroll-margin-top: 8px;
+
+  p {
+    margin: 6px 0 0;
+    line-height: 1.6;
+    color: #3b4356;
+  }
+
+  &.focused {
+    animation: focused 1.6s ease-out;
+  }
+}
+
+.results .concept:first-of-type,
+.rule + .concept {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.c-title {
+  margin: 0;
+  font: 500 18px/1.25 var(--sb-serif);
+  color: var(--sb-ink);
+}
+
+.marks {
+  margin: 12px 0 4px;
+  padding: 10px 12px;
+  list-style: none;
+  border-radius: var(--sb-radius);
+  background: var(--sb-canvas);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  li {
+    display: grid;
+    grid-template-columns: 10px 72px minmax(0, 1fr);
+    gap: 10px;
+    align-items: baseline;
+    font-size: var(--sb-small);
+  }
+
+  .mark {
+    width: 9px;
+    height: 9px;
+    box-sizing: border-box;
+    border-radius: 50%;
+    transform: translateY(1px);
+
+    &[data-mark='stated'] {
+      background: var(--sb-person);
+    }
+
+    &[data-mark='proposed'] {
+      background: var(--sb-agent);
+    }
+
+    &[data-mark='open'] {
+      border: 1.5px solid var(--sb-faint);
+    }
+  }
+
+  .mark-name {
+    font-weight: 600;
+    color: var(--sb-ink);
+  }
+
+  .mark-line {
+    color: var(--sb-muted);
+  }
+}
+
+// The glossary: a letter in the margin, terms beside it.
+.letters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin: 18px 0 6px;
+
+  button {
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: none;
+    font: 500 11px var(--sb-mono);
+    color: var(--sb-muted);
+    cursor: pointer;
+
+    &:hover {
+      background: var(--sb-person-soft);
+      color: var(--sb-person);
+    }
+  }
+}
+
+.letter-group {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 6px;
+  padding-top: 16px;
+  border-top: 1px solid var(--sb-line);
+  margin-top: 16px;
+  scroll-margin-top: 8px;
+}
+
+.letter {
+  font: 400 26px/1 var(--sb-serif);
+  color: var(--sb-line-strong);
+}
+
+.terms {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.term {
+  scroll-margin-top: 12px;
+  border-radius: 8px;
+
+  &.focused {
+    animation: focused 1.8s ease-out;
+  }
+
+  dt {
+    font-weight: 600;
+    color: var(--sb-ink);
+  }
+
+  dd {
+    margin: 3px 0 0;
+    line-height: 1.55;
+    color: #3b4356;
+  }
+}
+
+.where {
+  display: block;
+  margin-top: 4px;
+  font-size: 11.5px;
+  color: var(--sb-faint);
+}
+
+@keyframes focused {
+  0%,
+  35% {
+    background: var(--sb-person-soft);
+    box-shadow: 0 0 0 8px var(--sb-person-soft);
+  }
+}

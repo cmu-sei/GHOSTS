@@ -166,17 +166,6 @@ describe("delegation", () => {
     expect(api.answers.size).toBe(0);
   });
 
-  it("approve_stage approves the open stage while delegated, and passes the refusal through when not", async () => {
-    const refused = await run("approve_stage", {});
-    expect(refused.details.code).toBe("AGENT_CANNOT_DECIDE");
-
-    api.delegated = true;
-    const result = await run("approve_stage", {});
-
-    expect(result.isError).toBeFalsy();
-    expect(api.approved).toEqual([0]);
-  });
-
   it("ask_user refuses while delegated: the designer handed the decisions over", async () => {
     api.delegated = true;
 
@@ -293,8 +282,8 @@ describe("the other tools", () => {
     expect(text(result)).toContain("Stage 1 is open");
   });
 
-  it("offers no tool beyond the nine", () => {
+  it("offers no tool beyond the eight", () => {
     expect(createTools(ctx).map(t => t.name).sort()).toEqual(
-      ["advance_stage", "approve_stage", "ask_user", "draft", "get_progress", "propose_change", "record_answer", "record_answers", "search_sources"]);
+      ["advance_stage", "ask_user", "draft", "get_progress", "propose_change", "record_answer", "record_answers", "search_sources"]);
   });
 });

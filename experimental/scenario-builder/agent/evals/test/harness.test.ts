@@ -58,7 +58,6 @@ describe("runOnce", () => {
     expect(o.calls.map(c => c.name)).toEqual(expect.arrayContaining(["get_progress", "ask_user", "advance_stage"]));
     expect(o.doc.stage).toBeGreaterThanOrEqual(1);
     expect(o.prompts[0].text).toBe(fixture.opening);
-    expect(o.prompts.some(p => p.text === "[approved stage 0]")).toBe(true);
     expect(o.metrics.prompts).toBe(o.prompts.length);
     expect(o.metrics.medianFirstTokenMs).not.toBeNull();
   }, 120_000);

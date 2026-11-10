@@ -1,0 +1,49 @@
+@if (!help.welcomeDismissed()) {
+  <section class="welcome" aria-labelledby="welcome-title">
+    <div class="top">
+      <div class="intro">
+        <p class="eyebrow">Welcome</p>
+        <h2 class="headline" id="welcome-title">Design an exercise by answering questions, <em>not by writing documents.</em></h2>
+        <p class="lede">
+          The builder asks for what it needs, stage by stage, from the broad to the specific. The agent beside it recommends
+          an answer for every question. Or just tell it “you decide”, and it builds the whole scenario for you with smart
+          defaults you can change at any time. Nothing starts from a blank page.
+        </p>
+        <div class="end">
+          <button type="button" class="sb-button primary" (click)="help.dismissWelcome()">Got it</button>
+          <button type="button" class="sb-button ghost" (click)="help.show('how')">How it works</button>
+        </div>
+      </div>
+
+      @if (types().length) {
+        <div class="types">
+          <h3 class="types-head">Which Scenario Type?</h3>
+          <p class="types-sub">It sets the stages and questions, and stays with the scenario once it’s made.</p>
+          <ul class="type-list">
+            @for (t of types(); track t.id) {
+              <li class="type">
+                <span class="type-name">{{ t.name }}</span>
+                <span class="type-meta">{{ t.stages.length }} {{ t.stages.length === 1 ? 'stage' : 'stages' }} · {{ questions(t) }} {{ questions(t) === 1 ? 'question' : 'questions' }}{{ t.topology ? ' · Builds a range' : '' }}</span>
+                @if (t.description) {
+                  <span class="type-description">{{ t.description }}</span>
+                } @else if (t.topology) {
+                  <span class="type-description">Includes a Topology page, to build and deploy the range the team works on.</span>
+                }
+              </li>
+            }
+          </ul>
+        </div>
+      }
+    </div>
+
+    <ol class="steps">
+      @for (step of steps; track step.title; let i = $index) {
+        <li>
+          <span class="n">{{ i + 1 < 10 ? '0' + (i + 1) : i + 1 }}</span>
+          <span class="step-title">{{ step.title }}</span>
+          <span class="step-body">{{ step.body }}</span>
+        </li>
+      }
+    </ol>
+  </section>
+}

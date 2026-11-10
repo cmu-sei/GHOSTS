@@ -37,6 +37,11 @@ h1 {
   background: var(--sb-surface);
   border: 1px solid var(--sb-line);
   border-radius: var(--sb-radius);
+
+  // A deployment is built for another target.
+  &.unavailable {
+    opacity: 0.45;
+  }
 }
 
 .monogram {

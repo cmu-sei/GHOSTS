@@ -94,7 +94,7 @@ export class ScenarioTypePageComponent implements OnInit {
   }
 
   protected addStage(): void {
-    this.edit(k => ({ ...k, stages: [...k.stages, { number: k.stages.length, title: 'New Stage', purpose: '', questions: [], gate: {} }] }));
+    this.edit(k => ({ ...k, stages: [...k.stages, { number: k.stages.length, title: 'New Stage', purpose: '', questions: [] }] }));
   }
 
   /** A draft due after a removed stage moves to the stage before it. */

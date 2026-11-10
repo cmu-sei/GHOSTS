@@ -6,9 +6,9 @@ const q = (id: string) => ({ id, text: `${id}?`, why: 'w', answer: 'text' as con
 const scenarioType: ScenarioType = {
   id: 'k', version: '1', name: 'K', drafts: [],
   stages: [
-    { number: 0, title: 'Engagement context', gate: { approval: 'Confirm' }, questions: [q('a'), q('b')] },
-    { number: 1, title: 'Objectives', gate: {}, questions: [q('c'), q('d'), q('e')] },
-    { number: 2, title: 'Premise', gate: {}, questions: [q('f')] }
+    { number: 0, title: 'Engagement context', questions: [q('a'), q('b')] },
+    { number: 1, title: 'Objectives', questions: [q('c'), q('d'), q('e')] },
+    { number: 2, title: 'Premise', questions: [q('f')] }
   ]
 };
 const answered = (id: string, stage: number): AnsweredView =>
@@ -17,7 +17,7 @@ const answered = (id: string, stage: number): AnsweredView =>
 function progress(overrides: Partial<Progress>): Progress {
   return {
     scenarioTypeId: 'k', scenarioTypeVersion: '0.1.0', stage: 1, stageTitle: 'Objectives', lastStage: false,
-    gate: { passes: false, approved: false, findings: [] },
+    gate: { passes: false, findings: [] },
     open: [], answered: [answered('a', 0), answered('b', 0), answered('c', 1)], draftsDue: [], delegated: false, ...overrides
   };
 }
@@ -42,14 +42,6 @@ describe('StageRailComponent', () => {
     expect(rows[0].textContent).toContain('2/2');
     expect(rows[1].textContent).toContain('1/3');
     expect(rows[2].textContent).toContain('Opens after stage 1');
-  });
-
-  it('marks a closed stage whose approval went stale', async () => {
-    const stale = progress({
-      gate: { passes: false, approved: false, findings: [{ severity: 'stop', code: 'APPROVAL_STALE', message: 'Stage 0: …', stage: 0 }] }
-    });
-
-    expect(stages(await render(stale))[0].dataset['state']).toBe('attention');
   });
 
   it('marks the selected stage and emits the one clicked', async () => {

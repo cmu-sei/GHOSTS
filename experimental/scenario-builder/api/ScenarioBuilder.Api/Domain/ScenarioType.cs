@@ -22,17 +22,14 @@ public record ScenarioTypeQuestion(
     string? Label = null,
     string? Default = null);
 
-/// <summary>What closes a stage besides its answers: an approval the owner gives, when named.</summary>
-public record ScenarioTypeGate(string? Approval);
-
 /// <summary>A stage of the interview. <see cref="Purpose"/> says what it settles; the model drafts its questions from it.</summary>
-public record ScenarioTypeStage(int Number, string Title, List<ScenarioTypeQuestion> Questions, ScenarioTypeGate Gate, string? Purpose = null);
+public record ScenarioTypeStage(int Number, string Title, List<ScenarioTypeQuestion> Questions, string? Purpose = null);
 
 /// <summary>Text the agent drafts once every question of <see cref="DueAfterStage"/> is answered.</summary>
 public record DraftedField(string Field, int DueAfterStage, string Path, string? Visibility = null);
 
 /// <summary>
-/// A type of scenario: its stages, questions, gates and drafts, as a <c>*.scenario-type.json</c> file holds it.
+/// A type of scenario: its stages, questions and drafts, as a <c>*.scenario-type.json</c> file holds it.
 /// <see cref="Topology"/> gives its scenarios a Topology page, where the range is built and deployed.
 /// <see cref="Description"/> says what kind of exercise it is.
 /// </summary>
@@ -61,7 +58,7 @@ public partial record ScenarioType(string Id, string Version, string Name, List<
 
     /// <summary>
     /// The scenario type as <paramref name="id"/> at <paramref name="version"/>, with what a person or the model may leave out
-    /// filled in: stages numbered in order, an empty gate, a question's id from its wording, an empty why, a label
+    /// filled in: stages numbered in order, a question's id from its wording, an empty why, a label
     /// from the id, and a place in the document under <c>/scenario</c>.
     /// </summary>
     public ScenarioType Filled(string id, string version)
@@ -87,7 +84,6 @@ public partial record ScenarioType(string Id, string Version, string Name, List<
             Stages = stages.Select((s, i) => s with
             {
                 Number = i,
-                Gate = new ScenarioTypeGate(string.IsNullOrWhiteSpace(s.Gate?.Approval) ? null : s.Gate.Approval.Trim()),
                 Questions = (s.Questions ?? []).Where(q => q is not null).Select(q =>
                 {
                     var questionId = IdFor(q);
@@ -247,8 +243,6 @@ public sealed partial class ScenarioTypeCatalog
                 return $"stages must be numbered 0, 1, 2… in order; found {stage.Number} at position {i}.";
             if (string.IsNullOrWhiteSpace(stage.Title))
                 return $"stage {i} has no title.";
-            if (stage.Gate is null)
-                return $"stage {i} has no gate; use {{}} for none.";
             if (stage.Questions is null || (finished && stage.Questions.Count == 0))
                 return $"stage {i} ({stage.Title}) has no questions.";
             foreach (var q in stage.Questions)

@@ -15,22 +15,10 @@
   background: var(--sb-surface);
   color: var(--sb-muted);
 
-  &[data-state='approval'] {
-    border-color: var(--sb-person);
-    background: var(--sb-person-soft);
-    color: #20357f;
-  }
-
   &[data-state='passes'] {
     border-color: transparent;
     background: var(--sb-pass-soft);
     color: var(--sb-pass);
-  }
-
-  &[data-state='attention'] {
-    border-color: transparent;
-    background: var(--sb-attention-soft);
-    color: var(--sb-attention);
   }
 }
 

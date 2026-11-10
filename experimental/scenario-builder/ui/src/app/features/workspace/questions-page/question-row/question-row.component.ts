@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, input, output, signal } f
 import { DatePipe } from '@angular/common';
 import { AnsweredView, AnswerValue, ScenarioTypeQuestion } from '../../../../core/models/builder.model';
 import { spaced } from '../../../../shared/labels/question-label';
+import { TermTextComponent } from '../../../../shared/help/term-text/term-text.component';
 
 /**
  * One design question as a ledger row: its short label and full text, its answer, and who gave it.
@@ -11,7 +12,7 @@ import { spaced } from '../../../../shared/labels/question-label';
 @Component({
   selector: 'app-question-row',
   standalone: true,
-  imports: [DatePipe],
+  imports: [DatePipe, TermTextComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './question-row.component.html',
   styleUrls: ['./question-row.component.scss']
@@ -25,6 +26,7 @@ export class QuestionRowComponent {
 
   protected readonly editing = signal(false);
   protected readonly draft = signal('');
+  protected readonly whyShown = signal(false);
 
   protected readonly status = computed(() => {
     const a = this.answer();
