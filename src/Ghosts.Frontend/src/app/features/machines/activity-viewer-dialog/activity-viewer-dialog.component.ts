@@ -40,19 +40,25 @@ import { Machine } from '../../../core/models';
             <ng-container matColumnDef="timestamp">
               <th mat-header-cell *matHeaderCellDef>Timestamp</th>
               <td mat-cell *matCellDef="let activity">
-                {{ activity.timestamp | date:'short' }}
+                {{ activity.createdUtc | date:'short' }}
               </td>
             </ng-container>
 
             <ng-container matColumnDef="type">
               <th mat-header-cell *matHeaderCellDef>Type</th>
-              <td mat-cell *matCellDef="let activity">{{ activity.type || 'N/A' }}</td>
+              <td mat-cell *matCellDef="let activity">{{ activity.handler || 'N/A' }}</td>
             </ng-container>
 
             <ng-container matColumnDef="details">
               <th mat-header-cell *matHeaderCellDef>Details</th>
               <td mat-cell *matCellDef="let activity">
-                {{ activity.details || activity.description || 'N/A' }}
+                <div>{{ activity.command || 'N/A' }}</div>
+                @if (activity.commandArg) {
+                  <div>{{ activity.commandArg }}</div>
+                }
+                @if (activity.result) {
+                  <div>{{ activity.result }}</div>
+                }
               </td>
             </ng-container>
 
@@ -69,7 +75,7 @@ import { Machine } from '../../../core/models';
   styles: [`
     mat-dialog-content {
       min-height: 300px;
-      min-width: 600px;
+      min-width: 0;
       max-height: 70vh;
       overflow: auto;
     }
