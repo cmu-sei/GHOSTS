@@ -414,7 +414,8 @@ export class MachinesListComponent implements OnInit {
 
   protected viewActivity(machine: Machine): void {
     this.dialog.open(ActivityViewerDialogComponent, {
-      width: '800px',
+      width: '1200px',
+      maxWidth: '95vw',
       data: { machine },
       autoFocus: false,
       restoreFocus: false
