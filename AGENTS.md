@@ -14,22 +14,6 @@
 - Do not delete unrelated dead code. Mention it instead.
 - Rverify that you followed ALL of the CLAUDE.md rules before build.
 
-## Repo Shape
-
-GHOSTS is a monorepo for realistic user/NPC behavior simulation.
-
-Core components:
-- `src/Ghosts.Api/`: .NET 11 API/server
-- `src/Ghosts.Domain/`: Shared timeline/domain/handler models
-- `src/Ghosts.Client.Windows/`: .NET Framework Windows client
-- `src/Ghosts.Client.Universal/`: Cross-platform client
-- `src/Ghosts.Client.Lite/`: Lightweight client
-- `src/Ghosts.Frontend/`: Angular UI
-- `src/Ghosts.Animator/`: NPC persona generation
-- `src/Ghosts.Pandora/`: Content generation
-- `src/apphost/`: Aspire host
-- `docs/`: MkDocs documentation
-
 ## Architecture Invariants
 
 - Timelines are the core execution model: `Timeline -> TimeLineHandlers -> TimeLineEvents`.
@@ -42,10 +26,7 @@ Core components:
 
 ## Development
 - Simplicity, concision, and readability matter much more than flexibility, abstractions, hypothetical reuse, etc.
-- Avoid over-engineering or adding unnecessary features.
-- Define clear success criteria.
 - If something is unclear or confusing, stop and ask questions. Never assume.
-- Edit only what you must. Don't needlessly alter adjacent code.
 
 ## Verification
 
