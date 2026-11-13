@@ -32,7 +32,7 @@ The model names exposed depend on the active profiles:
 
 | Profile | Model names |
 |---------|-------------|
-| `aws` | `aws/fable-5.1`, `aws/opus-5.5`, `aws/sonnet-5`, `aws/gpt-6-sol`, `aws/gpt-6-luna`, `aws/gpt-6-astra`, `aws/gpt-5.6-terra`, `aws/grok-4.6` |
+| `aws` | `aws/fable-5.2`, `aws/opus-5.5`, `aws/sonnet-5`, `aws/gpt-6-sol`, `aws/gpt-6-luna`, `aws/gpt-6-astra`, `aws/gpt-5.6-terra`, `aws/grok-4.6` |
 | `awsgov` | `awsgov/fable-5.1`, `awsgov/opus-5.5`, `awsgov/sonnet-5`, `awsgov/grok-4.6` |
 | `opal` | `opal/gpt-oss-120b`, `opal/gemma-4-26b` |
 | `etc` | `etc/gpt-oss-120b` |
@@ -110,7 +110,7 @@ Nothing is written to a project-level `.claude/settings.json`; if you create one
 
 ### Pinned models
 
-Which Bedrock model each of `opus`/`sonnet`/`haiku` resolves to is defined per profile in `.devcontainer/profiles/<profile>/claude.json`, alongside the equivalent files for the other agents (`litellm.json`, `opencode.json`, `models.json`, `config.toml`, `grok.toml`). On every container create, `postcreate.sh` merges the configured profiles' entries into the `env` block of the **user-level** `~/.claude/settings.json`; the `/model` picker is left stock, so every family listed there — Fable included — is offered. Because the fragment is tracked in git and re-read on every create, a model bump reaches you on your next rebuild after a `git pull`. LiteLLM, OpenCode, and Pi offer the same three families (Fable 5.1, Opus 5.5, Sonnet 5) in both Bedrock profiles; OpenCode gets the commercial models from its built-in catalog, while the other entries come from the sibling files in each profile directory. They also offer xAI's Grok 4.6 where supported, which is the model behind the Grok CLI (see below); Pi's picker shows only the profile's listed models, so Haiku is not offered there.
+Which Bedrock model each of `opus`/`sonnet`/`haiku` resolves to is defined per profile in `.devcontainer/profiles/<profile>/claude.json`, alongside the equivalent files for the other agents (`litellm.json`, `opencode.json`, `models.json`, `config.toml`, `grok.toml`). On every container create, `postcreate.sh` merges the configured profiles' entries into the `env` block of the **user-level** `~/.claude/settings.json`; the `/model` picker is left stock, so every family listed there — Fable included — is offered. Because the fragment is tracked in git and re-read on every create, a model bump reaches you on your next rebuild after a `git pull`. LiteLLM, OpenCode, and Pi offer the same three families (Fable 5.2, Opus 5.5, Sonnet 5) in both Bedrock profiles; OpenCode gets the commercial models from its built-in catalog, while the other entries come from the sibling files in each profile directory. They also offer xAI's Grok 4.6 where supported, which is the model behind the Grok CLI (see below); Pi's picker shows only the profile's listed models, so Haiku is not offered there.
 
 ### Grok CLI
 

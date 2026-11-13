@@ -1,9 +1,9 @@
 {
   "model_list": [
     {
-      "model_name": "aws/fable-5.1",
+      "model_name": "aws/fable-5.2",
       "litellm_params": {
-        "model": "bedrock/us.anthropic.claude-fable-5-1",
+        "model": "bedrock/us.anthropic.claude-fable-5-2",
         "aws_region_name": "us-east-1",
         "max_tokens": 32768,
         "drop_params": true
