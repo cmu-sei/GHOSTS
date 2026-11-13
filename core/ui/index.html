@@ -1884,6 +1884,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#objectives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Objectives
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#machines" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1939,10 +1950,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#operations-dashboard" class="md-nav__link">
+  <a href="#executions" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Operations Dashboard
+        Executions
       
     </span>
   </a>
@@ -1950,10 +1961,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#belief-explorer" class="md-nav__link">
+  <a href="#assessment" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Belief Explorer
+        Assessment
       
     </span>
   </a>
@@ -1961,10 +1972,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#rangerai-n8n-workflow-scheduling" class="md-nav__link">
+  <a href="#activities-and-social" class="md-nav__link">
     <span class="md-ellipsis">
       
-        RangerAI / n8n Workflow Scheduling
+        Activities and Social
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#workflows-n8n" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Workflows (n8n)
       
     </span>
   </a>
@@ -1981,6 +2003,17 @@
     <span class="md-ellipsis">
       
         Real-Time Updates
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#appearance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Appearance
       
     </span>
   </a>
@@ -2331,7 +2364,7 @@
 
 
 <h1 id="ghosts-frontend">GHOSTS Frontend<a class="headerlink" href="#ghosts-frontend" title="Permanent link">&para;</a></h1>
-<p>The GHOSTS Frontend is an Angular 20 single-page application that provides a management interface for the GHOSTS framework. It communicates with the GHOSTS API via REST and SignalR WebSocket.</p>
+<p>The GHOSTS Frontend is an Angular 22 single-page application that provides a management interface for the GHOSTS framework. It communicates with the GHOSTS API via REST and SignalR WebSocket.</p>
 <p><strong>Docker image:</strong> <code>dustinupdyke/ghosts-frontend</code> (port 4200 / 80 inside container)
 <strong>Source:</strong> <code>src/Ghosts.Frontend/</code></p>
 <hr />
@@ -2346,6 +2379,7 @@
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">API_URL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://YOUR-API-HOST:5000/api</span>
 <span class="w">    </span><span class="nt">N8N_API_URL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://YOUR-N8N-HOST:5678</span>
+<span class="w">    </span><span class="nt">GRAFANA_URL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://YOUR-GRAFANA-HOST:3000</span>
 </code></pre></div>
 <h3 id="local-development">Local Development<a class="headerlink" href="#local-development" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>src/Ghosts.Frontend
@@ -2357,11 +2391,21 @@ npm<span class="w"> </span><span class="nb">test</span><span class="w">         
 <p>Edit <code>src/assets/config.json</code> to point at your API:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">"apiUrl"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost:5000/api"</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"n8nApiUrl"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost:5678"</span>
+<span class="w">  </span><span class="nt">"n8nApiUrl"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost:5678"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"grafanaUrl"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost:3000"</span>
 <span class="p">}</span>
 </code></pre></div>
 <hr />
 <h2 id="features">Features<a class="headerlink" href="#features" title="Permanent link">&para;</a></h2>
+<p>The top bar holds Objectives, Scenarios, Executions and Assessment on the left, and NPCs, Timelines and Workflows on the right. NPCs and Timelines each have a dropdown for their related pages.</p>
+<h3 id="objectives">Objectives<a class="headerlink" href="#objectives" title="Permanent link">&para;</a></h3>
+<p>Define training objectives and track them across runs:</p>
+<ul>
+<li>Types: MET, JMET, Rehearsal, Onboarding, Tool Training</li>
+<li>Priority, success criteria, assignee, and nested sub-tasks</li>
+<li>Status: Draft, Active, Achieved, Partially Met, Not Met</li>
+<li>Score each task Trained, Practiced, or Untrained</li>
+</ul>
 <h3 id="machines">Machines<a class="headerlink" href="#machines" title="Permanent link">&para;</a></h3>
 <p>View all registered GHOSTS client machines. From the machine list you can:</p>
 <ul>
@@ -2395,26 +2439,26 @@ npm<span class="w"> </span><span class="nb">test</span><span class="w">         
 <li>View and assign NPC actions via the NPC action menu</li>
 </ul>
 <h3 id="scenarios">Scenarios<a class="headerlink" href="#scenarios" title="Permanent link">&para;</a></h3>
-<p>Plan and track training/exercise scenarios:</p>
+<p>Plan training and exercise scenarios. Each scenario has tabs for Scenario Parameters, Technical Environment, Simulation Mechanics, Timeline, Document, and Entities &amp; Graph. Scenarios can also be authored with the <a href="../scenario-builder/">Scenario Builder</a>.</p>
+<h3 id="executions">Executions<a class="headerlink" href="#executions" title="Permanent link">&para;</a></h3>
+<p>Run a scenario and follow it live:</p>
 <ul>
-<li>Create scenarios with associated parameters and injects</li>
-<li>Run scenarios and monitor execution events in real time</li>
-<li>Review execution history and metric snapshots</li>
+<li>Create an execution from a scenario</li>
+<li>Start, pause, stop, or cancel a run</li>
+<li>Tabs for Timeline, Overview, Events, Metrics, NPCs, and Terrain</li>
+<li>Set and clear flags; mark manual timeline items complete</li>
+<li>Open the run on a full-screen map</li>
 </ul>
-<h3 id="operations-dashboard">Operations Dashboard<a class="headerlink" href="#operations-dashboard" title="Permanent link">&para;</a></h3>
-<p>Real-time overview showing:</p>
+<h3 id="assessment">Assessment<a class="headerlink" href="#assessment" title="Permanent link">&para;</a></h3>
+<p>Embedded Grafana panels for all runs, plus run-specific panels when you pick a run.</p>
+<h3 id="activities-and-social">Activities and Social<a class="headerlink" href="#activities-and-social" title="Permanent link">&para;</a></h3>
+<p>Under the NPCs menu:</p>
 <ul>
-<li>Connected machine count and status</li>
-<li>Recent timeline execution activity</li>
+<li><strong>Activities Overview</strong>: NPC activity list</li>
+<li><strong>Live Network</strong>: live graph of NPC activity, opened in its own tab</li>
+<li><strong>Social</strong>: each NPC's knowledge topics, preferences, and connections</li>
 </ul>
-<h3 id="belief-explorer">Belief Explorer<a class="headerlink" href="#belief-explorer" title="Permanent link">&para;</a></h3>
-<p>Inspect individual NPC belief states:</p>
-<ul>
-<li>Browse beliefs by NPC</li>
-<li>View belief values and how they have changed over simulation steps</li>
-<li>Filter by topic or time range</li>
-</ul>
-<h3 id="rangerai-n8n-workflow-scheduling">RangerAI / n8n Workflow Scheduling<a class="headerlink" href="#rangerai-n8n-workflow-scheduling" title="Permanent link">&para;</a></h3>
+<h3 id="workflows-n8n">Workflows (n8n)<a class="headerlink" href="#workflows-n8n" title="Permanent link">&para;</a></h3>
 <p>Schedule n8n webhook-triggered workflows on a cron schedule:</p>
 <ul>
 <li>Browse active n8n workflows fetched from the n8n API</li>
@@ -2432,6 +2476,10 @@ npm<span class="w"> </span><span class="nb">test</span><span class="w">         
 <li>Workflow execution results from the scheduler</li>
 <li>Machine connectivity events</li>
 </ul>
+<p>The execution pages connect to <code>/api/hubs/execution?executionId=…</code>, and the Scenario Builder connects to <code>/api/hubs/scenarioBuilder?scenarioId=…</code>.</p>
+<hr />
+<h2 id="appearance">Appearance<a class="headerlink" href="#appearance" title="Permanent link">&para;</a></h2>
+<p>The UI has light and dark themes. It follows the operating system setting until you use the toggle at the right of the top bar; that choice is saved in the browser. Colours are CSS custom properties (<code>--gh-*</code>) defined in <code>src/styles.scss</code>, and Angular Material is themed from them.</p>
 <hr />
 <h2 id="architecture-notes">Architecture Notes<a class="headerlink" href="#architecture-notes" title="Permanent link">&para;</a></h2>
 <ul>
