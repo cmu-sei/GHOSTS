@@ -209,6 +209,6 @@ export class MachineGroupsListComponent implements OnInit {
   }
 
   protected getMachineCount(group: MachineGroup): number {
-    return group.machines?.length ?? 0;
+    return group.groupMachines?.length ?? 0;
   }
 }

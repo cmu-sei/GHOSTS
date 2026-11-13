@@ -4,6 +4,7 @@ export interface MachineGroup {
   id: string;
   name: string;
   machines?: Machine[];
+  groupMachines?: { id: number; groupId: number; machineId: string }[];
   groupIds?: string[];
   createdUtc?: string;
 }
