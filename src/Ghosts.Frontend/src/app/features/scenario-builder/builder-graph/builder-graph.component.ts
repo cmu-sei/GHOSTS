@@ -233,7 +233,7 @@ export class BuilderGraphComponent implements OnInit, OnDestroy {
       .append('path')
       .attr('d', 'M 20 0 L 0 0 0 20')
       .attr('fill', 'none')
-      .attr('stroke', '#f0f0f0')
+      .style('stroke', 'var(--gh-line)')
       .attr('stroke-width', 0.5);
 
     // Add background with grid
@@ -269,7 +269,7 @@ export class BuilderGraphComponent implements OnInit, OnDestroy {
       .attr('markerHeight', 8)
       .append('path')
       .attr('d', 'M 0,-5 L 10,0 L 0,5')
-      .attr('fill', '#666666')
+      .style('fill', 'var(--gh-muted)')
       .attr('fill-opacity', 0.4);
 
     // Prepare data
@@ -373,7 +373,7 @@ export class BuilderGraphComponent implements OnInit, OnDestroy {
     const linkEnter = link
       .enter()
       .append('line')
-      .attr('stroke', '#666666')
+      .style('stroke', 'var(--gh-muted)')
       .attr('stroke-width', (d) => Math.max(1, (d.edge.weight || 1) * 0.8))
       .attr('stroke-dasharray', (d) => (d.edge.confidence < 0.5 ? '3,3' : '0'))
       .attr('stroke-opacity', 0.4)
@@ -394,7 +394,7 @@ export class BuilderGraphComponent implements OnInit, OnDestroy {
       .append('circle')
       .attr('r', (d) => d.radius)
       .attr('fill', (d) => this.entityColors[d.entity.entityType] || '#9E9E9E')
-      .attr('stroke', '#fff')
+      .style('stroke', 'var(--gh-surface)')
       .attr('stroke-width', 1.5)
       .attr('stroke-opacity', 0.8)
       .style('cursor', 'pointer');
@@ -417,7 +417,7 @@ export class BuilderGraphComponent implements OnInit, OnDestroy {
       .attr('text-anchor', 'middle')
       .attr('dy', (d) => d.radius + 12)
       .attr('font-size', 9)
-      .attr('fill', '#333333')
+      .style('fill', 'var(--gh-ink)')
       .style('pointer-events', 'none');
 
     const labelMerge = labelEnter.merge(label);

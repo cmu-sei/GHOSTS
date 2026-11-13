@@ -205,7 +205,7 @@ export class ActivitiesDynamicComponent implements OnInit, OnDestroy {
       .data(this.nodes)
       .join('text')
       .text(d => d.name)
-      .attr('fill', 'black')
+      .style('fill', 'var(--gh-ink)')
       .attr('text-anchor', 'middle')
       .attr('dy', 30)
       .attr('font-size', 10)
@@ -417,22 +417,22 @@ export class ActivitiesDynamicComponent implements OnInit, OnDestroy {
 
     let html = '';
     if (typeof message === 'object' && message !== null) {
-      html = `<div style='color:#000;'>Used <strong>${message.handler}</strong> to ${message.action}<br/>because ${message.reasoning}</div>`;
+      html = `<div style='color:var(--gh-ink);'>Used <strong>${message.handler}</strong> to ${message.action}<br/>because ${message.reasoning}</div>`;
       if (message.sentiment) {
         this.updateMood(message.sentiment, 1);
       }
     } else {
-      html = `<div style='color:#000;'>${message}</div>`;
+      html = `<div style='color:var(--gh-ink);'>${message}</div>`;
     }
 
     box.append('xhtml:div')
-      .style('color', '#000')
-      .style('background-color', '#fff')
-      .style('border', '1px solid silver')
+      .style('color', 'var(--gh-ink)')
+      .style('background-color', 'var(--gh-surface)')
+      .style('border', '1px solid var(--gh-line-strong)')
       .style('border-radius', '8px')
       .style('padding', '6px 10px')
       .style('font-size', '12px')
-      .style('box-shadow', '2px 2px 6px rgba(0,0,0,0.15)')
+      .style('box-shadow', '2px 2px 6px rgb(var(--gh-shadow) / 0.15)')
       .style('width', '268px')
       .style('max-width', '268px')
       .style('max-height', '188px')
@@ -441,7 +441,7 @@ export class ActivitiesDynamicComponent implements OnInit, OnDestroy {
       .style('word-break', 'break-word')
       .style('white-space', 'normal')
       .style('line-height', '1.4')
-      .style('font-family', 'monospace')
+      .style('font-family', 'var(--gh-mono)')
       .style('overflow-y', 'auto')
       .html(html);
 

@@ -12,11 +12,11 @@
 
   .subtitle {
     margin: 4px 0 0;
-    color: #999;
+    color: var(--gh-faint);
     font-size: 0.8rem;
 
     a {
-      color: #666;
+      color: var(--gh-muted);
     }
   }
 }
@@ -26,7 +26,7 @@
   align-items: center;
   gap: 8px;
   font-size: 0.875rem;
-  color: #666;
+  color: var(--gh-muted);
 
   .run-picker {
     min-width: 280px;
@@ -36,7 +36,7 @@
 .section-heading {
   font-size: 1rem;
   font-weight: 500;
-  color: #495057;
+  color: var(--gh-body);
   margin: 0 0 12px;
 }
 
@@ -48,8 +48,8 @@
 
 .panel-wrapper {
   grid-column: span 3;
-  background: white;
-  border: 1px solid #e0e0e0;
+  background: var(--gh-surface);
+  border: 1px solid var(--gh-line);
   border-radius: 8px;
   overflow: hidden;
 

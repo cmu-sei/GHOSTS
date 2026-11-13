@@ -94,7 +94,7 @@ export interface GenerateNpcsConfig {
 
     .description {
       margin: 0 0 24px 0;
-      color: rgba(0, 0, 0, 0.6);
+      color: var(--gh-muted);
     }
 
     .full-width {
@@ -108,9 +108,9 @@ export interface GenerateNpcsConfig {
       gap: 8px;
       padding: 12px;
       margin-bottom: 16px;
-      background: #ffebee;
+      background: var(--gh-bad-soft);
       border-radius: 4px;
-      color: #c62828;
+      color: var(--gh-bad);
 
       i {
         font-size: 18px;

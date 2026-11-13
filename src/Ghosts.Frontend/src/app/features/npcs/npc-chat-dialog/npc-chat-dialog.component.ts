@@ -153,7 +153,7 @@ interface ChatEntry extends NpcChatMessage {
       display: flex;
       align-items: center;
       gap: 8px;
-      color: #f44336;
+      color: var(--gh-bad);
       font-size: 13px;
     }
 
@@ -168,7 +168,7 @@ interface ChatEntry extends NpcChatMessage {
     }
 
     .hint {
-      color: rgba(0, 0, 0, 0.6);
+      color: var(--gh-muted);
       font-size: 13px;
       line-height: 1.5;
       margin: 0;
@@ -177,21 +177,21 @@ interface ChatEntry extends NpcChatMessage {
     .bubble {
       align-self: flex-start;
       max-width: 85%;
-      background: #f1f3f6;
+      background: var(--gh-canvas);
       border-radius: 10px;
       padding: 8px 12px;
     }
 
     .bubble.user {
       align-self: flex-end;
-      background: #e3f0ff;
+      background: var(--gh-accent-soft);
     }
 
     .bubble.pending {
       display: flex;
       align-items: center;
       gap: 8px;
-      color: rgba(0, 0, 0, 0.6);
+      color: var(--gh-muted);
       font-size: 13px;
     }
 
@@ -200,7 +200,7 @@ interface ChatEntry extends NpcChatMessage {
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.04em;
-      color: rgba(0, 0, 0, 0.5);
+      color: var(--gh-muted);
       margin-bottom: 2px;
     }
 
@@ -217,18 +217,18 @@ interface ChatEntry extends NpcChatMessage {
       flex-wrap: wrap;
       margin-top: 8px;
       padding-top: 6px;
-      border-top: 1px solid rgba(0, 0, 0, 0.08);
-      font-family: 'Fira Code', 'Menlo', monospace;
+      border-top: 1px solid var(--gh-line);
+      font-family: var(--gh-mono);
       font-size: 11px;
-      color: #2e7d32;
+      color: var(--gh-ok);
     }
 
     .action.failed {
-      color: #b71c1c;
+      color: var(--gh-bad);
     }
 
     .action .detail {
-      color: rgba(0, 0, 0, 0.5);
+      color: var(--gh-muted);
     }
 
     mat-dialog-actions {

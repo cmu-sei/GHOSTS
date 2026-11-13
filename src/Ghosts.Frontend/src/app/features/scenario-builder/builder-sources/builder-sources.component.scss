@@ -8,7 +8,7 @@
   }
 
   .subtitle {
-    color: #666;
+    color: var(--gh-muted);
     margin: 0 0 2rem 0;
   }
 }
@@ -54,7 +54,7 @@
 }
 
 .file-drop-zone {
-  border: 2px dashed #ccc;
+  border: 2px dashed var(--gh-line-strong);
   border-radius: 8px;
   padding: 2rem;
   text-align: center;
@@ -66,30 +66,30 @@
   justify-content: center;
 
   &.drag-over {
-    border-color: #3f51b5;
-    background-color: #f0f0f0;
+    border-color: var(--gh-accent);
+    background-color: var(--gh-accent-soft);
   }
 
   .upload-icon {
     font-size: 48px;
     width: 48px;
     height: 48px;
-    color: #999;
+    color: var(--gh-faint);
   }
 
   p {
     margin: 0.5rem 0;
-    color: #666;
+    color: var(--gh-muted);
   }
 
   .or-text {
     font-size: 0.9rem;
-    color: #999;
+    color: var(--gh-faint);
   }
 
   .selected-file {
     margin-top: 1rem;
-    color: #3f51b5;
+    color: var(--gh-accent);
     font-weight: 500;
   }
 }
@@ -106,7 +106,7 @@
   .empty-state {
     text-align: center;
     padding: 3rem;
-    color: #999;
+    color: var(--gh-faint);
 
     mat-icon {
       font-size: 64px;
@@ -125,11 +125,11 @@
   }
 
   .extracted-all {
-    color: #2e7d32;
+    color: var(--gh-ok);
   }
 
   .extracted-none {
-    color: #999;
+    color: var(--gh-faint);
   }
 }
 
@@ -137,7 +137,7 @@
   margin-top: 2rem;
 
   .subtitle {
-    color: #666;
+    color: var(--gh-muted);
     margin: 0 0 1rem;
   }
 
@@ -157,12 +157,12 @@
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    color: #666;
+    color: var(--gh-muted);
     font-size: 0.9rem;
   }
 
   .extraction-errors {
-    color: #c62828;
+    color: var(--gh-bad);
     font-size: 0.85rem;
     margin: 0 0 1.5rem;
   }
@@ -177,7 +177,7 @@
       position: sticky;
       top: 0;
       z-index: 1;
-      background: #fff;
+      background: var(--gh-surface);
     }
   }
 
@@ -196,7 +196,7 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     font-size: 0.8rem;
-    color: #1976d2;
+    color: var(--gh-accent);
   }
 
   .text-preview {
@@ -205,6 +205,6 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     font-size: 0.8rem;
-    color: #555;
+    color: var(--gh-body);
   }
 }

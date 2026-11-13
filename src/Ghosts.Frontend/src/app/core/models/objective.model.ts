@@ -55,15 +55,15 @@ export const OBJECTIVE_TYPES: { value: ObjectiveType; label: string; description
 ];
 
 export const OBJECTIVE_STATUSES: { value: ObjectiveStatus; label: string; color: string }[] = [
-  { value: 'Draft', label: 'Draft', color: '#9e9e9e' },
-  { value: 'Active', label: 'Active', color: '#1976d2' },
-  { value: 'Achieved', label: 'Achieved', color: '#2e7d32' },
-  { value: 'PartiallyMet', label: 'Partially Met', color: '#f57c00' },
-  { value: 'NotMet', label: 'Not Met', color: '#c62828' }
+  { value: 'Draft', label: 'Draft', color: 'var(--gh-muted)' },
+  { value: 'Active', label: 'Active', color: 'var(--gh-accent)' },
+  { value: 'Achieved', label: 'Achieved', color: 'var(--gh-ok)' },
+  { value: 'PartiallyMet', label: 'Partially Met', color: 'var(--gh-warn)' },
+  { value: 'NotMet', label: 'Not Met', color: 'var(--gh-bad)' }
 ];
 
 export const TASK_SCORES: { value: TaskScore; label: string; color: string }[] = [
-  { value: 'T', label: 'Trained', color: '#2e7d32' },
-  { value: 'P', label: 'Practiced', color: '#f57c00' },
-  { value: 'U', label: 'Untrained', color: '#c62828' }
+  { value: 'T', label: 'Trained', color: 'var(--gh-ok)' },
+  { value: 'P', label: 'Practiced', color: 'var(--gh-warn)' },
+  { value: 'U', label: 'Untrained', color: 'var(--gh-bad)' }
 ];

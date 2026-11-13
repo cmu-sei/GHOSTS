@@ -61,7 +61,7 @@ import { Machine } from '../../../core/models';
       align-items: center;
       justify-content: center;
       padding: 40px 20px;
-      color: rgba(0, 0, 0, 0.6);
+      color: var(--gh-muted);
     }
 
     .loading {
@@ -81,7 +81,7 @@ import { Machine } from '../../../core/models';
 
     .timeline-handlers {
       font-size: 12px;
-      color: rgba(0, 0, 0, 0.54);
+      color: var(--gh-muted);
     }
 
     mat-dialog-actions {

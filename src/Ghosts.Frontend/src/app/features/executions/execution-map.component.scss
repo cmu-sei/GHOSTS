@@ -1,14 +1,14 @@
 // ─── Design tokens ───
-$glass: rgba(15, 23, 42, 0.82);
-$glass-border: rgba(100, 116, 139, 0.25);
-$glass-hover: rgba(30, 41, 59, 0.9);
+$glass: rgba(21, 27, 34, 0.82);
+$glass-border: rgba(95, 107, 122, 0.25);
+$glass-hover: rgba(27, 34, 43, 0.9);
 $blur: 16px;
 $radius: 12px;
 $radius-sm: 8px;
-$text: #e2e8f0;
-$text-dim: #94a3b8;
-$text-mute: #64748b;
-$accent: #38bdf8;
+$text: #d8dee6;
+$text-dim: #8a96a6;
+$text-mute: #5f6b7a;
+$accent: #4ea1ff;
 $green: #22c55e;
 $red: #ef4444;
 $orange: #f59e0b;
@@ -28,10 +28,10 @@ $transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  background: #0f172a;
+  background: #0f1318;
   // Escape any parent padding/chrome
   margin: -20px;
-  margin-top: -84px;
+  margin-top: -69px;
 }
 
 .map-canvas {
@@ -46,10 +46,10 @@ $transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   position: absolute;
   z-index: 15;
   pointer-events: none;
-  background: rgba(15, 23, 42, 0.92);
+  background: rgba(21, 27, 34, 0.92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(100, 116, 139, 0.3);
+  border: 1px solid rgba(95, 107, 122, 0.3);
   border-radius: 10px;
   padding: 8px 14px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.55);
@@ -90,7 +90,7 @@ $transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid $glass-border;
   border-radius: 999px;
   color: $text;
-  font-family: Inter, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--gh-font);
   font-size: 13px;
   font-weight: 500;
   text-decoration: none;
@@ -103,7 +103,7 @@ $transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
     background: $glass-hover;
-    border-color: rgba(148, 163, 184, 0.35);
+    border-color: rgba(138, 150, 166, 0.35);
     color: $text;
   }
 
@@ -144,8 +144,8 @@ $transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   transition: border-color $transition, box-shadow $transition;
 
   &:focus-within {
-    border-color: rgba(56, 189, 248, 0.45);
-    box-shadow: $shadow, 0 0 0 3px rgba(56, 189, 248, 0.08);
+    border-color: rgba(78, 161, 255, 0.45);
+    box-shadow: $shadow, 0 0 0 3px rgba(78, 161, 255, 0.08);
   }
 
   > i {
@@ -241,7 +241,7 @@ $transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   &.st-running { color: $green; border-color: rgba(34, 197, 94, 0.3); }
   &.st-created { color: $text-mute; }
   &.st-paused { color: $orange; border-color: rgba(245, 158, 11, 0.3); }
-  &.st-completed { color: $accent; border-color: rgba(56, 189, 248, 0.3); }
+  &.st-completed { color: $accent; border-color: rgba(78, 161, 255, 0.3); }
   &.st-failed { color: $red; border-color: rgba(239, 68, 68, 0.3); }
 }
 
@@ -264,7 +264,7 @@ $transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   &:hover {
     background: $glass-hover;
     color: $text;
-    border-color: rgba(148, 163, 184, 0.35);
+    border-color: rgba(138, 150, 166, 0.35);
   }
 
   &.on {
@@ -317,7 +317,7 @@ $transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   height: 18px;
   border-radius: 50%;
   background: $accent;
-  color: #0f172a;
+  color: #0f1318;
   font-size: 10px;
   font-weight: 700;
   display: grid;
@@ -368,7 +368,7 @@ $transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   padding: 0 12px 12px;
 
   &::-webkit-scrollbar { width: 4px; }
-  &::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.2); border-radius: 2px; }
+  &::-webkit-scrollbar-thumb { background: rgba(138, 150, 166, 0.2); border-radius: 2px; }
 }
 
 // ─── Layer rows ───
@@ -411,7 +411,7 @@ $transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   width: 32px;
   height: 18px;
   border-radius: 9px;
-  background: rgba(100, 116, 139, 0.3);
+  background: rgba(95, 107, 122, 0.3);
   position: relative;
   cursor: pointer;
   transition: background $transition;
@@ -424,12 +424,12 @@ $transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     width: 14px;
     height: 14px;
     border-radius: 50%;
-    background: #475569;
+    background: #5f6b7a;
     transition: all $transition;
   }
 
   &.on {
-    background: rgba(56, 189, 248, 0.3);
+    background: rgba(78, 161, 255, 0.3);
     .toggle-thumb {
       left: 16px;
       background: $accent;
@@ -441,7 +441,7 @@ $transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 .filter-section {
   margin-top: 8px;
   padding-top: 8px;
-  border-top: 1px solid rgba(100, 116, 139, 0.12);
+  border-top: 1px solid rgba(95, 107, 122, 0.12);
 }
 
 .filter-label {
@@ -458,7 +458,7 @@ select {
   width: 100%;
   height: 30px;
   background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(100, 116, 139, 0.2);
+  border: 1px solid rgba(95, 107, 122, 0.2);
   border-radius: 6px;
   color: $text;
   font-size: 12px;
@@ -467,15 +467,15 @@ select {
   appearance: none;
   cursor: pointer;
 
-  option { background: #1e293b; }
-  &:focus { border-color: rgba(56, 189, 248, 0.4); }
+  option { background: #1b222b; }
+  &:focus { border-color: rgba(78, 161, 255, 0.4); }
 }
 
 // ─── Legend ───
 .legend-section {
   margin-top: 10px;
   padding-top: 10px;
-  border-top: 1px solid rgba(100, 116, 139, 0.12);
+  border-top: 1px solid rgba(95, 107, 122, 0.12);
 }
 
 .legend-title {
@@ -574,7 +574,7 @@ select {
 .tl-bar {
   flex: 1;
   min-height: 2px;
-  background: rgba(148, 163, 184, 0.12);
+  background: rgba(138, 150, 166, 0.12);
   border-radius: 1px 1px 0 0;
   transition: background 0.2s;
 
@@ -640,7 +640,7 @@ select {
   align-items: center;
   gap: 10px;
   padding: 14px 16px;
-  border-bottom: 1px solid rgba(100, 116, 139, 0.15);
+  border-bottom: 1px solid rgba(95, 107, 122, 0.15);
   flex-shrink: 0;
 }
 
@@ -683,7 +683,7 @@ select {
   padding: 0 16px 16px;
 
   &::-webkit-scrollbar { width: 4px; }
-  &::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.2); border-radius: 2px; }
+  &::-webkit-scrollbar-thumb { background: rgba(138, 150, 166, 0.2); border-radius: 2px; }
 }
 
 .dc-stats {
@@ -701,7 +701,7 @@ select {
 }
 
 .stat-k { color: $text-mute; }
-.stat-v { color: $text; &.mono { font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 12px; } }
+.stat-v { color: $text; &.mono { font-family: var(--gh-mono); font-size: 12px; } }
 
 .dc-desc {
   margin: 0 0 12px;
@@ -709,12 +709,12 @@ select {
   line-height: 1.55;
   color: $text-dim;
   padding: 10px 0;
-  border-top: 1px solid rgba(100, 116, 139, 0.12);
+  border-top: 1px solid rgba(95, 107, 122, 0.12);
 }
 
 .dc-section {
   padding: 10px 0;
-  border-top: 1px solid rgba(100, 116, 139, 0.12);
+  border-top: 1px solid rgba(95, 107, 122, 0.12);
 }
 
 .dc-section-title {
@@ -737,7 +737,7 @@ select {
 .kv-k { color: $text-mute; }
 .kv-v {
   color: $text;
-  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-family: var(--gh-mono);
   font-size: 11px;
   max-width: 180px;
   overflow: hidden;
@@ -834,7 +834,7 @@ select {
   align-items: center;
   gap: 8px;
   padding: 10px 14px;
-  border-bottom: 1px solid rgba(100, 116, 139, 0.15);
+  border-bottom: 1px solid rgba(95, 107, 122, 0.15);
   flex-shrink: 0;
 
   > i {
@@ -855,7 +855,7 @@ select {
   font-size: 10px;
   font-weight: 700;
   color: $accent;
-  background: rgba(56, 189, 248, 0.12);
+  background: rgba(78, 161, 255, 0.12);
   padding: 2px 7px;
   border-radius: 10px;
   font-variant-numeric: tabular-nums;
@@ -877,26 +877,26 @@ select {
   padding: 4px 0;
 
   &::-webkit-scrollbar { width: 4px; }
-  &::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.2); border-radius: 2px; }
+  &::-webkit-scrollbar-thumb { background: rgba(138, 150, 166, 0.2); border-radius: 2px; }
 }
 
 .ef-entry {
   padding: 8px 14px;
-  border-bottom: 1px solid rgba(100, 116, 139, 0.08);
+  border-bottom: 1px solid rgba(95, 107, 122, 0.08);
   transition: background 0.15s;
   cursor: pointer;
 
   &:last-child { border-bottom: none; }
   &:hover { background: rgba(255, 255, 255, 0.05); }
 
-  &:active { background: rgba(56, 189, 248, 0.08); }
+  &:active { background: rgba(78, 161, 255, 0.08); }
 
   &.ef-new {
-    background: rgba(56, 189, 248, 0.04);
+    background: rgba(78, 161, 255, 0.04);
     border-left: 2px solid $accent;
     padding-left: 12px;
 
-    &:hover { background: rgba(56, 189, 248, 0.08); }
+    &:hover { background: rgba(78, 161, 255, 0.08); }
   }
 }
 

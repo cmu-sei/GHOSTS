@@ -304,7 +304,7 @@ export class ObjectivesListComponent implements OnInit {
   // -- Helpers --
 
   protected getStatusColor(status: string): string {
-    return OBJECTIVE_STATUSES.find(s => s.value === status)?.color || '#9e9e9e';
+    return OBJECTIVE_STATUSES.find(s => s.value === status)?.color || 'var(--gh-muted)';
   }
 
   protected getScoreLabel(score: string): string {

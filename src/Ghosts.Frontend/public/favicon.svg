@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- The top bar's mark: a rounded square split corner to corner in the GHOSTS greens, with a white ghost.
+       After changing this file, bump ?v= in src/index.html: browsers cache favicons past a hard refresh. -->
+  <defs>
+    <clipPath id="tile">
+      <rect width="32" height="32" rx="9" />
+    </clipPath>
+  </defs>
+  <g clip-path="url(#tile)">
+    <rect width="32" height="32" fill="#137a40" />
+    <path d="M0 0H32L0 32Z" fill="#2fbf6b" />
+  </g>
+  <path fill="#ffffff" d="M8 15.5A8 8 0 0 1 24 15.5V24.5a2.667 1.9 0 0 1 -5.333 0a2.667 1.9 0 0 1 -5.334 0a2.667 1.9 0 0 1 -5.333 0Z" />
+  <ellipse cx="13.2" cy="15" rx="1.5" ry="2" fill="#178a4a" />
+  <ellipse cx="18.8" cy="15" rx="1.5" ry="2" fill="#178a4a" />
+</svg>

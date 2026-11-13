@@ -1,264 +1,252 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatDividerModule } from '@angular/material/divider';
 import { ChangeDetectionStrategy } from '@angular/core';
 import { ApiStatus } from '../../core/models';
 import { StatusService } from '../../core/services';
+import { GhostComponent } from '../../shared/components/ghost/ghost.component';
 
 @Component({
   selector: 'app-home',
   imports: [
-    MatCardModule,
+    MatButtonModule,
     MatProgressSpinnerModule,
-    MatDividerModule
+    GhostComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="home-container">
-      <div class="welcome-section">
-        <div class="logo-container">
-          <img src="ghosts.png" alt="GHOSTS Logo" class="ghost-logo" />
-        </div>
+    <div class="sheet">
+      <section class="welcome" aria-labelledby="welcome-title">
+        <div class="top">
+          <div class="intro">
+            <p class="eyebrow">Welcome to GHOSTS</p>
+            <h1 class="headline" id="welcome-title">Realistic user behavior simulation and orchestration, <em>for cyber and cognitive training, exercises, and research.</em></h1>
+            <p class="lede">
+              GHOSTS is an agent orchestration framework that simulates realistic users
+              on all types of computer systems, generating human-like activity across
+              applications, networks, and workflows. Beyond simple automation, it can
+              dynamically reason, chat, and create content via integrated LLMs, enabling
+              adaptive, context-aware behavior. Designed for cyber training, research,
+              and simulation, it produces realistic network traffic, supports complex
+              multi-agent scenarios, and leaves behind realistic artifacts. Its modular
+              architecture allows the addition of new agents, behaviors, and lightweight
+              clients, making it a flexible platform for high-fidelity simulations.
+            </p>
+            <p class="small">If you find GHOSTS useful for your needs, please consider <a href="https://github.com/cmu-sei/GHOSTS">starring the repository</a>. Otherwise, please use the links below to get started.</p>
+            <div class="end">
+              <a mat-flat-button href="https://cmu-sei.github.io/GHOSTS/" target="_blank" rel="noopener noreferrer">Documentation</a>
+              <a mat-button href="https://github.com/cmu-sei/GHOSTS" target="_blank" rel="noopener noreferrer">GitHub</a>
+            </div>
+          </div>
 
-        <h1>Welcome to GHOSTS</h1>
-
-        <div class="description">
-          <p><strong>Realistic User Behavior Simulation and Orchestration for Cyber/Cognitive Training, Exercises, and Research</strong></p>
-          <p>
-            GHOSTS is an agent orchestration framework that simulates realistic users
-            on all types of computer systems, generating human-like activity across
-            applications, networks, and workflows. Beyond simple automation, it can
-            dynamically reason, chat, and create content via integrated LLMs, enabling
-            adaptive, context-aware behavior. Designed for cyber training, research,
-            and simulation, it produces realistic network traffic, supports complex
-            multi-agent scenarios, and leaves behind realistic artifacts. Its modular
-            architecture allows the addition of new agents, behaviors, and lightweight
-            clients, making it a flexible platform for high-fidelity simulations.
-          </p>
-          <p class="small">If you find GHOSTS useful for your needs, please consider <a href="https://github.com/cmu-sei/GHOSTS">starring the repository</a>. Otherwise, please use the quick links at right to get started.</p>
-        </div>
-      </div>
-
-      <div class="status-section">
-        <mat-card>
-          <mat-card-header>
-            <mat-card-title>Current Server Status</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            @if (loading()) {
-              <div class="loading-container">
-                <mat-spinner diameter="40"></mat-spinner>
-              </div>
-            } @else if (error()) {
-              <div class="error-container">
-                <p class="error-message">{{ error() }}</p>
-                <button mat-button (click)="loadStatus()">Retry</button>
-              </div>
-            } @else if (status()) {
-              <div class="status-data">
-                <div class="status-item">
-                  <span class="status-label">Machines:</span>
-                  <span class="status-value">{{ status()?.machines }}</span>
-                </div>
-                <div class="status-item">
-                  <span class="status-label">Groups:</span>
-                  <span class="status-value">{{ status()?.groups }}</span>
-                </div>
-                <div class="status-item">
-                  <span class="status-label">NPCs:</span>
-                  <span class="status-value">{{ status()?.npcs }}</span>
-                </div>
-                <div class="status-item version-item">
-                  <span class="status-label">Version:</span>
-                  <span class="status-value">{{ status()?.version }}</span>
-                </div>
-                <div class="status-item version-item">
-                  <span class="status-label">File Version:</span>
-                  <span class="status-value">{{ status()?.versionFile }}</span>
-                </div>
-                <div class="status-item version-item">
-                  <span class="status-label">dotnet:</span>
-                  <span class="status-value">{{ status()?.versionEnvironment }}</span>
-                </div>
-              </div>
-            }
-          </mat-card-content>
-        </mat-card>
-
-        <div class="quick-links">
-          <h3>Quick Links</h3>
-          <div class="links-grid">
-            <a href="https://cmu-sei.github.io/GHOSTS/" target="_blank" rel="noopener noreferrer" class="link-item">
-              <span class="link-icon">📖</span>
-              <span>Documentation</span>
-            </a>
-            <a href="https://github.com/cmu-sei/GHOSTS" target="_blank" rel="noopener noreferrer" class="link-item">
-              <span class="link-icon">💻</span>
-              <span>GitHub</span>
-            </a>
+          <div class="stage" aria-hidden="true">
+            <app-ghost class="ghost" />
+            <span class="shadow"></span>
           </div>
         </div>
-      </div>
+
+        <div class="status" aria-label="Current server status">
+          @if (loading()) {
+            <div class="status-note">
+              <mat-spinner diameter="20"></mat-spinner>
+              <span>Loading server status…</span>
+            </div>
+          } @else if (error()) {
+            <div class="status-note">
+              <span class="error-message">{{ error() }}</span>
+              <button mat-button (click)="loadStatus()">Retry</button>
+            </div>
+          } @else if (status()) {
+            <div class="fact">
+              <span class="label">Machines</span>
+              <span class="value">{{ status()?.machines }}</span>
+            </div>
+            <div class="fact">
+              <span class="label">Groups</span>
+              <span class="value">{{ status()?.groups }}</span>
+            </div>
+            <div class="fact">
+              <span class="label">NPCs</span>
+              <span class="value">{{ status()?.npcs }}</span>
+            </div>
+            <div class="fact">
+              <span class="label">Server</span>
+              <span class="meta">v{{ status()?.version }}</span>
+              <span class="meta">File {{ status()?.versionFile }}</span>
+              <span class="meta">dotnet {{ status()?.versionEnvironment }}</span>
+            </div>
+          }
+        </div>
+      </section>
     </div>
   `,
   styles: [`
-    .home-container {
+    .sheet {
+      max-width: 1080px;
+      margin: 12px auto;
+    }
+
+    .welcome {
+      padding: 30px 34px 22px;
+      border: 1px solid var(--gh-line);
+      border-radius: 14px;
+      background:
+        radial-gradient(120% 140% at 100% 0%, color-mix(in srgb, var(--gh-brand) 8%, transparent) 0%, transparent 46%),
+        radial-gradient(90% 120% at 0% 0%, color-mix(in srgb, var(--gh-accent) 6%, transparent) 0%, transparent 52%),
+        var(--gh-surface);
+      animation: welcome-in 360ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    @keyframes welcome-in {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+    }
+
+    .top {
       display: grid;
-      grid-template-columns: 4fr 1fr;
-      gap: 32px;
-      padding: 24px;
+      grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+      gap: 36px;
     }
 
-    @media (max-width: 768px) {
-      .home-container {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .welcome-section {
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-    }
-
-    .logo-container {
-      margin-bottom: 16px;
-      padding-top: 24px;
-    }
-
-    .ghost-logo {
-      width: 150px;
-      height: auto;
-      animation: float 3s ease-in-out infinite;
-    }
-
-    @keyframes float {
-      0%, 100% {
-        transform: translateY(0px);
-      }
-      50% {
-        transform: translateY(-20px);
-      }
-    }
-
-    h1 {
-      font-size: 2.5rem;
-      font-weight: 300;
+    .eyebrow {
       margin: 0;
-      color: rgba(0, 0, 0, 0.87);
+      font: 500 10.5px/1 var(--gh-mono);
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--gh-accent);
     }
 
-    .description {
-      font-size: 1rem;
-      line-height: 1.6;
-      color: rgba(0, 0, 0, 0.7);
+    .headline {
+      margin: 12px 0 0;
+      font: 500 30px/1.15 var(--gh-serif);
+      letter-spacing: -0.015em;
+      color: var(--gh-ink);
     }
 
-    .description p {
-      margin: 0 0 16px 0;
+    .headline em {
+      font-style: italic;
+      font-weight: 400;
+      color: light-dark(#4a5268, #a3adba);
     }
 
-    .quick-links {
-      margin-top: 24px;
+    .lede {
+      margin: 14px 0 0;
+      font: 400 16px/1.6 var(--gh-serif);
+      color: var(--gh-body);
     }
 
     .small {
-      font-size: 0.85rem;
+      margin: 12px 0 0;
+      color: var(--gh-muted);
     }
 
-    .quick-links h3 {
-      font-size: 0.95rem;
-      font-weight: normal;
-      margin: 0 0 12px 0;
-    }
-
-    .links-grid {
+    .end {
       display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .link-item {
-      display: flex;
-      align-items: center;
       gap: 8px;
-      padding: 10px 12px;
-      background: #f5f5f5;
-      border-radius: 6px;
-      text-decoration: none;
-      color: rgba(0, 0, 0, 0.87);
-      transition: all 0.2s ease;
-      font-size: 0.85rem;
+      margin-top: 18px;
     }
 
-    .link-item:hover {
-      background: #e0e0e0;
+    .stage {
+      position: relative;
+      display: grid;
+      place-items: center;
+      min-height: 260px;
     }
 
-    .link-icon {
-      font-size: 18px;
+    .ghost {
+      width: min(220px, 70%);
+      animation: float 4.5s ease-in-out infinite;
     }
 
-    .status-section {
-      position: sticky;
-      top: 20px;
-      align-self: start;
+    .shadow {
+      position: absolute;
+      bottom: 22%;
+      width: min(130px, 42%);
+      height: 14px;
+      border-radius: 50%;
+      background: radial-gradient(closest-side, rgb(var(--gh-shadow) / 0.22), transparent);
+      animation: breathe 4.5s ease-in-out infinite;
     }
 
-    mat-card {
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    @keyframes float {
+      0%, 100% { transform: translateY(-6px) rotate(-2deg); }
+      50% { transform: translateY(-26px) rotate(2deg); }
     }
 
-    mat-card-title {
-      font-size: 0.95rem;
-      font-weight: normal;
-      margin-bottom: 12px;
+    @keyframes breathe {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(0.72); opacity: 0.55; }
     }
 
-    .loading-container,
-    .error-container {
+    .status {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, 1.4fr);
+      margin: 24px 0 0;
+      border-top: 1px solid var(--gh-line);
+    }
+
+    .fact {
       display: flex;
       flex-direction: column;
+      gap: 6px;
+      padding: 16px 18px 0 0;
+    }
+
+    .fact + .fact {
+      padding-left: 18px;
+      border-left: 1px solid var(--gh-line);
+    }
+
+    .label {
+      font: 500 11px/1 var(--gh-mono);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gh-faint);
+    }
+
+    .value {
+      margin-top: 4px;
+      font: 500 26px/1.1 var(--gh-serif);
+      color: var(--gh-ink);
+    }
+
+    .meta {
+      font: 400 12px/1.5 var(--gh-mono);
+      color: var(--gh-muted);
+    }
+
+    .status-note {
+      grid-column: 1 / -1;
+      display: flex;
       align-items: center;
-      justify-content: center;
-      padding: 24px;
+      gap: 12px;
+      padding-top: 16px;
+      color: var(--gh-muted);
     }
 
     .error-message {
-      color: #f44336;
-      margin-bottom: 16px;
+      color: var(--gh-bad);
     }
 
-    .status-data {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
+    @media (max-width: 860px) {
+      .top {
+        grid-template-columns: minmax(0, 1fr);
+      }
 
-    .status-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 4px 0;
-    }
+      .stage {
+        min-height: 200px;
+      }
 
-    .status-item.version-item .status-label,
-    .status-item.version-item .status-value {
-      color: rgba(0, 0, 0, 0.4);
-      font-size: 0.8rem;
-    }
+      .status {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
 
-    .status-label {
-      font-weight: normal;
-      color: rgba(0, 0, 0, 0.6);
-      font-size: 0.85rem;
-    }
-
-    .status-value {
-      font-weight: normal;
-      color: rgba(0, 0, 0, 0.87);
-      font-size: 0.85rem;
+      .fact:nth-child(3) {
+        padding-left: 0;
+        border-left: 0;
+      }
     }
   `]
 })

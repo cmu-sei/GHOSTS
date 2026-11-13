@@ -86,7 +86,7 @@ import { Machine } from '../../../core/models';
       align-items: center;
       justify-content: center;
       padding: 40px 20px;
-      color: rgba(0, 0, 0, 0.6);
+      color: var(--gh-muted);
     }
 
     .loading {
@@ -95,11 +95,11 @@ import { Machine } from '../../../core/models';
 
     .error {
       gap: 12px;
-      color: #f44336;
+      color: var(--gh-bad);
     }
 
     .table-container {
-      background: white;
+      background: var(--gh-surface);
       border-radius: 4px;
       overflow: auto;
     }

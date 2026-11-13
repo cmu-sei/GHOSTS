@@ -14,8 +14,8 @@
       margin: 0 0 16px 0;
       font-size: 18px;
       font-weight: 500;
-      color: rgba(0, 0, 0, 0.87);
-      border-bottom: 2px solid #e0e0e0;
+      color: var(--gh-ink);
+      border-bottom: 2px solid var(--gh-line);
       padding-bottom: 8px;
     }
 
@@ -23,7 +23,7 @@
       margin: 16px 0 12px 0;
       font-size: 14px;
       font-weight: 500;
-      color: rgba(0, 0, 0, 0.87);
+      color: var(--gh-ink);
     }
   }
 
@@ -42,7 +42,7 @@
   .hint {
     margin: 0 0 12px 0;
     font-size: 12px;
-    color: rgba(0, 0, 0, 0.6);
+    color: var(--gh-muted);
   }
 
   .edit-grid {
@@ -73,7 +73,7 @@
   }
 
   .edit-block {
-    border-left: 3px solid #e0e0e0;
+    border-left: 3px solid var(--gh-line);
     padding: 8px 0 8px 16px;
     margin-bottom: 16px;
   }
@@ -87,6 +87,6 @@
     gap: 8px;
     align-items: center;
     padding-top: 16px;
-    border-top: 1px solid #e0e0e0;
+    border-top: 1px solid var(--gh-line);
   }
 }

@@ -71,7 +71,7 @@ import { MatButtonModule } from '@angular/material/button';
     }
 
     .search-icon {
-      color: rgba(0, 0, 0, 0.54);
+      color: var(--gh-muted);
       margin-right: 8px;
       margin-left: 8px;
       font-size: 16px;

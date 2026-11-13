@@ -26,11 +26,11 @@ import { SavedTimeline } from '../../../core/models';
     mat-dialog-content {
       max-height: 60vh;
       overflow: auto;
-      background: #0f172a;
-      color: #e2e8f0;
+      background: var(--gh-code);
+      color: var(--gh-code-ink);
       border-radius: 6px;
       padding: 16px;
-      font-family: 'Fira Code', 'Menlo', monospace;
+      font-family: var(--gh-mono);
       font-size: 13px;
       line-height: 1.5;
     }

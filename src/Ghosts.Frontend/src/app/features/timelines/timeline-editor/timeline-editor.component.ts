@@ -221,7 +221,7 @@ const TIME_PATTERN = /^(([01]?\d|2[0-3]):([0-5]\d):([0-5]\d)|24:00:00)$/;
                             <div class="event-header">
                               <h4>Event {{ eventIndex + 1 }}</h4>
                               <button mat-button class="icon-button" type="button" (click)="removeEvent(i, eventIndex)">
-                                <i class="fas fa-trash" style="color: #f44336;"></i>
+                                <i class="fas fa-trash" style="color: var(--gh-bad);"></i>
                               </button>
                             </div>
 
@@ -304,7 +304,7 @@ const TIME_PATTERN = /^(([01]?\d|2[0-3]):([0-5]\d):([0-5]\d)|24:00:00)$/;
 
     .subtitle {
       margin: 4px 0 0;
-      color: rgba(0, 0, 0, 0.6);
+      color: var(--gh-muted);
     }
 
     .header-actions {
@@ -352,7 +352,7 @@ const TIME_PATTERN = /^(([01]?\d|2[0-3]):([0-5]\d):([0-5]\d)|24:00:00)$/;
     }
 
     .handler-args textarea {
-      font-family: 'Fira Code', 'Menlo', monospace;
+      font-family: var(--gh-mono);
     }
 
     .events-header {
@@ -369,19 +369,19 @@ const TIME_PATTERN = /^(([01]?\d|2[0-3]):([0-5]\d):([0-5]\d)|24:00:00)$/;
     .events-empty {
       margin: 0;
       padding: 16px;
-      background: rgba(27, 94, 32, 0.08);
+      background: var(--gh-accent-soft);
       border-radius: 6px;
-      color: rgba(0, 0, 0, 0.6);
+      color: var(--gh-muted);
     }
 
     .event-card {
-      border: 1px solid rgba(0, 0, 0, 0.08);
+      border: 1px solid var(--gh-line);
       border-radius: 8px;
       padding: 16px;
       display: flex;
       flex-direction: column;
       gap: 16px;
-      background: #fafafa;
+      background: var(--gh-raised);
     }
 
     .event-header {
