@@ -5,8 +5,16 @@
   <title>GHOSTS</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/png" href="ghosts.png">
-  <link rel="apple-touch-icon" href="ghosts.png">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=1">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <script>
+    // Set the theme before the first paint (ThemeService takes over once the app boots).
+    try {
+      var t = localStorage.getItem('ghosts-theme');
+      if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.dataset.theme = t;
+    } catch (e) {}
+  </script>
 </head>
 <body>
   <app-root></app-root>

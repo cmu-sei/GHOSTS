@@ -134,14 +134,14 @@ export const ENTITY_COLORS: Record<string, string> = {
   Person: '#4CAF50',
   Organization: '#2196F3',
   System: '#FF9800',
-  Network: '#9C27B0',
-  Location: '#795548',
+  Network: '#AB47BC',
+  Location: '#8D6E63',
   Software: '#00BCD4',
   ThreatActor: '#F44336',
   Campaign: '#E91E63',
   Vulnerability: '#FF5722',
   DataAsset: '#607D8B',
-  Service: '#3F51B5',
+  Service: '#5C6BC0',
   Custom: '#9E9E9E'
 };
 

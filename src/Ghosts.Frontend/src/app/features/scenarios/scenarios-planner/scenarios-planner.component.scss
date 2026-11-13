@@ -32,7 +32,7 @@
   p {
     margin-top: 24px;
     font-size: 16px;
-    color: rgba(0, 0, 0, 0.6);
+    color: var(--gh-muted);
   }
 }
 
@@ -44,7 +44,7 @@
 
     .document-tab {
       .document-note {
-        color: #666;
+        color: var(--gh-muted);
         margin: 0 0 16px;
       }
 
@@ -62,8 +62,8 @@
         margin: 0 0 12px;
       }
 
-      .document-unchanged { color: #2e7d32; }
-      .document-edited { color: #b26a00; }
+      .document-unchanged { color: var(--gh-ok); }
+      .document-edited { color: var(--gh-warn); }
 
       .change-list {
         margin: 0 0 16px;
@@ -73,7 +73,7 @@
       }
 
       .document-text {
-        background: #f6f7f9;
+        background: var(--gh-code);
         border-radius: 8px;
         padding: 12px 16px;
         font-size: 12px;
@@ -120,7 +120,7 @@
     .form-section {
       margin-top: 32px;
       padding-top: 24px;
-      border-top: 1px solid #e0e0e0;
+      border-top: 1px solid var(--gh-line);
 
       h3 {
         font-size: 16px;
@@ -139,7 +139,7 @@
         gap: 12px;
         align-items: flex-start;
         padding: 16px;
-        background: #f5f5f5;
+        background: var(--gh-canvas);
         border-radius: 4px;
 
         .item-field {
@@ -169,7 +169,7 @@
       .source-usage {
         padding: 0 16px;
         font-size: 13px;
-        color: rgba(0, 0, 0, 0.6);
+        color: var(--gh-muted);
       }
 
       // An item with more than one row of fields
@@ -178,7 +178,7 @@
         flex-direction: column;
         gap: 8px;
         padding: 16px;
-        background: #f5f5f5;
+        background: var(--gh-canvas);
         border-radius: 4px;
 
         > .list-item {
@@ -196,7 +196,7 @@
         flex-direction: column;
         gap: 8px;
         padding-left: 16px;
-        border-left: 2px solid #e0e0e0;
+        border-left: 2px solid var(--gh-line);
 
         h4 {
           margin: 0;
@@ -205,7 +205,7 @@
 
         .list-block,
         .list-block > .list-item {
-          background: #fff;
+          background: var(--gh-surface);
         }
 
         > button {
@@ -228,7 +228,7 @@
         font-size: 14px;
         font-weight: 500;
         margin: 0 0 12px 0;
-        color: rgba(0, 0, 0, 0.87);
+        color: var(--gh-ink);
       }
 
       .checkbox-grid {
@@ -236,7 +236,7 @@
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
         gap: 12px;
         padding: 12px;
-        background: #f9f9f9;
+        background: var(--gh-raised);
         border-radius: 4px;
       }
     }
@@ -250,13 +250,13 @@
 
         .drag-handle {
           cursor: move;
-          color: rgba(0, 0, 0, 0.54);
+          color: var(--gh-muted);
         }
 
         .table-row {
           &.cdk-drag-preview {
-            background: white;
-            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+            background: var(--gh-surface);
+            box-shadow: 0 5px 10px rgb(var(--gh-shadow) / 0.2);
           }
 
           &.cdk-drag-placeholder {
@@ -298,7 +298,7 @@
 
         .drag-handle {
           cursor: move;
-          color: rgba(0, 0, 0, 0.54);
+          color: var(--gh-muted);
         }
 
         .table-input-field {
@@ -328,8 +328,8 @@
           min-height: 60px;
 
           &.cdk-drag-preview {
-            background: white;
-            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+            background: var(--gh-surface);
+            box-shadow: 0 5px 10px rgb(var(--gh-shadow) / 0.2);
           }
 
           &.cdk-drag-placeholder {
@@ -361,14 +361,14 @@ button[mat-icon-button] i {
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  background: #e8f5e9;
-  border: 1px solid #a5d6a7;
+  background: var(--gh-ok-soft);
+  border: 1px solid var(--gh-ok-line);
   border-radius: 6px;
   padding: 14px 16px;
   margin-bottom: 20px;
 
   i {
-    color: #2e7d32;
+    color: var(--gh-ok);
     font-size: 20px;
     margin-top: 2px;
     flex-shrink: 0;
@@ -381,20 +381,20 @@ button[mat-icon-button] i {
     gap: 4px;
 
     strong {
-      color: #1b5e20;
+      color: var(--gh-ok);
       font-size: 0.95rem;
     }
 
     span {
-      color: #33691e;
+      color: var(--gh-body);
       font-size: 0.85rem;
     }
   }
 
   button {
     flex-shrink: 0;
-    border-color: #2e7d32;
-    color: #2e7d32;
+    border-color: var(--gh-ok);
+    color: var(--gh-ok);
   }
 }
 
@@ -404,9 +404,9 @@ button[mat-icon-button] i {
   gap: 4px;
   font-size: 0.75rem;
   font-weight: normal;
-  background: #fff8e1;
-  border: 1px solid #ffe082;
-  color: #f57f17;
+  background: var(--gh-warn-soft);
+  border: 1px solid var(--gh-warn-line);
+  color: var(--gh-warn);
   border-radius: 12px;
   padding: 2px 8px;
   margin-left: 10px;
@@ -416,8 +416,8 @@ button[mat-icon-button] i {
   transition: background 0.15s, border-color 0.15s;
 
   &:hover {
-    background: #ffecb3;
-    border-color: #ffd54f;
+    background: var(--gh-warn-line);
+    border-color: var(--gh-warn);
   }
 
   i {
@@ -438,13 +438,13 @@ button[mat-icon-button] i {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #fff8e1;
-  border: 1px solid #ffe082;
+  background: var(--gh-warn-soft);
+  border: 1px solid var(--gh-warn-line);
   border-radius: 4px;
   padding: 10px 14px;
   margin-bottom: 16px;
   font-size: 0.875rem;
-  color: #e65100;
+  color: var(--gh-warn);
 
   i {
     font-size: 16px;

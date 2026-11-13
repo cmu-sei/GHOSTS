@@ -112,7 +112,7 @@ import { SearchBarComponent } from '../../../shared/components/search-bar/search
                   <span>View Raw JSON</span>
                 </button>
                 <button mat-menu-item (click)="deleteMachine(machine)">
-                  <i class="fas fa-trash" style="color: #f44336;"></i>
+                  <i class="fas fa-trash" style="color: var(--gh-bad);"></i>
                   <span>Delete</span>
                 </button>
               </mat-menu>
@@ -147,7 +147,7 @@ import { SearchBarComponent } from '../../../shared/components/search-bar/search
     }
 
     .search-results-info {
-      color: rgba(0, 0, 0, 0.6);
+      color: var(--gh-muted);
       font-size: 14px;
     }
 
@@ -160,9 +160,9 @@ import { SearchBarComponent } from '../../../shared/components/search-bar/search
     }
 
     .table-container {
-      background: white;
+      background: var(--gh-surface);
       border-radius: 4px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 4px rgb(var(--gh-shadow) / 0.1);
     }
 
     table {
@@ -203,75 +203,75 @@ import { SearchBarComponent } from '../../../shared/components/search-bar/search
 
     .status-up,
     .status-active {
-      --mdc-chip-elevated-container-color: #4caf50 !important;
-      --mdc-chip-label-text-color: white !important;
-      --mat-chip-elevated-container-color: #4caf50 !important;
-      --mat-chip-label-text-color: white !important;
+      --mdc-chip-elevated-container-color: var(--gh-ok-soft) !important;
+      --mdc-chip-label-text-color: var(--gh-ok) !important;
+      --mat-chip-elevated-container-color: var(--gh-ok-soft) !important;
+      --mat-chip-label-text-color: var(--gh-ok) !important;
       --mdc-chip-outline-width: 0 !important;
       --mdc-chip-outline-color: transparent !important;
       --mdc-chip-flat-outline-color: transparent !important;
-      background-color: #4caf50 !important;
-      color: white !important;
+      background-color: var(--gh-ok-soft) !important;
+      color: var(--gh-ok) !important;
       border: none !important;
       border-width: 0 !important;
       box-shadow: none !important;
     }
 
     .status-down {
-      --mdc-chip-elevated-container-color: #f44336 !important;
-      --mdc-chip-label-text-color: white !important;
-      --mat-chip-elevated-container-color: #f44336 !important;
-      --mat-chip-label-text-color: white !important;
+      --mdc-chip-elevated-container-color: var(--gh-bad-soft) !important;
+      --mdc-chip-label-text-color: var(--gh-bad) !important;
+      --mat-chip-elevated-container-color: var(--gh-bad-soft) !important;
+      --mat-chip-label-text-color: var(--gh-bad) !important;
       --mdc-chip-outline-width: 0 !important;
       --mdc-chip-outline-color: transparent !important;
       --mdc-chip-flat-outline-color: transparent !important;
-      background-color: #f44336 !important;
-      color: white !important;
+      background-color: var(--gh-bad-soft) !important;
+      color: var(--gh-bad) !important;
       border: none !important;
       border-width: 0 !important;
       box-shadow: none !important;
     }
 
     .status-upwitherrors {
-      --mdc-chip-elevated-container-color: #ff9800 !important;
-      --mdc-chip-label-text-color: white !important;
-      --mat-chip-elevated-container-color: #ff9800 !important;
-      --mat-chip-label-text-color: white !important;
+      --mdc-chip-elevated-container-color: var(--gh-warn-soft) !important;
+      --mdc-chip-label-text-color: var(--gh-warn) !important;
+      --mat-chip-elevated-container-color: var(--gh-warn-soft) !important;
+      --mat-chip-label-text-color: var(--gh-warn) !important;
       --mdc-chip-outline-width: 0 !important;
       --mdc-chip-outline-color: transparent !important;
       --mdc-chip-flat-outline-color: transparent !important;
-      background-color: #ff9800 !important;
-      color: white !important;
+      background-color: var(--gh-warn-soft) !important;
+      color: var(--gh-warn) !important;
       border: none !important;
       border-width: 0 !important;
       box-shadow: none !important;
     }
 
     .status-downwitherrors {
-      --mdc-chip-elevated-container-color: #ff5722 !important;
-      --mdc-chip-label-text-color: white !important;
-      --mat-chip-elevated-container-color: #ff5722 !important;
-      --mat-chip-label-text-color: white !important;
+      --mdc-chip-elevated-container-color: var(--gh-bad-soft) !important;
+      --mdc-chip-label-text-color: var(--gh-bad) !important;
+      --mat-chip-elevated-container-color: var(--gh-bad-soft) !important;
+      --mat-chip-label-text-color: var(--gh-bad) !important;
       --mdc-chip-outline-width: 0 !important;
       --mdc-chip-outline-color: transparent !important;
       --mdc-chip-flat-outline-color: transparent !important;
-      background-color: #ff5722 !important;
-      color: white !important;
+      background-color: var(--gh-bad-soft) !important;
+      color: var(--gh-bad) !important;
       border: none !important;
       border-width: 0 !important;
       box-shadow: none !important;
     }
 
     .status-unknown {
-      --mdc-chip-elevated-container-color: #9e9e9e !important;
-      --mdc-chip-label-text-color: white !important;
-      --mat-chip-elevated-container-color: #9e9e9e !important;
-      --mat-chip-label-text-color: white !important;
+      --mdc-chip-elevated-container-color: var(--gh-line) !important;
+      --mdc-chip-label-text-color: var(--gh-muted) !important;
+      --mat-chip-elevated-container-color: var(--gh-line) !important;
+      --mat-chip-label-text-color: var(--gh-muted) !important;
       --mdc-chip-outline-width: 0 !important;
       --mdc-chip-outline-color: transparent !important;
       --mdc-chip-flat-outline-color: transparent !important;
-      background-color: #9e9e9e !important;
-      color: white !important;
+      background-color: var(--gh-line) !important;
+      color: var(--gh-muted) !important;
       border: none !important;
       border-width: 0 !important;
       box-shadow: none !important;

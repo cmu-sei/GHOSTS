@@ -5,18 +5,18 @@
       "api": "bedrock-converse-stream",
       "models": [
         {
-          "id": "us.anthropic.claude-fable-5-1",
-          "name": "Claude Fable 5.1 (US)",
+          "id": "us.anthropic.claude-fable-5-2",
+          "name": "Claude Fable 5.2 (US)",
           "reasoning": true,
           "input": [
             "text",
             "image"
           ],
           "cost": {
-            "input": 11,
-            "output": 55,
-            "cacheRead": 0.275,
-            "cacheWrite": 13.75
+            "input": 8.8,
+            "output": 44,
+            "cacheRead": 0.22,
+            "cacheWrite": 11
           },
           "contextWindow": 1000000,
           "maxTokens": 128000,

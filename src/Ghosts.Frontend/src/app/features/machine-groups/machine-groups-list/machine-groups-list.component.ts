@@ -121,7 +121,7 @@ import { SearchBarComponent } from '../../../shared/components/search-bar/search
     }
 
     .search-results-info {
-      color: rgba(0, 0, 0, 0.6);
+      color: var(--gh-muted);
       font-size: 14px;
     }
 
@@ -136,19 +136,19 @@ import { SearchBarComponent } from '../../../shared/components/search-bar/search
 
     .error p {
       margin: 0;
-      color: #f44336;
+      color: var(--gh-bad);
       text-align: center;
     }
 
     .empty-state mat-icon {
       font-size: 48px;
-      color: rgba(0, 0, 0, 0.32);
+      color: var(--gh-faint);
     }
 
     .table-container {
-      background: #ffffff;
+      background: var(--gh-surface);
       border-radius: 4px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 4px rgb(var(--gh-shadow) / 0.1);
     }
 
     table {

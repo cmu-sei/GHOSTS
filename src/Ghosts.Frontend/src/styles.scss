@@ -1,9 +1,6 @@
-/* You can add global styles to this file, and also import other style files */
-
-// Custom GHOSTS Material theme with green primary emphasis
+// GHOSTS shares the Ranger look: the Scenario Builder's light palette and GraySpace's dark one. Green is GHOSTS'
+// own and is kept for the brand (the mark, the favicon, the ghost); the shared blue is the accent for everything else.
 @use '@angular/material' as mat;
-
-@include mat.core();
 
 // FontAwesome
 @import '@fortawesome/fontawesome-free/css/all.min.css';
@@ -11,18 +8,140 @@
 // Material Icons (local, no CDN)
 @import 'material-icons/iconfont/material-icons.css';
 
-$ghosts-theme: mat.define-theme((
-  color: (
-    theme-type: light,
-    primary: mat.$green-palette,
-    tertiary: mat.$violet-palette,
-  ),
-  density: (
-    scale: 0,
-  ),
-));
+// Light is the default; html[data-theme='dark'] swaps the colour tokens. Only colours change; type, size and radius stay put.
+:root {
+  color-scheme: light;
 
-@include mat.all-component-themes($ghosts-theme);
+  --gh-canvas: #f6f7f9;
+  --gh-surface: #ffffff;
+  --gh-raised: #fafbfc;
+  --gh-ink: #1c2230;
+  --gh-body: #3b4356;
+  --gh-muted: #6b7385;
+  --gh-faint: #9aa1b0;
+  --gh-line: #e3e6eb;
+  --gh-line-strong: #cfd4dc;
+  --gh-accent: #2f5bea;
+  --gh-accent-hover: #2449c9;
+  --gh-accent-soft: #eaf0fe;
+  --gh-accent-ink: #20357f;
+  --gh-purple: #7a4fd6;
+  --gh-purple-soft: #f2ecfc;
+  --gh-purple-line: #e3d8f7;
+  --gh-purple-ink: #4b2d8f;
+  --gh-ok: #1f8a5b;
+  --gh-ok-soft: #e7f5ee;
+  --gh-ok-line: #bfe2cf;
+  --gh-warn: #a3600a;
+  --gh-warn-soft: #fff3df;
+  --gh-warn-line: #f3dfb8;
+  --gh-bad: #c22f3a;
+  --gh-bad-soft: #fdecee;
+  --gh-bad-line: #f3c4c8;
+  --gh-on-accent: #ffffff;
+  // Shadows are drawn as rgb(var(--gh-shadow) / alpha).
+  --gh-shadow: 18 22 34;
+  // Code and JSON blocks.
+  --gh-code: #f3f5f8;
+  --gh-code-ink: #1c2230;
+
+  // The GHOSTS brand green: the mark, the favicon and the ghost.
+  --gh-brand: #1f9d55;
+  --gh-brand-light: #3ccf7f;
+  --gh-brand-dark: #137a40;
+  --gh-brand-glow: transparent;
+
+  --gh-font: 'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif;
+  --gh-serif: 'IBM Plex Serif', Georgia, 'Times New Roman', serif;
+  --gh-mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+  --gh-text: 13px;
+  --gh-small: 12px;
+  --gh-title: 17px;
+  --gh-radius: 8px;
+  --gh-pill: 4px;
+}
+
+// GraySpace dark: bg #0f1318, panels #151b22 / #1b222b, lines #2a333f, text #d8dee6 / #8a96a6, accent #4ea1ff,
+// purple #a371f7; status as its pills (a dark tint, a deeper border, the bright colour as text).
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --gh-canvas: #0f1318;
+  --gh-surface: #151b22;
+  --gh-raised: #1b222b;
+  --gh-ink: #d8dee6;
+  --gh-body: #b8c2cf;
+  --gh-muted: #8a96a6;
+  --gh-faint: #5f6b7a;
+  --gh-line: #2a333f;
+  --gh-line-strong: #36414f;
+  --gh-accent: #4ea1ff;
+  --gh-accent-hover: #3d8ee6;
+  --gh-accent-soft: #22344a;
+  --gh-accent-ink: #9cc8f5;
+  --gh-purple: #a371f7;
+  --gh-purple-soft: #261e3c;
+  --gh-purple-line: #3a2d5c;
+  --gh-purple-ink: #d6c6ff;
+  --gh-ok: #3fb950;
+  --gh-ok-soft: #10221a;
+  --gh-ok-line: #23462c;
+  --gh-warn: #d29922;
+  --gh-warn-soft: #221b0c;
+  --gh-warn-line: #4a3b16;
+  --gh-bad: #f85149;
+  --gh-bad-soft: #2a1110;
+  --gh-bad-line: #5a2422;
+  --gh-on-accent: #ffffff;
+  --gh-shadow: 0 0 0;
+  --gh-code: #0e1318;
+  --gh-code-ink: #d8dee6;
+
+  --gh-brand: #2fbf6b;
+  --gh-brand-light: #5fe39a;
+  --gh-brand-dark: #178a4a;
+  --gh-brand-glow: rgb(63 220 130 / 0.28);
+}
+
+html {
+  @include mat.theme((
+    color: (
+      theme-type: color-scheme,
+      primary: mat.$blue-palette,
+      tertiary: mat.$violet-palette,
+    ),
+    typography: (
+      plain-family: 'IBM Plex Sans, "Helvetica Neue", Arial, sans-serif',
+      brand-family: 'IBM Plex Sans, "Helvetica Neue", Arial, sans-serif',
+    ),
+    density: 0,
+  ));
+  // Material follows color-scheme; these pin its system colours to the GHOSTS tokens in either theme.
+  @include mat.theme-overrides((
+    primary: var(--gh-accent),
+    on-primary: var(--gh-on-accent),
+    primary-container: var(--gh-accent-soft),
+    on-primary-container: var(--gh-accent-ink),
+    tertiary: var(--gh-purple),
+    tertiary-container: var(--gh-purple-soft),
+    on-tertiary-container: var(--gh-purple-ink),
+    error: var(--gh-bad),
+    background: var(--gh-canvas),
+    on-background: var(--gh-ink),
+    surface: var(--gh-surface),
+    on-surface: var(--gh-ink),
+    on-surface-variant: var(--gh-muted),
+    surface-variant: var(--gh-line),
+    surface-container-lowest: var(--gh-surface),
+    surface-container-low: var(--gh-surface),
+    surface-container: var(--gh-surface),
+    surface-container-high: var(--gh-raised),
+    surface-container-highest: var(--gh-raised),
+    outline: var(--gh-line-strong),
+    outline-variant: var(--gh-line),
+    corner-full: 8px,
+  ));
+}
 
 // Global styles
 html, body {
@@ -31,32 +150,32 @@ html, body {
 
 body {
   margin: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
-}
-
-// Ensure Material primary toolbars fall back to the GHOSTS green
-.mat-toolbar.mat-primary {
-  --mat-toolbar-container-background-color: #1b5e20;
-  --mat-toolbar-container-text-color: #ffffff;
-  color: #ffffff;
+  font: 400 var(--gh-text) / 1.45 var(--gh-font);
+  font-variant-numeric: tabular-nums;
+  background: var(--gh-canvas);
+  color: var(--gh-ink);
+  -webkit-font-smoothing: antialiased;
 }
 
 a,
 a:visited {
-  color: #8e24aa;
-  text-decoration-color: rgba(142, 36, 170, 0.4);
+  color: var(--gh-accent);
 }
 
 a:hover,
 a:focus,
 a:active {
-  color: #ab47bc;
-  text-decoration-color: rgba(171, 71, 188, 0.6);
+  color: var(--gh-accent-hover);
 }
 
 ::selection {
-  background-color: rgba(142, 36, 170, 0.25);
+  background-color: var(--gh-accent-soft);
   color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--gh-accent);
+  outline-offset: 2px;
 }
 
 // Icon button styling for FontAwesome icons in Material buttons
@@ -94,4 +213,13 @@ button.icon-button {
 
 .map-tooltip .maplibregl-popup-close-button:hover {
   color: #e2e8f0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
 }

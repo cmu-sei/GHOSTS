@@ -15,7 +15,7 @@
   }
 
   .subtitle {
-    color: #666;
+    color: var(--gh-muted);
     margin: 0;
   }
 }
@@ -29,14 +29,14 @@
 
   p {
     margin-top: 1rem;
-    color: #666;
+    color: var(--gh-muted);
   }
 }
 
 .empty-state {
   text-align: center;
   padding: 3rem;
-  color: #999;
+  color: var(--gh-faint);
 
   mat-icon {
     font-size: 48px;
@@ -65,17 +65,17 @@
   overflow-x: hidden;
 
   mat-card {
-    background: #ffffff;
-    color: #333333;
-    border: 1px solid #e0e0e0;
+    background: var(--gh-surface);
+    color: var(--gh-ink);
+    border: 1px solid var(--gh-line);
   }
 
   mat-card-title {
-    color: #1976d2;
+    color: var(--gh-accent);
   }
 
   label {
-    color: #666666;
+    color: var(--gh-muted);
   }
 }
 
@@ -86,7 +86,7 @@
     display: block;
     font-weight: 500;
     margin-bottom: 0.5rem;
-    color: #333;
+    color: var(--gh-ink);
   }
 
   .confidence-slider {
@@ -98,7 +98,7 @@
     text-align: center;
     margin-top: 0.5rem;
     font-size: 0.875rem;
-    color: #666;
+    color: var(--gh-muted);
   }
 }
 
@@ -124,12 +124,12 @@
 }
 
 .graph-main {
-  background: #ffffff;
-  border: 1px solid #e0e0e0;
+  background: var(--gh-surface);
+  border: 1px solid var(--gh-line);
   border-radius: 4px;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgb(var(--gh-shadow) / 0.1);
 }
 
 .graph-svg-container {
@@ -149,17 +149,17 @@
     }
 
     circle {
-      filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.3));
+      filter: drop-shadow(0 0 4px color-mix(in srgb, var(--gh-surface) 30%, transparent));
 
       &:hover {
         stroke-width: 3;
-        filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.6));
+        filter: drop-shadow(0 0 8px color-mix(in srgb, var(--gh-surface) 60%, transparent));
       }
     }
 
     text {
       user-select: none;
-      fill: #333333;
+      fill: var(--gh-ink);
       text-shadow: none;
       font-size: 10px;
       font-weight: 500;
@@ -205,17 +205,17 @@
     display: block;
     font-weight: 500;
     margin-bottom: 0.25rem;
-    color: #666;
+    color: var(--gh-muted);
     font-size: 0.875rem;
   }
 
   p {
     margin: 0;
-    color: #333;
+    color: var(--gh-ink);
   }
 
   .properties-json {
-    background: #f5f5f5;
+    background: var(--gh-code);
     padding: 0.75rem;
     border-radius: 4px;
     font-size: 0.75rem;
@@ -229,7 +229,7 @@
   gap: 0.5rem;
   margin-top: 1.5rem;
   padding-top: 1.5rem;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid var(--gh-line);
 
   button {
     flex: 1;
@@ -239,13 +239,13 @@
 .inline-form {
   margin-top: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid var(--gh-line);
 
   .inline-form-title {
     margin: 0 0 1rem 0;
     font-size: 0.95rem;
     font-weight: 500;
-    color: #333;
+    color: var(--gh-ink);
   }
 
   .full-width {
@@ -270,7 +270,7 @@
       top: 200px;
       width: 320px;
       z-index: 100;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 4px 20px rgb(var(--gh-shadow) / 0.15);
     }
   }
 }

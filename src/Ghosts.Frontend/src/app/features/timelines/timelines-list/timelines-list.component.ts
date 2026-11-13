@@ -111,7 +111,7 @@ import { SearchBarComponent } from '../../../shared/components/search-bar/search
                     <span>View JSON</span>
                   </button>
                   <button mat-menu-item (click)="deleteTimeline(timeline)">
-                    <i class="fas fa-trash" style="color: #f44336;"></i>
+                    <i class="fas fa-trash" style="color: var(--gh-bad);"></i>
                     <span>Delete</span>
                   </button>
                 </mat-menu>
@@ -148,7 +148,7 @@ import { SearchBarComponent } from '../../../shared/components/search-bar/search
 
     .subtitle {
       margin: 4px 0 0;
-      color: rgba(0, 0, 0, 0.6);
+      color: var(--gh-muted);
     }
 
     .header-actions {
@@ -165,14 +165,14 @@ import { SearchBarComponent } from '../../../shared/components/search-bar/search
     }
 
     .search-results-info {
-      color: rgba(0, 0, 0, 0.6);
+      color: var(--gh-muted);
       font-size: 14px;
     }
 
     .table-wrapper {
       overflow: auto;
       border-radius: 8px;
-      background: #ffffff;
+      background: var(--gh-surface);
     }
 
     table {
@@ -202,7 +202,7 @@ import { SearchBarComponent } from '../../../shared/components/search-bar/search
       font-size: 12px;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: rgba(0, 0, 0, 0.54);
+      color: var(--gh-muted);
     }
 
     .handler-flow {
@@ -210,25 +210,25 @@ import { SearchBarComponent } from '../../../shared/components/search-bar/search
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      color: rgba(0, 0, 0, 0.74);
+      color: var(--gh-body);
     }
 
     .empty-state, .loading-state {
       padding: 64px 24px;
-      background: #ffffff;
+      background: var(--gh-surface);
       border-radius: 8px;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 16px;
       text-align: center;
-      color: rgba(0, 0, 0, 0.6);
+      color: var(--gh-muted);
     }
 
     .empty-state mat-icon,
     .loading-state mat-icon {
       font-size: 48px;
-      color: rgba(0, 0, 0, 0.2);
+      color: var(--gh-faint);
       animation: pulse 2.4s ease-in-out infinite;
     }
 

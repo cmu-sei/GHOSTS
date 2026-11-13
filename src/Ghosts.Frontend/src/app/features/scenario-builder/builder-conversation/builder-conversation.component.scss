@@ -1,23 +1,23 @@
 @use '@angular/material' as mat;
 
 // The conversation fills the step: a slim header, a thread that scrolls within itself, and a composer
-// pinned to the foot. 20.75rem is everything above and below it on the page: the app toolbar (64px), the
+// pinned to the foot. 16.4375rem is everything above and below it on the page: the app toolbar (48px), the
 // content wrapper's padding (20px twice), the builder header (73px), the stepper header (72px) and the app
-// footer (78px). The step's own 2rem padding is cancelled by the negative margin below, so it does not count.
-$ink: #1f2430;
-$muted: #6b7280;
-$line: #e5e7eb;
-$surface: #f6f7f9;
-$accent: #1c58d9;
+// footer (25px). The step's own 2rem padding is cancelled by the negative margin below, so it does not count.
+$ink: var(--gh-ink);
+$muted: var(--gh-muted);
+$line: var(--gh-line);
+$surface: var(--gh-canvas);
+$accent: var(--gh-accent);
 $column: 76rem;
 
 .conversation {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 20.75rem);
+  height: calc(100vh - 16.4375rem);
   min-height: 24rem;
   margin: -2rem;              // span the step's full width, over its padding
-  background: #fff;
+  background: var(--gh-surface);
   color: $ink;
 }
 
@@ -50,14 +50,14 @@ $column: 76rem;
     width: 0.55rem;
     height: 0.55rem;
     border-radius: 50%;
-    background: #22c55e;
-    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.18);
+    background: var(--gh-ok);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--gh-ok) 18%, transparent);
   }
 
   .model-name {
     font-size: 0.75rem;
     color: $muted;
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-family: var(--gh-mono);
     padding: 0.1rem 0.5rem;
     border: 1px solid $line;
     border-radius: 999px;
@@ -96,13 +96,13 @@ $column: 76rem;
   gap: 0.5rem;
   margin: 0.75rem 1.5rem 0;
   padding: 0.6rem 0.9rem;
-  background: #fdecea;
-  color: #7f1d1d;
+  background: var(--gh-bad-soft);
+  color: var(--gh-bad);
   border-radius: 10px;
   font-size: 0.9rem;
 
   mat-icon {
-    color: #d32f2f;
+    color: var(--gh-bad);
   }
 }
 
@@ -136,7 +136,7 @@ $column: 76rem;
       max-width: 70%;
       padding: 0.7rem 1rem;
       background: $accent;
-      color: #fff;
+      color: var(--gh-on-accent);
       border-radius: 18px 18px 4px 18px;
       white-space: pre-wrap;
       line-height: 1.5;
@@ -153,8 +153,8 @@ $column: 76rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #3f51b5, #7b2cbf);
-    color: #fff;
+    background: linear-gradient(135deg, var(--gh-accent), var(--gh-purple));
+    color: var(--gh-on-accent);
 
     mat-icon {
       font-size: 1.1rem;
@@ -167,7 +167,7 @@ $column: 76rem;
     flex: 1 1 auto;
     min-width: 0;
     padding: 0.85rem 1.1rem;
-    background: #fff;
+    background: var(--gh-surface);
     border: 1px solid $line;
     border-radius: 4px 18px 18px 18px;
   }
@@ -204,11 +204,11 @@ $column: 76rem;
       blockquote {
         border-left: 3px solid $line;
         padding-left: 0.8em;
-        color: #4b5563;
+        color: var(--gh-body);
       }
 
       code {
-        background: rgba(0, 0, 0, 0.06);
+        background: color-mix(in srgb, var(--gh-ink) 6%, transparent);
         padding: 0.1em 0.3em;
         border-radius: 4px;
         font-size: 0.9em;
@@ -264,7 +264,7 @@ $column: 76rem;
   color: $muted;
 
   .elapsed {
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-family: var(--gh-mono);
     font-size: 0.8rem;
   }
 }
@@ -273,11 +273,11 @@ $column: 76rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #7f1d1d;
+  color: var(--gh-bad);
   font-size: 0.92rem;
 
   mat-icon {
-    color: #d32f2f;
+    color: var(--gh-bad);
   }
 }
 
@@ -312,7 +312,7 @@ $column: 76rem;
     padding: 0.2rem 0.65rem;
     border: 1px solid $line;
     border-radius: 999px;
-    background: #fff;
+    background: var(--gh-surface);
     color: $accent;
     font: inherit;
     font-size: 0.78rem;
@@ -320,8 +320,8 @@ $column: 76rem;
 
     &:hover,
     &.open {
-      background: rgba(28, 88, 217, 0.08);
-      border-color: rgba(28, 88, 217, 0.35);
+      background: color-mix(in srgb, var(--gh-accent) 8%, transparent);
+      border-color: color-mix(in srgb, var(--gh-accent) 35%, transparent);
     }
 
     mat-icon {
@@ -335,12 +335,12 @@ $column: 76rem;
 .chunk-where {
   margin: 0.5rem 0 0;
   font-size: 0.78rem;
-  color: #6b7280;
+  color: $muted;
 }
 
 .chunk-text {
   background: $surface;
-  border-left: 3px solid #9ca3af;
+  border-left: 3px solid var(--gh-faint);
   padding: 0.6rem 0.8rem;
   margin: 0.5rem 0 0;
   font-size: 0.83rem;
@@ -355,7 +355,7 @@ $column: 76rem;
   padding-top: 0.75rem;
   border-top: 1px dashed $line;
   font-size: 0.86rem;
-  color: #4b5563;
+  color: var(--gh-body);
 
   ul {
     margin: 0;
@@ -378,7 +378,7 @@ $column: 76rem;
     }
 
     code {
-      background: rgba(0, 0, 0, 0.05);
+      background: color-mix(in srgb, var(--gh-ink) 5%, transparent);
       padding: 0.05em 0.3em;
       border-radius: 4px;
     }
@@ -388,7 +388,7 @@ $column: 76rem;
     margin-top: 0.5rem;
 
     .gap-line {
-      color: #92400e;
+      color: var(--gh-warn);
       margin: 0.2rem 0;
     }
   }
@@ -456,7 +456,7 @@ $column: 76rem;
 .composer {
   flex: 0 0 auto;
   padding: 0.75rem 1.5rem 0.9rem;
-  background: #fff;
+  background: var(--gh-surface);
   border-top: 1px solid $line;
 
   .composer-inner {
@@ -487,10 +487,10 @@ $column: 76rem;
   }
 
   &.ready {
-    color: #166534;
+    color: var(--gh-ok);
 
     mat-icon {
-      color: #16a34a;
+      color: var(--gh-ok);
     }
   }
 }
@@ -500,14 +500,14 @@ $column: 76rem;
   align-items: flex-end;
   gap: 0.25rem;
   padding: 0.35rem 0.35rem 0.35rem 1rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--gh-line-strong);
   border-radius: 1.4rem;
-  background: #fff;
+  background: var(--gh-surface);
   transition: border-color 0.15s, box-shadow 0.15s;
 
   &:focus-within {
     border-color: $accent;
-    box-shadow: 0 0 0 3px rgba(28, 88, 217, 0.15);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--gh-accent) 15%, transparent);
   }
 
   textarea {
@@ -526,7 +526,7 @@ $column: 76rem;
     max-height: 12rem;
 
     &::placeholder {
-      color: #9ca3af;
+      color: var(--gh-faint);
     }
   }
 
@@ -540,7 +540,7 @@ $column: 76rem;
   justify-content: space-between;
   gap: 1rem;
   font-size: 0.75rem;
-  color: #9ca3af;
+  color: var(--gh-faint);
 
   // The session's tokens and estimated cost, where the developer is looking when they decide to send more.
   .token-line {
@@ -552,10 +552,10 @@ $column: 76rem;
 // ───────────── the (mock) control dashboard ─────────────
 // Information dense by intent: one line per question, finding, source and gate step, in small type.
 
-$stated: #16a34a;
-$proposed: #d97706;
-$open: #dc2626;
-$pending: #9ca3af;
+$stated: var(--gh-ok);
+$proposed: var(--gh-warn);
+$open: var(--gh-bad);
+$pending: var(--gh-faint);
 
 .dash-resizer {
   flex: 0 0 6px;
@@ -565,7 +565,7 @@ $pending: #9ca3af;
 
   &:hover,
   &:active {
-    background: rgba($accent, 0.25);
+    background: color-mix(in srgb, var(--gh-accent) 25%, transparent);
   }
 
   @media (max-width: 1100px) {
@@ -579,7 +579,7 @@ $pending: #9ca3af;
   flex-direction: column;
   overflow-y: auto;
   border-left: 1px solid $line;
-  background: #fff;
+  background: var(--gh-surface);
   font-size: 0.78rem;
   color: $ink;
 
@@ -594,7 +594,7 @@ $pending: #9ca3af;
   }
 
   code {
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-family: var(--gh-mono);
     font-size: 0.72rem;
   }
 }
@@ -708,7 +708,7 @@ $pending: #9ca3af;
     height: 1rem;
     border-radius: 3px;
     background: $ink;
-    color: #fff;
+    color: var(--gh-surface);
     font-size: 0.6rem;
     font-weight: 700;
   }
@@ -723,11 +723,11 @@ $pending: #9ca3af;
   line-height: 1.3;
 
   .q-icon { color: $pending; }
-  .q-tag { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.68rem; color: $muted; }
+  .q-tag { font-family: var(--gh-mono); font-size: 0.68rem; color: $muted; }
   .q-label { overflow-wrap: anywhere; }
   .q-value {
     overflow-wrap: anywhere;
-    color: #4b5563;
+    color: var(--gh-body);
     font-size: 0.72rem;
 
     &.empty { font-style: italic; color: $open; }
@@ -788,7 +788,7 @@ $pending: #9ca3af;
     border-radius: 3px;
     font-size: 0.62rem;
     font-weight: 700;
-    color: #fff;
+    color: var(--gh-surface);
     background: $pending;
   }
   &.error .f-sev { background: $open; }

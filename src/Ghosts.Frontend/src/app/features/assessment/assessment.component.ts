@@ -10,6 +10,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ConfigService } from '../../core/services/config.service';
 import { ExecutionService } from '../../core/services/execution.service';
 import { ExecutionSummary } from '../../core/models/execution.model';
+import { ThemeService } from '../../core/services/theme.service';
 
 interface GrafanaPanel {
   title: string;
@@ -30,6 +31,7 @@ export class AssessmentComponent implements OnInit {
   private readonly sanitizer = inject(DomSanitizer);
   private readonly configService = inject(ConfigService);
   private readonly executionService = inject(ExecutionService);
+  private readonly theme = inject(ThemeService);
 
   panels: { panel: GrafanaPanel; url: SafeResourceUrl }[] = [];
   grafanaUrl = '';
@@ -86,7 +88,7 @@ export class AssessmentComponent implements OnInit {
 
   private buildPanelUrl(panel: GrafanaPanel, executionId?: number): SafeResourceUrl {
     const execution = executionId ? `&var-execution=${executionId}` : '';
-    const raw = `${this.grafanaUrl}/d-solo/${panel.dashboardUid}/?panelId=${panel.panelId}&theme=light${execution}`;
+    const raw = `${this.grafanaUrl}/d-solo/${panel.dashboardUid}/?panelId=${panel.panelId}&theme=${this.theme.theme()}${execution}`;
     return this.sanitizer.bypassSecurityTrustResourceUrl(raw);
   }
 }

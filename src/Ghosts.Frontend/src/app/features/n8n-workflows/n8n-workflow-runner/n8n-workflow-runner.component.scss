@@ -48,7 +48,7 @@
 
   mat-card-subtitle {
     font-size: 14px;
-    color: rgba(0, 0, 0, 0.6);
+    color: var(--gh-muted);
   }
 }
 
@@ -66,7 +66,7 @@
   .workflow-id {
     display: block;
     font-size: 11px;
-    color: rgba(0, 0, 0, 0.6);
+    color: var(--gh-muted);
   }
 
   .form-actions {
@@ -83,7 +83,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    color: rgba(0, 0, 0, 0.7);
+    color: var(--gh-body);
   }
 }
 
@@ -99,9 +99,9 @@
 
   li {
     padding: 12px 16px;
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--gh-line);
     border-radius: 8px;
-    background-color: #fafafa;
+    background-color: var(--gh-raised);
   }
 
   .workflow-name {
@@ -111,7 +111,7 @@
     font-weight: 600;
 
     .workflow-link {
-      color: #1976d2;
+      color: var(--gh-accent);
       text-decoration: none;
       font-weight: 600;
 
@@ -124,31 +124,31 @@
   .workflow-meta {
     margin-top: 6px;
     font-size: 13px;
-    color: rgba(0, 0, 0, 0.7);
+    color: var(--gh-body);
   }
 
   .status-chip {
     padding: 2px 8px;
     border-radius: 999px;
-    background-color: rgba(56, 142, 60, 0.15);
-    color: #2e7d32;
+    background-color: var(--gh-ok-soft);
+    color: var(--gh-ok);
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.05em;
 
     &.running {
-      background-color: rgba(255, 152, 0, 0.2);
-      color: #ef6c00;
+      background-color: var(--gh-warn-soft);
+      color: var(--gh-warn);
     }
 
     &.trigger {
-      background-color: rgba(33, 150, 243, 0.15);
-      color: #1e88e5;
+      background-color: var(--gh-accent-soft);
+      color: var(--gh-accent);
     }
 
     &.inactive {
-      background-color: rgba(244, 67, 54, 0.15);
-      color: #d32f2f;
+      background-color: var(--gh-bad-soft);
+      color: var(--gh-bad);
     }
   }
 
@@ -161,12 +161,12 @@
     justify-content: center;
     padding: 48px 16px;
     text-align: center;
-    color: rgba(0, 0, 0, 0.6);
+    color: var(--gh-muted);
 
     i {
       font-size: 36px;
       margin-bottom: 12px;
-      color: rgba(0, 0, 0, 0.4);
+      color: var(--gh-faint);
     }
 
     button {
@@ -181,21 +181,21 @@
     align-items: center;
     gap: 6px;
     font-size: 13px;
-    color: rgba(0, 0, 0, 0.5);
+    color: var(--gh-muted);
 
     .hub-dot {
       display: inline-block;
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background-color: rgba(0, 0, 0, 0.25);
+      background-color: var(--gh-faint);
     }
 
     &.connected {
-      color: #2e7d32;
+      color: var(--gh-ok);
 
       .hub-dot {
-        background-color: #43a047;
+        background-color: var(--gh-ok);
       }
     }
   }
@@ -217,12 +217,12 @@
     justify-content: center;
     padding: 40px 16px;
     text-align: center;
-    color: rgba(0, 0, 0, 0.5);
+    color: var(--gh-muted);
 
     i {
       font-size: 32px;
       margin-bottom: 12px;
-      color: rgba(0, 0, 0, 0.3);
+      color: var(--gh-faint);
     }
 
     p {
@@ -231,14 +231,14 @@
 
     .log-empty-hint {
       font-size: 12px;
-      color: rgba(0, 0, 0, 0.4);
+      color: var(--gh-faint);
     }
   }
 
   .log-scroll {
     max-height: 320px;
     overflow-y: auto;
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--gh-line);
     border-radius: 6px;
   }
 
@@ -248,8 +248,8 @@
     font-size: 13px;
 
     thead tr {
-      background-color: rgba(0, 0, 0, 0.03);
-      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      background-color: var(--gh-raised);
+      border-bottom: 1px solid var(--gh-line);
     }
 
     th {
@@ -259,13 +259,13 @@
       font-size: 12px;
       text-transform: uppercase;
       letter-spacing: 0.04em;
-      color: rgba(0, 0, 0, 0.5);
+      color: var(--gh-muted);
       white-space: nowrap;
     }
 
     td {
       padding: 7px 12px;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      border-bottom: 1px solid var(--gh-line);
       vertical-align: middle;
     }
 
@@ -274,12 +274,12 @@
     }
 
     .log-row-fail td {
-      background-color: rgba(244, 67, 54, 0.04);
+      background-color: color-mix(in srgb, var(--gh-bad) 4%, transparent);
     }
 
     .log-time {
-      font-family: monospace;
-      color: rgba(0, 0, 0, 0.55);
+      font-family: var(--gh-mono);
+      color: var(--gh-muted);
       white-space: nowrap;
     }
 
@@ -288,9 +288,9 @@
     }
 
     .log-code {
-      font-family: monospace;
+      font-family: var(--gh-mono);
       font-size: 12px;
-      color: rgba(0, 0, 0, 0.6);
+      color: var(--gh-muted);
       white-space: nowrap;
     }
 
@@ -300,8 +300,8 @@
 
     .log-error-text {
       font-size: 12px;
-      font-family: monospace;
-      color: #c62828;
+      font-family: var(--gh-mono);
+      color: var(--gh-bad);
       display: block;
       white-space: nowrap;
       overflow: hidden;
@@ -311,21 +311,21 @@
     }
 
     .log-na {
-      color: rgba(0, 0, 0, 0.3);
+      color: var(--gh-faint);
     }
 
     .status-chip {
       padding: 2px 8px;
       border-radius: 999px;
-      background-color: rgba(56, 142, 60, 0.15);
-      color: #2e7d32;
+      background-color: var(--gh-ok-soft);
+      color: var(--gh-ok);
       font-size: 11px;
       text-transform: uppercase;
       letter-spacing: 0.05em;
 
       &.log-fail {
-        background-color: rgba(244, 67, 54, 0.15);
-        color: #d32f2f;
+        background-color: var(--gh-bad-soft);
+        color: var(--gh-bad);
       }
     }
   }

@@ -15,7 +15,7 @@
   }
 
   .subtitle {
-    color: #666;
+    color: var(--gh-muted);
     margin: 0 0 1rem 0;
   }
 
@@ -23,13 +23,13 @@
     display: flex;
     gap: 1rem;
     padding: 1rem;
-    background-color: #e3f2fd;
-    border-left: 4px solid #2196f3;
+    background-color: var(--gh-accent-soft);
+    border-left: 4px solid var(--gh-accent);
     border-radius: 4px;
     margin-top: 1rem;
 
     .help-icon {
-      color: #2196f3;
+      color: var(--gh-accent);
       font-size: 24px;
       width: 24px;
       height: 24px;
@@ -38,14 +38,14 @@
 
     p {
       margin: 0 0 0.5rem 0;
-      color: #333;
+      color: var(--gh-ink);
       font-size: 0.9rem;
     }
 
     ul {
       margin: 0.5rem 0;
       padding-left: 1.5rem;
-      color: #555;
+      color: var(--gh-body);
       font-size: 0.85rem;
 
       li {
@@ -95,7 +95,7 @@
 
     .filter-count {
       font-size: 0.9rem;
-      color: #666;
+      color: var(--gh-muted);
       font-weight: normal;
     }
   }
@@ -116,7 +116,7 @@
 .empty-state {
   text-align: center;
   padding: 3rem;
-  color: #999;
+  color: var(--gh-faint);
 
   mat-icon {
     font-size: 48px;
@@ -142,7 +142,7 @@
   }
 
   .low-confidence {
-    color: #f44336;
+    color: var(--gh-bad);
     font-weight: 500;
   }
 
@@ -167,11 +167,11 @@
 
   mat-icon {
     &.reviewed {
-      color: #4caf50;
+      color: var(--gh-ok);
     }
 
     &:not(.reviewed) {
-      color: #999;
+      color: var(--gh-faint);
     }
   }
 }

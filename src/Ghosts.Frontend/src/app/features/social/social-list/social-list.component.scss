@@ -31,7 +31,7 @@
 
   p {
     margin: 8px 0;
-    color: rgba(0, 0, 0, 0.6);
+    color: var(--gh-muted);
   }
 }
 
@@ -47,7 +47,7 @@
 
     &:hover {
       transform: translateY(-4px);
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 8px 16px rgb(var(--gh-shadow) / 0.15);
     }
 
     mat-card-header {
@@ -64,14 +64,14 @@
         width: 40px;
         height: 40px;
         border-radius: 50%;
-        background-color: #e0e0e0;
+        background-color: var(--gh-line);
         display: flex;
         align-items: center;
         justify-content: center;
 
         i {
           font-size: 24px;
-          color: #757575;
+          color: var(--gh-muted);
         }
       }
 
@@ -98,8 +98,8 @@
       .mini-badge {
         display: inline-block;
         padding: 2px 6px;
-        background-color: #e3f2fd;
-        color: #1976d2;
+        background-color: var(--gh-accent-soft);
+        color: var(--gh-accent-ink);
         border-radius: 8px;
         font-size: 10px;
         font-weight: 500;
@@ -113,7 +113,7 @@
         margin: 0 0 12px 0;
         font-size: 13px;
         font-weight: 500;
-        color: rgba(0, 0, 0, 0.6);
+        color: var(--gh-muted);
       }
 
       .knowledge-topics {
@@ -131,7 +131,7 @@
           border-radius: 11px;
 
           .topic-count {
-            background: rgba(0, 0, 0, 0.2);
+            background: rgb(var(--gh-shadow) / 0.2);
             padding: 1px 4px;
             border-radius: 8px;
             font-size: 9px;
@@ -140,58 +140,58 @@
 
           // Knowledge strength color classes (z0-z9)
           &.z0 {
-            background-color: #f1f1f1;
+            background-color: light-dark(#f1f1f1, color-mix(in srgb, #c62828 20%, transparent));
             color: #c62828;
           }
 
           &.z1 {
-            background-color: #fff3e0;
+            background-color: light-dark(#fff3e0, color-mix(in srgb, #e65100 20%, transparent));
             color: #e65100;
           }
 
           &.z2 {
-            background-color: #fff9c4;
+            background-color: light-dark(#fff9c4, color-mix(in srgb, #f57f17 20%, transparent));
             color: #f57f17;
           }
 
           &.z3 {
-            background-color: #f1f8e9;
+            background-color: light-dark(#f1f8e9, color-mix(in srgb, #558b2f 20%, transparent));
             color: #558b2f;
           }
 
           &.z4 {
-            background-color: #e8f5e9;
+            background-color: light-dark(#e8f5e9, color-mix(in srgb, #2e7d32 20%, transparent));
             color: #2e7d32;
           }
 
           &.z5 {
-            background-color: #e0f2f1;
+            background-color: light-dark(#e0f2f1, color-mix(in srgb, #00695c 20%, transparent));
             color: #00695c;
           }
 
           &.z6 {
-            background-color: #e1f5fe;
+            background-color: light-dark(#e1f5fe, color-mix(in srgb, #0277bd 20%, transparent));
             color: #0277bd;
           }
 
           &.z7 {
-            background-color: #e8eaf6;
+            background-color: light-dark(#e8eaf6, color-mix(in srgb, #283593 20%, transparent));
             color: #283593;
           }
 
           &.z8 {
-            background-color: #f3e5f5;
+            background-color: light-dark(#f3e5f5, color-mix(in srgb, #6a1b9a 20%, transparent));
             color: #6a1b9a;
           }
 
           &.z9 {
-            background-color: #fce4ec;
+            background-color: light-dark(#fce4ec, color-mix(in srgb, #ad1457 20%, transparent));
             color: #ad1457;
           }
 
           &.more-chip {
-            background-color: #e0e0e0;
-            color: #616161;
+            background-color: var(--gh-line);
+            color: var(--gh-muted);
             font-weight: 600;
             font-style: italic;
           }
@@ -200,7 +200,7 @@
 
       .no-topics {
         font-size: 12px;
-        color: rgba(0, 0, 0, 0.4);
+        color: var(--gh-faint);
         font-style: italic;
         margin: 0;
       }
@@ -213,7 +213,7 @@
         margin: 0 0 12px 0;
         font-size: 13px;
         font-weight: 500;
-        color: rgba(0, 0, 0, 0.6);
+        color: var(--gh-muted);
       }
 
       .preference-chips {
@@ -229,11 +229,11 @@
           align-items: center;
           gap: 3px;
           border-radius: 11px;
-          background-color: #e8eaf6;
-          color: #3f51b5;
+          background-color: var(--gh-accent-soft);
+          color: var(--gh-accent-ink);
 
           .pref-strength {
-            background: rgba(63, 81, 181, 0.2);
+            background: color-mix(in srgb, var(--gh-accent) 20%, transparent);
             padding: 1px 4px;
             border-radius: 8px;
             font-size: 9px;
@@ -241,8 +241,8 @@
           }
 
           &.more-chip {
-            background-color: #e0e0e0;
-            color: #616161;
+            background-color: var(--gh-line);
+            color: var(--gh-muted);
             font-weight: 600;
             font-style: italic;
           }
@@ -253,7 +253,7 @@
     .card-footer {
       margin-top: 12px;
       padding-top: 12px;
-      border-top: 1px solid #e0e0e0;
+      border-top: 1px solid var(--gh-line);
 
       .metrics {
         display: flex;
@@ -265,13 +265,13 @@
           align-items: center;
           gap: 4px;
           font-size: 13px;
-          color: rgba(0, 0, 0, 0.7);
+          color: var(--gh-body);
 
           mat-icon {
             font-size: 18px;
             width: 18px;
             height: 18px;
-            color: #1976d2;
+            color: var(--gh-accent);
           }
         }
       }
@@ -304,14 +304,14 @@
           width: 48px;
           height: 48px;
           border-radius: 50%;
-          background-color: #e0e0e0;
+          background-color: var(--gh-line);
           display: flex;
           align-items: center;
           justify-content: center;
 
           mat-icon {
             font-size: 28px;
-            color: #757575;
+            color: var(--gh-muted);
           }
         }
 
@@ -331,8 +331,8 @@
       .badge {
         display: inline-block;
         padding: 4px 10px;
-        background-color: #e3f2fd;
-        color: #1976d2;
+        background-color: var(--gh-accent-soft);
+        color: var(--gh-accent-ink);
         border-radius: 12px;
         font-size: 12px;
         font-weight: 500;
@@ -342,7 +342,7 @@
     .stats {
       margin-top: 8px;
       font-size: 13px;
-      color: rgba(0, 0, 0, 0.6);
+      color: var(--gh-muted);
     }
   }
 
@@ -370,14 +370,14 @@
         }
 
         .connection-avatar-placeholder {
-          background-color: #e0e0e0;
+          background-color: var(--gh-line);
           display: flex;
           align-items: center;
           justify-content: center;
 
           mat-icon {
             font-size: 20px;
-            color: #757575;
+            color: var(--gh-muted);
           }
         }
 
@@ -393,7 +393,7 @@
         font-size: 13px;
 
         .stat {
-          color: rgba(0, 0, 0, 0.6);
+          color: var(--gh-muted);
         }
 
         .score {
@@ -402,23 +402,23 @@
           font-weight: 600;
 
           &.excellent {
-            background-color: #4caf50;
-            color: white;
+            background-color: var(--gh-ok-soft);
+            color: var(--gh-ok);
           }
 
           &.good {
-            background-color: #8bc34a;
-            color: white;
+            background-color: color-mix(in srgb, var(--gh-ok-soft), var(--gh-warn-soft));
+            color: color-mix(in srgb, var(--gh-ok), var(--gh-warn));
           }
 
           &.fair {
-            background-color: #ff9800;
-            color: white;
+            background-color: var(--gh-warn-soft);
+            color: var(--gh-warn);
           }
 
           &.poor {
-            background-color: #f44336;
-            color: white;
+            background-color: var(--gh-bad-soft);
+            color: var(--gh-bad);
           }
         }
       }
@@ -437,11 +437,11 @@
             margin: 0 0 12px 0;
             font-size: 14px;
             font-weight: 500;
-            color: rgba(0, 0, 0, 0.87);
+            color: var(--gh-ink);
           }
 
           .no-data {
-            color: rgba(0, 0, 0, 0.4);
+            color: var(--gh-faint);
             font-style: italic;
             font-size: 13px;
           }
@@ -457,28 +457,28 @@
             align-items: center;
             gap: 12px;
             padding: 8px 12px;
-            background-color: #f5f5f5;
+            background-color: var(--gh-raised);
             border-radius: 4px;
 
             .step {
               min-width: 80px;
               font-size: 12px;
-              color: rgba(0, 0, 0, 0.6);
+              color: var(--gh-muted);
             }
 
             .change-icon {
               font-size: 20px;
 
               &.up {
-                color: #4caf50;
+                color: var(--gh-ok);
               }
 
               &.down {
-                color: #f44336;
+                color: var(--gh-bad);
               }
 
               &.neutral {
-                color: #9e9e9e;
+                color: var(--gh-faint);
               }
             }
 
@@ -501,12 +501,12 @@
             align-items: center;
             gap: 12px;
             padding: 8px 12px;
-            background-color: #f5f5f5;
+            background-color: var(--gh-raised);
             border-radius: 4px;
 
             mat-icon {
               font-size: 20px;
-              color: #4caf50;
+              color: var(--gh-ok);
             }
 
             .topic {
@@ -517,32 +517,32 @@
             .value {
               font-weight: 600;
               font-size: 13px;
-              color: #2e7d32;
+              color: var(--gh-ok);
             }
 
             .step {
               font-size: 12px;
-              color: rgba(0, 0, 0, 0.6);
+              color: var(--gh-muted);
             }
           }
 
           .decay-item {
             mat-icon {
-              color: #f44336;
+              color: var(--gh-bad);
             }
 
             .value {
-              color: #c62828;
+              color: var(--gh-bad);
             }
           }
         }
 
         .decay-section {
-          border-top: 1px solid #e0e0e0;
+          border-top: 1px solid var(--gh-line);
           padding-top: 16px;
 
           h4 {
-            color: #f44336;
+            color: var(--gh-bad);
           }
         }
       }

@@ -6,16 +6,16 @@
   top: 0;
   left: 0;
   z-index: 1000;
-  background: #fff;
+  background: var(--gh-canvas);
 }
 
 .dynamic-container {
   width: 100%;
   height: 100%;
   margin: 0;
-  background: #fff;
-  color: #000;
-  font-family: monospace;
+  background: var(--gh-canvas);
+  color: var(--gh-ink);
+  font-family: var(--gh-mono);
   position: relative;
 }
 
@@ -32,8 +32,8 @@ foreignObject {
 
 .tooltip {
   position: absolute;
-  background: #333;
-  color: #fff;
+  background: var(--gh-ink);
+  color: var(--gh-surface);
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 12px;
@@ -47,10 +47,10 @@ foreignObject {
   position: fixed;
   bottom: 110px;
   right: 10px;
-  background: #eee;
-  border: 1px solid #999;
+  background: var(--gh-raised);
+  border: 1px solid var(--gh-line-strong);
   padding: 6px 12px;
-  font-family: monospace;
+  font-family: var(--gh-mono);
   font-size: 14px;
   border-radius: 4px;
   z-index: 999;
@@ -63,9 +63,9 @@ foreignObject {
   width: 100%;
   max-height: 97px;
   overflow-y: auto;
-  background: white;
-  border-top: 1px solid silver;
-  font-family: monospace;
+  background: var(--gh-surface);
+  border-top: 1px solid var(--gh-line-strong);
+  font-family: var(--gh-mono);
   font-size: 12px;
   padding: 4px 8px;
   z-index: 998;

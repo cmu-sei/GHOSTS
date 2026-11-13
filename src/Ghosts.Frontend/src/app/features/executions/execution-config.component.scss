@@ -5,7 +5,7 @@
   justify-content: center;
   min-height: 400px;
   text-align: center;
-  color: #666;
+  color: var(--gh-muted);
 
   mat-spinner {
     margin-bottom: 16px;
@@ -23,19 +23,19 @@
   align-items: flex-start;
   margin-bottom: 32px;
   padding-bottom: 16px;
-  border-bottom: 2px solid #e0e0e0;
+  border-bottom: 2px solid var(--gh-line);
 
   h1 {
     margin: 0 0 8px 0;
     font-size: 32px;
     font-weight: 300;
-    color: #1b5e20;
+    color: var(--gh-accent);
   }
 
   .subtitle {
     margin: 0;
     font-size: 16px;
-    color: #666;
+    color: var(--gh-muted);
   }
 
   .header-actions {
@@ -58,9 +58,9 @@
 .config-section {
   margin-bottom: 40px;
   padding: 24px;
-  background-color: #fff;
+  background-color: var(--gh-surface);
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgb(var(--gh-shadow) / 0.1);
 
   &:last-child {
     margin-bottom: 0;
@@ -71,7 +71,7 @@
     margin-bottom: 16px;
     font-size: 20px;
     font-weight: 500;
-    color: #1b5e20;
+    color: var(--gh-accent);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -81,7 +81,7 @@
     margin-top: 0;
     margin-bottom: 24px;
     font-size: 14px;
-    color: #666;
+    color: var(--gh-muted);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -102,14 +102,14 @@
     margin-bottom: 12px;
     font-size: 14px;
     font-weight: 500;
-    color: #333;
+    color: var(--gh-ink);
 
     i {
       margin-left: 4px;
       margin-right: 6px;
       ;
       font-size: 12px;
-      color: #666;
+      color: var(--gh-muted);
       cursor: help;
     }
   }
@@ -124,7 +124,7 @@
     width: 90px;
     text-align: right;
     font-weight: 500;
-    color: #1b5e20;
+    color: var(--gh-accent);
     vertical-align: middle;
     margin-left: 10px;
     font-size: 14px;
@@ -151,12 +151,12 @@
   font-weight: 500;
   padding: 6px 16px;
   border-radius: 16px;
-  background-color: #e8f5e9;
-  color: #2e7d32;
+  background-color: var(--gh-ok-soft);
+  color: var(--gh-ok);
 
   &.invalid {
-    background-color: #ffebee;
-    color: #c62828;
+    background-color: var(--gh-bad-soft);
+    color: var(--gh-bad);
 
     i {
       margin-left: 4px;
@@ -179,19 +179,19 @@
   justify-content: flex-start;
   margin-top: 24px;
   padding-top: 24px;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid var(--gh-line);
 }
 
 // Material slider customization
 ::ng-deep {
   .mat-mdc-slider {
     .mdc-slider__track--active_fill {
-      border-color: #2e7d32;
+      border-color: var(--gh-accent);
     }
 
     .mdc-slider__thumb-knob {
-      background-color: #2e7d32;
-      border-color: #2e7d32;
+      background-color: var(--gh-accent);
+      border-color: var(--gh-accent);
     }
   }
 }
@@ -218,7 +218,7 @@
   .config-section {
     border-radius: 0;
     box-shadow: none;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid var(--gh-line);
   }
 
   .slider-field {

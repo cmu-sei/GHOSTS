@@ -119,7 +119,7 @@ interface ReportedTimeline {
 
     .hint {
       margin: 0 0 12px;
-      color: rgba(0, 0, 0, 0.6);
+      color: var(--gh-muted);
     }
 
     .loading, .error, .empty {
@@ -128,7 +128,7 @@ interface ReportedTimeline {
       align-items: center;
       justify-content: center;
       padding: 40px 20px;
-      color: rgba(0, 0, 0, 0.6);
+      color: var(--gh-muted);
     }
 
     .loading {
@@ -137,7 +137,7 @@ interface ReportedTimeline {
 
     .error {
       gap: 12px;
-      color: #f44336;
+      color: var(--gh-bad);
     }
 
     table {
@@ -145,13 +145,13 @@ interface ReportedTimeline {
     }
 
     .timeline-id {
-      font-family: monospace;
+      font-family: var(--gh-mono);
       font-size: 12px;
     }
 
     .handlers {
       font-size: 12px;
-      color: rgba(0, 0, 0, 0.6);
+      color: var(--gh-muted);
     }
 
     .actions {

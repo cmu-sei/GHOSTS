@@ -1,8 +1,8 @@
 {
   "env": {
-    "ANTHROPIC_DEFAULT_FABLE_MODEL": "us.anthropic.claude-fable-5-1",
+    "ANTHROPIC_DEFAULT_FABLE_MODEL": "us.anthropic.claude-fable-5-2",
     "ANTHROPIC_DEFAULT_FABLE_MODEL_NAME": "Fable",
-    "ANTHROPIC_DEFAULT_FABLE_MODEL_DESCRIPTION": "Fable 5.1 · Most capable",
+    "ANTHROPIC_DEFAULT_FABLE_MODEL_DESCRIPTION": "Fable 5.2 · Most capable",
     "ANTHROPIC_DEFAULT_OPUS_MODEL": "us.anthropic.claude-opus-5-5",
     "ANTHROPIC_DEFAULT_OPUS_MODEL_NAME": "Opus",
     "ANTHROPIC_DEFAULT_OPUS_MODEL_DESCRIPTION": "Opus 5.5 · Deep reasoning for complex work",

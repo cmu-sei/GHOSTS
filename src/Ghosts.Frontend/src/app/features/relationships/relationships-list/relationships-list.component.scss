@@ -29,7 +29,7 @@
 
   mat-card-subtitle {
     font-size: 14px;
-    color: rgba(0, 0, 0, 0.6);
+    color: var(--gh-muted);
   }
 
   .loading,
@@ -52,7 +52,7 @@
 
     p {
       margin: 8px 0;
-      color: rgba(0, 0, 0, 0.6);
+      color: var(--gh-muted);
     }
   }
 
@@ -64,7 +64,7 @@
 
       th {
         font-weight: 600;
-        background-color: #f5f5f5;
+        background-color: var(--gh-raised);
         padding: 12px 16px;
       }
 
@@ -85,7 +85,7 @@
       .metric {
         font-size: 16px;
         font-weight: 500;
-        color: #1976d2;
+        color: var(--gh-accent);
       }
     }
   }
@@ -110,7 +110,7 @@
   .stats {
     margin-top: 8px;
     font-size: 13px;
-    color: rgba(0, 0, 0, 0.6);
+    color: var(--gh-muted);
   }
 
   mat-tab-group {
@@ -122,8 +122,8 @@
 .badge {
   display: inline-block;
   padding: 2px 8px;
-  background-color: #e3f2fd;
-  color: #1976d2;
+  background-color: var(--gh-accent-soft);
+  color: var(--gh-accent-ink);
   border-radius: 12px;
   font-size: 11px;
   font-weight: 500;
@@ -148,23 +148,23 @@
 
       mat-chip {
         &.status-excellent {
-          background-color: #4caf50 !important;
-          color: white !important;
+          background-color: var(--gh-ok-soft) !important;
+          color: var(--gh-ok) !important;
         }
 
         &.status-good {
-          background-color: #8bc34a !important;
-          color: white !important;
+          background-color: color-mix(in srgb, var(--gh-ok-soft), var(--gh-warn-soft)) !important;
+          color: color-mix(in srgb, var(--gh-ok), var(--gh-warn)) !important;
         }
 
         &.status-fair {
-          background-color: #ff9800 !important;
-          color: white !important;
+          background-color: var(--gh-warn-soft) !important;
+          color: var(--gh-warn) !important;
         }
 
         &.status-poor {
-          background-color: #f44336 !important;
-          color: white !important;
+          background-color: var(--gh-bad-soft) !important;
+          color: var(--gh-bad) !important;
         }
       }
     }
@@ -188,15 +188,15 @@
       }
 
       .trend-up {
-        color: #4caf50;
+        color: var(--gh-ok);
       }
 
       .trend-down {
-        color: #f44336;
+        color: var(--gh-bad);
       }
 
       .trend-neutral {
-        color: #9e9e9e;
+        color: var(--gh-faint);
       }
     }
 
@@ -208,7 +208,7 @@
       }
 
       .no-data {
-        color: rgba(0, 0, 0, 0.6);
+        color: var(--gh-muted);
         font-style: italic;
       }
 
@@ -234,11 +234,11 @@
             .step {
               min-width: 80px;
               font-size: 12px;
-              color: rgba(0, 0, 0, 0.6);
+              color: var(--gh-muted);
             }
 
             .value-bar {
-              background: linear-gradient(to right, #1976d2, #2196f3);
+              background: linear-gradient(to right, var(--gh-accent-hover), var(--gh-accent));
               height: 24px;
               border-radius: 4px;
               display: flex;
@@ -248,7 +248,7 @@
               max-width: 100%;
 
               span {
-                color: white;
+                color: var(--gh-on-accent);
                 font-size: 12px;
                 font-weight: 500;
               }
@@ -300,7 +300,8 @@
 
     &:hover {
       opacity: 0.9;
-      background-color: aliceblue;
+      background-color: var(--gh-accent-soft);
+      color: var(--gh-accent-ink);
     }
   }
 }
@@ -334,7 +335,8 @@
 
     &:hover {
       opacity: 0.9;
-      background-color: aliceblue;
+      background-color: var(--gh-accent-soft);
+      color: var(--gh-accent-ink);
     }
   }
 }
@@ -348,7 +350,7 @@
 
     th {
       font-weight: 600;
-      background-color: #f5f5f5;
+      background-color: var(--gh-raised);
     }
 
     td, th {
@@ -364,6 +366,6 @@
   }
 
   .mat-expansion-panel {
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 2px 4px rgb(var(--gh-shadow) / 0.1) !important;
   }
 }

@@ -1,10 +1,9 @@
-import { Component, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { ChangeDetectionStrategy } from '@angular/core';
 import { FooterComponent } from '../footer/footer.component';
+import { ThemeService } from '../../../core/services/theme.service';
 
 interface NavItem {
   label: string;
@@ -20,39 +19,29 @@ interface NavItem {
   imports: [
     RouterLink,
     RouterLinkActive,
-    MatToolbarModule,
-    MatButtonModule,
     MatMenuModule,
     FooterComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <mat-toolbar color="primary" class="ghosts-toolbar mat-elevation-z4">
-      <a [routerLink]="'/'" class="app-title">
-        <img src="/ghosts.png" alt="GHOSTS" class="logo">
+    <header class="bar">
+      <a [routerLink]="'/'" class="brand">
+        <span class="mark" aria-hidden="true"></span>
         GHOSTS
       </a>
 
-      <nav class="nav-links">
+      <nav class="tabs">
         @for (item of navItems(); track item.path || item.label) {
           @if (item.rightAlign) {
-            <span class="nav-spacer"></span>
+            <span class="spacer"></span>
           }
           @if (item.children && item.children.length > 0) {
-            <div class="nav-item-group">
-              <a
-                mat-button
-                [routerLink]="item.path"
-                routerLinkActive="active"
-                [routerLinkActiveOptions]="{ exact: false }"
-                class="nav-link nav-link-with-menu">
+            <div class="tab-group" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: false }">
+              <a class="tab" [routerLink]="item.path" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: false }">
                 <i class="fas {{item.icon}}"></i>
                 <span>{{item.label}}</span>
               </a>
-              <button
-                mat-button
-                [matMenuTriggerFor]="menu"
-                class="nav-link nav-dropdown-trigger">
+              <button type="button" class="tab caret" [matMenuTriggerFor]="menu" [attr.aria-label]="item.label + ' menu'">
                 <i class="fas fa-chevron-down"></i>
               </button>
               <mat-menu #menu="matMenu">
@@ -65,19 +54,22 @@ interface NavItem {
               </mat-menu>
             </div>
           } @else {
-            <a
-              mat-button
-              [routerLink]="item.path"
-              routerLinkActive="active"
-              [routerLinkActiveOptions]="{ exact: false }"
-              class="nav-link">
+            <a class="tab" [routerLink]="item.path" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: false }">
               <i class="fas {{item.icon}}"></i>
               <span>{{item.label}}</span>
             </a>
           }
         }
       </nav>
-    </mat-toolbar>
+
+      <button type="button" class="theme" [attr.aria-label]="themeLabel()" [title]="themeLabel()" (click)="theme.toggle()">
+        @if (theme.theme() === 'dark') {
+          <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="3" /><path d="M8 1.5v1.6M8 12.9v1.6M1.5 8h1.6M12.9 8h1.6M3.4 3.4l1.1 1.1M11.5 11.5l1.1 1.1M3.4 12.6l1.1-1.1M11.5 4.5l1.1-1.1" /></svg>
+        } @else {
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13.5 9.6A5.6 5.6 0 0 1 6.4 2.5a5.6 5.6 0 1 0 7.1 7.1Z" /></svg>
+        }
+      </button>
+    </header>
 
     <div class="main-content">
       <div class="content-wrapper">
@@ -87,135 +79,144 @@ interface NavItem {
     </div>
   `,
   styles: [`
-    .ghosts-toolbar.mat-toolbar.mat-primary {
-      --mat-toolbar-container-background-color: #1b5e20;
-      --mat-toolbar-container-text-color: #ffffff;
-      --mdc-top-app-bar-container-color: #1b5e20;
-      --mdc-top-app-bar-icon-ink-color: #ffffff;
-      --mdc-top-app-bar-title-text-color: #ffffff;
-      --mat-toolbar-standard-height: 64px;
-      background-image: linear-gradient(90deg, #2e7d32, #2e7d32, #1b5e20);
-      background-color: #1b5e20;
-      color: #ffffff;
+    :host {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .bar {
       display: flex;
       align-items: center;
       gap: 16px;
+      height: 48px;
+      padding: 0 16px;
+      background: var(--gh-surface);
+      border-bottom: 1px solid var(--gh-line);
     }
 
-    .ghosts-toolbar.mat-toolbar.mat-primary .mat-mdc-icon-button {
-      color: inherit;
-    }
-
-    .logo {
-      filter: brightness(0) invert(1);
-    }
-
-    .app-title {
+    .brand {
       display: flex;
       align-items: center;
-      gap: 12px;
-      font-size: 20px;
-      font-weight: 300;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: inherit;
-      white-space: nowrap;
+      gap: 8px;
+      font-weight: 600;
+      color: var(--gh-ink) !important;
       text-decoration: none;
-      transition: opacity 0.2s;
+      white-space: nowrap;
     }
 
-    .app-title:hover {
-      opacity: 0.9;
+    .mark {
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+      background: linear-gradient(135deg, var(--gh-brand-light) 0 50%, var(--gh-brand-dark) 50% 100%);
     }
 
-    .logo {
-      height: 32px;
-      width: 32px;
-    }
-
-    .mat-mdc-button {
-      font-weight: 300 !important;
-    }
-
-    .nav-links {
+    .tabs {
       display: flex;
-      align-items: center;
-      gap: 4px;
+      align-items: stretch;
+      gap: 2px;
       flex: 1;
+      height: 100%;
       overflow-x: auto;
-      margin: 0;
-      padding: 0;
-      border: none;
-      outline: none;
       scrollbar-width: none; /* Firefox */
     }
 
-    .nav-links::-webkit-scrollbar {
+    .tabs::-webkit-scrollbar {
       display: none; /* Chrome, Safari, Edge */
     }
 
-    .nav-spacer {
+    .spacer {
       flex: 1;
     }
 
-    .nav-item-group {
+    .tab-group {
+      display: flex;
+      align-items: stretch;
+    }
+
+    .tab {
       display: flex;
       align-items: center;
-      gap: 0;
-    }
-
-    .nav-link {
-      color: rgba(255, 255, 255, 0.87) !important;
+      gap: 6px;
+      padding: 0 10px;
+      border: 0;
+      border-bottom: 2px solid transparent;
+      background: none;
+      font: 500 var(--gh-text) var(--gh-font);
+      color: var(--gh-muted) !important;
+      text-decoration: none;
       white-space: nowrap;
-      font-size: 14px;
+      cursor: pointer;
+      transition: color 120ms, border-color 120ms;
     }
 
-    .nav-link i {
-      margin-right: 6px;
-      font-size: 16px;
+    .tab i {
+      font-size: 12px;
     }
 
-    .nav-link.active {
-      background-color: rgba(255, 255, 255, 0.15) !important;
-      color: #ffffff !important;
+    .tab:hover {
+      color: var(--gh-ink) !important;
     }
 
-    .nav-link:hover {
-      background-color: rgba(255, 255, 255, 0.1) !important;
+    .tab.active,
+    .tab-group.active .caret {
+      color: var(--gh-ink) !important;
+      border-bottom-color: var(--gh-accent);
     }
 
-    .nav-link-with-menu {
-      border-top-right-radius: 0 !important;
-      border-bottom-right-radius: 0 !important;
+    .tab-group .tab:first-child {
+      padding-right: 4px;
     }
 
-    .nav-dropdown-trigger {
-      min-width: 36px !important;
-      padding: 0 8px !important;
-      border-top-left-radius: 0 !important;
-      border-bottom-left-radius: 0 !important;
-      border-left: 1px solid rgba(255, 255, 255, 0.1);
+    .caret {
+      padding: 0 8px 0 4px;
     }
 
-    .nav-dropdown-trigger i {
-      margin-right: 0;
-      font-size: 10px;
-    }
-
-    .dropdown-icon {
-      margin-left: 4px;
-      font-size: 10px;
-      opacity: 0.8;
+    .caret i {
+      font-size: 9px;
     }
 
     ::ng-deep .mat-mdc-menu-item i {
       margin-right: 12px;
+      color: var(--gh-muted);
+    }
+
+    .theme {
+      display: grid;
+      place-items: center;
+      flex: none;
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      border: 1px solid var(--gh-line);
+      border-radius: 50%;
+      background: var(--gh-surface);
+      color: var(--gh-muted);
+      cursor: pointer;
+      transition: border-color 120ms, color 120ms, background 120ms;
+    }
+
+    .theme:hover {
+      border-color: var(--gh-accent);
+      color: var(--gh-accent);
+      background: var(--gh-accent-soft);
+    }
+
+    .theme svg {
+      width: 14px;
+      height: 14px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
     }
 
     .main-content {
       display: flex;
       flex-direction: column;
-      min-height: calc(100vh - 64px);
+      flex: 1;
     }
 
     .content-wrapper {
@@ -224,36 +225,20 @@ interface NavItem {
     }
 
     @media (max-width: 1024px) {
-      .nav-links {
-        gap: 2px;
-      }
-
-      .nav-item-group {
-        gap: 0;
-      }
-
-      .nav-link {
-        font-size: 13px;
-        padding: 0 8px;
-      }
-
-      .nav-link span {
+      .tab span {
         display: none;
       }
 
-      .nav-link i {
-        margin-right: 0;
-        font-size: 18px;
-      }
-
-      .nav-dropdown-trigger {
-        min-width: 32px !important;
-        padding: 0 6px !important;
+      .tab i {
+        font-size: 15px;
       }
     }
   `]
 })
 export class NavigationComponent {
+  protected readonly theme = inject(ThemeService);
+  protected readonly themeLabel = computed(() => (this.theme.theme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'));
+
   protected readonly navItems = signal<NavItem[]>([
     { label: 'Objectives', path: '/objectives', icon: 'fa-bullseye' },
     { label: 'Scenarios', path: '/scenarios', icon: 'fa-file-alt' },
@@ -279,6 +264,6 @@ export class NavigationComponent {
         { label: 'Machine Groups', path: '/machine-groups', icon: 'fa-users-cog' }
       ]
     },
-    { label: 'RangerAI', path: '/n8n-workflows', icon: 'fa-project-diagram' }
+    { label: 'Workflows', path: '/n8n-workflows', icon: 'fa-project-diagram' }
   ]);
 }

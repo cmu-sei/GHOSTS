@@ -1,0 +1,144 @@
+{
+  "Status": "Run",
+  "TimeLineHandlers": [
+    {
+      "HandlerType": "BrowserEdge",
+      "Initial": "about:blank",
+      "UtcTimeOn": "00:00:00",
+      "UtcTimeOff": "24:00:00",
+      "HandlerArgs": {
+        "isheadless": "false",
+        "stickiness": 50,
+        "stickiness-depth-min": 1,
+        "stickiness-depth-max": 5,
+        "actions-before-restart": 9
+      },
+      "Loop": true,
+      "TimeLineEvents": [
+        {
+          "Command": "random",
+          "CommandArgs": [
+            "https://www.weather.gov",
+            "https://www.wikipedia.org",
+            "https://apnews.com",
+            "https://www.bbc.com/news",
+            "https://www.npr.org",
+            "https://www.reuters.com",
+            "https://www.nytimes.com",
+            "https://www.cnn.com",
+            "https://www.amazon.com",
+            "https://www.bestbuy.com",
+            "https://learn.microsoft.com/en-us/windows-server/",
+            "https://learn.microsoft.com/en-us/powershell/",
+            "https://techcommunity.microsoft.com"
+          ],
+          "DelayAfter": {
+            "random": true,
+            "min": 15000,
+            "max": 60000
+          },
+          "DelayBefore": 0
+        }
+      ]
+    },
+    {
+      "HandlerType": "Word",
+      "Initial": "",
+      "UtcTimeOn": "00:00:00",
+      "UtcTimeOff": "24:00:00",
+      "HandlerArgs": {},
+      "Loop": true,
+      "TimeLineEvents": [
+        {
+          "Command": "create",
+          "CommandArgs": [ "%homedrive%%homepath%\\Documents" ],
+          "DelayAfter": {
+            "random": true,
+            "min": 300000,
+            "max": 600000
+          },
+          "DelayBefore": 0
+        },
+        {
+          "Command": "create",
+          "CommandArgs": [ "%homedrive%%homepath%\\Documents", "pdf" ],
+          "DelayAfter": {
+            "random": true,
+            "min": 300000,
+            "max": 600000
+          },
+          "DelayBefore": 0
+        }
+      ]
+    },
+    {
+      "HandlerType": "Excel",
+      "Initial": "",
+      "UtcTimeOn": "00:00:00",
+      "UtcTimeOff": "24:00:00",
+      "HandlerArgs": {},
+      "Loop": true,
+      "TimeLineEvents": [
+        {
+          "Command": "create",
+          "CommandArgs": [ "%homedrive%%homepath%\\Documents" ],
+          "DelayAfter": {
+            "random": true,
+            "min": 480000,
+            "max": 900000
+          },
+          "DelayBefore": 0
+        }
+      ]
+    },
+    {
+      "HandlerType": "PowerPoint",
+      "Initial": "",
+      "UtcTimeOn": "00:00:00",
+      "UtcTimeOff": "24:00:00",
+      "HandlerArgs": {},
+      "Loop": true,
+      "TimeLineEvents": [
+        {
+          "Command": "create",
+          "CommandArgs": [ "%homedrive%%homepath%\\Documents" ],
+          "DelayAfter": {
+            "random": true,
+            "min": 600000,
+            "max": 1200000
+          },
+          "DelayBefore": 0
+        }
+      ]
+    },
+    {
+      "HandlerType": "Notepad",
+      "Initial": "",
+      "UtcTimeOn": "00:00:00",
+      "UtcTimeOff": "24:00:00",
+      "HandlerArgs": {
+        "execution-probability": 100,
+        "creation-probability": 40,
+        "modification-probability": 30,
+        "view-probability": 20,
+        "deletion-probability": 10,
+        "input-directory": "%homedrive%%homepath%\\Documents\\Notes",
+        "output-directory": "%homedrive%%homepath%\\Documents\\Notes",
+        "delay-jitter": 0
+      },
+      "Loop": true,
+      "TimeLineEvents": [
+        {
+          "Command": "random",
+          "CommandArgs": [],
+          "DelayAfter": {
+            "random": true,
+            "min": 300000,
+            "max": 600000
+          },
+          "DelayBefore": 0
+        }
+      ]
+    }
+  ]
+}

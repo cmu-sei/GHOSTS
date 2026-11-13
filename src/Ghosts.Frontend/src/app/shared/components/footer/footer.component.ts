@@ -9,149 +9,37 @@ import { ApiStatus } from '../../../core/models';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <footer class="footer">
-      <div class="footer-container">
-        <div class="footer-content">
-          <div class="footer-left">
-            @if (status()) {
-              <p class="footer-text">
-                GHOSTS v{{ status()?.version }}
-                ({{ status()?.versionFile }} on dotnet {{ status()?.versionEnvironment }}).
-                CERT © 2017. All rights reserved.
-              </p>
-            } @else {
-              <p class="footer-text">
-                GHOSTS. CERT © 2017. All rights reserved.
-              </p>
-            }
-          </div>
-          <div class="footer-right">
-            <p class="footer-text">
-              <a [href]="swaggerUrl()" class="footer-link" target="_blank">API Swagger</a>
-              <span class="separator">|</span>
-              <a [href]="grafanaUrl()" class="footer-link" target="_blank">Grafana</a>
-              <span class="separator">|</span>
-              <a href="https://github.com/cmu-sei/GHOSTS" class="footer-link" target="_blank">GitHub</a>
-              <span class="separator">|</span>
-              <a href="https://cmu-sei.github.io/GHOSTS/" class="footer-link" target="_blank">Docs</a>
-            </p>
-          </div>
-        </div>
-      </div>
+      <span class="notice">
+        @if (status()) {
+          GHOSTS v{{ status()?.version }} ({{ status()?.versionFile }} on dotnet {{ status()?.versionEnvironment }}).
+        } @else {
+          GHOSTS.
+        }
+      </span>
+      <span class="notice links">
+        <a [href]="swaggerUrl()" target="_blank">API Swagger</a>
+        <a [href]="grafanaUrl()" target="_blank">Grafana</a>
+        <a href="https://cmu-sei.github.io/GHOSTS/" target="_blank">Docs</a>
+        <a class="repo" href="https://github.com/cmu-sei/GHOSTS" target="_blank" rel="noopener"
+           aria-label="GHOSTS on GitHub" title="GHOSTS on GitHub"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg></a>
+        CERT © 2017. All rights reserved.
+      </span>
     </footer>
   `,
   styles: [`
+    :host { display: block; flex: none; }
     .footer {
-      border-top: 1px solid rgba(0, 0, 0, 0.12);
-      padding: 1rem 20px;
-      margin-top: 1.5rem;
-      background-color: #fafafa;
-      width: 100%;
-      box-sizing: border-box;
-      overflow-x: hidden;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      min-height: 24px; padding: 0 16px;
+      border-top: 1px solid var(--gh-line); background: var(--gh-surface);
+      font-size: 11px; color: var(--gh-faint);
     }
-
-    .footer-container {
-      width: 100%;
-      padding: 0;
-      margin: 0;
-      box-sizing: border-box;
-    }
-
-    .footer-content {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-      max-width: 100%;
-      overflow: hidden;
-    }
-
-    @media (max-width: 1024px) {
-      .footer-content {
-        flex-wrap: wrap;
-      }
-
-      .footer-left {
-        flex: 1 1 100%;
-        max-width: 100%;
-      }
-
-      .footer-right {
-        flex: 1 1 100%;
-        max-width: 100%;
-        text-align: left;
-      }
-    }
-
-    @media (max-width: 768px) {
-      .footer-content {
-        flex-direction: column;
-        text-align: center;
-      }
-
-      .footer-left,
-      .footer-right {
-        width: 100%;
-      }
-    }
-
-    .footer-left {
-      flex: 1 1 auto;
-      min-width: 0;
-      overflow: hidden;
-    }
-
-    .footer-right {
-      flex: 0 1 auto;
-      text-align: right;
-      white-space: nowrap;
-    }
-
-    @media (max-width: 768px) {
-      .footer-right {
-        text-align: center;
-        white-space: normal;
-      }
-
-      .footer-left .footer-text {
-        white-space: normal;
-      }
-    }
-
-    .footer-text {
-      margin: 0;
-      font-size: 0.875rem;
-      color: rgba(0, 0, 0, 0.6);
-      line-height: 1.5;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .footer-left .footer-text {
-      white-space: nowrap;
-    }
-
-    .footer-link {
-      color: rgba(0, 0, 0, 0.6);
-      text-decoration: none;
-      transition: color 0.2s ease;
-    }
-
-    .footer-link:hover {
-      color: #3f51b5;
-      text-decoration: underline;
-    }
-
-    .separator {
-      margin: 0 8px;
-      color: rgba(0, 0, 0, 0.4);
-    }
-
-    @media (max-width: 768px) {
-      .separator {
-        margin: 0 4px;
-      }
-    }
+    .notice { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .links { display: flex; align-items: center; gap: 12px; }
+    .links a { color: var(--gh-faint); text-decoration: none; }
+    .links a:hover { color: var(--gh-ink); }
+    .repo { display: inline-flex; }
+    .repo svg { width: 12px; height: 12px; }
   `]
 })
 export class FooterComponent implements OnInit {

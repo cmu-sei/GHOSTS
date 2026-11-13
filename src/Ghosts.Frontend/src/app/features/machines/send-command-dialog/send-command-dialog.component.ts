@@ -51,7 +51,7 @@ import { Machine, SendCommandsRequest, CommandShell } from '../../../core/models
     }
 
     .commands {
-      font-family: monospace;
+      font-family: var(--gh-mono);
     }
 
     mat-dialog-actions {
