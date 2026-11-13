@@ -17,7 +17,7 @@ The GHOSTS API stack runs as five Docker containers:
 
 | Container | Image | Port | Purpose |
 |-----------|-------|------|---------|
-| `ghosts-frontend` | *(built from source)* | 4200 | Angular 20 management UI |
+| `ghosts-frontend` | *(built from source)* | 4200 | Angular 22 management UI |
 | `ghosts-api` | *(built from source)* | 5000 | REST API + SignalR WebSocket |
 | `ghosts-postgres` | `postgres:16.8` | 5432 | PostgreSQL database |
 | `ghosts-n8n` | `docker.n8n.io/n8nio/n8n` | 5678 | Workflow automation |

@@ -1,5 +1,11 @@
 # What's New in GHOSTS 9
 
+## Version 9.8
+
+- **Platform**: the API, Pandora, and the Universal client target .NET 11; the frontend is on Angular 22.
+- **Frontend look**: restyled to match GraySpace and the Scenario Builder, with light and dark themes and a toggle in the top bar. See [Frontend UI](core/ui.md#appearance).
+- **Workflows**: the "RangerAI" menu item is now "Workflows".
+
 ## Version 9.1
 
 ### Automatic NPC pools and default workflows on execution
