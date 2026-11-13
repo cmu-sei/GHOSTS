@@ -93,7 +93,7 @@ For full setup instructions see the [Quick Start Guide](https://cmu-sei.github.i
 | Component | Tech | Description |
 |-----------|------|-------------|
 | **Ghosts.Api** | .NET 11 | Central command-and-control server. REST API, SignalR WebSocket hub, NPC orchestration, scenario management. |
-| **Ghosts.Frontend** | Angular 20 | Web UI for managing machines, groups, timelines, NPCs, scenarios, and workflow automation. |
+| **Ghosts.Frontend** | Angular 22 | Web UI for managing machines, groups, timelines, NPCs, scenarios, and workflow automation. |
 | **Ghosts.Client.Windows** | .NET Framework 4.6.2 | Full-featured Windows client with Office automation, browser control, SSH, RDP, and 27+ activity handlers. |
 | **Ghosts.Client.Universal** | .NET 9 | Cross-platform client for Linux/Windows with 38+ handlers. |
 | **Ghosts.Client.Lite** | .NET 8 | Lightweight client for resource-constrained environments. |
@@ -123,7 +123,7 @@ For full setup instructions see the [Quick Start Guide](https://cmu-sei.github.i
 src/
 ├── Ghosts.Api/            # .NET 11 API server + docker-compose.yml
 ├── Ghosts.Domain/         # Shared domain library (netstandard2.0)
-├── Ghosts.Frontend/       # Angular 20 management UI
+├── Ghosts.Frontend/       # Angular 22 management UI
 ├── Ghosts.Client.Windows/ # .NET 4.6.2 Windows client
 ├── Ghosts.Client.Universal/ # .NET 9 cross-platform client
 ├── Ghosts.Client.Lite/    # .NET 8 lightweight client

@@ -11,7 +11,7 @@ The API stack runs as five Docker containers:
 | Container | Image | Port | Purpose |
 |-----------|-------|------|---------|
 | `ghosts-api` | `dustinupdyke/ghosts` | 5000 | .NET 11 REST API + SignalR |
-| `ghosts-frontend` | `dustinupdyke/ghosts-frontend` | 4200 | Angular 20 management UI |
+| `ghosts-frontend` | `dustinupdyke/ghosts-frontend` | 4200 | Angular 22 management UI |
 | `ghosts-postgres` | `postgres:16.8` | 5432 | PostgreSQL 16 database |
 | `ghosts-n8n` | `docker.n8n.io/n8nio/n8n` | 5678 | n8n workflow automation |
 | `ghosts-grafana` | `grafana/grafana` | 3000 | Activity dashboards |

@@ -1,6 +1,6 @@
 # GHOSTS Frontend
 
-The GHOSTS Frontend is an Angular 20 single-page application that provides a management interface for the GHOSTS framework. It communicates with the GHOSTS API via REST and SignalR WebSocket.
+The GHOSTS Frontend is an Angular 22 single-page application that provides a management interface for the GHOSTS framework. It communicates with the GHOSTS API via REST and SignalR WebSocket.
 
 **Docker image:** `dustinupdyke/ghosts-frontend` (port 4200 / 80 inside container)
 **Source:** `src/Ghosts.Frontend/`
@@ -22,6 +22,7 @@ ghosts-frontend:
   environment:
     API_URL: http://YOUR-API-HOST:5000/api
     N8N_API_URL: http://YOUR-N8N-HOST:5678
+    GRAFANA_URL: http://YOUR-GRAFANA-HOST:3000
 ```
 
 ### Local Development
@@ -39,13 +40,25 @@ Edit `src/assets/config.json` to point at your API:
 ```json
 {
   "apiUrl": "http://localhost:5000/api",
-  "n8nApiUrl": "http://localhost:5678"
+  "n8nApiUrl": "http://localhost:5678",
+  "grafanaUrl": "http://localhost:3000"
 }
 ```
 
 ---
 
 ## Features
+
+The top bar holds Objectives, Scenarios, Executions and Assessment on the left, and NPCs, Timelines and Workflows on the right. NPCs and Timelines each have a dropdown for their related pages.
+
+### Objectives
+
+Define training objectives and track them across runs:
+
+- Types: MET, JMET, Rehearsal, Onboarding, Tool Training
+- Priority, success criteria, assignee, and nested sub-tasks
+- Status: Draft, Active, Achieved, Partially Met, Not Met
+- Score each task Trained, Practiced, or Untrained
 
 ### Machines
 
@@ -86,28 +99,31 @@ Manage generated NPC personas:
 
 ### Scenarios
 
-Plan and track training/exercise scenarios:
+Plan training and exercise scenarios. Each scenario has tabs for Scenario Parameters, Technical Environment, Simulation Mechanics, Timeline, Document, and Entities & Graph. Scenarios can also be authored with the [Scenario Builder](scenario-builder.md).
 
-- Create scenarios with associated parameters and injects
-- Run scenarios and monitor execution events in real time
-- Review execution history and metric snapshots
+### Executions
 
-### Operations Dashboard
+Run a scenario and follow it live:
 
-Real-time overview showing:
+- Create an execution from a scenario
+- Start, pause, stop, or cancel a run
+- Tabs for Timeline, Overview, Events, Metrics, NPCs, and Terrain
+- Set and clear flags; mark manual timeline items complete
+- Open the run on a full-screen map
 
-- Connected machine count and status
-- Recent timeline execution activity
+### Assessment
 
-### Belief Explorer
+Embedded Grafana panels for all runs, plus run-specific panels when you pick a run.
 
-Inspect individual NPC belief states:
+### Activities and Social
 
-- Browse beliefs by NPC
-- View belief values and how they have changed over simulation steps
-- Filter by topic or time range
+Under the NPCs menu:
 
-### RangerAI / n8n Workflow Scheduling
+- **Activities Overview**: NPC activity list
+- **Live Network**: live graph of NPC activity, opened in its own tab
+- **Social**: each NPC's knowledge topics, preferences, and connections
+
+### Workflows (n8n)
 
 Schedule n8n webhook-triggered workflows on a cron schedule:
 
@@ -128,6 +144,14 @@ The frontend maintains a SignalR WebSocket connection to `/api/hubs/activities` 
 - Live NPC animation events (social graph updates, belief changes, chat messages)
 - Workflow execution results from the scheduler
 - Machine connectivity events
+
+The execution pages connect to `/api/hubs/execution?executionId=…`, and the Scenario Builder connects to `/api/hubs/scenarioBuilder?scenarioId=…`.
+
+---
+
+## Appearance
+
+The UI has light and dark themes. It follows the operating system setting until you use the toggle at the right of the top bar; that choice is saved in the browser. Colours are CSS custom properties (`--gh-*`) defined in `src/styles.scss`, and Angular Material is themed from them.
 
 ---
 
