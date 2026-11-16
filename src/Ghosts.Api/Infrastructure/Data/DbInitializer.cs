@@ -45,11 +45,18 @@ namespace Ghosts.Api.Infrastructure.Data
             // Import MITRE ATT&CK data if not already loaded
             await ImportMitreAttackData(context, logger, serviceProvider);
 
+            // Demo data is opt-out: ApplicationSettings:SeedDemoData false skips seed.json, random NPCs and the map demo
+            var seedDemoData = Program.ApplicationSettings?.SeedDemoData ?? true;
+            if (!seedDemoData)
+                logger.LogInformation("SeedDemoData is false — not loading any demo data");
+
             // Seed all exercise data from config/SeedData/seed.json (scenarios, objectives, machines, etc.)
-            await SeedFromJson(context, logger);
+            if (seedDemoData)
+                await SeedFromJson(context, logger);
 
             // NPCs are not seeded — generate random ones when there are none
-            await GenerateNpcsIfEmpty(context, logger);
+            if (seedDemoData)
+                await GenerateNpcsIfEmpty(context, logger);
 
             // Give any NPC that has no avatar one
             await EnsureNpcPhotos(context, logger);
@@ -58,7 +65,8 @@ namespace Ghosts.Api.Infrastructure.Data
             await EnsureMapFeaturesTableExists(context, logger);
 
             // Seed map features independently (has its own guard)
-            await SeedMapFeatures(context, logger);
+            if (seedDemoData)
+                await SeedMapFeatures(context, logger);
 
             // Ensure the scenario_documents table exists (EnsureCreated is a no-op for existing DBs)
             await EnsureScenarioDocumentsTableExists(context, logger);

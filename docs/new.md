@@ -5,6 +5,7 @@
 - **Platform**: the API, Pandora, and the Universal client target .NET 11; the frontend is on Angular 22.
 - **Frontend look**: restyled to match GraySpace and the Scenario Builder, with light and dark themes and a toggle in the top bar. See [Frontend UI](core/ui.md#appearance).
 - **Workflows**: the "RangerAI" menu item is now "Workflows".
+- **Demo data**: set `ApplicationSettings__SeedDemoData=false` to start with an empty database instead of the demo scenarios, machines, NPCs and map. See [Configuration](core/api.md#appsettingsjson-advanced).
 
 ## Version 9.1
 

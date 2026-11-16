@@ -79,6 +79,8 @@ Set these in a `.env` file alongside `docker-compose.yml` or directly in your co
 
 Override values for production via environment variables or a mounted `appsettings.Production.json`.
 
+On an empty database the API loads demo data at startup: the scenarios, objectives, machines and history in `config/SeedData/seed.json`, `ApplicationSettings:SeedNpcCount` random NPCs, and a demo execution for the Execution Map. To start empty instead, set `ApplicationSettings:SeedDemoData` to `false` (`ApplicationSettings__SeedDemoData=false` in the environment).
+
 ---
 
 ## Managing the Stack
