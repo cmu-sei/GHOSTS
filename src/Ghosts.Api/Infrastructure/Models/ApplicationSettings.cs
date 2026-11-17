@@ -13,6 +13,11 @@ public class ApplicationSettings
     public int ListenerPort { get; set; }
 
     /// <summary>
+    /// Load demo data (seed.json, random NPCs, the map demo) into an empty database. false to skip.
+    /// </summary>
+    public bool SeedDemoData { get; set; } = true;
+
+    /// <summary>
     /// How many random NPCs to generate when the database has none. 0 to skip.
     /// </summary>
     public int SeedNpcCount { get; set; }
