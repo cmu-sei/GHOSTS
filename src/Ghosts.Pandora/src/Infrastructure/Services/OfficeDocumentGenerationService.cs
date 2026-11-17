@@ -62,6 +62,7 @@ public class OfficeDocumentGenerationService : IOfficeDocumentGenerationService
         }
 
         mainPart.Document.Save();
+        wordDocument.Dispose();
 
         return memoryStream.ToArray();
     }
@@ -139,6 +140,7 @@ public class OfficeDocumentGenerationService : IOfficeDocumentGenerationService
         }
 
         presentationPart.Presentation.Save();
+        presentationDocument.Dispose();
 
         return memoryStream.ToArray();
     }
