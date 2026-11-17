@@ -2572,6 +2572,7 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 </table>
 <h3 id="appsettingsjson-advanced">appsettings.json (Advanced)<a class="headerlink" href="#appsettingsjson-advanced" title="Permanent link">&para;</a></h3>
 <p>Override values for production via environment variables or a mounted <code>appsettings.Production.json</code>.</p>
+<p>On an empty database the API loads demo data at startup: the scenarios, objectives, machines and history in <code>config/SeedData/seed.json</code>, <code>ApplicationSettings:SeedNpcCount</code> random NPCs, and a demo execution for the Execution Map. To start empty instead, set <code>ApplicationSettings:SeedDemoData</code> to <code>false</code> (<code>ApplicationSettings__SeedDemoData=false</code> in the environment).</p>
 <hr />
 <h2 id="managing-the-stack">Managing the Stack<a class="headerlink" href="#managing-the-stack" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="c1"># Stop</span>
