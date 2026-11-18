@@ -1,9 +1,10 @@
-﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
+// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
 using NLog;
 // ReSharper disable InconsistentNaming
@@ -94,8 +95,7 @@ public class EmailConfiguration
             Id = emailContent.Id;
             Body = emailContent.Body;
 
-            Body +=
-                $"{Environment.NewLine}{Environment.NewLine}CONFIDENTIALITY NOTICE: This e-mail message, including any attachments, may contain information that is protected by the DoD Privacy Act. This e-mail transmission is intended solely for the addressee(s). If you are not the intended recipient, you are hereby notified that you are not authorized to read, print, retain, copy, disclose, distribute, or use this message, any part of it, or any attachments. If you have received this message in error, please immediately notify the sender by telephone or return e-mail and delete this message and any attachments from your system without reading or saving in any manner. You can obtain additional information about the DoD Privacy Act at http://dpclo.defense.gov/privacy. Thank you.{Environment.NewLine}Timestamp: {DateTime.Now} ID: {Id}";
+            Body += GetFooter();
         }
 
         BodyType = EmailBodyType.PlainText;
@@ -121,6 +121,17 @@ public class EmailConfiguration
                     _log.Debug($"Can't add attachment {o} - file was not found");
             }
         }
+    }
+
+    private string GetFooter()
+    {
+        if (!File.Exists(ApplicationDetails.ConfigurationFiles.EmailsFooter))
+            return string.Empty;
+
+        return File.ReadAllText(ApplicationDetails.ConfigurationFiles.EmailsFooter)
+            .Replace("{{from}}", From)
+            .Replace("{{now}}", DateTime.Now.ToString())
+            .Replace("{{id}}", Id.ToString());
     }
 
     public override string ToString()

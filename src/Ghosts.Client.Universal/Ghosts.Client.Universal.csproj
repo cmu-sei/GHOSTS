@@ -85,6 +85,9 @@
     <None Update="config\dictionary.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="config\emails-footer.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="config\email-content.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
