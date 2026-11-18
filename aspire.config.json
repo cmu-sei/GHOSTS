@@ -1,5 +1,8 @@
 {
     "appHost": {
         "path": "src/apphost/Ghosts-AppHost.csproj"
+    },
+    "sdk": {
+        "version": "17.0.0"
     }
 }
