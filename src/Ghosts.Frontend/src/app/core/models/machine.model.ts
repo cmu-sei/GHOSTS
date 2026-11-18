@@ -9,8 +9,8 @@ export enum MachineStatus {
 export interface Machine {
   id: string;
   name: string;
-  status?: MachineStatus;
-  statusUp?: StatusType;
+  status?: 'Active' | 'Deleted';
+  statusUp?: MachineStatus;
   fQDN?: string;
   host?: string;
   iPAddress?: string;

@@ -74,8 +74,8 @@ import { SearchBarComponent } from '../../../shared/components/search-bar/search
           <ng-container matColumnDef="status">
             <th mat-header-cell *matHeaderCellDef>Status</th>
             <td mat-cell *matCellDef="let machine">
-              <mat-chip [class]="'status-' + getStatusClass(machine.status)">
-                {{ machine.status || 'Unknown' }}
+              <mat-chip [class]="'status-' + getStatusClass(machine.statusUp)">
+                {{ machine.statusUp || 'Unknown' }}
               </mat-chip>
             </td>
           </ng-container>
@@ -298,7 +298,7 @@ export class MachinesListComponent implements OnInit {
     return this.machines().filter(machine =>
       machine.name?.toLowerCase().includes(search) ||
       machine.id?.toString().includes(search) ||
-      machine.status?.toLowerCase().includes(search)
+      machine.statusUp?.toLowerCase().includes(search)
     );
   });
 
