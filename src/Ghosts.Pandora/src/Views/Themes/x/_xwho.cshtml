@@ -1,0 +1,17 @@
+@* "Who to follow" / "You might like": accounts the current user does not follow yet *@
+@model List<string>
+<section class="x-card">
+    <h2 class="x-card-title">@ViewData["Title"]</h2>
+    @foreach (var username in Model)
+    {
+        <div class="x-who" data-href="/u/@username">
+            <img src="/u/@username/avatar" alt="" class="x-who-avatar">
+            <div class="x-who-names">
+                <a href="/u/@username" class="x-who-name">@Present.DisplayName(username)</a>
+                <a href="/u/@username" class="x-who-handle">@Present.Handle(username)</a>
+            </div>
+            <button type="button" class="x-follow" data-x-follow="@username">Follow</button>
+        </div>
+    }
+    <a href="/search" class="x-card-more">Show more</a>
+</section>

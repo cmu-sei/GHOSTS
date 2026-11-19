@@ -55,6 +55,40 @@ public class PandoraFileExtensionMiddleware
         { ".iso", "/iso/" }
     };
 
+    // The first path segments each generation route also answers to, so "/docs/memo.docx" is
+    // already a Word request, while "/docs/report.pdf" still asks for a PDF
+    private static readonly Dictionary<string, string[]> RouteAliases = new()
+    {
+        ["/pdf/"] = ["pdf"],
+        ["/doc/"] = ["doc", "docx", "docs", "documents"],
+        ["/xlsx/"] = ["xlsx", "sheets"],
+        ["/ppt/"] = ["ppt", "pptx", "slides"],
+        ["/onenote/"] = ["onenote"],
+        ["/img/"] = ["i", "img", "images"],
+        ["/json/"] = ["json"],
+        ["/csv/"] = ["csv"],
+        ["/text/"] = ["text", "txt"],
+        ["/html/"] = ["html"],
+        ["/js/"] = ["js", "script"],
+        ["/css/"] = ["css", "stylesheet"],
+        ["/zip/"] = ["zip"],
+        ["/tar/"] = ["tar"],
+        ["/video/"] = ["video", "videos"],
+        ["/audio/"] = ["audio", "voice", "call", "calls"],
+        ["/bin/"] = ["bin", "binary", "binaries"],
+        ["/exe/"] = ["exe"],
+        ["/msi/"] = ["msi"],
+        ["/iso/"] = ["iso"]
+    };
+
+    // Application routes whose paths are never rewritten, whatever they end in. /files is not one:
+    // it only serves upload ids, so /files/data.xlsx is a generated spreadsheet.
+    private static readonly HashSet<string> ReservedSegments = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "api", "hubs", "swagger", "payloads", "wwwroot",
+        "posts", "post", "r", "u", "user", "users", "profile", "messages", "login", "search", "law-enforcement"
+    };
+
     public PandoraFileExtensionMiddleware(RequestDelegate next, ILogger<PandoraFileExtensionMiddleware> logger)
     {
         _next = next;
@@ -63,6 +97,18 @@ public class PandoraFileExtensionMiddleware
 
     public async Task InvokeAsync(HttpContext context, ApplicationConfiguration configuration)
     {
+        var path = context.Request.Path.Value;
+
+        // A configured payload answers at its own URL, ahead of anything generated there
+        if (configuration.Payloads.Enabled && !string.IsNullOrEmpty(path) &&
+            !path.StartsWith("/payloads/", StringComparison.OrdinalIgnoreCase) &&
+            configuration.Payloads.Mappings.Any(m => !string.IsNullOrEmpty(m.Url) && path.StartsWith(m.Url, StringComparison.OrdinalIgnoreCase)))
+        {
+            context.Request.Path = new PathString("/payloads" + path);
+            await _next(context);
+            return;
+        }
+
         if (!configuration.Pandora.Enabled)
         {
             await _next(context);
@@ -76,7 +122,6 @@ public class PandoraFileExtensionMiddleware
             return;
         }
 
-        var path = context.Request.Path.Value;
         if (string.IsNullOrEmpty(path))
         {
             await _next(context);
@@ -88,16 +133,9 @@ public class PandoraFileExtensionMiddleware
 
         if (ExtensionToRoute.TryGetValue(extension, out var route))
         {
-            // Skip if the path already starts with a known route
-            var skipPrefixes = new[] { "/pdf", "/doc", "/docx", "/xlsx", "/ppt", "/img", "/i", "/images",
-                                       "/json", "/api", "/csv", "/text", "/txt", "/html", "/js", "/css",
-                                       "/zip", "/tar", "/sheets", "/slides", "/script", "/stylesheet",
-                                       "/video", "/videos", "/audio", "/voice", "/call", "/calls",
-                                       "/bin", "/binary", "/binaries", "/onenote", "/exe", "/msi", "/iso",
-                                       "/pandora", "/files", "/posts", "/users", "/auth",
-                                       "/search", "/hubs", "/swagger", "/wwwroot" };
-
-            if (skipPrefixes.Any(p => path.StartsWith(p, StringComparison.OrdinalIgnoreCase)))
+            var firstSegment = path.TrimStart('/').Split('/')[0];
+            if (ReservedSegments.Contains(firstSegment) ||
+                RouteAliases[route].Contains(firstSegment, StringComparer.OrdinalIgnoreCase))
             {
                 await _next(context);
                 return;

@@ -1,0 +1,25 @@
+@{
+    // The "Start a post" box. The textarea is the pill itself, so it is always visible; it opens into an editor with a Post button.
+    var username = ViewBag.Username as string ?? "User";
+}
+<div class="li-card li-composer" id="li-composer" data-li-composer>
+    <form method="post" action="/">
+        <input type="hidden" name="theme" value="linkedin">
+        <input type="hidden" name="user" value="@username">
+        <div class="li-composer__top">
+            <a href="/u/@username" class="li-composer__avatar"><img src="/u/@username/avatar" alt="@Present.DisplayName(username)"></a>
+            <div class="li-composer__field">
+                <textarea name="message" placeholder="Start a post" class="post-input" required rows="1" aria-label="Start a post"></textarea>
+                <div class="li-composer__footer">
+                    <span class="li-composer__audience"><svg width="16" height="16"><use href="#li-globe"/></svg>Anyone</span>
+                    <button type="submit" class="post-btn">Post</button>
+                </div>
+            </div>
+        </div>
+    </form>
+    <div class="li-composer__tools">
+        <button type="button" data-li-compose><svg class="li-tool--media" width="24" height="24"><use href="#li-media"/></svg><span>Media</span></button>
+        <button type="button" data-li-compose><svg class="li-tool--event" width="24" height="24"><use href="#li-event"/></svg><span>Event</span></button>
+        <button type="button" data-li-compose><svg class="li-tool--article" width="24" height="24"><use href="#li-article"/></svg><span>Write article</span></button>
+    </div>
+</div>

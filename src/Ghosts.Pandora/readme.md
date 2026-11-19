@@ -43,6 +43,8 @@ Typical install is via Docker.
 - Switch between modes via configuration without code changes
 
 ### Social Media Functionality (Social Mode)
+- Themes modeled on the current Facebook, Instagram, X, Reddit, LinkedIn, YouTube and Discord web apps: real names, headlines and stock photos from the generated world, plausible engagement counts, and trends and suggestions drawn from real posts and users
+- A profile exists for any username: visiting `/u/{name}` creates the user in that site's theme
 - User registration and authentication
 - Post creation, likes, and comments
 - Direct messaging between users
@@ -88,24 +90,26 @@ Content can be requested in **two ways**:
 - `/media/video.mp4` → Returns a video file
 - `/downloads/installer.exe` → Returns an executable
 
-All content is **generated in real-time** with randomized but realistic data. Content can optionally be cached for repeat requests.
+Content is generated from the request path and stored, so a URL returns the same file every time. See [Generated content](#generated-content) for how a path becomes a document.
 
 #### Supported File Types
 
 **Documents:**
-- PDF (`.pdf`) - Multi-page documents with random text
-- Word Documents (`.doc`, `.docx`) - Formatted text documents
-- Excel Spreadsheets (`.xls`, `.xlsx`) - Tables with random data
-- PowerPoint Presentations (`.ppt`, `.pptx`) - Multi-slide presentations
+- PDF (`.pdf`) - Reports with headings, tables and page numbers
+- Word Documents (`.docx`) - Styled reports with headings, bullet lists, tables, a footer and document properties
+- Excel Spreadsheets (`.xlsx`) - Typed cells, currency and date formats, formulas and totals, plus an About sheet
+- PowerPoint Presentations (`.pptx`) - A title slide and one slide per report section
+
+A request for `.doc`, `.xls` or `.ppt` gets the modern format, named `.docx`, `.xlsx` or `.pptx` in the download, since Pandora does not write the legacy binary formats.
 - OneNote Notebooks (`.one`) - OneNote files
 
 **Images:**
 - PNG, JPEG, GIF (`.png`, `.jpg`, `.jpeg`, `.gif`) - Random geometric images with text
 
 **Data Formats:**
-- JSON (`.json`) - Structured data with random records
-- CSV (`.csv`) - Tabular data
-- Plain Text (`.txt`) - Random paragraphs
+- JSON (`.json`) - The table behind the request (`title`, `organization`, `updated`, `count`, `data`)
+- CSV (`.csv`) - The same table as CSV
+- Plain Text (`.txt`) - The same report as plain text
 - HTML (`.html`, `.htm`) - Complete web pages with links, images, CSS, and JavaScript
 
 **Web Resources:**
@@ -262,7 +266,7 @@ The application can run in two modes:
 
 **Social Mode** (default): Acts as a social media platform with user posts, comments, likes, themes, etc.
 
-**Website Mode**: Acts as a regular website (news site, shopping site, sports site, etc.) with a realistic homepage.
+**Website Mode**: Acts as a regular website (news site, shopping site, sports site, etc.). Every link leads to a page: articles or products with stable ids at `/article/{id}` or `/product/{id}`, a page per section, and About, Contact, Privacy and Terms pages. Pages come from the world seed, so they do not change between visits. A path the site never linked to still gets a page, made from the words in the path (`/news/2026/11/04/storm-cleanup` is a story with that headline, `/c/kitchen` a category), the same one every time; only a path with more than eight segments or a segment over 100 characters gets the site's not-found page. News-style sites also have `/author/{name}` pages; shopping has `/cart` and `/s?q=` search.
 
 ```json
 {
@@ -354,7 +358,7 @@ Serve specific files at configured URLs:
 }
 ```
 
-Place your payload files in the `Payloads` directory and configure the mappings. Access `GET /payloads` to list all configured payloads.
+Place your payload files in the `Payloads` directory and configure the mappings. A mapping answers at its own URL and every path under it (`/downloads/document` above), ahead of any generated content there, and also under `/payloads` (`/payloads/downloads/document`). Access `GET /payloads` to list all configured payloads.
 
 ### Pandora Content Generation
 
@@ -378,11 +382,42 @@ Configure dynamic content generation:
 ### Configuration Options
 
 - `Enabled`: Enable/disable Pandora functionality
-- `StoreResults`: Cache generated content for repeat requests
-- `ContentCacheDirectory`: Directory for cached content
-- `OllamaEnabled`: Enable AI-powered content generation (requires Ollama)
-- `OllamaApiUrl`: URL for Ollama API
-- `OllamaTimeout`: Timeout for AI generation requests
+- `StoreResults`: Store generated content, so a URL keeps returning the same file
+- `ContentCacheDirectory`: Directory for stored content and the world state (`world.json`), relative to the application directory. Delete it to reset the generated world.
+- `MaxStoredMegabytes`: Once stored content reaches this size, new content is still served but no longer stored (default 1024)
+- `OllamaEnabled`, `OllamaApiUrl`, `OllamaTimeout`: reserved; no content generator reads them yet
+
+### Generated content
+
+Generated documents describe one fictional organization, its **world**: a name, a reserved
+`.example` email domain, about 45 staff across eight departments, its servers, projects and
+vendors. A directory, a budget, an assessment and a news story all name the same people and hosts.
+
+How a path becomes a document, for example `/reports/2026/q3/network-assessment.docx`:
+
+1. The file extension picks the format (Word here), unless the first folder already names a format route.
+2. The words of the file name, then of each folder from the deepest up, pick the kind: network
+   assessment, incident report, budget, staff directory, meeting minutes, policy, project status,
+   or a memo when nothing matches. The last matching word wins, so `staff-meeting` is minutes.
+3. A folder or word such as `finance`, `hr`, `it` or `ops` picks the department, `2026` the year and
+   `q3` the quarter. The document is dated at the end of that period, never after the world's date.
+4. The file name becomes the title (`Network Assessment`), unless it says nothing (`index`, `report`, `data`).
+5. The path without its extension seeds the content, so `budget.xlsx`, `budget.csv` and `budget.pdf`
+   in the same folder carry the same figures.
+6. The file is stored under `ContentCacheDirectory/<format>/<path>` and served from there afterwards.
+
+Settings under `ApplicationConfiguration:World` (environment variables
+`ApplicationConfiguration__World__Seed` and so on):
+
+| Setting | Default |
+|---------|---------|
+| `Seed` | Picked at random on first start and kept in `world.json`, so the world survives restarts. Set it to recreate a world exactly. |
+| `ReferenceDate` | The date of first start, kept in `world.json`. Undated documents and website articles are dated relative to it. |
+| `OrganizationName` | Generated from the seed |
+| `Domain` | From the organization name, on `.example` |
+
+Images, audio, video, archives and binaries are still random, but they are stored per URL like
+everything else, so they do not change either.
 
 ## Running the Server
 
@@ -393,7 +428,21 @@ Pandora runs either on its own or under the Aspire host with the rest of the GHO
 | Started with | `docker run`, or `docker compose up -d` in `src/Ghosts.Pandora/src` | the Aspire host in `src/apphost` |
 | Database | SQLite in `/app/db` | PostgreSQL on `ghosts-postgres`, database `pandora` |
 | Activity reporting to the GHOSTS API | off; set `GHOSTS_API_URL` to turn it on | on |
-| Address | http://localhost:8000 | http://localhost:8800 |
+| Address | http://localhost:8000 | http://localhost:6360 (`facebook`) |
+
+Under the Aspire host every theme and website type has its own resource. All of them start stopped, so start the ones you need from the dashboard (the n8n social workflows and NPC chat post to `facebook`):
+
+| Resource | Address | Resource | Address |
+|---|---|---|---|
+| `facebook` | http://localhost:6360 | `pandora-default` | http://localhost:6367 |
+| `instagram` | http://localhost:6361 | `news-site` | http://localhost:6368 |
+| `discord` | http://localhost:6362 | `shopping-site` | http://localhost:6369 |
+| `x` | http://localhost:6363 | `sports-site` | http://localhost:6370 |
+| `linkedin` | http://localhost:6364 | `entertainment-site` | http://localhost:6371 |
+| `reddit` | http://localhost:6365 | | |
+| `youtube` | http://localhost:6366 | | |
+
+They share the `pandora` database and the content directory, so they show the same world: one organization, the same staff and the same stored documents.
 
 The API's compose stack does not run Pandora; its `PANDORA_URL` (n8n) defaults to a standalone Pandora at `http://host.docker.internal:8000`, and NPC chat posts to `PANDORA_HOST` on the API.
 
@@ -482,6 +531,14 @@ dotnet run
 The server will be available at `http://localhost:5000` (or configured port).
 
 Visit `/swagger` for API documentation.
+
+On an ARM64 Linux host, SkiaSharp's native library needs FreeType preloaded, or the first generated
+image ends the process with `undefined symbol: FT_Get_BDF_Property`. The Aspire host sets this; for
+`dotnet run` use `LD_PRELOAD=/lib/aarch64-linux-gnu/libfreetype.so.6 dotnet run`.
+
+**Tests:** `dotnet test src/Ghosts.Pandora.Tests` (from the repository root). The tests host the app
+against a temporary SQLite database. Image decoding tests are skipped unless
+`GHOSTS_SKIA_AVAILABLE=1` (with the preload above on ARM64).
 
 ## API Documentation
 

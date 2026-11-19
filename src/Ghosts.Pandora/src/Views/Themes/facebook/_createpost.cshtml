@@ -1,0 +1,21 @@
+@* Facebook composer. GHOSTS clients find it by these exact classes: create-post-top > img.profile-pic, input.create-post-input, button.post-btn *@
+@{
+    var username = ViewBag.Username as string ?? "User";
+    var firstName = Present.DisplayName(username).Split(' ')[0];
+}
+<div class="create-post">
+    <form method="post" action="/">
+        <input type="hidden" name="theme" value="facebook">
+        <input type="hidden" name="user" value="@username">
+        <div class="create-post-top">
+            <a href="/u/@username" class="fb-composer-avatar"><img src="/u/@username/avatar" alt="Profile" class="profile-pic"></a>
+            <input type="text" name="message" class="create-post-input" placeholder="What's on your mind, @firstName?" autocomplete="off" required>
+            <button type="submit" class="post-btn">Post</button>
+        </div>
+    </form>
+    <div class="create-post-buttons">
+        <button type="button" class="create-post-btn" data-fb-focus-composer><svg class="fb-i"><use href="#fb-live"></use></svg><span>Live video</span></button>
+        <button type="button" class="create-post-btn" data-fb-focus-composer><svg class="fb-i"><use href="#fb-photo"></use></svg><span>Photo/video</span></button>
+        <button type="button" class="create-post-btn fb-hide-narrow" data-fb-focus-composer><svg class="fb-i"><use href="#fb-feeling"></use></svg><span>Feeling/activity</span></button>
+    </div>
+</div>

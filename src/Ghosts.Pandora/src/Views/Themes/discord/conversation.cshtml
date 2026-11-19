@@ -1,350 +1,195 @@
 @{
     Layout = null;
+    ViewBag.Theme = "discord";
+    await Html.RenderPartialAsync("~/Views/Themes/discord/_discordhelpers.cshtml");
+    var roleCss = (Func<string, string>)Context.Items["dc.rolecss"];
+    var presence = (Func<string, string>)Context.Items["dc.presence"];
+    var presenceLabel = (Func<string, string>)Context.Items["dc.presencelabel"];
+    var activity = (Func<string, string>)Context.Items["dc.activity"];
+    var stamp = (Func<DateTime, string>)Context.Items["dc.stamp"];
+    var time = (Func<DateTime, string>)Context.Items["dc.time"];
+    var day = (Func<DateTime, string>)Context.Items["dc.day"];
+    var iso = (Func<DateTime, string>)Context.Items["dc.iso"];
+    var since = (Func<string, int, int, DateTime>)Context.Items["dc.since"];
+    var us = System.Globalization.CultureInfo.GetCultureInfo("en-US");
+    var world = Present.World;
+    var me = ViewBag.Username as string ?? "user";
+    var partner = ViewBag.PartnerUsername as string ?? "user";
+    var partnerName = Present.DisplayName(partner);
+    var status = presence(partner);
+    var hash = Ghosts.Pandora.Infrastructure.Content.ContentRequest.StableHash(partner.ToLowerInvariant());
+    string[] banners = { "#5865f2", "#1f8b4c", "#c27c0e", "#71368a", "#11806a", "#ad1457", "#206694", "#a84300" };
+
+    // grouped the way a channel groups messages, newest first for the column-reverse list
+    var messages = ((IEnumerable<Ghosts.Pandora.Infrastructure.Models.DirectMessage>)ViewBag.Conversation ?? Enumerable.Empty<Ghosts.Pandora.Infrastructure.Models.DirectMessage>())
+        .OrderBy(m => m.CreatedUtc).ToList();
+    var rows = new List<(Ghosts.Pandora.Infrastructure.Models.DirectMessage Message, bool Grouped, bool NewDay)>();
+    for (var i = 0; i < messages.Count; i++)
+    {
+        var m = messages[i];
+        var prev = i > 0 ? messages[i - 1] : null;
+        var newDay = prev == null || prev.CreatedUtc.Date != m.CreatedUtc.Date;
+        rows.Add((m, !newDay && prev.FromUsername == m.FromUsername && m.CreatedUtc - prev.CreatedUtc < TimeSpan.FromMinutes(7), newDay));
+    }
+    rows.Reverse();
 }
-@using Ghosts.Pandora.Infrastructure
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Discord | @ViewBag.PartnerUsername</title>
+    <title>Discord | @@@partnerName</title>
     <link rel="stylesheet" href="/themes/discord/css/feed.css">
     <link rel="icon" href="/themes/discord/images/discord-icon.png">
-    <style>
-        .dm-sidebar {
-            width: 240px;
-            background-color: #2f3136;
-            border-right: 1px solid #202225;
-            overflow-y: auto;
-        }
-
-        .dm-header {
-            padding: 16px;
-            border-bottom: 1px solid #36393f;
-        }
-
-        .dm-search {
-            background-color: #40444b;
-            border: none;
-            border-radius: 4px;
-            color: #dcddde;
-            padding: 8px 12px;
-            width: 100%;
-            font-size: 14px;
-        }
-
-        .dm-list {
-            padding: 8px 0;
-        }
-
-        .dm-item {
-            display: flex;
-            align-items: center;
-            padding: 8px 16px;
-            cursor: pointer;
-            color: #8e9297;
-            transition: background-color 0.2s;
-            text-decoration: none;
-        }
-
-        .dm-item:hover, .dm-item.active {
-            background-color: #36393f;
-            color: #dcddde;
-        }
-
-        .dm-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            margin-right: 12px;
-        }
-
-        .dm-info {
-            flex: 1;
-        }
-
-        .dm-name {
-            font-weight: 500;
-            font-size: 14px;
-        }
-
-        .dm-content {
-            flex: 1;
-            background-color: #36393f;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .dm-content-header {
-            padding: 16px 20px;
-            border-bottom: 1px solid #40444b;
-            background-color: #36393f;
-            display: flex;
-            align-items: center;
-        }
-
-        .dm-header-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            margin-right: 12px;
-        }
-
-        .dm-title {
-            color: #ffffff;
-            font-size: 16px;
-            font-weight: 600;
-            margin: 0;
-        }
-
-        .conversation-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .conversation-messages {
-            flex: 1;
-            padding: 16px 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .conversation-message {
-            display: flex;
-            margin-bottom: 16px;
-            max-width: 70%;
-        }
-
-        .conversation-message.sent {
-            align-self: flex-end;
-            flex-direction: row-reverse;
-        }
-
-        .conversation-message.received {
-            align-self: flex-start;
-        }
-
-        .conversation-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin: 0 12px;
-            flex-shrink: 0;
-        }
-
-        .conversation-message-content {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .conversation-message-bubble {
-            background-color: #40444b;
-            color: #dcddde;
-            padding: 10px 16px;
-            border-radius: 18px;
-            font-size: 14px;
-            line-height: 1.4;
-            word-wrap: break-word;
-            position: relative;
-        }
-
-        .conversation-message.sent .conversation-message-bubble {
-            background-color: #7289da;
-            color: #ffffff;
-        }
-
-        .conversation-message-info {
-            font-size: 11px;
-            color: #72767d;
-            margin-top: 4px;
-            padding: 0 16px;
-        }
-
-        .conversation-message.sent .conversation-message-info {
-            text-align: right;
-        }
-
-        .conversation-input-container {
-            padding: 16px 20px;
-            background-color: #40444b;
-            border-top: 1px solid #202225;
-        }
-
-        .conversation-input-form {
-            display: flex;
-            align-items: center;
-            background-color: #484c52;
-            border-radius: 24px;
-            padding: 8px 16px;
-        }
-
-        .conversation-input {
-            flex: 1;
-            background: none;
-            border: none;
-            color: #dcddde;
-            font-size: 14px;
-            padding: 8px 0;
-            outline: none;
-        }
-
-        .conversation-input::placeholder {
-            color: #72767d;
-        }
-
-        .conversation-send-btn {
-            background-color: #7289da;
-            border: none;
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            color: #ffffff;
-            cursor: pointer;
-            margin-left: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background-color 0.2s;
-        }
-
-        .conversation-send-btn:hover {
-            background-color: #677bc4;
-        }
-
-        .back-btn {
-            background: none;
-            border: none;
-            color: #b9bbbe;
-            cursor: pointer;
-            padding: 8px;
-            margin-right: 8px;
-            border-radius: 4px;
-            transition: background-color 0.2s;
-        }
-
-        .back-btn:hover {
-            background-color: #40444b;
-        }
-
-        .empty-conversation {
-            text-align: center;
-            padding: 40px 20px;
-            color: #72767d;
-            margin: auto;
-        }
-
-        .empty-conversation h3 {
-            color: #ffffff;
-            margin-bottom: 8px;
-        }
-    </style>
+    <meta name="current-user" content="@me">
 </head>
-<body>
-    <div class="app">
-        <!-- Left Sidebar (same as index) -->
-        <div class="server-sidebar">
-            <div class="home-button">
-                <div class="server-icon home">
-                    <img src="/themes/discord/images/discord-icon.png" alt="Discord Home" class="discord-logo">
-                </div>
+<body data-theme="discord" data-me="@me" data-me-name="@Present.DisplayName(me)">
+    @await Html.PartialAsync("~/Views/Themes/discord/_discordicons.cshtml")
+    <div class="dc-app">
+        <header class="dc-titlebar">
+            <div class="dc-titlebar-title"><span class="dc-titlebar-icon"><img src="/u/@partner/avatar" alt=""></span>@partnerName</div>
+            <div class="dc-titlebar-actions">
+                <button type="button" class="dc-icon-btn" data-tip="Inbox" data-inert><svg class="ic" width="20" height="20"><use href="#i-inbox"/></svg></button>
+                <button type="button" class="dc-icon-btn" data-tip="Help" data-inert><svg class="ic" width="20" height="20"><use href="#i-help"/></svg></button>
             </div>
-            <div class="server-separator"></div>
-            <div class="server-list">
-                <div class="server-item">
-                    <div class="server-icon">
-                        <img src="/themes/discord/images/gaming-server.jpg" alt="Gaming Server" class="server-avatar">
+        </header>
+        <div class="dc-base">
+            @await Html.PartialAsync("~/Views/Themes/discord/_discordrail.cshtml", "home")
+            @await Html.PartialAsync("~/Views/Themes/discord/_discorddms.cshtml", partner)
+
+            <main class="dc-chat dc-dm-chat">
+                <div class="dc-chat-header">
+                    <a href="/messages" class="dc-icon-btn dc-mobile-only" data-tip="Back"><svg class="ic" width="22" height="22"><use href="#i-back"/></svg></a>
+                    <span class="dc-avatar s24"><img src="/u/@partner/avatar" alt=""><i class="dc-status @status"></i></span>
+                    <h1 class="dc-chat-title">@partnerName</h1>
+                    <div class="dc-chat-tools">
+                        <button type="button" class="dc-icon-btn" data-tip="Start Voice Call" data-inert><svg class="ic" width="22" height="22"><use href="#i-phone"/></svg></button>
+                        <button type="button" class="dc-icon-btn dc-desktop-only" data-tip="Start Video Call" data-inert><svg class="ic" width="22" height="22"><use href="#i-video"/></svg></button>
+                        <button type="button" class="dc-icon-btn dc-desktop-only" data-popover="dc-pins" data-tip="Pinned Messages"><svg class="ic" width="22" height="22"><use href="#i-pin"/></svg></button>
+                        <button type="button" class="dc-icon-btn dc-desktop-only" data-popover="dc-new-dm" data-tip="Add Friends to DM"><svg class="ic" width="22" height="22"><use href="#i-user-add"/></svg></button>
+                        <button type="button" class="dc-icon-btn selected dc-desktop-only" data-toggle-members data-tip="Hide User Profile"><svg class="ic" width="22" height="22"><use href="#i-members"/></svg></button>
+                        <label class="dc-search dc-desktop-only">
+                            <input type="text" class="dc-search-input" placeholder="Search" aria-label="Search">
+                            <svg class="ic" width="16" height="16"><use href="#i-search"/></svg>
+                        </label>
+                    </div>
+                    <div class="dc-popover dc-panel dc-pins" id="dc-pins" hidden>
+                        <div class="dc-panel-head"><svg class="ic" width="20" height="20"><use href="#i-pin"/></svg><strong>Pinned Messages</strong></div>
+                        <div class="dc-empty"><strong>This direct message doesn't have any pinned messages... yet.</strong></div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- DM Sidebar -->
-        <div class="dm-sidebar">
-            <div class="dm-header">
-                <input type="text" class="dm-search" placeholder="Find or start a conversation">
-            </div>
-
-            <div class="dm-list">
-                <a href="/messages" class="dm-item">
-                    <div class="dm-info">
-                        <div class="dm-name">← Back to Direct Messages</div>
-                    </div>
-                </a>
-
-                <div class="dm-item active">
-                    <img src="/u/@ViewBag.PartnerUsername/avatar" alt="@ViewBag.PartnerUsername" class="dm-avatar">
-                    <div class="dm-info">
-                        <div class="dm-name">@ViewBag.PartnerUsername</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Main Content -->
-        <div class="dm-content">
-            <div class="dm-content-header">
-                <img src="/u/@ViewBag.PartnerUsername/avatar" alt="@ViewBag.PartnerUsername" class="dm-header-avatar">
-                <h1 class="dm-title">@ViewBag.PartnerUsername</h1>
-            </div>
-
-            <div class="conversation-container">
-                <div class="conversation-messages">
-                    @if (ViewBag.Conversation != null)
-                    {
-                        @foreach (var message in ViewBag.Conversation)
-                        {
-                            <div class="conversation-message @(message.FromUsername == ViewBag.Username ? "sent" : "received")">
-                                <img src="/u/@(message.FromUsername == ViewBag.Username ? message.ToUsername : message.FromUsername)/avatar"
-                                     alt="@(message.FromUsername == ViewBag.Username ? message.ToUsername : message.FromUsername)"
-                                     class="conversation-avatar">
-                                <div class="conversation-message-content">
-                                    <div class="conversation-message-bubble">
-                                        @message.Message
+                <div class="dc-chat-body">
+                    <div class="dc-chat-main">
+                        <div class="messages-list conversation-messages">
+                            @foreach (var row in rows)
+                            {
+                                var m = row.Message;
+                                <div class="message@(row.Grouped ? " grouped" : "")">
+                                    @if (row.Grouped)
+                                    {
+                                        <time class="message-gutter-time" datetime="@iso(m.CreatedUtc)" data-f="time">@time(m.CreatedUtc)</time>
+                                    }
+                                    else
+                                    {
+                                        <a href="/u/@m.FromUsername" class="message-avatar-link"><img src="/u/@m.FromUsername/avatar" alt="" class="message-avatar"></a>
+                                    }
+                                    <div class="message-content">
+                                        @if (!row.Grouped)
+                                        {
+                                            <h3 class="message-header">
+                                                <a href="/u/@m.FromUsername" class="message-author dc-name">@Present.DisplayName(m.FromUsername)</a>
+                                                <time class="message-timestamp" datetime="@iso(m.CreatedUtc)" data-f="stamp">@stamp(m.CreatedUtc)</time>
+                                            </h3>
+                                        }
+                                        <div class="message-text">@MessageHtml.Render(m.Message)</div>
                                     </div>
-                                    <div class="conversation-message-info">
-                                        @message.CreatedUtc.ToString("MMM dd, h:mm tt")@(message.ReadUtc != null ? " • Read" : "")
+                                    <div class="message-actions">
+                                        <button type="button" class="message-action" data-reply data-tip="Reply"><svg class="ic" width="20" height="20"><use href="#i-reply"/></svg></button>
+                                        <button type="button" class="message-action" data-message-menu data-tip="More"><svg class="ic" width="20" height="20"><use href="#i-more"/></svg></button>
                                     </div>
                                 </div>
+                                if (row.NewDay)
+                                {
+                                    <div class="dc-divider" role="separator"><time datetime="@iso(m.CreatedUtc)" data-f="day">@day(m.CreatedUtc)</time></div>
+                                }
+                            }
+                            <div class="dc-channel-start dc-dm-start">
+                                <span class="dc-avatar s80"><img src="/u/@partner/avatar" alt=""></span>
+                                <h2>@partnerName</h2>
+                                <div class="dc-dm-start-handle">@partner</div>
+                                <p>This is the beginning of your direct message history with <strong>@partnerName</strong>.</p>
+                                <div class="dc-dm-start-actions">
+                                    <span class="dc-dm-start-mutual"><span class="dc-titlebar-icon org">@world.ShortName[..1]</span>1 Mutual Server</span>
+                                    <a href="/u/@partner" class="dc-btn">View Profile</a>
+                                    <button type="button" class="dc-btn" data-inert>Block</button>
+                                </div>
                             </div>
-                        }
-                    }
-                    else
-                    {
-                        <div class="empty-conversation">
-                            <h3>Start the conversation!</h3>
-                            <p>Send a message to @ViewBag.PartnerUsername to get started.</p>
                         </div>
-                    }
-                </div>
 
-                <div class="conversation-input-container">
-                    <form method="post" action="/messages/send" class="conversation-input-form">
-                        <input type="hidden" name="toUsername" value="@ViewBag.PartnerUsername">
-                        <input type="text" name="message" class="conversation-input"
-                               placeholder="Message @ViewBag.PartnerUsername" required>
-                        <button type="submit" class="conversation-send-btn">
-                            ➤
-                        </button>
-                    </form>
+                        <div class="message-input-container">
+                            <div class="dc-reply-bar" hidden>
+                                <span>Replying to <strong class="dc-reply-name"></strong></span>
+                                <button type="button" class="dc-icon-btn" data-reply-cancel data-tip="Cancel Reply"><svg class="ic" width="16" height="16"><use href="#i-close"/></svg></button>
+                            </div>
+                            <form method="post" action="/messages/send" class="conversation-input-form">
+                                <input type="hidden" name="toUsername" value="@partner">
+                                <div class="message-input-wrapper">
+                                    <button type="button" class="attachment-btn" data-popover="dc-upload-menu" data-tip="Upload a File or Use Apps"><svg class="ic" width="24" height="24"><use href="#i-plus-circle"/></svg></button>
+                                    <div class="dc-popover dc-menu dc-upload-menu" id="dc-upload-menu" hidden>
+                                        <button type="button" class="dc-menu-item" data-inert><svg class="ic" width="20" height="20"><use href="#i-upload"/></svg> Upload a File</button>
+                                        <button type="button" class="dc-menu-item" data-inert><svg class="ic" width="20" height="20"><use href="#i-apps"/></svg> Use Apps</button>
+                                    </div>
+                                    <div class="input-area">
+                                        <input type="text" name="message" class="conversation-input" placeholder="Message @@@partnerName" required autocomplete="off" aria-label="Message">
+                                        <div class="input-actions">
+                                            <button type="button" class="input-action" data-popover="dc-gift" data-tip="Upgrade your friends! Gift them awesome chat perks with Discord Nitro"><svg class="ic" width="24" height="24"><use href="#i-gift"/></svg></button>
+                                            <button type="button" class="input-action" data-picker="gif" data-tip="Open GIF picker"><svg class="ic" width="24" height="24"><use href="#i-gif"/></svg></button>
+                                            <button type="button" class="input-action" data-picker="sticker" data-tip="Open sticker picker"><svg class="ic" width="24" height="24"><use href="#i-sticker"/></svg></button>
+                                            <button type="button" class="input-action" data-picker="emoji" data-tip="Select emoji"><svg class="ic" width="24" height="24"><use href="#i-emoji"/></svg></button>
+                                            <button type="submit" class="conversation-send-btn" data-tip="Send"><svg class="ic" width="20" height="20"><use href="#i-forward"/></svg></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                            <div class="dc-popover dc-gift" id="dc-gift" hidden>
+                                <strong>Gift Nitro</strong>
+                                <p>Gifting is not available for your account right now.</p>
+                            </div>
+                            <div class="dc-typing"></div>
+                        </div>
+                    </div>
+
+                    <aside class="dc-members dc-dm-profile" style="--banner: @banners[hash % (uint)banners.Length]">
+                        <div class="dc-dm-profile-banner"></div>
+                        <span class="dc-avatar s80"><img src="/u/@partner/avatar" alt=""><i class="dc-status @status" data-tip="@presenceLabel(status)"></i></span>
+                        <h2 class="dc-profile-name">@partnerName</h2>
+                        <div class="dc-profile-handle">@partner</div>
+                        @if (activity(partner) != null)
+                        {
+                            <div class="dc-profile-bubble">@activity(partner)</div>
+                        }
+                        <div class="dc-dm-profile-card">
+                            <h3 class="dc-profile-label">About Me</h3>
+                            <p class="dc-profile-about">@Present.Headline(partner)</p>
+                            <h3 class="dc-profile-label">Member Since</h3>
+                            <p class="dc-profile-about">@since(partner, 2016, 2024).ToString("MMM d, yyyy", us)</p>
+                        </div>
+                        <div class="dc-dm-profile-card dc-dm-profile-links">
+                            <a href="/u/@partner">Mutual Servers — 1 <svg class="ic" width="16" height="16"><use href="#i-chevron-right"/></svg></a>
+                            <a href="/u/@partner">Mutual Friends — @(1 + hash % 6) <svg class="ic" width="16" height="16"><use href="#i-chevron-right"/></svg></a>
+                        </div>
+                        <a href="/u/@partner" class="dc-dm-profile-full">View Full Profile</a>
+                    </aside>
                 </div>
-            </div>
+            </main>
         </div>
+        @await Html.PartialAsync("~/Views/Themes/discord/_discorduserpanel.cshtml")
+        <div class="dc-scrim" data-drawer-close></div>
     </div>
 
     <script src="/lib/jquery/dist/jquery.min.js"></script>
-    <script>
-        // Auto-scroll to bottom of messages
-        $('.conversation-messages').scrollTop($('.conversation-messages')[0].scrollHeight);
-
-        // Auto-resize input
-        $('.conversation-input').on('input', function() {
-            this.style.height = 'auto';
-            this.style.height = this.scrollHeight + 'px';
-        });
-    </script>
+    <script src="/themes/discord/js/discord.js"></script>
 </body>
 </html>

@@ -1,0 +1,48 @@
+@model string
+@inject Ghosts.Pandora.Infrastructure.Services.IUserService Users
+@inject Ghosts.Pandora.Infrastructure.Services.IDirectMessageService Messages
+@{
+    // The reader's chats, most recent first, with the last message of each
+    var me = ViewBag.Username as string ?? "user";
+    var user = await Users.GetUserByUsernameAsync(me, "reddit");
+    var chats = new List<(string Partner, DirectMessage Last, bool Unread)>();
+    if (user != null)
+    {
+        var received = await Messages.GetReceivedMessagesAsync(user.Id);
+        var sent = await Messages.GetSentMessagesAsync(user.Id);
+        chats = received.Select(m => (Partner: m.FromUsername, Message: m))
+            .Concat(sent.Select(m => (Partner: m.ToUsername, Message: m)))
+            .GroupBy(x => x.Partner, StringComparer.OrdinalIgnoreCase)
+            .Select(g => g.OrderByDescending(x => x.Message.CreatedUtc).First())
+            .Select(x => (x.Partner, Last: x.Message, Unread: x.Message.ToUserId == user.Id && x.Message.ReadUtc == null))
+            .OrderByDescending(c => c.Last.CreatedUtc)
+            .ToList();
+    }
+    string When(DateTime utc) =>
+        utc.Date == DateTime.UtcNow.Date ? utc.ToString("h:mm tt")
+        : utc.Date == DateTime.UtcNow.Date.AddDays(-1) ? "Yesterday"
+        : utc.ToString(utc.Year == DateTime.UtcNow.Year ? "MMM d" : "MMM d, yyyy");
+}
+<aside class="r-chat-list" aria-label="Chats">
+    <div class="r-chat-list-head">
+        <h1>Chats</h1>
+        <a href="/messages#r-newchat" class="r-icon-btn" aria-label="Start new chat" title="Start new chat"><svg class="ri"><use href="#i-newchat" /></svg></a>
+        <button type="button" class="r-icon-btn" aria-label="More options" data-r="more"><svg class="ri"><use href="#i-more" /></svg></button>
+    </div>
+    <div class="r-chat-items">
+        @foreach (var chat in chats)
+        {
+            <a href="/messages/conversation/@chat.Partner" class="r-chat-item" aria-current="@(string.Equals(chat.Partner, Model, StringComparison.OrdinalIgnoreCase) ? "page" : "false")" data-unread="@(chat.Unread ? "1" : "0")">
+                <img src="/u/@chat.Partner/avatar" alt="">
+                <div class="r-chat-item-main">
+                    <div class="r-chat-item-top"><span class="r-chat-item-name">@chat.Partner</span><span class="r-chat-item-time">@When(chat.Last.CreatedUtc)</span></div>
+                    <div class="r-chat-item-preview">@(chat.Last.FromUserId == user?.Id ? "You: " : "")@MessageHtml.Render(chat.Last.Message)</div>
+                </div>
+            </a>
+        }
+        @if (chats.Count == 0)
+        {
+            <div class="r-chat-none">No chats yet. Start one to talk with other Redditors.</div>
+        }
+    </div>
+</aside>

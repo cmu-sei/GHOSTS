@@ -62,8 +62,7 @@ public class DirectMessagesController(
     {
         if(string.IsNullOrEmpty(fromUsername))
             fromUsername = GetOrCreateUsernameCookie(this.HttpContext);
-        if(string.IsNullOrEmpty(theme))
-            theme = ResolveThemeName();
+        theme = string.IsNullOrEmpty(theme) ? ResolveThemeName() : KnownTheme(theme);
 
         var fromUser = await userService.GetOrCreateUserAsync(fromUsername, theme);
         var toUser = await userService.GetOrCreateUserAsync(toUsername, theme);
@@ -112,7 +111,7 @@ public class DirectMessagesController(
     private string ResolveThemeName()
     {
         var queryTheme = HttpContext.Request.Query["theme"].ToString();
-        var selectedTheme = !string.IsNullOrWhiteSpace(queryTheme) ? queryTheme : ThemeRead();
+        var selectedTheme = !string.IsNullOrWhiteSpace(queryTheme) ? KnownTheme(queryTheme) : ThemeRead();
 
         ThemeWrite(selectedTheme);
         return selectedTheme;

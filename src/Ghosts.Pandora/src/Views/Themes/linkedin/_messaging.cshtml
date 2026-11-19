@@ -1,0 +1,224 @@
+@using Ghosts.Pandora.Infrastructure.Content
+@using Ghosts.Pandora.Infrastructure.Models
+@inject Ghosts.Pandora.Infrastructure.Services.IUserService Users
+@inject Ghosts.Pandora.Infrastructure.Services.IDirectMessageService DirectMessages
+@functions {
+    static DateTime Utc(DateTime value) => DateTime.SpecifyKind(value, DateTimeKind.Utc);
+
+    // "3:45 PM" today, "Tue" this week, then "Nov 12"
+    static string ListDate(DateTime createdUtc)
+    {
+        var at = Utc(createdUtc);
+        var now = DateTime.UtcNow;
+        if (at.Date == now.Date) return at.ToString("h:mm tt", System.Globalization.CultureInfo.InvariantCulture);
+        if (now - at < TimeSpan.FromDays(6)) return at.ToString("ddd", System.Globalization.CultureInfo.InvariantCulture);
+        return at.ToString(at.Year == now.Year ? "MMM d" : "MMM d, yyyy", System.Globalization.CultureInfo.InvariantCulture);
+    }
+
+    static string DayHeading(DateTime createdUtc)
+    {
+        var day = Utc(createdUtc).Date;
+        var today = DateTime.UtcNow.Date;
+        if (day == today) return "TODAY";
+        if (day == today.AddDays(-1)) return "YESTERDAY";
+        return day.ToString(day.Year == today.Year ? "MMM d" : "MMM d, yyyy", System.Globalization.CultureInfo.InvariantCulture).ToUpperInvariant();
+    }
+}
+@{
+    // Both messaging pages: the conversation list on the left and one conversation, or a new message, on the right.
+    // ViewData["LiPartner"] is the open conversation; ViewData["LiConversation"] its messages when the page already has them.
+    var me = ViewBag.Username as string ?? string.Empty;
+    var partner = ViewData["LiPartner"] as string;
+    var conversation = ViewData["LiConversation"] as IEnumerable<DirectMessage>;
+    var meUser = await Users.GetUserByUsernameAsync(me, "linkedin");
+
+    var all = new List<DirectMessage>();
+    if (meUser != null)
+    {
+        all.AddRange(await DirectMessages.GetReceivedMessagesAsync(meUser.Id));
+        all.AddRange(await DirectMessages.GetSentMessagesAsync(meUser.Id));
+    }
+    string Other(DirectMessage m) => string.Equals(m.FromUsername, me, StringComparison.OrdinalIgnoreCase) ? m.ToUsername : m.FromUsername;
+    var threads = all
+        .GroupBy(Other, StringComparer.OrdinalIgnoreCase)
+        .Select(g => new { Partner = g.Key, Messages = g.OrderBy(m => m.CreatedUtc).ToList() })
+        .OrderByDescending(t => t.Messages[^1].CreatedUtc)
+        .ToList();
+
+    var composing = Context.Request.Query["new"] == "1" || (partner == null && threads.Count == 0);
+    if (!composing && partner == null)
+        partner = threads[0].Partner;
+    var messages = composing ? new List<DirectMessage>()
+        : (conversation?.ToList() ?? threads.FirstOrDefault(t => string.Equals(t.Partner, partner, StringComparison.OrdinalIgnoreCase))?.Messages ?? new List<DirectMessage>());
+
+    var partnerIsWorld = partner != null && Present.World.People.Any(p => string.Equals(p.Username, partner, StringComparison.OrdinalIgnoreCase));
+    var partnerDegree = partner == null ? "" : ContentRequest.StableHash($"{me}:{partner}:degree") % 100 < (partnerIsWorld ? 70u : 35u) ? "2nd" : "3rd+";
+    var people = (await Users.GetUsersByThemeAsync("linkedin", 50))
+        .Where(u => !string.Equals(u.Username, me, StringComparison.OrdinalIgnoreCase))
+        .ToList();
+}
+<div class="li-card li-msg@(ViewData["LiThreadPage"] as bool? == true ? " li-msg--thread" : "")">
+    <div class="li-msg__bar">
+        <h1>Messaging</h1>
+        <div class="li-msg__search">
+            <svg width="16" height="16"><use href="#li-search"/></svg>
+            <input type="text" placeholder="Search messages" aria-label="Search messages" data-li-msg-search>
+            <svg class="li-msg__filter" width="16" height="16"><use href="#li-filter"/></svg>
+        </div>
+        <div class="li-msg__baricons">
+            <button type="button" class="li-iconbtn li-inert" aria-label="More options"><svg width="24" height="24"><use href="#li-more"/></svg></button>
+            <a href="/messages?new=1" class="li-iconbtn" aria-label="Compose message"><svg width="24" height="24"><use href="#li-compose"/></svg></a>
+        </div>
+    </div>
+    <div class="li-msg__filters">
+        <span class="li-pill li-pill--on li-pill--sm">Focused <svg width="16" height="16"><use href="#li-caret"/></svg></span>
+        <span class="li-pill li-pill--sm li-inert">Unread</span>
+        <span class="li-pill li-pill--sm li-inert">My Connections</span>
+        <span class="li-pill li-pill--sm li-inert">InMail</span>
+        <span class="li-pill li-pill--sm li-inert">Starred</span>
+    </div>
+    <div class="li-msg__panes">
+        <ul class="li-msg__list" aria-label="Conversation list">
+            @foreach (var thread in threads)
+            {
+                var last = thread.Messages[^1];
+                var mine = string.Equals(last.FromUsername, me, StringComparison.OrdinalIgnoreCase);
+                var unread = thread.Messages.Any(m => !string.Equals(m.FromUsername, me, StringComparison.OrdinalIgnoreCase) && m.ReadUtc == null);
+                var active = !composing && string.Equals(thread.Partner, partner, StringComparison.OrdinalIgnoreCase);
+                var preview = SocialPresentation.PlainText(new Post { Message = last.Message });
+                <li class="@(active ? "li-msg__item--active" : "")@(unread ? " li-msg__item--unread" : "")" data-li-thread="@Present.DisplayName(thread.Partner).ToLowerInvariant() @thread.Partner.ToLowerInvariant()">
+                    <a href="/messages/conversation/@thread.Partner" class="li-msg__item">
+                        <img src="/u/@thread.Partner/avatar" alt="">
+                        <span class="li-msg__itembody">
+                            <span class="li-msg__itemtop">
+                                <span class="li-msg__name">@Present.DisplayName(thread.Partner)</span>
+                                <span class="li-msg__date">@ListDate(last.CreatedUtc)</span>
+                            </span>
+                            <span class="li-msg__preview">@(mine ? "You: " : "")@MessageHtml.Render(preview)</span>
+                        </span>
+                        @if (unread)
+                        {
+                            <span class="li-msg__dot" aria-label="Unread"></span>
+                        }
+                    </a>
+                </li>
+            }
+            @if (threads.Count == 0)
+            {
+                <li class="li-msg__none">
+                    <strong>No messages yet</strong>
+                    <span>Reach out and start a conversation to advance your career.</span>
+                    <a href="/messages?new=1" class="li-btn li-btn--outline">Send a message</a>
+                </li>
+            }
+        </ul>
+
+        <section class="li-msg__thread">
+            @if (composing)
+            {
+                <div class="li-msg__threadhead">
+                    <a href="/messages" class="li-iconbtn li-msg__back" aria-label="Back"><svg width="24" height="24"><use href="#li-back"/></svg></a>
+                    <h2>New message</h2>
+                </div>
+                <form method="post" action="/messages/send" class="li-msg__compose li-msg__compose--new" data-li-msgform>
+                    <div class="li-msg__to">
+                        <input type="text" name="toUsername" list="li-msg-people" placeholder="Type a name or multiple names" required autocomplete="off" aria-label="Type a name or multiple names">
+                        <datalist id="li-msg-people">
+                            @foreach (var user in people)
+                            {
+                                <option value="@user.Username">@Present.DisplayName(user.Username) &middot; @Present.Headline(user.Username)</option>
+                            }
+                        </datalist>
+                    </div>
+                    <div class="li-msg__spacer"></div>
+                    <div class="li-msg__write">
+                        <textarea name="message" placeholder="Write a message…" required rows="3" aria-label="Write a message"></textarea>
+                    </div>
+                    <div class="li-msg__tools">
+                        <span>
+                            <button type="button" class="li-iconbtn li-inert" aria-label="Attach an image"><svg width="24" height="24"><use href="#li-image"/></svg></button>
+                            <button type="button" class="li-iconbtn li-inert" aria-label="Attach a file"><svg width="24" height="24"><use href="#li-attach"/></svg></button>
+                            <button type="button" class="li-iconbtn li-inert" aria-label="Open GIF Keyboard"><svg width="24" height="24"><use href="#li-gif"/></svg></button>
+                            <button type="button" class="li-iconbtn li-inert" aria-label="Open Emoji Keyboard"><svg width="24" height="24"><use href="#li-emoji"/></svg></button>
+                        </span>
+                        <span>
+                            <button type="submit" class="li-msg__send">Send</button>
+                            <button type="button" class="li-iconbtn li-inert" aria-label="Open send options"><svg width="24" height="24"><use href="#li-more"/></svg></button>
+                        </span>
+                    </div>
+                </form>
+            }
+            else
+            {
+                <div class="li-msg__threadhead">
+                    <a href="/messages" class="li-iconbtn li-msg__back" aria-label="Back"><svg width="24" height="24"><use href="#li-back"/></svg></a>
+                    <a href="/u/@partner" class="li-msg__who">
+                        <h2>@Present.DisplayName(partner)</h2>
+                        <span>@Present.Headline(partner)</span>
+                    </a>
+                    <span class="li-msg__threadicons">
+                        <button type="button" class="li-iconbtn li-inert" aria-label="Open the options list"><svg width="24" height="24"><use href="#li-more"/></svg></button>
+                        <button type="button" class="li-iconbtn li-inert" aria-label="Start a video meeting"><svg width="24" height="24"><use href="#li-video"/></svg></button>
+                        <button type="button" class="li-iconbtn li-inert" aria-label="Star conversation"><svg width="24" height="24"><use href="#li-star"/></svg></button>
+                    </span>
+                </div>
+                <div class="li-msg__scroll" data-li-msgscroll>
+                    <div class="li-msg__intro">
+                        <a href="/u/@partner"><img src="/u/@partner/avatar" alt=""></a>
+                        <a href="/u/@partner" class="li-msg__introname">@Present.DisplayName(partner) <span>&bull; @partnerDegree</span></a>
+                        <span class="li-msg__introheadline">@Present.Headline(partner)</span>
+                    </div>
+                    @{
+                        DirectMessage previous = null;
+                    }
+                    @foreach (var message in messages)
+                    {
+                        var newDay = previous == null || Utc(previous.CreatedUtc).Date != Utc(message.CreatedUtc).Date;
+                        var grouped = !newDay && string.Equals(previous.FromUsername, message.FromUsername, StringComparison.OrdinalIgnoreCase) &&
+                                      message.CreatedUtc - previous.CreatedUtc < TimeSpan.FromMinutes(10);
+                        var from = message.FromUsername;
+                        if (newDay)
+                        {
+                            <div class="li-msg__day"><span>@DayHeading(message.CreatedUtc)</span></div>
+                        }
+                        <div class="li-msg__event@(grouped ? " li-msg__event--grouped" : "")">
+                            @if (!grouped)
+                            {
+                                <a href="/u/@from" class="li-msg__eventavatar"><img src="/u/@from/avatar" alt=""></a>
+                                <div class="li-msg__eventhead">
+                                    <a href="/u/@from" class="li-msg__eventname">@Present.DisplayName(from)</a>
+                                    <span class="li-msg__eventtime">&bull; @Utc(message.CreatedUtc).ToString("h:mm tt", System.Globalization.CultureInfo.InvariantCulture)</span>
+                                </div>
+                            }
+                            <p class="li-msg__text">@MessageHtml.Render(message.Message)</p>
+                        </div>
+                        previous = message;
+                    }
+                    @if (messages.Count > 0 && previous != null && string.Equals(previous.FromUsername, me, StringComparison.OrdinalIgnoreCase) && previous.ReadUtc != null)
+                    {
+                        <div class="li-msg__seen"><img src="/u/@partner/avatar" alt="Seen by @Present.DisplayName(partner)" title="Seen by @Present.DisplayName(partner)"></div>
+                    }
+                </div>
+                <form method="post" action="/messages/send" class="li-msg__compose" data-li-msgform>
+                    <input type="hidden" name="toUsername" value="@partner">
+                    <div class="li-msg__write">
+                        <textarea name="message" placeholder="Write a message…" required rows="3" aria-label="Write a message"></textarea>
+                        <button type="button" class="li-iconbtn li-msg__expand li-inert" aria-label="Maximize compose field"><svg width="16" height="16"><use href="#li-expand"/></svg></button>
+                    </div>
+                    <div class="li-msg__tools">
+                        <span>
+                            <button type="button" class="li-iconbtn li-inert" aria-label="Attach an image"><svg width="24" height="24"><use href="#li-image"/></svg></button>
+                            <button type="button" class="li-iconbtn li-inert" aria-label="Attach a file"><svg width="24" height="24"><use href="#li-attach"/></svg></button>
+                            <button type="button" class="li-iconbtn li-inert" aria-label="Open GIF Keyboard"><svg width="24" height="24"><use href="#li-gif"/></svg></button>
+                            <button type="button" class="li-iconbtn li-inert" aria-label="Open Emoji Keyboard"><svg width="24" height="24"><use href="#li-emoji"/></svg></button>
+                        </span>
+                        <span>
+                            <button type="submit" class="li-msg__send">Send</button>
+                            <button type="button" class="li-iconbtn li-inert" aria-label="Open send options"><svg width="24" height="24"><use href="#li-more"/></svg></button>
+                        </span>
+                    </div>
+                </form>
+            }
+        </section>
+    </div>
+</div>

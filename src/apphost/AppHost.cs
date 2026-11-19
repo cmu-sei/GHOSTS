@@ -36,16 +36,54 @@ var freetypeLib = RuntimeInformation.OSArchitecture == Architecture.Arm64
     ? "/lib/aarch64-linux-gnu/libfreetype.so.6"
     : "";
 
-var facebook = builder.AddProject<Projects.Ghosts_Pandora>("facebook")
-    .WaitFor(postgres)
-    .WithReference(dbPandora, "PostgreSQL")
-    .WithEnvironment("DATABASE_PROVIDER", "PostgreSQL")
-    .WithEnvironment("MODE_TYPE", "social")
-    .WithEnvironment("DEFAULT_THEME", "facebook")
-    .WithEnvironment("GHOSTS_API_URL", "http://localhost:5000/api")
-    .WithEnvironment("LD_PRELOAD", freetypeLib)
-    .WithHttpEndpoint(port: 8800, name: "http", isProxied: false)
-    .WithExternalHttpEndpoints();
+// Dashboard groups: visual nesting only, so each site and client still starts and stops on its own
+var pandoraSites = builder.AddGroup("pandora-sites", "Pandora social and website instances");
+var ghostsClients = builder.AddGroup("ghosts-clients", "GHOSTS Universal clients");
+
+// A Pandora site for every template it has: each social theme and each website type, on 6360 and up.
+// They are off until started from the dashboard, and share the pandora database and the content
+// directory, so they show one world (users and posts are kept apart by theme).
+(string Name, string Theme, int Port)[] pandoraThemes =
+[
+    ("facebook", "facebook", 6360), ("instagram", "instagram", 6361), ("discord", "discord", 6362), ("x", "x", 6363),
+    ("linkedin", "linkedin", 6364), ("reddit", "reddit", 6365), ("youtube", "youtube", 6366), ("pandora-default", "default", 6367)
+];
+foreach (var (name, theme, port) in pandoraThemes)
+{
+    builder.AddProject<Projects.Ghosts_Pandora>(name)
+        .WithParentRelationship(pandoraSites)
+        .WithExplicitStart()
+        .WaitFor(postgres)
+        .WithReference(dbPandora, "PostgreSQL")
+        .WithEnvironment("DATABASE_PROVIDER", "PostgreSQL")
+        .WithEnvironment("MODE_TYPE", "social")
+        .WithEnvironment("DEFAULT_THEME", theme)
+        .WithEnvironment("GHOSTS_API_URL", "http://localhost:5000/api")
+        .WithEnvironment("LD_PRELOAD", freetypeLib)
+        .WithHttpEndpoint(port: port, name: "http", isProxied: false)
+        .WithExternalHttpEndpoints();
+}
+
+(string Name, string SiteType, string SiteName, int Port)[] pandoraWebsites =
+[
+    ("news-site", "news", "Daily Chronicle", 6368), ("shopping-site", "shopping", "Harbor Market", 6369),
+    ("sports-site", "sports", "Sideline Report", 6370), ("entertainment-site", "entertainment", "Marquee Daily", 6371)
+];
+foreach (var (name, siteType, siteName, port) in pandoraWebsites)
+{
+    builder.AddProject<Projects.Ghosts_Pandora>(name)
+        .WithParentRelationship(pandoraSites)
+        .WithExplicitStart()
+        .WaitFor(postgres)
+        .WithReference(dbPandora, "PostgreSQL")
+        .WithEnvironment("DATABASE_PROVIDER", "PostgreSQL")
+        .WithEnvironment("MODE_TYPE", "website")
+        .WithEnvironment("SITE_TYPE", siteType)
+        .WithEnvironment("SITE_NAME", siteName)
+        .WithEnvironment("LD_PRELOAD", freetypeLib)
+        .WithHttpEndpoint(port: port, name: "http", isProxied: false)
+        .WithExternalHttpEndpoints();
+}
 
 // The terrain provider in development is the API's own GraySpace simulator (Terrain API 1.3.0); a range points it at a
 // real GraySpace with its GRAYSPACE_API_TOKEN. The simulator downloads nothing, so ClientUrl here is only a placeholder.
@@ -105,8 +143,9 @@ var n8n = builder.AddContainer("n8n", "docker.n8n.io/n8nio/n8n")
     // Big Five study reports: the only directory the Read/Write Files node may touch (n8n blocks file access elsewhere by default).
     .WithEnvironment("N8N_RESTRICT_FILE_ACCESS_TO", "/home/node/bigfive-out")
     // The social workflows post to Pandora at $env.PANDORA_URL, so one set of files works wherever Pandora runs:
-    // here it is the "facebook" project on the devcontainer's port 8800; on a range it is a site on the base internet.
-    .WithEnvironment("PANDORA_URL", "http://host.docker.internal:8800")
+    // here it is the "facebook" project on the devcontainer's port 6360 (start it from the dashboard first);
+    // on a range it is a site on the base internet.
+    .WithEnvironment("PANDORA_URL", "http://host.docker.internal:6360")
     .WithEnvironment("N8N_BLOCK_ENV_ACCESS_IN_NODE", "false")
     .WithContainerName("n8n")
     // Reach the Mac's Ollama from inside this inner DinD container. host.docker.internal
@@ -198,8 +237,10 @@ var baserow = builder.AddContainer("baserow", "baserow/baserow")
         url.Url = "http://localhost:8090/";
     });
 
-// GHOSTS Universal Clients (built from source, demo/testing)
+// GHOSTS Universal Clients (built from source, demo/testing), off until started from the dashboard
 var client1 = builder.AddDockerfile("ghosts-client-1", "../../", "src/Dockerfile-client-universal")
+    .WithParentRelationship(ghostsClients)
+    .WithExplicitStart()
     .WithContainerName("ghosts-client-1")
     // A real hostname, so the client reports "ghosts-client-1" and can be bound to a manifest host by name.
     .WithContainerRuntimeArgs("--hostname", "ghosts-client-1")
@@ -209,6 +250,8 @@ var client1 = builder.AddDockerfile("ghosts-client-1", "../../", "src/Dockerfile
     .WaitFor(api);
 
 var client2 = builder.AddDockerfile("ghosts-client-2", "../../", "src/Dockerfile-client-universal")
+    .WithParentRelationship(ghostsClients)
+    .WithExplicitStart()
     .WithContainerName("ghosts-client-2")
     // A real hostname, so the client reports "ghosts-client-2" and can be bound to a manifest host by name.
     .WithContainerRuntimeArgs("--hostname", "ghosts-client-2")
@@ -218,6 +261,8 @@ var client2 = builder.AddDockerfile("ghosts-client-2", "../../", "src/Dockerfile
     .WaitFor(api);
 
 var client3 = builder.AddDockerfile("ghosts-client-3", "../../", "src/Dockerfile-client-universal")
+    .WithParentRelationship(ghostsClients)
+    .WithExplicitStart()
     .WithContainerName("ghosts-client-3")
     // A real hostname, so the client reports "ghosts-client-3" and can be bound to a manifest host by name.
     .WithContainerRuntimeArgs("--hostname", "ghosts-client-3")
@@ -241,3 +286,20 @@ var docs = builder.AddExecutable("docs", "mkdocs", "../../", "serve", "--dev-add
     });
 
 builder.Build().Run();
+
+/// <summary>A resource with no process of its own, used only to group others in the dashboard.</summary>
+sealed class GroupResource(string name) : Resource(name);
+
+static class GroupResourceExtensions
+{
+    public static IResourceBuilder<GroupResource> AddGroup(this IDistributedApplicationBuilder builder, string name, string description) =>
+        builder.AddResource(new GroupResource(name))
+            .WithInitialState(new CustomResourceSnapshot
+            {
+                ResourceType = "Group",
+                CreationTimeStamp = DateTime.UtcNow,
+                State = "Group",
+                Properties = [new(CustomResourceKnownProperties.Source, description)]
+            })
+            .ExcludeFromManifest();
+}

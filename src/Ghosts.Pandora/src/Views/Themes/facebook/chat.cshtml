@@ -1,6 +1,7 @@
 @{
     Layout = null;
     ViewBag.Theme = "facebook";
+    var to = ViewBag.To as string;
 }
 
 <!DOCTYPE html>
@@ -8,60 +9,96 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>Facebook Messenger</title>
+    <title>@(string.IsNullOrEmpty(to) ? "Messenger" : $"{Present.DisplayName(to)} | Messenger")</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/themes/facebook/css/facebook.css">
+    <link rel="icon" href="/themes/facebook/images/favicon.svg" type="image/svg+xml">
 
     <!-- n8n Chat styles -->
     <link href="/css/chat.css" rel="stylesheet" />
 
     <style>
-        body {
-            margin: 10px;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            background: white;
-            color: #1877f2;
-            max-width: 99%;
-            display: flex;
-            flex-direction: column;
+        /* n8n chat dressed as a Messenger chat window */
+        .fb-chat-mount {
+            --chat--font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI Historic", "Segoe UI", Helvetica, Arial, sans-serif;
+            --chat--color--primary: #0084FF;
+            --chat--color--primary-shade-50: #0077E6;
+            --chat--color--secondary: #0084FF;
+            --chat--color-light: #FFFFFF;
+            --chat--color-dark: #080809;
+            --chat--spacing: 12px;
+            --chat--body--background: #FFFFFF;
+            --chat--footer--background: #FFFFFF;
+            --chat--message--font-size: 15px;
+            --chat--message-line-height: 1.3333;
+            --chat--message--padding: 8px 12px;
+            --chat--message--border-radius: 18px;
+            --chat--message--margin-bottom: 4px;
+            --chat--message--bot--background: #F0F0F0;
+            --chat--message--bot--color: #080809;
+            --chat--message--user--background: #0084FF;
+            --chat--message--user--color: #FFFFFF;
+            --chat--messages-list--padding: 16px;
+            --chat--input--background: #F0F2F5;
+            --chat--input--border-radius: 20px;
+            --chat--input--padding: 8px 12px;
+            --chat--input--font-size: 15px;
+            --chat--textarea--height: 36px;
+            --chat--input--send--button--color: #0084FF;
+            --chat--input--send--button--background: transparent;
         }
 
-        header {
-            padding: 1rem 1.5rem;
-            background: #020617;
-            border-bottom: 1px solid #1f2937;
-        }
-
-        main {
-            flex: 1;
-
-        }
-
-        .chat-header {
+        .chat-header, .chat-powered-by {
             display: none !important;
+        }
+
+        .chat-footer {
+            border-top: 0 !important;
+            padding: 12px !important;
         }
 
         .chat-input-send-button, .chat-input-file-button
         {
-            color: #1877f2 !important;
+            color: #0084FF !important;
         }
 
         .chat-message.chat-message-from-user:not(.chat-message-transparent)
         {
-            background: #1877f2;
+            background: #0084FF;
         }
     </style>
 </head>
 
-<body>
-    <header>
-        <h1>Facebook Messenger</h1>
+<body data-theme="facebook" class="fb-chat-page">
+    <svg class="fb-sprite" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+        <symbol id="fb-phone" viewBox="0 0 24 24"><path fill="currentColor" d="M7.4 3.2c.5-.2 1.1 0 1.4.5l1.6 2.8c.3.5.2 1.1-.2 1.5L8.8 9.3c.9 2 2.5 3.8 4.6 4.9l1.4-1.3c.4-.4 1-.5 1.5-.2l2.8 1.6c.5.3.7.9.5 1.4l-.7 2c-.3.9-1.2 1.4-2.2 1.3C9.9 18.5 5.3 13.9 4.8 7.1c-.1-1 .5-1.9 1.4-2.2z"/></symbol>
+        <symbol id="fb-videocam" viewBox="0 0 24 24"><path fill="currentColor" d="M2.5 8A2.5 2.5 0 0 1 5 5.5h8.5A2.5 2.5 0 0 1 16 8v8a2.5 2.5 0 0 1-2.5 2.5H5A2.5 2.5 0 0 1 2.5 16zM17.5 10l3.3-2.2c.5-.3 1.2 0 1.2.6v7.2c0 .6-.7 1-1.2.6L17.5 14z"/></symbol>
+        <symbol id="fb-close" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+    </svg>
+
+    <header class="fb-thread-head">
+        @if (!string.IsNullOrEmpty(to))
+        {
+            <a href="/u/@to" target="_blank" class="fb-thread-who">
+                <span class="fb-thread-avatar"><img src="/u/@to/avatar" alt=""><span class="fb-online"></span></span>
+                <span>
+                    <span class="fb-thread-name">@Present.DisplayName(to)</span>
+                    <span class="fb-thread-status">Active now</span>
+                </span>
+            </a>
+        }
+        else
+        {
+            <span class="fb-thread-title">Messenger</span>
+        }
+        <div class="fb-thread-tools">
+            <button type="button" aria-label="Start a voice call" title="Start a voice call"><svg><use href="#fb-phone"></use></svg></button>
+            <button type="button" aria-label="Start a video call" title="Start a video call"><svg><use href="#fb-videocam"></use></svg></button>
+            <button type="button" aria-label="Close chat" title="Close chat" onclick="window.close()"><svg><use href="#fb-close"></use></svg></button>
+        </div>
     </header>
 
-    <main>
-        <p>
-
-        </p>
-    </main>
+    <main id="n8n-chat" class="fb-chat-mount"></main>
 
     <!-- n8n Chat script (ES module from CDN) -->
     <script type="module">
@@ -78,6 +115,10 @@
                 toUsername: "@ViewBag.To",
                 theme: "facebook",
             },
+
+            // no canned greeting from the widget; Messenger opens on an empty conversation
+            initialMessages: [],
+            i18n: { en: { title: "", subtitle: "", footer: "", getStarted: "New Conversation", inputPlaceholder: "Aa", closeButtonTooltip: "Close chat" } },
 
             // Optional: UI options
             // position: "right", // "left" | "right"

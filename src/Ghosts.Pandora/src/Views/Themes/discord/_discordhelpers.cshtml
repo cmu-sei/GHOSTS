@@ -1,0 +1,85 @@
+@using System.Globalization
+@using Ghosts.Pandora.Infrastructure.Content
+@*
+    Who people are on the Discord theme: a server role from their department in the world, a presence and an
+    activity, all derived from the username so every page agrees, plus Discord's timestamp formats. Razor views
+    cannot share a @@functions block, so each page renders this partial first and reads the functions back
+    from HttpContext.Items (see the top of index.cshtml).
+*@
+@functions {
+    private static readonly CultureInfo Us = CultureInfo.GetCultureInfo("en-US");
+
+    // department in the world -> server role and its colour class, in the order the member list hoists them
+    public static readonly (string Department, string Role, string Css)[] Roles =
+    {
+        ("Executive Office", "Leadership", "role-gold"),
+        ("Information Technology", "IT", "role-blue"),
+        ("Operations", "Operations", "role-orange"),
+        ("Finance", "Finance", "role-green"),
+        ("Human Resources", "HR", "role-pink"),
+        ("Communications", "Communications", "role-teal"),
+        ("Legal and Compliance", "Legal & Compliance", "role-purple"),
+        ("Facilities", "Facilities", "role-brown")
+    };
+
+    private static readonly string[] Presences = { "online", "online", "idle", "online", "dnd", "online", "offline", "online", "offline", "idle", "online", "offline" };
+
+    private static uint Hash(string key) => ContentRequest.StableHash((key ?? string.Empty).ToLowerInvariant());
+}
+@{
+    var world = Present.World;
+    var me = ViewBag.Username as string;
+
+    string Department(string username) =>
+        world.People.FirstOrDefault(p => string.Equals(p.Username, username, StringComparison.OrdinalIgnoreCase))?.Department;
+
+    string[] activities =
+    {
+        "Playing Stardew Valley", "Listening to Spotify", "Playing Minecraft", "Playing Visual Studio Code",
+        $"📍 {world.City} office", "📅 In meetings until 3", "📟 On call this week", "🏠 WFH today",
+        "Playing Rocket League", "☕ Running on coffee", "Playing Microsoft Excel", "Listening to Spotify"
+    };
+
+    Context.Items["dc.roles"] = Roles;
+    Context.Items["dc.role"] = (Func<string, string>)(u => Roles.FirstOrDefault(r => r.Department == Department(u)).Role);
+    Context.Items["dc.rolecss"] = (Func<string, string>)(u => Roles.FirstOrDefault(r => r.Department == Department(u)).Css ?? "role-none");
+    // a thread is named after the message it was started from, the way people name them: a few words, no ellipsis
+    Context.Items["dc.threadname"] = (Func<Ghosts.Pandora.Infrastructure.Models.Post, string>)(post =>
+    {
+        var title = Present.Title(post);
+        if (title.Length > 48)
+        {
+            var cut = title.LastIndexOf(' ', 48);
+            title = title[..(cut > 20 ? cut : 48)];
+        }
+        return title.TrimEnd(',', ';', ':', '-', '…', ' ');
+    });
+    Context.Items["dc.presence"] = (Func<string, string>)(u =>
+        string.Equals(u, me, StringComparison.OrdinalIgnoreCase) ? "online" : Presences[Hash(u) % Presences.Length]);
+    Context.Items["dc.presencelabel"] = (Func<string, string>)(p => p switch
+    {
+        "idle" => "Idle", "dnd" => "Do Not Disturb", "offline" => "Offline", _ => "Online"
+    });
+    // about half the people show an activity or custom status, and nobody who is offline does
+    Context.Items["dc.activity"] = (Func<string, string>)(u =>
+    {
+        var h = Hash(u + ":activity");
+        var presence = ((Func<string, string>)Context.Items["dc.presence"])(u);
+        return presence == "offline" || h % 2 == 0 ? null : activities[h / 2 % (uint)activities.Length];
+    });
+    // "Today at 3:42 PM", "Yesterday at 9:05 AM", then "11/16/26, 5:51 AM"; discord.js redoes these in local time
+    Context.Items["dc.stamp"] = (Func<DateTime, string>)(utc =>
+    {
+        var time = utc.ToString("h:mm tt", Us);
+        var today = DateTime.UtcNow.Date;
+        if (utc.Date == today) return $"Today at {time}";
+        if (utc.Date == today.AddDays(-1)) return $"Yesterday at {time}";
+        return utc.ToString("M/d/yy, h:mm tt", Us);
+    });
+    Context.Items["dc.time"] = (Func<DateTime, string>)(utc => utc.ToString("h:mm tt", Us));
+    Context.Items["dc.day"] = (Func<DateTime, string>)(utc => utc.ToString("MMMM d, yyyy", Us));
+    Context.Items["dc.iso"] = (Func<DateTime, string>)(utc => DateTime.SpecifyKind(utc, DateTimeKind.Utc).ToString("o", Us));
+    // a stable date between two years, for "Member Since" and server join dates
+    Context.Items["dc.since"] = (Func<string, int, int, DateTime>)((key, from, to) =>
+        new DateTime(from, 1, 1).AddDays(Hash(key) % (uint)Math.Max(1, (new DateTime(to, 1, 1) - new DateTime(from, 1, 1)).TotalDays)));
+}

@@ -1,0 +1,32 @@
+@* One notification: a like on the current user's post (Item4 is null) or a reply to it *@
+@model System.ValueTuple<DateTime, string, Ghosts.Pandora.Infrastructure.Models.Post, Ghosts.Pandora.Infrastructure.Models.Comment>
+@{
+    var (when, who, post, comment) = Model;
+}
+@if (comment == null)
+{
+    <div class="x-note" data-href="/posts/@post.Id" title="@when.ToString("h:mm tt · MMM d, yyyy")">
+        <div class="x-note-icon"><svg><use href="#x-like-fill"/></svg></div>
+        <div class="x-note-body">
+            <a href="/u/@who"><img src="/u/@who/avatar" alt=""></a>
+            <p><a href="/u/@who" class="tweet-name">@Present.DisplayName(who)</a> liked your post</p>
+            <p class="x-note-quote">@SocialPresentation.PlainText(post)</p>
+        </div>
+    </div>
+}
+else
+{
+    <article class="tweet" data-username="@who" data-href="/posts/@post.Id">
+        <a href="/u/@who" class="tweet-avatar-link"><img src="/u/@who/avatar" alt="" class="tweet-avatar"></a>
+        <div class="tweet-content">
+            <div class="tweet-header">
+                <a href="/u/@who" class="tweet-name">@Present.DisplayName(who)</a>
+                <a href="/u/@who" class="tweet-handle">@Present.Handle(who)</a>
+                <span class="tweet-dot">·</span>
+                <a href="/posts/@post.Id" class="tweet-time">@SocialPresentation.ShortAgo(when)</a>
+            </div>
+            <div class="x-replying">Replying to <a href="/u/@post.Username">@Present.Handle(post.Username)</a></div>
+            <div class="tweet-text">@MessageHtml.Render(comment.Message)</div>
+        </div>
+    </article>
+}

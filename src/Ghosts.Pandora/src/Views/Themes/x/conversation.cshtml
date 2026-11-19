@@ -1,5 +1,18 @@
+@inject Ghosts.Pandora.Infrastructure.Services.IUserService Users
+@inject Ghosts.Pandora.Infrastructure.Services.IFollowService Follows
 @{
     Layout = null;
+    ViewBag.Theme = "x";
+    ViewData["XNav"] = "messages";
+    var me = ViewBag.Username as string ?? "user";
+    string partner = ViewBag.PartnerUsername;
+    ViewData["XChat"] = partner;
+    var messages = ((IEnumerable<Ghosts.Pandora.Infrastructure.Models.DirectMessage>)ViewBag.Conversation ?? Enumerable.Empty<Ghosts.Pandora.Infrastructure.Models.DirectMessage>()).ToList();
+    var partnerUser = await Users.GetUserByUsernameAsync(partner, "x");
+    var followers = partnerUser == null ? 0 : await Follows.GetFollowerCountAsync(partnerUser.Id);
+    var joined = (partnerUser?.CreatedUtc ?? DateTime.UtcNow).ToString("MMMM yyyy", System.Globalization.CultureInfo.GetCultureInfo("en-US"));
+    var bio = partnerUser == null || string.IsNullOrWhiteSpace(partnerUser.Bio) || partnerUser.Bio == $"User {partner}" ? Present.Headline(partner) : partnerUser.Bio;
+    bool Mine(Ghosts.Pandora.Infrastructure.Models.DirectMessage m) => string.Equals(m.FromUsername, me, StringComparison.OrdinalIgnoreCase);
 }
 
 <!DOCTYPE html>
@@ -7,257 +20,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>X | Chat with @ViewBag.PartnerUsername</title>
-    <link rel="stylesheet" href="/themes/x/css/feed.css">
-    <link rel="icon" href="/themes/x/images/x-icon.png">
-    <style>
-        .chat-container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px;
-            background: #000;
-            min-height: 100vh;
-            color: #fff;
-        }
-
-        .chat-header {
-            background: #16181c;
-            border: 1px solid #2f3336;
-            border-radius: 16px 16px 0 0;
-            padding: 16px 20px;
-            display: flex;
-            align-items: center;
-        }
-
-        .back-btn {
-            background: none;
-            border: none;
-            color: #1d9bf0;
-            cursor: pointer;
-            padding: 8px;
-            margin-right: 12px;
-            border-radius: 50%;
-            font-size: 16px;
-            transition: background-color 0.2s;
-        }
-
-        .back-btn:hover {
-            background: #0f1419;
-        }
-
-        .chat-user-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            margin-right: 12px;
-        }
-
-        .chat-user-info h1 {
-            font-size: 20px;
-            font-weight: 800;
-            color: #fff;
-            margin: 0;
-        }
-
-        .chat-messages {
-            background: #16181c;
-            border-left: 1px solid #2f3336;
-            border-right: 1px solid #2f3336;
-            min-height: 400px;
-            max-height: 500px;
-            overflow-y: auto;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .chat-message {
-            display: flex;
-            align-items: flex-start;
-            max-width: 70%;
-        }
-
-        .chat-message.sent {
-            align-self: flex-end;
-            flex-direction: row-reverse;
-        }
-
-        .chat-message.received {
-            align-self: flex-start;
-        }
-
-        .chat-message-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            margin: 0 8px;
-        }
-
-        .chat-message-bubble {
-            background: #000;
-            border: 1px solid #2f3336;
-            padding: 12px 16px;
-            border-radius: 16px;
-            max-width: 100%;
-            word-wrap: break-word;
-        }
-
-        .chat-message.sent .chat-message-bubble {
-            background: #1d9bf0;
-            border-color: #1d9bf0;
-            color: #fff;
-        }
-
-        .chat-message-text {
-            font-size: 15px;
-            line-height: 1.3;
-            margin-bottom: 2px;
-        }
-
-        .chat-message-time {
-            font-size: 11px;
-            color: #71767b;
-            text-align: center;
-            margin-top: 4px;
-        }
-
-        .chat-message.sent .chat-message-time {
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        .chat-input-container {
-            background: #16181c;
-            border: 1px solid #2f3336;
-            border-radius: 0 0 16px 16px;
-            padding: 16px 20px;
-        }
-
-        .chat-input-form {
-            display: flex;
-            align-items: center;
-            background: #000;
-            border: 1px solid #2f3336;
-            border-radius: 20px;
-            padding: 8px 16px;
-        }
-
-        .chat-input {
-            flex: 1;
-            border: none;
-            background: none;
-            color: #fff;
-            font-size: 15px;
-            padding: 8px 0;
-            outline: none;
-            resize: none;
-            max-height: 100px;
-        }
-
-        .chat-input::placeholder {
-            color: #71767b;
-        }
-
-        .chat-send-btn {
-            background: #1d9bf0;
-            border: none;
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            color: #fff;
-            cursor: pointer;
-            margin-left: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background-color 0.2s;
-        }
-
-        .chat-send-btn:hover {
-            background: #1a8cd8;
-        }
-
-        .empty-chat {
-            text-align: center;
-            padding: 40px 20px;
-            color: #71767b;
-            margin: auto;
-        }
-
-        .empty-chat h3 {
-            color: #fff;
-            margin-bottom: 8px;
-        }
-    </style>
+    <meta name="current-user" content="@me">
+    <title>@Present.DisplayName(partner) / X</title>
+    <link rel="stylesheet" href="/themes/x/css/x.css?@System.Guid.NewGuid()">
+    <link rel="icon" href="/themes/x/images/favicon.svg" type="image/svg+xml">
 </head>
-<body data-theme="x">
-    <div class="chat-container">
-        <div class="chat-header">
-            <button class="back-btn" onclick="window.location.href='/messages'">←</button>
-            <img src="/u/@ViewBag.PartnerUsername/avatar" alt="@ViewBag.PartnerUsername" class="chat-user-avatar">
-            <div class="chat-user-info">
-                <h1>@ViewBag.PartnerUsername</h1>
-            </div>
-        </div>
-
-        <div class="chat-messages">
-            @if (ViewBag.Conversation != null)
-            {
-                @foreach (var message in ViewBag.Conversation)
-                {
-                    <div class="chat-message @(message.FromUsername == ViewBag.Username ? "sent" : "received")">
-                        <img src="/u/@(message.FromUsername == ViewBag.Username ? ViewBag.Username : ViewBag.PartnerUsername)/avatar"
-                             alt="@(message.FromUsername == ViewBag.Username ? ViewBag.Username : ViewBag.PartnerUsername)"
-                             class="chat-message-avatar">
-                        <div class="chat-message-content">
-                            <div class="chat-message-bubble">
-                                <div class="chat-message-text">@message.Message</div>
-                            </div>
-                            <div class="chat-message-time">
-                                @message.CreatedUtc.ToString("h:mm tt")@(message.ReadUtc != null ? " • Read" : "")
-                            </div>
+<body data-theme="x" class="x-chat-page">
+    @await Html.PartialAsync("/Views/Themes/x/_xsprite.cshtml")
+    <div class="x-app">
+        @await Html.PartialAsync("/Views/Themes/x/_xnav.cshtml")
+        <main class="x-main" role="main">
+            <div class="x-main-inner">
+                <div class="x-dm has-chat">
+                    @await Html.PartialAsync("/Views/Themes/x/_xdmlist.cshtml")
+                    <section class="x-dm-pane" aria-label="Conversation">
+                        <div class="x-sticky x-chat-head">
+                            <a href="/messages" class="x-back x-chat-back" aria-label="Back"><svg><use href="#x-back"/></svg></a>
+                            <img src="/u/@partner/avatar" alt="">
+                            <h2>@Present.DisplayName(partner)</h2>
+                            <a href="/u/@partner" class="x-icon-btn" aria-label="Conversation info"><svg><use href="#x-info"/></svg></a>
                         </div>
-                    </div>
-                }
-            }
-            else
-            {
-                <div class="empty-chat">
-                    <h3>Send @ViewBag.PartnerUsername a message</h3>
-                    <p>Start a conversation now</p>
-                </div>
-            }
-        </div>
 
-        <div class="chat-input-container">
-            <form method="post" action="/messages/send" class="chat-input-form">
-                <input type="hidden" name="toUsername" value="@ViewBag.PartnerUsername">
-                <textarea name="message" class="chat-input" placeholder="Start a new message" required rows="1"></textarea>
-                <button type="submit" class="chat-send-btn">
-                    ➤
-                </button>
-            </form>
-        </div>
+                        <div class="x-chat-scroll">
+                            <a href="/u/@partner" class="x-chat-person">
+                                <img src="/u/@partner/avatar" alt="">
+                                <span class="tweet-name">@Present.DisplayName(partner)</span>
+                                <span class="x-profile-handle">@Present.Handle(partner)</span>
+                                <p>@bio</p>
+                                <small>Joined @joined · @followers.ToString("N0") @(followers == 1 ? "Follower" : "Followers")</small>
+                            </a>
+
+                            @for (var i = 0; i < messages.Count; i++)
+                            {
+                                var message = messages[i];
+                                var next = i + 1 < messages.Count ? messages[i + 1] : null;
+                                // a time goes under the last bubble of each run, as on X
+                                var endOfRun = next == null || Mine(next) != Mine(message) || next.CreatedUtc - message.CreatedUtc > TimeSpan.FromMinutes(5);
+                                <div class="x-msg@(Mine(message) ? " sent" : "")">
+                                    <div class="x-bubble">@MessageHtml.Render(message.Message)</div>
+                                    @if (endOfRun)
+                                    {
+                                        <div class="x-msg-time" title="@message.CreatedUtc.ToString("MMM d, yyyy, h:mm tt")">@message.CreatedUtc.ToString(message.CreatedUtc.Date == DateTime.UtcNow.Date ? "h:mm tt" : "MMM d, yyyy, h:mm tt")@(Mine(message) && message.ReadUtc != null ? " · Seen" : "")</div>
+                                    }
+                                </div>
+                            }
+                        </div>
+
+                        <div class="x-chat-compose">
+                            <form method="post" action="/messages/send" class="x-chat-form" data-empty>
+                                <input type="hidden" name="toUsername" value="@partner">
+                                <button type="button" class="option-btn" aria-label="Add photos or video"><svg><use href="#x-media"/></svg></button>
+                                <button type="button" class="option-btn" aria-label="Add a GIF"><svg><use href="#x-gif"/></svg></button>
+                                <button type="button" class="option-btn" aria-label="Add emoji"><svg><use href="#x-emoji"/></svg></button>
+                                <textarea name="message" placeholder="Start a new message" rows="1" required></textarea>
+                                <button type="submit" class="x-icon-btn x-send" aria-label="Send"><svg><use href="#x-send"/></svg></button>
+                            </form>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
     </div>
 
-    <script src="/lib/jquery/dist/jquery.min.js"></script>
-    <script>
-        // Auto-scroll to bottom of messages
-        $('.chat-messages').scrollTop($('.chat-messages')[0].scrollHeight);
-
-        // Auto-resize textarea
-        $('.chat-input').on('input', function() {
-            this.style.height = 'auto';
-            this.style.height = Math.min(this.scrollHeight, 100) + 'px';
-        });
-
-        // Submit on Enter
-        $('.chat-input').on('keypress', function(e) {
-            if (e.which === 13 && !e.shiftKey) {
-                e.preventDefault();
-                $(this).closest('form').submit();
-            }
-        });
-    </script>
+    <script src="/themes/x/js/x.js?@System.Guid.NewGuid()"></script>
 </body>
 </html>

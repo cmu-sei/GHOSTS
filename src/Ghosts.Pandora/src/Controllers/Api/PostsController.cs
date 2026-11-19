@@ -71,8 +71,7 @@ public class PostsController(ILogger logger, IHubContext<PostsHub> hubContext, I
         }
 
         var theme = Request.Query["theme"].ToString();
-        if (string.IsNullOrWhiteSpace(theme))
-            theme = ThemeRead();
+        theme = string.IsNullOrWhiteSpace(theme) ? ThemeRead() : KnownTheme(theme);
 
         // Get or create user
         var user = await userService.GetOrCreateUserAsync(username, theme);
@@ -107,7 +106,7 @@ public class PostsController(ILogger logger, IHubContext<PostsHub> hubContext, I
         UserWrite(username);
 
         if (!duplicate)
-            await hubContext.Clients.All.SendAsync("SendMessage", post.Id, username, theme, post.Message, post.CreatedUtc);
+            await hubContext.Clients.All.SendAsync("SendMessage", post.Id, username, theme, MessageHtml.ToHtml(post.Message), post.CreatedUtc);
 
         return NoContent();
     }

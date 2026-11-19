@@ -1,0 +1,38 @@
+@using Ghosts.Pandora.Infrastructure.Content
+@{
+    // The left-rail identity card for the signed-in member: cover, avatar, name, headline, stats and shortcuts.
+    var me = ViewBag.Username as string ?? string.Empty;
+    var hash = ContentRequest.StableHash($"{me}:identity");
+    var inWorld = Present.World.People.Any(p => string.Equals(p.Username, me, StringComparison.OrdinalIgnoreCase));
+    var viewers = 9 + (int)(hash % 171);
+    var impressions = 38 + (int)(hash / 7 % 2460);
+}
+<div class="li-card li-identity">
+    <a href="/u/@me" class="li-identity__cover li-cover--@(hash % 6)" aria-hidden="true" tabindex="-1"></a>
+    <div class="li-identity__body">
+        <a href="/u/@me" class="li-identity__avatarlink"><img class="li-identity__avatar" src="/u/@me/avatar" alt="@Present.DisplayName(me)"></a>
+        <div class="profile-details">
+            <a href="/u/@me" class="li-identity__namelink"><h3 class="profile-name">@Present.DisplayName(me)</h3></a>
+            <p class="li-identity__headline">@Present.Headline(me)</p>
+            <p class="li-identity__location">Greater @Present.World.City Area</p>
+            @if (inWorld)
+            {
+                <div class="li-identity__company"><span class="li-orglogo li-orglogo--sm">@Present.World.ShortName[0]</span>@Present.World.OrganizationName</div>
+            }
+        </div>
+    </div>
+</div>
+<div class="li-card li-identity-stats">
+    <a href="#" class="li-inert"><span>Profile viewers</span><strong>@viewers.ToString("N0")</strong></a>
+    <a href="#" class="li-inert"><span>Post impressions</span><strong>@impressions.ToString("N0")</strong></a>
+</div>
+<div class="li-card li-identity-premium">
+    <p>Grow your career with Premium</p>
+    <a href="#" class="li-inert"><svg width="16" height="16"><use href="#li-premium"/></svg>Try Premium for $0</a>
+</div>
+<div class="li-card li-shortcuts">
+    <a href="#" class="li-inert"><svg width="16" height="16"><use href="#li-bookmark"/></svg>Saved items</a>
+    <a href="#" class="li-inert"><svg width="16" height="16"><use href="#li-groups"/></svg>Groups</a>
+    <a href="#" class="li-inert"><svg width="16" height="16"><use href="#li-newsletter"/></svg>Newsletters</a>
+    <a href="#" class="li-inert"><svg width="16" height="16"><use href="#li-calendar"/></svg>Events</a>
+</div>

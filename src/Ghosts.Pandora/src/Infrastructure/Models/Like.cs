@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace Ghosts.Pandora.Infrastructure.Models;
 
@@ -19,6 +20,8 @@ public class Like
     public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
 
     public virtual User User { get; set; }
+    // the post already holds its likes and comments, so serializing back to it would loop
+    [JsonIgnore]
     public virtual Post Post { get; set; }
 
     [NotMapped]

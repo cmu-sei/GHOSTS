@@ -1,5 +1,6 @@
 using Ghosts.Pandora.Hubs;
 using Ghosts.Pandora.Infrastructure;
+using Ghosts.Pandora.Infrastructure.Content;
 using Ghosts.Pandora.Infrastructure.Middleware;
 using Ghosts.Pandora.Infrastructure.Services;
 using Ghosts.Pandora.Infrastructure.Startup.Extensions;
@@ -7,7 +8,9 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var configuration = ApplicationConfigurationLoader.Load();
+// appsettings.json, appsettings.{Environment}.json, environment variables and the command line
+var configuration = new ApplicationConfiguration();
+builder.Configuration.GetSection("ApplicationConfiguration").Bind(configuration);
 
 // Override configuration from environment variables
 var modeTypeEnv = Environment.GetEnvironmentVariable("MODE_TYPE");
@@ -126,8 +129,12 @@ builder.Services.AddScoped<IArchiveGenerationService, ArchiveGenerationService>(
 builder.Services.AddScoped<IVideoGenerationService, VideoGenerationService>();
 builder.Services.AddScoped<IAudioGenerationService, AudioGenerationService>();
 builder.Services.AddScoped<IBinaryGenerationService, BinaryGenerationService>();
-builder.Services.AddScoped<IWebsiteGenerationService, WebsiteGenerationService>();
-builder.Services.AddScoped<ContentManager>();
+builder.Services.AddSingleton<IWebsiteGenerationService, WebsiteGenerationService>();
+builder.Services.AddSingleton<ContentManager>();
+builder.Services.AddSingleton(sp => World.Load(configuration.World, sp.GetRequiredService<ContentManager>().Root,
+    sp.GetRequiredService<ILogger<World>>()));
+builder.Services.AddSingleton<DocumentComposer>();
+builder.Services.AddSingleton<SocialPresentation>();
 
 builder.Services.AddSingleton(_ =>
     LoggerFactory
@@ -166,4 +173,11 @@ logger.LogInformation(
 logger.LogInformation("This server is configured for '{Mode}' and to use the '{Theme}' theme", configuration.Mode.Type, configuration.Mode.DefaultTheme);
 logger.LogInformation("Database Provider: {Provider}", databaseProvider);
 
+var world = app.Services.GetRequiredService<World>();
+logger.LogInformation("Generated content is about {Organization} ({Domain}), seed {Seed}, as of {ReferenceDate:yyyy-MM-dd}",
+    world.OrganizationName, world.Domain, world.Seed, world.ReferenceDate);
+
 app.Run();
+
+// lets the integration tests host the app
+public partial class Program;

@@ -1,0 +1,81 @@
+@inject Ghosts.Pandora.Infrastructure.Services.IUserService Users
+@inject Ghosts.Pandora.Infrastructure.Services.IDirectMessageService Dms
+@{
+    // The Direct inbox column and the "New message" dialog, shared by the inbox and conversation pages
+    var me = ViewBag.Username as string ?? string.Empty;
+    var activePartner = ViewData["IgPartner"] as string;
+    var meUser = await Users.GetUserByUsernameAsync(me, "instagram");
+    var partners = meUser == null ? new List<User>() : (await Dms.GetConversationPartnersAsync(meUser.Id)).ToList();
+    var received = meUser == null ? new List<DirectMessage>() : (await Dms.GetReceivedMessagesAsync(meUser.Id)).ToList();
+    var sent = meUser == null ? new List<DirectMessage>() : (await Dms.GetSentMessagesAsync(meUser.Id)).ToList();
+    var contacts = (await Users.GetUsersByThemeAsync("instagram", 40))
+        .Where(u => !string.Equals(u.Username, me, StringComparison.OrdinalIgnoreCase))
+        .GroupBy(u => u.Username, StringComparer.OrdinalIgnoreCase).Select(g => g.First())
+        .OrderBy(u => partners.All(p => p.Id != u.Id)).ThenBy(u => u.Username)
+        .Take(25).ToList();
+}
+<section class="ig-inbox" aria-label="Inbox">
+    <div class="ig-inbox-head">
+        <a href="/" class="ig-icon-btn ig-inbox-back" aria-label="Back"><svg class="ig-i"><use href="#ig-back"/></svg></a>
+        <div class="ig-inbox-me">@me <svg class="ig-i ig-i-12"><use href="#ig-chevron-down"/></svg></div>
+        <a href="#" class="ig-icon-btn" aria-label="New message" data-ig-new-message style="margin-right:-8px"><svg class="ig-i"><use href="#ig-compose"/></svg></a>
+    </div>
+    <div class="ig-inbox-notes">
+        <div class="ig-note">
+            <span class="ig-note-bubble">Note...</span>
+            <img src="/u/@me/avatar" alt="">
+            <span>Your note</span>
+        </div>
+    </div>
+    <div class="ig-inbox-label"><span>Messages</span><a href="#" data-ig-inert>Requests</a></div>
+    <div class="ig-inbox-list">
+        @if (partners.Count == 0)
+        {
+            <div class="ig-inbox-empty">No messages found.</div>
+        }
+        @foreach (var partner in partners)
+        {
+            var last = received.Where(m => m.FromUserId == partner.Id).Concat(sent.Where(m => m.ToUserId == partner.Id))
+                .OrderByDescending(m => m.CreatedUtc).FirstOrDefault();
+            var mine = last != null && last.FromUserId == meUser?.Id;
+            var unread = last != null && !mine && last.ReadUtc == null && partner.Username != activePartner;
+            <a href="/messages/conversation/@partner.Username" class="ig-thread-item@(partner.Username == activePartner ? " is-active" : "")@(unread ? " is-unread" : "")">
+                <img src="/u/@partner.Username/avatar" alt="">
+                <span class="ig-thread-who">
+                    <span class="ig-thread-name">@Present.DisplayName(partner.Username)</span>
+                    @if (last != null)
+                    {
+                        <span class="ig-thread-preview">
+                            <span>@(mine ? "You: " : "")@MessageHtml.Render(last.Message)</span>
+                            <span>· @SocialPresentation.ShortAgo(last.CreatedUtc)</span>
+                        </span>
+                    }
+                </span>
+                @if (unread)
+                {
+                    <span class="ig-unread-dot"></span>
+                }
+            </a>
+        }
+    </div>
+</section>
+
+<div class="ig-modal-backdrop" id="ig-new-message" hidden>
+    <form method="post" action="/messages/send" class="ig-modal ig-modal-wide" role="dialog" aria-label="New message">
+        <div class="ig-modal-head">New message<button type="button" class="ig-modal-x" aria-label="Close"><svg class="ig-i"><use href="#ig-close"/></svg></button></div>
+        <label class="ig-modal-to">To: <input type="text" name="toUsername" placeholder="Search..." autocomplete="off" required></label>
+        <div class="ig-modal-list">
+            <h4>Suggested</h4>
+            @foreach (var c in contacts)
+            {
+                <button type="button" class="ig-pick" data-username="@c.Username">
+                    <img src="/u/@c.Username/avatar" alt="" class="ig-avatar-44">
+                    <span class="ig-pick-who"><span>@Present.DisplayName(c.Username)</span><span class="ig-muted">@c.Username</span></span>
+                    <span class="ig-pick-circle"></span>
+                </button>
+            }
+        </div>
+        <textarea name="message" class="ig-modal-msg" placeholder="Write a message..." required></textarea>
+        <div class="ig-modal-foot"><button type="submit" class="ig-btn ig-btn-blue">Send</button></div>
+    </form>
+</div>

@@ -481,7 +481,7 @@ public class NpcChatService(
     {
         var host = (Environment.GetEnvironmentVariable("PANDORA_HOST")
                     ?? configuration["NpcChat:SocialHost"]
-                    ?? "http://localhost:8800").TrimEnd('/');
+                    ?? "http://localhost:6360").TrimEnd('/');
 
         // Without a theme, the social site uses its own default theme
         var url = PlatformThemes.TryGetValue(platform, out var theme) ? $"{host}/?theme={theme}" : $"{host}/";

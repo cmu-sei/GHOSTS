@@ -1,5 +1,34 @@
 @{
     Layout = null;
+    ViewBag.Theme = "youtube";
+    var me = ViewBag.Username as string ?? string.Empty;
+    var posts = Model ?? new List<Ghosts.Pandora.Infrastructure.Models.Post>();
+
+    // The catch-all route renders this view for every feed URL, so the guide entry and heading follow the path
+    var path = Context.Request.Path.Value?.TrimEnd('/').ToLowerInvariant() ?? string.Empty;
+    var list = Context.Request.Query["list"].ToString();
+    var (active, heading) = path switch
+    {
+        "" => ("home", null),
+        "/shorts" => ("shorts", null),
+        "/feed/subscriptions" => ("subscriptions", "Latest"),
+        "/feed/you" => ("you", "History"),
+        "/feed/history" => ("history", "Watch history"),
+        "/feed/playlists" => ("playlists", "Playlists"),
+        "/playlist" when list == "LL" => ("liked", "Liked videos"),
+        "/playlist" when list == "WL" => ("watchlater", "Watch later"),
+        _ => (string.Empty, null)
+    };
+    ViewData["ytActive"] = active;
+
+    if (active == "subscriptions")
+        posts = posts.Where(p => !string.Equals(p.Username, me, StringComparison.OrdinalIgnoreCase)).ToList();
+    if (active == "liked")
+        posts = posts.Where(p => p.Likes?.Any(l => string.Equals(l.Username, me, StringComparison.OrdinalIgnoreCase)) == true).ToList();
+    if (active == "watchlater")
+        posts = new List<Ghosts.Pandora.Infrastructure.Models.Post>();
+
+    var chips = new[] { "All", "Music", "Gaming", "News", "Live", "Mixes", "Podcasts", Present.World.City, "Cooking", "Computer programming", "Recently uploaded", "Watched", "New to you" };
 }
 @model List<Ghosts.Pandora.Infrastructure.Models.Post>
 
@@ -8,127 +37,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube</title>
+    <meta name="current-user" content="@me">
+    <title>@(heading == null ? "YouTube" : $"{heading} - YouTube")</title>
     <link rel="stylesheet" href="/themes/youtube/css/feed.css?@System.Guid.NewGuid()">
-    <link rel="icon" href="/themes/youtube/images/youtube-icon.png">
+    <link rel="icon" href="/themes/youtube/images/youtube-icon.svg" type="image/svg+xml">
 </head>
-<body data-theme="youtube">
-    <div class="app">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-container">
-                <div class="header-left">
-                    <button class="menu-btn">☰</button>
-                    <a href="/"><img src="/themes/youtube/images/youtube-logo.png" alt="YouTube" class="youtube-logo"></a>
-                </div>
-                <div class="header-center">
-                    <div class="search-container">
-                        <input type="text" placeholder="Search" class="search-input">
-                        <button class="search-btn">🔍</button>
-                    </div>
-                    <button class="voice-search-btn">🎤</button>
-                </div>
-                <div class="header-right">
-                    <button class="header-btn">📹</button>
-                    <button class="header-btn">🔔</button>
-                    <a href="/messages" class="header-btn" style="text-decoration: none;">💬</a>
-                    <img src="/u/@ViewBag.Username/avatar" alt="User" class="user-avatar">
-                </div>
-            </div>
-        </header>
+<body data-theme="youtube" class="yt-browse-page">
+    @await Html.PartialAsync("~/Views/Themes/youtube/_masthead.cshtml")
+    @await Html.PartialAsync("~/Views/Themes/youtube/_guide.cshtml")
 
-        <div class="main-container">
-            <!-- Left Sidebar -->
-            <aside class="left-sidebar">
-                <div class="sidebar-section">
-                    <a href="/" class="sidebar-item active" style="text-decoration: none; color: inherit; display: flex; align-items: center;">
-                        <span class="sidebar-icon">🏠</span>
-                        <span class="sidebar-text">Home</span>
-                    </a>
-                    <div class="sidebar-item">
-                        <span class="sidebar-icon">🔥</span>
-                        <span class="sidebar-text">Trending</span>
-                    </div>
-                    <div class="sidebar-item">
-                        <span class="sidebar-icon">📺</span>
-                        <span class="sidebar-text">Subscriptions</span>
-                    </div>
-                </div>
-
-                <div class="sidebar-section">
-                    <div class="sidebar-item">
-                        <span class="sidebar-icon">📚</span>
-                        <span class="sidebar-text">Library</span>
-                    </div>
-                    <div class="sidebar-item">
-                        <span class="sidebar-icon">🕒</span>
-                        <span class="sidebar-text">History</span>
-                    </div>
-                    <div class="sidebar-item">
-                        <span class="sidebar-icon">📹</span>
-                        <span class="sidebar-text">Your videos</span>
-                    </div>
-                    <div class="sidebar-item">
-                        <span class="sidebar-icon">⏰</span>
-                        <span class="sidebar-text">Watch later</span>
-                    </div>
-                    <div class="sidebar-item">
-                        <span class="sidebar-icon">👍</span>
-                        <span class="sidebar-text">Liked videos</span>
-                    </div>
-                </div>
-
-                <div class="sidebar-section">
-                    <h3>SUBSCRIPTIONS</h3>
-                    <div class="channel-item">
-                        <img src="/u/tech/avatar" alt="Channel" class="channel-avatar">
-                        <span class="channel-name">Tech Channel</span>
-                    </div>
-                    <div class="channel-item">
-                        <img src="/u/coding/avatar" alt="Channel" class="channel-avatar">
-                        <span class="channel-name">Coding Tutorials</span>
-                    </div>
-                    <div class="channel-item">
-                        <img src="/u/web-dev/avatar" alt="Channel" class="channel-avatar">
-                        <span class="channel-name">Web Dev Tips</span>
-                    </div>
-                </div>
-            </aside>
-
-            <!-- Main Content -->
-            <main class="main-content">
-                <div class="filter-bar">
-                    <button class="filter-btn active">All</button>
-                    <button class="filter-btn">Music</button>
-                    <button class="filter-btn">Gaming</button>
-                    <button class="filter-btn">News</button>
-                    <button class="filter-btn">Sports</button>
-                    <button class="filter-btn">Technology</button>
-                    <button class="filter-btn">Education</button>
-                </div>
-
-                @{
-                    ViewBag.Theme = "youtube";
-                }
-
-                @await Html.PartialAsync("_CreatePost")
-
-                <!-- Video Grid -->
-                <div class="video-grid" id="newsfeed-items-grid">
-                    @{
-                        if (Model != null)
-                        {
-                            foreach (var post in Model)
-                            {
-                                await Html.RenderPartialAsync("_PostCard", post);
-                            }
-                        }
+    <main class="yt-page-manager">
+        @if (heading == null)
+        {
+            <div class="yt-chips-bar">
+                <div class="yt-chips">
+                    @for (var i = 0; i < chips.Length; i++)
+                    {
+                        <button class="yt-chip@(i == 0 ? " selected" : "")" type="button">@chips[i]</button>
                     }
                 </div>
-            </main>
+                <button class="yt-icon-btn yt-chips-next" type="button" aria-label="Next"><svg class="yt-icon"><use href="#yt-i-chevron-right"/></svg></button>
+            </div>
+        }
+        else
+        {
+            <div class="yt-feed-header">
+                <h1>@heading</h1>
+                @if (active == "subscriptions")
+                {
+                    <a class="yt-text-btn yt-link" href="/feed/channels">Manage</a>
+                }
+            </div>
+        }
+
+        <div class="yt-rich-grid" id="newsfeed-items-grid">
+            @foreach (var post in posts)
+            {
+                await Html.RenderPartialAsync("~/Views/Themes/youtube/_postcard.cshtml", post);
+            }
         </div>
-    </div>
+
+        @if (posts.Count == 0)
+        {
+            <div class="yt-empty">
+                <svg class="yt-icon"><use href="#yt-i-@(active == "liked" ? "like" : active == "watchlater" ? "clock" : "your-videos")"/></svg>
+                <h2>@(active == "liked" ? "No liked videos yet" : active == "watchlater" ? "No videos in this playlist yet" : "No videos yet")</h2>
+                <p>@(active == "liked" ? "Tap the like button on videos you enjoy and they will show up here." : "Videos you save will show up here.")</p>
+            </div>
+        }
+    </main>
 
     @await Html.PartialAsync("_Scripts")
+    <script src="/themes/youtube/js/youtube.js?@System.Guid.NewGuid()"></script>
 </body>
 </html>

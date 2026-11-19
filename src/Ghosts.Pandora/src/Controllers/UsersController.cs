@@ -35,12 +35,19 @@ public class UsersController(
         }
 
         var requestedTheme = HttpContext.Request.Query["theme"].ToString();
-        var theme = !string.IsNullOrWhiteSpace(requestedTheme) ? requestedTheme : ThemeRead();
+        var theme = !string.IsNullOrWhiteSpace(requestedTheme) ? KnownTheme(requestedTheme) : ThemeRead();
         var user = await userService.GetUserByUsernameAsync(targetUsername, theme);
         if (user == null)
         {
             user = await userService.GetUserByUsernameAsync(targetUsername);
             theme = user?.Theme ?? theme;
+        }
+
+        // Anyone you can name has a profile: an unknown user is created in this theme, as posting
+        // and messaging already do, so a link to a person never ends in a 404
+        if (user == null && SafeUsername.IsMatch(targetUsername) && targetUsername.Length <= 50)
+        {
+            user = await userService.GetOrCreateUserAsync(targetUsername, theme);
         }
 
         if (user == null)
@@ -121,7 +128,7 @@ public class UsersController(
             else
             {
                 Logger.LogWarning($"Source avatar image not found: {sourceImagePath}");
-                return NotFound("Avatar image not available.");
+                return PhysicalFile(Path.Combine(env.WebRootPath, "img", "avatar1.webp"), "image/webp");
             }
         }
 

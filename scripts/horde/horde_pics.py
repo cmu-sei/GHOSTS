@@ -21,7 +21,7 @@ sites = [
     "linkedin",
     "youtube",
 ]
-API_URL = "http://localhost:8800"
+API_URL = "http://localhost:6360"
 IMG_DIR = "/tmp"   # local fallback directory
 SAVE_DIR = "/tmp/images"
 SCENARIO_FILE = "cyber-exercise-scenario.json"

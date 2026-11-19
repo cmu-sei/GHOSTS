@@ -1,0 +1,96 @@
+@{
+    var me = ViewBag.Username as string ?? "user";
+}
+<script>try { if (localStorage.getItem('r-mode') === 'dark') document.documentElement.dataset.mode = 'dark'; } catch (e) { }</script>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <symbol id="r-snoo" viewBox="0 0 32 32">
+        <circle cx="16" cy="16" r="16" fill="#FF4500" />
+        <path d="M16.4 12.2 17.8 6.6l3.9.9" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+        <circle cx="22.7" cy="7.7" r="2" fill="#fff" />
+        <ellipse cx="16" cy="19" rx="9.6" ry="6.6" fill="#fff" />
+        <circle cx="7.4" cy="15" r="2.5" fill="#fff" stroke="#FF4500" stroke-width=".9" />
+        <circle cx="24.6" cy="15" r="2.5" fill="#fff" stroke="#FF4500" stroke-width=".9" />
+        <circle cx="12.4" cy="18" r="1.75" fill="#FF4500" />
+        <circle cx="19.6" cy="18" r="1.75" fill="#FF4500" />
+        <path d="M12.3 21.6c2.2 1.6 5.2 1.6 7.4 0" fill="none" stroke="#FF4500" stroke-width="1.2" stroke-linecap="round" />
+    </symbol>
+    <symbol id="i-menu" viewBox="0 0 20 20"><path d="M3 5h14M3 10h14M3 15h14" /></symbol>
+    <symbol id="i-search" viewBox="0 0 20 20"><circle cx="8.8" cy="8.8" r="6" /><path d="m13.2 13.2 4.3 4.3" /></symbol>
+    <symbol id="i-plus" viewBox="0 0 20 20"><path d="M10 3.5v13M3.5 10h13" /></symbol>
+    <symbol id="i-chat" viewBox="0 0 20 20"><path d="M10 2.5a7.5 7.5 0 0 0-6.5 11.2l-1 3.8 3.8-1A7.5 7.5 0 1 0 10 2.5z" /><circle cx="6.6" cy="10" r=".95" fill="currentColor" stroke="none" /><circle cx="10" cy="10" r=".95" fill="currentColor" stroke="none" /><circle cx="13.4" cy="10" r=".95" fill="currentColor" stroke="none" /></symbol>
+    <symbol id="i-bell" viewBox="0 0 20 20"><path d="M5 8.2a5 5 0 0 1 10 0v3.6l1.6 2.7H3.4L5 11.8z" /><path d="M8 17a2.1 2.1 0 0 0 4 0" /></symbol>
+    <symbol id="i-home" viewBox="0 0 20 20"><path d="M3 9.2 10 3l7 6.2V17a.8.8 0 0 1-.8.8H12.6v-5.2H7.4v5.2H3.8A.8.8 0 0 1 3 17z" /></symbol>
+    <symbol id="i-popular" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.6" /><path d="m7 13 6-6M8.6 7H13v4.4" /></symbol>
+    <symbol id="i-explore" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.6" /><path d="m13 7-1.8 4.2L7 13l1.8-4.2z" /></symbol>
+    <symbol id="i-all" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.6" /><path d="M7 13.2v-3M10 13.2V6.8M13 13.2V8.6" /></symbol>
+    <symbol id="i-chev" viewBox="0 0 20 20"><path d="m5.5 7.8 4.5 4.5 4.5-4.5" /></symbol>
+    <symbol id="i-up" viewBox="0 0 20 20"><path d="M10 2.6 17.4 10.6H13.2v6.8H6.8v-6.8H2.6z" /></symbol>
+    <symbol id="i-down" viewBox="0 0 20 20"><path d="M10 17.4 2.6 9.4h4.2V2.6h6.4v6.8h4.2z" /></symbol>
+    <symbol id="i-comment" viewBox="0 0 20 20"><path d="M10 2.6a7.4 7.4 0 1 1 0 14.8H3.1a.4.4 0 0 1-.3-.7l1.8-1.8A7.4 7.4 0 0 1 10 2.6z" /></symbol>
+    <symbol id="i-award" viewBox="0 0 20 20"><circle cx="10" cy="8" r="5.1" /><path d="m7.1 12.3-1.5 5.3L10 15.9l4.4 1.7-1.5-5.3" /></symbol>
+    <symbol id="i-share" viewBox="0 0 20 20"><path d="M11.6 3.6 16.9 9l-5.3 5.4" /><path d="M16.9 9H9.6a5.8 5.8 0 0 0-5.8 5.8v1.8" /></symbol>
+    <symbol id="i-more" viewBox="0 0 20 20"><circle cx="4.5" cy="10" r="1.35" fill="currentColor" stroke="none" /><circle cx="10" cy="10" r="1.35" fill="currentColor" stroke="none" /><circle cx="15.5" cy="10" r="1.35" fill="currentColor" stroke="none" /></symbol>
+    <symbol id="i-back" viewBox="0 0 20 20"><path d="M16 10H4.2M9 4.8 3.8 10 9 15.2" /></symbol>
+    <symbol id="i-star" viewBox="0 0 20 20"><path d="m10 2.9 2.2 4.5 5 .7-3.6 3.5.9 4.9-4.5-2.3-4.5 2.3.9-4.9-3.6-3.5 5-.7z" /></symbol>
+    <symbol id="i-cake" viewBox="0 0 20 20"><path d="M3.5 17.5h13M4.5 17.5v-6.2h11v6.2M4.5 13.6c1.2 1 2.5 1 3.7 0 1.2 1 2.4 1 3.6 0 1.2 1 2.5 1 3.7 0M10 11.3V8.6M10 6.6c-.9-.8-.9-1.9 0-3.1.9 1.2.9 2.3 0 3.1z" /></symbol>
+    <symbol id="i-globe" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.6" /><path d="M2.4 10h15.2M10 2.4c2.1 2.2 3.1 4.8 3.1 7.6s-1 5.4-3.1 7.6c-2.1-2.2-3.1-4.8-3.1-7.6s1-5.4 3.1-7.6z" /></symbol>
+    <symbol id="i-user" viewBox="0 0 20 20"><circle cx="10" cy="7" r="3.6" /><path d="M3.4 17.6a6.6 6.6 0 0 1 13.2 0" /></symbol>
+    <symbol id="i-moon" viewBox="0 0 20 20"><path d="M16.6 12.3A7 7 0 0 1 7.7 3.4a7 7 0 1 0 8.9 8.9z" /></symbol>
+    <symbol id="i-logout" viewBox="0 0 20 20"><path d="M8 3.4H4.4v13.2H8M12.6 6.4 16.2 10l-3.6 3.6M16.2 10H8" /></symbol>
+    <symbol id="i-gear" viewBox="0 0 20 20"><circle cx="10" cy="10" r="2.7" /><path d="M10 2.4v2.2M10 15.4v2.2M2.4 10h2.2M15.4 10h2.2M4.6 4.6l1.6 1.6M13.8 13.8l1.6 1.6M4.6 15.4l1.6-1.6M13.8 6.2l1.6-1.6" /></symbol>
+    <symbol id="i-about" viewBox="0 0 20 20"><ellipse cx="10" cy="12" rx="6" ry="4.4" /><circle cx="3.6" cy="9.2" r="1.4" /><circle cx="16.4" cy="9.2" r="1.4" /><path d="m10 7.6 1-4.2 3 .7" /><circle cx="15.2" cy="4.3" r="1.1" /></symbol>
+    <symbol id="i-ad" viewBox="0 0 20 20"><path d="M3.4 8v4h3l6.2 3.6V4.4L6.4 8z" /><path d="M15.2 8.2c.9.9.9 2.7 0 3.6M6.4 12l.8 4.4" /></symbol>
+    <symbol id="i-help" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.6" /><path d="M7.8 7.9a2.3 2.3 0 1 1 3.2 2.1c-.6.3-1 .9-1 1.6v.3" /><circle cx="10" cy="14.3" r=".7" fill="currentColor" stroke="none" /></symbol>
+    <symbol id="i-book" viewBox="0 0 20 20"><path d="M2.8 4.4h4.8A2.4 2.4 0 0 1 10 6.8v10a1.8 1.8 0 0 0-1.8-1.8H2.8zM17.2 4.4h-4.8A2.4 2.4 0 0 0 10 6.8v10a1.8 1.8 0 0 1 1.8-1.8h5.4z" /></symbol>
+    <symbol id="i-case" viewBox="0 0 20 20"><rect x="2.6" y="6" width="14.8" height="10.6" rx="1.6" /><path d="M7 6V4.4h6V6M2.6 10.6h14.8" /></symbol>
+    <symbol id="i-mic" viewBox="0 0 20 20"><rect x="7.4" y="2.6" width="5.2" height="9" rx="2.6" /><path d="M4.6 9.6a5.4 5.4 0 0 0 10.8 0M10 15v2.6" /></symbol>
+    <symbol id="i-people" viewBox="0 0 20 20"><circle cx="7.2" cy="7.4" r="2.6" /><circle cx="13.8" cy="8" r="2" /><path d="M2.6 16.2a4.6 4.6 0 0 1 9.2 0M12.2 12.6a3.8 3.8 0 0 1 5.4 3.6" /></symbol>
+    <symbol id="i-trophy" viewBox="0 0 20 20"><path d="M6 3.4h8v4.2a4 4 0 0 1-8 0zM6 5H3.6a2.6 2.6 0 0 0 2.7 3.2M14 5h2.4a2.6 2.6 0 0 1-2.7 3.2M10 11.6v3M7 17.2h6M8 14.6h4" /></symbol>
+    <symbol id="i-grid" viewBox="0 0 20 20"><rect x="3" y="3" width="6" height="6" rx="1.2" /><rect x="11" y="3" width="6" height="6" rx="1.2" /><rect x="3" y="11" width="6" height="6" rx="1.2" /><rect x="11" y="11" width="6" height="6" rx="1.2" /></symbol>
+    <symbol id="i-rules" viewBox="0 0 20 20"><path d="M10 3v14M4 17h12M5 6.4h10M5 6.4 2.8 11.6a2.3 2.3 0 0 0 4.4 0zM15 6.4l-2.2 5.2a2.3 2.3 0 0 0 4.4 0z" /></symbol>
+    <symbol id="i-lock" viewBox="0 0 20 20"><rect x="4" y="9" width="12" height="8.6" rx="1.6" /><path d="M6.6 9V6.6a3.4 3.4 0 0 1 6.8 0V9" /></symbol>
+    <symbol id="i-doc" viewBox="0 0 20 20"><path d="M5.4 2.6h6.2l3 3v11.8H5.4z" /><path d="M8 9.4h4.6M8 12.4h4.6M8 15h3" /></symbol>
+    <symbol id="i-access" viewBox="0 0 20 20"><circle cx="10" cy="4.4" r="1.6" /><path d="M3.6 7.4 10 8.8l6.4-1.4M10 8.8v3.6l-2.6 5M10 12.4l2.6 5" /></symbol>
+    <symbol id="i-pro" viewBox="0 0 20 20"><path d="m3 15.6 4.6-5.4 3 3 6.4-8.6" /><path d="M12.6 4.6H17V9" /></symbol>
+    <symbol id="i-image" viewBox="0 0 20 20"><rect x="2.6" y="3.6" width="14.8" height="12.8" rx="2" /><circle cx="7" cy="8" r="1.5" /><path d="m3 15 4.4-4.4 3 3 2-2 4.6 4.6" /></symbol>
+    <symbol id="i-link" viewBox="0 0 20 20"><path d="M8.6 11.4a3 3 0 0 0 4.2 0l2.6-2.6a3 3 0 0 0-4.2-4.2l-1 1M11.4 8.6a3 3 0 0 0-4.2 0l-2.6 2.6a3 3 0 0 0 4.2 4.2l1-1" /></symbol>
+    <symbol id="i-poll" viewBox="0 0 20 20"><path d="M4.6 16.6V9.4M10 16.6V3.4M15.4 16.6V7" /></symbol>
+    <symbol id="i-text" viewBox="0 0 20 20"><path d="M4 5h12M4 9h12M4 13h8" /></symbol>
+    <symbol id="i-send" viewBox="0 0 20 20"><path d="M3 9.6 17 3l-3.8 14-3.4-5.6z" /><path d="M9.8 11.4 17 3" /></symbol>
+    <symbol id="i-newchat" viewBox="0 0 20 20"><path d="M10 2.6a7.4 7.4 0 0 0-6.4 11.1l-1 3.7 3.7-1A7.4 7.4 0 1 0 10 2.6z" /><path d="M10 7v6M7 10h6" /></symbol>
+    <symbol id="i-card" viewBox="0 0 20 20"><rect x="3" y="3.4" width="14" height="5.8" rx="1.2" /><rect x="3" y="10.8" width="14" height="5.8" rx="1.2" /></symbol>
+    <symbol id="i-emoji" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.6" /><path d="M6.9 11.8c1.7 1.9 4.5 1.9 6.2 0" /><circle cx="7.4" cy="8" r=".8" fill="currentColor" stroke="none" /><circle cx="12.6" cy="8" r=".8" fill="currentColor" stroke="none" /></symbol>
+    <symbol id="i-bookmark" viewBox="0 0 20 20"><path d="M5 3h10v14.4l-5-3.6-5 3.6z" /></symbol>
+    <symbol id="i-hide" viewBox="0 0 20 20"><path d="M3 3l14 14M8.2 5.2A8 8 0 0 1 10 5c4.4 0 7.4 5 7.4 5a13 13 0 0 1-2.4 2.9M12 14.6a7 7 0 0 1-2 .4c-4.4 0-7.4-5-7.4-5a13.2 13.2 0 0 1 2.9-3.3" /></symbol>
+    <symbol id="i-flag" viewBox="0 0 20 20"><path d="M4.4 17.6V3M4.4 3.4h10.2l-2 3.8 2 3.8H4.4" /></symbol>
+</svg>
+<header class="r-header">
+    <div class="r-header-left">
+        <button type="button" class="r-icon-btn r-burger" aria-label="Open navigation" data-r="nav"><svg class="ri"><use href="#i-menu" /></svg></button>
+        <a href="/" class="r-logo" aria-label="Home"><svg><use href="#r-snoo" /></svg><span class="r-wordmark">reddit</span></a>
+    </div>
+    <div class="r-search">
+        <form action="/search" method="get" role="search">
+            <svg class="ri"><use href="#i-search" /></svg>
+            <input type="text" name="q" placeholder="Search Reddit" autocomplete="off" aria-label="Search Reddit" value="@ViewData["Query"]">
+        </form>
+    </div>
+    <div class="r-header-right">
+        <a href="/search" class="r-icon-btn r-search-mobile" aria-label="Search"><svg class="ri"><use href="#i-search" /></svg></a>
+        <a href="/messages" class="r-icon-btn r-chat-link" aria-label="Open chat" title="Open chat"><svg class="ri"><use href="#i-chat" /></svg></a>
+        <a href="/#create-post" class="r-icon-btn" aria-label="Create post" title="Create post" data-r="create"><svg class="ri"><use href="#i-plus" /></svg><span class="r-create-label">Create</span></a>
+        <a href="/messages" class="r-icon-btn" aria-label="Open inbox" title="Open inbox"><svg class="ri"><use href="#i-bell" /></svg></a>
+        <div class="user-menu">
+            <button type="button" class="r-avatar-btn" aria-label="Expand user menu" aria-expanded="false" data-r="menu"><span class="r-avatar"><img src="/u/@me/avatar" alt=""></span></button>
+            <div class="r-menu" role="menu">
+                <a href="/u/@me" class="r-menu-profile" role="menuitem"><img src="/u/@me/avatar" alt=""><span><strong>View Profile</strong><span class="username">@me</span></span></a>
+                <a href="/messages" role="menuitem"><svg class="ri"><use href="#i-chat" /></svg>Chats</a>
+                <button type="button" class="r-menu-item" role="menuitemcheckbox" data-r="mode"><svg class="ri"><use href="#i-moon" /></svg>Dark Mode<span class="r-switch"></span></button>
+                <a href="/login" role="menuitem"><svg class="ri"><use href="#i-logout" /></svg>Log Out</a>
+                <hr>
+                <a href="#" role="menuitem"><svg class="ri"><use href="#i-ad" /></svg>Advertise on Reddit</a>
+                <a href="#" role="menuitem"><svg class="ri"><use href="#i-gear" /></svg>Settings</a>
+            </div>
+        </div>
+    </div>
+</header>

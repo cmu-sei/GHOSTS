@@ -1,0 +1,92 @@
+@* The conversation list of X's Messages, plus the "New message" dialog. ViewData["XChat"]: the open conversation's partner. *@
+@inject Ghosts.Pandora.Infrastructure.Services.IUserService Users
+@inject Ghosts.Pandora.Infrastructure.Services.IDirectMessageService Messages
+@{
+    var me = ViewBag.Username as string ?? "";
+    var theme = ViewBag.Theme as string ?? "x";
+    var open = ViewData["XChat"] as string;
+    var same = StringComparer.OrdinalIgnoreCase;
+
+    var threads = new List<(string Partner, Ghosts.Pandora.Infrastructure.Models.DirectMessage Last, bool Unread)>();
+    var meUser = await Users.GetUserByUsernameAsync(me, theme);
+    if (meUser != null)
+    {
+        var all = (await Messages.GetReceivedMessagesAsync(meUser.Id)).Concat(await Messages.GetSentMessagesAsync(meUser.Id));
+        threads = all
+            .GroupBy(m => m.FromUserId == meUser.Id ? m.ToUsername : m.FromUsername, same)
+            .Select(g => (g.Key, g.OrderByDescending(m => m.CreatedUtc).First(), g.Any(m => m.ToUserId == meUser.Id && m.ReadUtc == null)))
+            .OrderByDescending(t => t.Item2.CreatedUtc)
+            .ToList();
+    }
+
+    var worldNames = Present.World.People.Select(p => p.Username).ToHashSet(same);
+    var people = (await Users.GetUsersByThemeAsync(theme, 50))
+        .Where(u => !same.Equals(u.Username, me))
+        .OrderByDescending(u => worldNames.Contains(u.Username))
+        .Take(12)
+        .Select(u => u.Username)
+        .ToList();
+}
+<section class="x-dm-list" aria-label="Section navigation">
+    <div class="x-dm-head">
+        <h2>Messages</h2>
+        <button type="button" class="x-icon-btn" aria-label="Settings" data-x-menu="dm"><svg><use href="#x-gear"/></svg></button>
+        <button type="button" class="x-icon-btn" aria-label="New message" data-x-newdm><svg><use href="#x-mail-plus"/></svg></button>
+    </div>
+
+    @if (threads.Count == 0)
+    {
+        <div class="x-dm-intro">
+            <div class="x-empty">
+                <h2>Welcome to your inbox!</h2>
+                <p>Drop a line, share posts and more with private conversations between you and others on X.</p>
+                <button type="button" class="x-btn-dark x-btn-big" data-x-newdm>Write a message</button>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="x-dm-search">
+            <div class="x-search"><svg><use href="#x-explore"/></svg><input type="text" placeholder="Search Direct Messages" aria-label="Search Direct Messages" data-x-dm-filter></div>
+        </div>
+        @foreach (var (partner, last, unread) in threads)
+        {
+            <div class="x-dm-row@(same.Equals(partner, open) ? " active" : "")@(unread && !same.Equals(partner, open) ? " unread" : "")" data-href="/messages/conversation/@partner">
+                <img src="/u/@partner/avatar" alt="">
+                <div class="x-dm-row-body">
+                    <div class="x-dm-row-top">
+                        <a href="/messages/conversation/@partner" class="tweet-name">@Present.DisplayName(partner)</a>
+                        <span class="tweet-handle">@Present.Handle(partner)</span>
+                        <span class="tweet-dot">·</span>
+                        <span class="tweet-time" title="@last.CreatedUtc.ToString("h:mm tt · MMM d, yyyy")">@SocialPresentation.ShortAgo(last.CreatedUtc)</span>
+                    </div>
+                    <div class="x-dm-preview">@MessageHtml.Render(last.Message)</div>
+                </div>
+            </div>
+        }
+    }
+</section>
+
+<div class="x-modal" id="x-newdm" hidden>
+    <form class="x-modal-box" method="post" action="/messages/send" role="dialog" aria-label="New message">
+        <div class="x-modal-head">
+            <button type="button" class="x-icon-btn" aria-label="Close" data-x-close><svg><use href="#x-close"/></svg></button>
+            <h2>New message</h2>
+            <button type="submit" class="x-btn-dark">Send</button>
+        </div>
+        <label class="x-modal-field"><svg><use href="#x-explore"/></svg><input type="text" name="toUsername" placeholder="Search people" autocomplete="off" required></label>
+        <label class="x-modal-field"><svg><use href="#x-mail"/></svg><textarea name="message" placeholder="Start a new message" rows="2" required></textarea></label>
+        <div class="x-modal-people">
+            @foreach (var username in people)
+            {
+                <div class="x-who" data-x-pick="@username">
+                    <img src="/u/@username/avatar" alt="" class="x-who-avatar">
+                    <div class="x-who-names">
+                        <span class="x-who-name">@Present.DisplayName(username)</span>
+                        <span class="x-who-handle">@Present.Handle(username)</span>
+                    </div>
+                </div>
+            }
+        </div>
+    </form>
+</div>

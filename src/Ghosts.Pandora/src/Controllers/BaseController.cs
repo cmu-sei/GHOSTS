@@ -1,3 +1,4 @@
+using Ghosts.Pandora.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
@@ -14,7 +15,7 @@ public class BaseController : Controller
 
         // Check query parameter first (same logic as ThemeViewLocationExpander)
         var queryTheme = context.HttpContext.Request.Query["theme"].ToString();
-        ViewBag.Theme = !string.IsNullOrWhiteSpace(queryTheme) ? queryTheme : ThemeRead();
+        ViewBag.Theme = !string.IsNullOrWhiteSpace(queryTheme) ? KnownTheme(queryTheme) : ThemeRead();
 
         base.OnActionExecuting(context);
     }
@@ -81,7 +82,7 @@ public class BaseController : Controller
     internal static string ForLog(string value) =>
         string.IsNullOrEmpty(value)
             ? value
-            : new string(System.Linq.Enumerable.Where(value, c => !char.IsControl(c)).ToArray());
+            : new string(System.Linq.Enumerable.Where(value, c => !char.IsControl(c)).ToArray()).ReplaceLineEndings("");
 
     internal void CookieWrite(string key, string value)
     {
@@ -142,19 +143,25 @@ public class BaseController : Controller
 
     internal void ThemeWrite(string theme)
     {
-        CookieWrite("theme", theme);
+        CookieWrite(Infrastructure.ThemeViewLocationExpander.CookieName(HttpContext), theme);
     }
 
     /// <summary>The theme cookie, else the configured default theme.</summary>
-    internal string ThemeRead()
-    {
-        var theme = CookieRead("theme");
-        return string.IsNullOrWhiteSpace(theme) ? DefaultTheme() : theme;
-    }
+    internal string ThemeRead() => KnownTheme(CookieRead(Infrastructure.ThemeViewLocationExpander.CookieName(HttpContext)));
 
     internal string DefaultTheme()
     {
         var defaultTheme = HttpContext?.RequestServices.GetService<Infrastructure.ApplicationConfiguration>()?.Mode.DefaultTheme;
-        return string.IsNullOrWhiteSpace(defaultTheme) ? "default" : defaultTheme;
+        return Exists(defaultTheme) ? defaultTheme.Trim().ToLowerInvariant() : "default";
     }
+
+    /// <summary>
+    /// The theme if there is one by that name, else the default theme. A theme names a view folder,
+    /// so an unknown or crafted name must never reach a view path.
+    /// </summary>
+    internal string KnownTheme(string theme) => Exists(theme) ? theme.Trim().ToLowerInvariant() : DefaultTheme();
+
+    private bool Exists(string theme) =>
+        !string.IsNullOrWhiteSpace(theme) &&
+        HttpContext?.RequestServices.GetService<IThemeService>()?.ThemeExists(theme.Trim().ToLowerInvariant()) != false;
 }

@@ -58,7 +58,7 @@ public class N8nWorkflowTests
         foreach (var node in Nodes(file).Where(IsHttpRequest))
         {
             var url = Url(node);
-            if (!(url.Contains("pandora", StringComparison.OrdinalIgnoreCase) || url.Contains(":8800") || url.Contains("/messages/send"))) continue;
+            if (!(url.Contains("pandora", StringComparison.OrdinalIgnoreCase) || url.Contains(":6360") || url.Contains(":8800") || url.Contains("/messages/send"))) continue;
             Assert.Contains("$env.PANDORA_URL", url);
         }
     }

@@ -1,0 +1,58 @@
+@* X's left navigation and, on phones, its bottom tab bar. Set ViewData["XNav"] to the active item. *@
+@{
+    var me = ViewBag.Username as string ?? "user";
+    var active = ViewData["XNav"] as string ?? "";
+    var items = new[]
+    {
+        (Key: "home", Label: "Home", Href: "/", Icon: "x-home", Active: "x-home-fill"),
+        (Key: "explore", Label: "Explore", Href: "/search", Icon: "x-explore", Active: "x-explore-fill"),
+        (Key: "notifications", Label: "Notifications", Href: "/notifications", Icon: "x-bell", Active: "x-bell-fill"),
+        (Key: "messages", Label: "Messages", Href: "/messages", Icon: "x-mail", Active: "x-mail-fill"),
+        (Key: "grok", Label: "Grok", Href: "/grok", Icon: "x-grok", Active: "x-grok"),
+        (Key: "bookmarks", Label: "Bookmarks", Href: "/bookmarks", Icon: "x-bookmark", Active: "x-bookmark-fill"),
+        (Key: "communities", Label: "Communities", Href: "/communities", Icon: "x-communities", Active: "x-communities"),
+        (Key: "premium", Label: "Premium", Href: "/premium", Icon: "x-logo", Active: "x-logo"),
+        (Key: "profile", Label: "Profile", Href: $"/u/{me}", Icon: "x-profile", Active: "x-profile-fill")
+    };
+    var mobile = new[] { "home", "explore", "grok", "notifications", "messages" };
+}
+<header class="x-header" role="banner">
+    <div class="x-header-inner">
+        <div class="x-header-top">
+            <a href="/" class="x-logo-link" aria-label="X"><svg class="x-logo"><use href="#x-logo"/></svg></a>
+            <nav class="x-nav" aria-label="Primary">
+                @foreach (var item in items)
+                {
+                    <a href="@item.Href" class="x-nav-link@(item.Key == active ? " active" : "")" aria-label="@item.Label">
+                        <svg class="x-nav-icon"><use href="#@(item.Key == active ? item.Active : item.Icon)"/></svg>
+                        <span class="x-nav-label">@item.Label</span>
+                    </a>
+                }
+                <button type="button" class="x-nav-link" aria-label="More menu items" data-x-menu="more">
+                    <svg class="x-nav-icon"><use href="#x-more-circle"/></svg>
+                    <span class="x-nav-label">More</span>
+                </button>
+            </nav>
+            <a href="/" class="x-post-btn" data-x-compose aria-label="Post">
+                <span class="x-post-btn-label">Post</span>
+                <svg class="x-post-btn-icon"><use href="#x-feather"/></svg>
+            </a>
+        </div>
+        <button type="button" class="x-account" aria-label="Account menu" data-x-menu="account" data-handle="@Present.Handle(me)">
+            <img src="/u/@me/avatar" alt="" class="x-account-avatar">
+            <span class="x-account-names">
+                <span class="x-account-name">@Present.DisplayName(me)</span>
+                <span class="x-account-handle">@Present.Handle(me)</span>
+            </span>
+            <svg class="x-account-dots"><use href="#x-dots"/></svg>
+        </button>
+    </div>
+</header>
+<nav class="x-tabbar" aria-label="Primary">
+    @foreach (var item in items.Where(i => mobile.Contains(i.Key)).OrderBy(i => Array.IndexOf(mobile, i.Key)))
+    {
+        <a href="@item.Href" class="x-tabbar-link@(item.Key == active ? " active" : "")" aria-label="@item.Label">
+            <svg><use href="#@(item.Key == active ? item.Active : item.Icon)"/></svg>
+        </a>
+    }
+</nav>

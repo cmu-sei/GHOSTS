@@ -1,0 +1,91 @@
+@inject Ghosts.Pandora.Infrastructure.Services.IUserService Users
+@{
+    var me = ViewBag.Username as string ?? string.Empty;
+    var active = ViewData["ytActive"] as string ?? string.Empty;
+    var channels = (await Users.GetUsersByThemeAsync("youtube", 16))
+        .Where(u => !string.Equals(u.Username, me, StringComparison.OrdinalIgnoreCase))
+        .ToList();
+    string Is(string key) => key == active ? " active" : string.Empty;
+}
+<div class="yt-guide-scrim" data-guide-close></div>
+<nav class="yt-guide" id="guide" aria-label="Guide">
+    <div class="yt-guide-drawer-header">
+        <button class="yt-icon-btn" type="button" data-guide-close aria-label="Guide"><svg class="yt-icon"><use href="#yt-i-menu"/></svg></button>
+        <a class="yt-logo" href="/" title="YouTube Home"><img src="/themes/youtube/images/youtube-logo.png" alt="YouTube"></a>
+    </div>
+    <div class="yt-guide-inner">
+        <div class="yt-guide-section">
+            <a class="yt-guide-entry@(Is("home"))" href="/"><svg class="yt-icon"><use href="#yt-i-@(active == "home" ? "home-fill" : "home")"/></svg><span>Home</span></a>
+            <a class="yt-guide-entry@(Is("shorts"))" href="/shorts"><svg class="yt-icon"><use href="#yt-i-shorts"/></svg><span>Shorts</span></a>
+            <a class="yt-guide-entry@(Is("subscriptions"))" href="/feed/subscriptions"><svg class="yt-icon"><use href="#yt-i-subs"/></svg><span>Subscriptions</span></a>
+        </div>
+        <div class="yt-guide-section">
+            <a class="yt-guide-entry yt-guide-title@(Is("you"))" href="/feed/you"><span>You</span><svg class="yt-icon"><use href="#yt-i-chevron-right"/></svg></a>
+            <a class="yt-guide-entry@(Is("history"))" href="/feed/history"><svg class="yt-icon"><use href="#yt-i-history"/></svg><span>History</span></a>
+            <a class="yt-guide-entry@(Is("playlists"))" href="/feed/playlists"><svg class="yt-icon"><use href="#yt-i-playlists"/></svg><span>Playlists</span></a>
+            <a class="yt-guide-entry@(Is("yourvideos"))" href="/u/@me"><svg class="yt-icon"><use href="#yt-i-your-videos"/></svg><span>Your videos</span></a>
+            <a class="yt-guide-entry@(Is("watchlater"))" href="/playlist?list=WL"><svg class="yt-icon"><use href="#yt-i-clock"/></svg><span>Watch later</span></a>
+            <a class="yt-guide-entry@(Is("liked"))" href="/playlist?list=LL"><svg class="yt-icon"><use href="#yt-i-like"/></svg><span>Liked videos</span></a>
+        </div>
+        @if (channels.Count > 0)
+        {
+            <div class="yt-guide-section">
+                <h3>Subscriptions</h3>
+                @for (var i = 0; i < channels.Count; i++)
+                {
+                    var channel = channels[i];
+                    <a class="yt-guide-entry yt-guide-channel" href="/u/@channel.Username" @(i >= 7 ? "hidden" : null) data-username="@channel.Username" data-display-name>
+                        <img src="/u/@channel.Username/avatar" alt="">
+                        <span>@Present.DisplayName(channel.Username)</span>
+                    </a>
+                }
+                @if (channels.Count > 7)
+                {
+                    <button class="yt-guide-entry yt-guide-more" type="button"><svg class="yt-icon"><use href="#yt-i-chevron-down"/></svg><span>Show more</span></button>
+                }
+            </div>
+        }
+        <div class="yt-guide-section">
+            <h3>Explore</h3>
+            <a class="yt-guide-entry" href="/feed/music"><svg class="yt-icon"><use href="#yt-i-music"/></svg><span>Music</span></a>
+            <a class="yt-guide-entry" href="/feed/storefront"><svg class="yt-icon"><use href="#yt-i-film"/></svg><span>Movies &amp; TV</span></a>
+            <a class="yt-guide-entry" href="/feed/live"><svg class="yt-icon"><use href="#yt-i-live"/></svg><span>Live</span></a>
+            <a class="yt-guide-entry" href="/gaming"><svg class="yt-icon"><use href="#yt-i-gaming"/></svg><span>Gaming</span></a>
+            <a class="yt-guide-entry" href="/feed/news"><svg class="yt-icon"><use href="#yt-i-news"/></svg><span>News</span></a>
+            <a class="yt-guide-entry" href="/feed/sports"><svg class="yt-icon"><use href="#yt-i-trophy"/></svg><span>Sports</span></a>
+            <a class="yt-guide-entry" href="/feed/courses"><svg class="yt-icon"><use href="#yt-i-courses"/></svg><span>Courses</span></a>
+            <a class="yt-guide-entry" href="/podcasts"><svg class="yt-icon"><use href="#yt-i-podcast"/></svg><span>Podcasts</span></a>
+        </div>
+        <div class="yt-guide-section">
+            <h3>More from YouTube</h3>
+            <a class="yt-guide-entry yt-guide-brand" href="/premium"><span class="yt-brand-mark"><svg viewBox="0 0 24 24"><path d="M21.6 7.2c-.2-.9-.9-1.5-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.4c-.9.3-1.6.9-1.8 1.8C2 8.8 2 12 2 12s0 3.2.4 4.8c.2.9.9 1.5 1.8 1.8 1.6.4 7.8.4 7.8.4s6.2 0 7.8-.4c.9-.3 1.6-.9 1.8-1.8.4-1.6.4-4.8.4-4.8s0-3.2-.4-4.8z" fill="#f00"/><path d="M10 15l5.2-3L10 9z" fill="#fff"/></svg></span><span>YouTube Premium</span></a>
+            <button class="yt-guide-entry yt-guide-brand" type="button" data-open-upload><span class="yt-brand-mark"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5" fill="#f00"/><path d="M10 9l5 3-5 3z" fill="#fff"/></svg></span><span>YouTube Studio</span></button>
+            <a class="yt-guide-entry yt-guide-brand" href="/premium?music=1"><span class="yt-brand-mark"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#f00"/><circle cx="12" cy="12" r="5.5" fill="none" stroke="#fff" stroke-width="1"/><path d="M10.5 9.5l4 2.5-4 2.5z" fill="#fff"/></svg></span><span>YouTube Music</span></a>
+            <a class="yt-guide-entry yt-guide-brand" href="/premium?kids=1"><span class="yt-brand-mark"><svg viewBox="0 0 24 24"><path d="M4 6.5 19 4.2l1.6 13.6L5.4 20z" fill="#f00"/><path d="M10 9.4l4.8 2.4-4.4 3z" fill="#fff"/></svg></span><span>YouTube Kids</span></a>
+        </div>
+        <div class="yt-guide-section">
+            <a class="yt-guide-entry" href="/account"><svg class="yt-icon"><use href="#yt-i-settings"/></svg><span>Settings</span></a>
+            <a class="yt-guide-entry" href="/reporthistory"><svg class="yt-icon"><use href="#yt-i-flag"/></svg><span>Report history</span></a>
+            <button class="yt-guide-entry" type="button"><svg class="yt-icon"><use href="#yt-i-help"/></svg><span>Help</span></button>
+            <button class="yt-guide-entry" type="button" data-toast="Thanks for your feedback"><svg class="yt-icon"><use href="#yt-i-feedback"/></svg><span>Send feedback</span></button>
+        </div>
+        <footer class="yt-guide-footer">
+            <div><a href="/about">About</a><a href="/about/press">Press</a><a href="/about/copyright">Copyright</a><a href="/t/contact_us">Contact us</a><a href="/creators">Creators</a><a href="/ads">Advertise</a><a href="/developers">Developers</a></div>
+            <div><a href="/t/terms">Terms</a><a href="/t/privacy">Privacy</a><a href="/about/policies">Policy &amp; Safety</a><a href="/howyoutubeworks">How YouTube works</a><a href="/new">Test new features</a></div>
+            <div class="yt-copyright">&copy; @DateTime.UtcNow.Year Google LLC</div>
+        </footer>
+    </div>
+</nav>
+<nav class="yt-mini-guide" aria-label="Mini guide">
+    <a class="yt-mini-entry@(Is("home"))" href="/"><svg class="yt-icon"><use href="#yt-i-@(active == "home" ? "home-fill" : "home")"/></svg><span>Home</span></a>
+    <a class="yt-mini-entry@(Is("shorts"))" href="/shorts"><svg class="yt-icon"><use href="#yt-i-shorts"/></svg><span>Shorts</span></a>
+    <a class="yt-mini-entry@(Is("subscriptions"))" href="/feed/subscriptions"><svg class="yt-icon"><use href="#yt-i-subs"/></svg><span>Subscriptions</span></a>
+    <a class="yt-mini-entry@(Is("you"))" href="/feed/you"><img src="/u/@me/avatar" alt=""><span>You</span></a>
+</nav>
+<nav class="yt-pivot-bar" aria-label="Navigation">
+    <a class="yt-pivot@(Is("home"))" href="/"><svg class="yt-icon"><use href="#yt-i-@(active == "home" ? "home-fill" : "home")"/></svg><span>Home</span></a>
+    <a class="yt-pivot@(Is("shorts"))" href="/shorts"><svg class="yt-icon"><use href="#yt-i-shorts"/></svg><span>Shorts</span></a>
+    <button class="yt-pivot yt-pivot-create" type="button" data-open-upload aria-label="Create"><span><svg class="yt-icon"><use href="#yt-i-plus"/></svg></span></button>
+    <a class="yt-pivot@(Is("subscriptions"))" href="/feed/subscriptions"><svg class="yt-icon"><use href="#yt-i-subs"/></svg><span>Subscriptions</span></a>
+    <a class="yt-pivot@(Is("you"))" href="/feed/you"><img src="/u/@me/avatar" alt=""><span>You</span></a>
+</nav>

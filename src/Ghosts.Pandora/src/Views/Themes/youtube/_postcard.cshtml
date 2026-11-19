@@ -1,0 +1,19 @@
+@model Ghosts.Pandora.Infrastructure.Models.Post
+@{
+    var title = Present.Title(Model);
+}
+<div class="yt-video-card" data-post-id="@Model.Id" data-created="@Model.CreatedUtc.ToString("o")" data-views="@Present.Views(Model)">
+    <a class="yt-thumb" href="/posts/@Model.Id" tabindex="-1" aria-hidden="true">
+        <img src="@Present.PhotoUrl(Model)" alt="" loading="lazy">
+        <span class="yt-badge">@Present.Duration(Model.Id)</span>
+    </a>
+    <div class="yt-details">
+        <a class="yt-avatar" href="/u/@Model.Username"><img src="/u/@Model.Username/avatar" alt=""></a>
+        <div class="yt-meta">
+            <h3 class="yt-title"><a href="/posts/@Model.Id" title="@title">@title</a></h3>
+            <div class="yt-byline"><a href="/u/@Model.Username" data-username="@Model.Username" data-display-name>@Present.DisplayName(Model.Username)</a></div>
+            <div class="yt-stats"><span>@SocialPresentation.Compact(Present.Views(Model)) views</span><span>@SocialPresentation.LongAgo(Model.CreatedUtc)</span></div>
+        </div>
+        <button class="yt-icon-btn yt-card-menu" type="button" aria-label="Action menu"><svg class="yt-icon"><use href="#yt-i-more-vert"/></svg></button>
+    </div>
+</div>

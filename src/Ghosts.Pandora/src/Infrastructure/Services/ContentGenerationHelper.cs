@@ -133,28 +133,4 @@ public static class ContentGenerationHelper
             ["timestamp"] = DateTime.UtcNow.ToString("O")
         };
     }
-
-    public static List<string[]> GenerateRandomCsvData(int rows = 10, int columns = 5)
-    {
-        var data = new List<string[]>();
-
-        var headers = new string[columns];
-        for (var i = 0; i < columns; i++)
-        {
-            headers[i] = Lorem.GetFirstWord().ToUpper();
-        }
-        data.Add(headers);
-
-        for (var i = 0; i < rows; i++)
-        {
-            var row = new string[columns];
-            for (var j = 0; j < columns; j++)
-            {
-                row[j] = Random.Next(2) == 0 ? Lorem.GetFirstWord() : Lorem.Sentence(1);
-            }
-            data.Add(row);
-        }
-
-        return data;
-    }
 }

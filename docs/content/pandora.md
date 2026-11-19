@@ -20,7 +20,7 @@ Pandora runs as a Docker container, either on its own or under the Aspire host w
 |---|---|---|
 | Database | SQLite in `/app/db` | PostgreSQL on `ghosts-postgres`, database `pandora` |
 | Activity reporting to the GHOSTS API | off; set `GHOSTS_API_URL` to turn it on | on |
-| Address | http://localhost:8000 | http://localhost:8800 |
+| Address | http://localhost:8000 | http://localhost:6360 (`facebook`; start it from the dashboard) |
 
 ### Standalone
 

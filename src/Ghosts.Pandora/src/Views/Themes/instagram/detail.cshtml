@@ -1,171 +1,174 @@
+@model Ghosts.Pandora.Infrastructure.Models.Post
+@inject Ghosts.Pandora.Infrastructure.Services.IPostService Posts
+@inject Ghosts.Pandora.Infrastructure.Services.IUserService Users
+@inject Ghosts.Pandora.Infrastructure.Services.IFollowService Follows
 @{
     Layout = null;
     ViewBag.Theme = "instagram";
-    var currentUser = ViewBag.Username as string;
-    var currentUserLiked = !string.IsNullOrWhiteSpace(currentUser) &&
-        (Model?.Likes?.Any(l => string.Equals(l.Username, currentUser, StringComparison.OrdinalIgnoreCase)) ?? false);
-    var likedClass = currentUserLiked ? " liked" : string.Empty;
-}
-@model Ghosts.Pandora.Infrastructure.Models.Post
+    ViewData["IgMobileTitle"] = "Post";
+    var currentUser = ViewBag.Username as string ?? string.Empty;
+    var us = System.Globalization.CultureInfo.GetCultureInfo("en-US");
 
+    var currentUserLiked = Model != null && !string.IsNullOrWhiteSpace(currentUser) &&
+        (Model.Likes?.Any(l => string.Equals(l.Username, currentUser, StringComparison.OrdinalIgnoreCase)) ?? false);
+    var likedClass = currentUserLiked ? " liked" : string.Empty;
+    var score = Model == null ? 0 : Present.Score(Model);
+    var caption = Model == null ? string.Empty : SocialPresentation.UploadedImage(Model) != null ? SocialPresentation.PlainText(Model) : Model.Message;
+    var comments = Model?.Comments?.OrderByDescending(c => c.CreatedUtc).ToList() ?? new List<Comment>();
+    var isMine = Model != null && string.Equals(Model.Username, currentUser, StringComparison.OrdinalIgnoreCase);
+
+    var isFollowing = false;
+    var morePosts = new List<Post>();
+    if (Model != null)
+    {
+        var meUser = await Users.GetUserByUsernameAsync(currentUser, "instagram");
+        if (meUser != null && !isMine && Model.UserId != Guid.Empty)
+            isFollowing = await Follows.IsFollowingAsync(meUser.Id, Model.UserId);
+        morePosts = (await Posts.GetPostsByUserAndTheme(Model.Username, "instagram", 7)).Where(p => p.Id != Model.Id).Take(6).ToList();
+    }
+
+    string When(DateTime utc)
+    {
+        var age = DateTime.UtcNow - DateTime.SpecifyKind(utc, DateTimeKind.Utc);
+        if (age < TimeSpan.FromDays(7)) return SocialPresentation.LongAgo(utc);
+        return utc.ToString(utc.Year == DateTime.UtcNow.Year ? "MMMM d" : "MMMM d, yyyy", us);
+    }
+    var title = Model == null ? "Page not found • Instagram" : $"{Present.DisplayName(Model.Username)} on Instagram: \"{SocialPresentation.PlainText(Model)}\"";
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="current-user" content="@ViewBag.Username">
-    <title>@Model.User on Instagram</title>
+    <meta name="current-user" content="@currentUser">
+    <title>@title</title>
     <link rel="stylesheet" href="/themes/instagram/css/feed.css?@System.Guid.NewGuid()">
-    <link rel="icon" href="/themes/instagram/images/instagram-icon.png">
+    <link rel="icon" href="/themes/instagram/images/favicon.svg" type="image/svg+xml">
 </head>
-<body>
-    <div class="app">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-container">
-                <div class="logo">
-                    <a href="/"><img src="/themes/instagram/images/instagram-logo.png" alt="Instagram" class="instagram-logo"></a>
-                </div>
-                <div class="search-container">
-                    <div class="search-box">
-                        <span class="search-icon">🔍</span>
-                        <input type="text" placeholder="Search" class="search-input">
-                    </div>
-                </div>
-                <div class="header-actions">
-                    <a href="/" class="action-btn" style="text-decoration: none;">🏠</a>
-                    <button class="action-btn">💬</button>
-                    <button class="action-btn">➕</button>
-                    <button class="action-btn">🧭</button>
-                    <button class="action-btn">❤️</button>
-                    <div class="profile-menu">
-                        <img src="/u/@ViewBag.Username/avatar" alt="Profile" class="header-avatar">
-                    </div>
-                </div>
-            </div>
-        </header>
+<body data-theme="instagram" class="ig ig-post-view">
+@await Html.PartialAsync("~/Views/Themes/instagram/_igsprite.cshtml")
+@await Html.PartialAsync("~/Views/Themes/instagram/_ignav.cshtml")
 
-        <!-- Main Content -->
-        <div class="main-container">
-            <!-- Post Detail -->
-            <div class="post-detail">
-                <div class="post" data-post-id="@Model.Id">
-                    <!-- Post Header -->
-                    <div class="post-header">
-                        <div class="post-user-info">
-                            <img src="/u/@Model.User/avatar" alt="@Model.User" class="user-avatar">
-                            <div class="user-details">
-                                <div class="username">@Model.User</div>
-                                <div class="location">📍 Location</div>
+<main class="ig-main">
+    @if (Model == null)
+    {
+        <div class="ig-empty">
+            <div class="ig-empty-title" style="font-size:24px;font-weight:600">Sorry, this page isn't available.</div>
+            <div class="ig-empty-text">The link you followed may be broken, or the page may have been removed. <a href="/" class="ig-link-blue" style="font-size:14px">Go back to Instagram.</a></div>
+        </div>
+    }
+    else
+    {
+        <div class="ig-post-page">
+            <article class="ig-post-box post-detail" data-post-id="@Model.Id">
+                <div class="ig-post-media" data-ig-dbl-like>
+                    <img src="@Present.PhotoUrl(Model)" alt="Photo by @Present.DisplayName(Model.Username)">
+                    <span class="ig-burst" aria-hidden="true"><svg><use href="#ig-heart-fill"/></svg></span>
+                </div>
+                <div class="ig-post-side">
+                    <header class="ig-post-head">
+                        <a href="/u/@Model.Username" class="ig-ring has-story"><img src="/u/@Model.Username/avatar" alt="@Model.Username's profile picture" class="post-avatar"></a>
+                        <div class="post-meta">
+                            <div class="post-meta-line">
+                                <a href="/u/@Model.Username" class="post-user">@Model.Username</a>
+                                @if (!isMine)
+                                {
+                                    <span class="ig-sep">•</span>
+                                    <button type="button" class="ig-follow-inline@(isFollowing ? " is-following" : "")" data-username="@Model.Username">@(isFollowing ? "Following" : "Follow")</button>
+                                }
                             </div>
                         </div>
-                        <button class="more-options">⋯</button>
-                    </div>
+                        <button type="button" class="ig-icon-btn ig-post-more" aria-label="More options" data-user="@Model.Username"><svg class="ig-i"><use href="#ig-dots"/></svg></button>
+                    </header>
 
-                    <!-- Post Image/Content -->
-                    <div class="post-image-container">
-                        {
-                        }
-                        else
-                        {
-                            <div class="post-placeholder">
-                                <span class="placeholder-icon">📷</span>
-                                <p class="placeholder-text">No image available</p>
+                    <div class="ig-post-comments">
+                        <div class="ig-caption-comment">
+                            <a href="/u/@Model.Username"><img src="/u/@Model.Username/avatar" alt="" class="comment-avatar"></a>
+                            <div class="comment-content">
+                                <div class="comment-text">
+                                    <a href="/u/@Model.Username" class="comment-username">@Model.Username</a>
+                                    <span class="caption-text">@MessageHtml.Render(caption)</span>
+                                </div>
+                                <div class="comment-actions"><time class="comment-time" datetime="@Model.CreatedUtc.ToString("o")">@SocialPresentation.ShortAgo(Model.CreatedUtc)</time></div>
                             </div>
-                        }
-                    </div>
-
-                    <!-- Post Actions -->
-                    <div class="post-actions">
-                        <div class="action-buttons">
-                        <button class="action-btn like-btn like-it@likedClass" data-id="@Model.Id">
-                            @(currentUserLiked ? "❤️" : "🤍")
-                        </button>
-                            <button class="action-btn comment-btn">💬</button>
-                            <button class="action-btn share-btn">📤</button>
                         </div>
-                        <button class="action-btn bookmark-btn">🔖</button>
-                    </div>
 
-                    <!-- Post Stats -->
-                    <div class="post-stats">
-                        <div class="likes-count">
-                            @{
-                                var likesCount = Model.Likes?.Count ?? 0;
-                                if (likesCount > 0)
-                                {
-                        <span><strong>@likesCount likes</strong></span>
-                                }
-                                else
-                                {
-                                    <span><strong>0 likes</strong></span>
-                                }
-                            }
-                        </div>
-                    </div>
-
-                    <!-- Post Caption -->
-                    <div class="post-caption">
-                        <span class="username">@Model.User</span>
-                        <span class="caption-text">@Html.Raw(Model.Message)</span>
-                    </div>
-
-                    <!-- Post Time -->
-                    <div class="post-time">
-                        <time datetime="@Model.CreatedUtc">@Model.CreatedUtc.ToString("MMMM d, yyyy")</time>
-                    </div>
-                </div>
-
-                <!-- Comments Section -->
-                <div class="comments-section">
-                    <div class="comments-header">
-                        <h3>Comments</h3>
-                    </div>
-
-                    <!-- Add Comment -->
-                    <div class="add-comment" data-post-id="@Model.Id">
-                        <img src="/u/@ViewBag.Username/avatar" alt="Your avatar" class="comment-avatar">
-                        <input type="text" placeholder="Add a comment..." class="comment-input">
-                        <button class="comment-post-btn">Post</button>
-                    </div>
-
-                    <!-- Comments List -->
-                    <div class="comments-list">
-                        @if (Model.Comments != null)
-                        {
-                            @foreach (var comment in Model.Comments)
+                        <div class="comments-list">
+                            @if (comments.Count == 0)
                             {
-                                <div class="comment">
-                                    <img src="/u/@comment.Username/avatar" alt="@comment.Username" class="comment-avatar">
-                                    <div class="comment-content">
-                                        <div class="comment-text">
-                                            <span class="comment-username">@comment.Username</span>
-                                            <span class="comment-message">@comment.Message</span>
-                                        </div>
-                                        <div class="comment-actions">
-                                            <span class="comment-time">@comment.CreatedUtc.ToString("MMM d")</span>
-                                            <button class="comment-like">Like</button>
-                                            <button class="comment-reply">Reply</button>
-                                        </div>
-                                    </div>
-                                    <button class="comment-like-btn">❤️</button>
+                                <div class="no-comments">
+                                    <p>No comments yet.</p>
+                                    <p>Start the conversation.</p>
                                 </div>
                             }
-                        }
-                        else
-                        {
-                            <div class="no-comments">
-                                <p>No comments yet.</p>
-                                <p>Start the conversation.</p>
+                            @foreach (var comment in comments)
+                            {
+                                <div class="comment">
+                                    <a href="/u/@comment.Username"><img src="/u/@comment.Username/avatar" alt="@comment.Username" class="comment-avatar"></a>
+                                    <div class="comment-content">
+                                        <div class="comment-text">
+                                            <a href="/u/@comment.Username" class="comment-username">@comment.Username</a>
+                                            <span class="comment-message">@MessageHtml.Render(comment.Message)</span>
+                                        </div>
+                                        <div class="comment-actions">
+                                            <span class="comment-time">@SocialPresentation.ShortAgo(comment.CreatedUtc)</span>
+                                            <button type="button" class="comment-like">Like</button>
+                                            <button type="button" class="comment-reply">Reply</button>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="comment-like-btn" aria-label="Like"></button>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="ig-post-foot">
+                        <div class="post-actions">
+                            <div class="action-buttons">
+                                <button class="action-btn like-btn like-it@(likedClass)" data-id="@Model.Id" aria-label="Like"></button>
+                                <a href="#" class="ig-icon-btn" aria-label="Comment" data-ig-focus-comment><svg class="ig-i"><use href="#ig-comment"/></svg></a>
+                                <button type="button" class="ig-icon-btn ig-share" aria-label="Share Post"><svg class="ig-i"><use href="#ig-share"/></svg></button>
                             </div>
-                        }
+                            <button type="button" class="ig-icon-btn ig-save" aria-label="Save"><svg class="ig-i"><use href="#ig-save"/></svg></button>
+                        </div>
+                        <div class="post-likes"><span class="ig-like-count" data-base="@(score - (currentUserLiked ? 1 : 0))">@score.ToString("N0", us)</span> @(score == 1 ? "like" : "likes")</div>
+                        <time class="ig-post-date" datetime="@Model.CreatedUtc.ToString("o")" title="@Model.CreatedUtc.ToString("MMM d, yyyy", us)">@When(Model.CreatedUtc)</time>
+                        <div class="add-comment" data-post-id="@Model.Id">
+                            <input type="text" placeholder="Add a comment…" class="comment-input" aria-label="Add a comment…" autocomplete="off">
+                            <button type="button" class="comment-post-btn">Post</button>
+                            <svg class="ig-i ig-emoji" aria-hidden="true"><use href="#ig-emoji"/></svg>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
+            </article>
 
-    @await Html.PartialAsync("_Scripts")
-    <script src="/themes/instagram/js/instagram.js"></script>
+            @if (morePosts.Count > 0)
+            {
+                <section class="ig-more-from">
+                    <h2>More posts from <a href="/u/@Model.Username">@Model.Username</a></h2>
+                    <div class="ig-grid">
+                        @foreach (var p in morePosts)
+                        {
+                            <a href="/posts/@p.Id" class="ig-tile">
+                                <img src="@Present.PhotoUrl(p)" alt="" loading="lazy">
+                                <span class="ig-tile-overlay">
+                                    <span><svg class="ig-i"><use href="#ig-heart-fill"/></svg>@SocialPresentation.Compact(Present.Score(p))</span>
+                                    <span><svg class="ig-i" style="transform:scaleX(-1)"><use href="#ig-comment"/></svg>@Present.CommentCount(p)</span>
+                                </span>
+                            </a>
+                        }
+                    </div>
+                </section>
+            }
+        </div>
+    }
+    <footer class="ig-profile-footer">
+        <nav><a href="#" data-ig-inert>Meta</a><a href="#" data-ig-inert>About</a><a href="#" data-ig-inert>Blog</a><a href="#" data-ig-inert>Jobs</a><a href="#" data-ig-inert>Help</a><a href="#" data-ig-inert>API</a><a href="#" data-ig-inert>Privacy</a><a href="#" data-ig-inert>Terms</a><a href="#" data-ig-inert>Locations</a><a href="#" data-ig-inert>Instagram Lite</a><a href="#" data-ig-inert>Threads</a><a href="#" data-ig-inert>Meta Verified</a></nav>
+        <div>English &nbsp; © @DateTime.UtcNow.Year Instagram from Meta</div>
+    </footer>
+</main>
+
+@await Html.PartialAsync("_Scripts")
+<script src="/themes/instagram/js/instagram.js?@System.Guid.NewGuid()"></script>
 </body>
 </html>

@@ -1,0 +1,13 @@
+@model DateTime
+@{
+    // Reddit's relative times: "just now", "12 min. ago", "5 hr. ago", "3 days ago", "2 mo. ago", "1 yr. ago"
+    var utc = DateTime.SpecifyKind(Model, DateTimeKind.Utc);
+    var age = DateTime.UtcNow - utc;
+    var text = age.TotalMinutes < 1 ? "just now"
+        : age.TotalHours < 1 ? $"{(int)age.TotalMinutes} min. ago"
+        : age.TotalDays < 1 ? $"{(int)age.TotalHours} hr. ago"
+        : age.TotalDays < 2 ? "1 day ago"
+        : age.TotalDays < 30 ? $"{(int)age.TotalDays} days ago"
+        : age.TotalDays < 365 ? $"{(int)(age.TotalDays / 30)} mo. ago"
+        : $"{(int)(age.TotalDays / 365)} yr. ago";
+}<time datetime="@utc.ToString("o")" title="@utc.ToString("ddd, MMM d, yyyy, h:mm:ss tt") UTC">@text</time>

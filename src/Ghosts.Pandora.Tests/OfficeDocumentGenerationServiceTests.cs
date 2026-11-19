@@ -1,4 +1,5 @@
 using DocumentFormat.OpenXml.Packaging;
+using Ghosts.Pandora.Infrastructure.Content;
 using Ghosts.Pandora.Infrastructure.Services;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -11,10 +12,19 @@ public class OfficeDocumentGenerationServiceTests
 {
     private readonly OfficeDocumentGenerationService _service = new(NullLogger<OfficeDocumentGenerationService>.Instance);
 
+    private static DocumentSpec Spec(string title, string content) => new()
+    {
+        Title = title,
+        Organization = "Test Organization",
+        Author = new Person("Ada", "Lovelace", "Analyst", "Finance", "ada.lovelace@test.example", "555-100-2000", "alovelace"),
+        Date = new DateTime(2026, 11, 19),
+        Sections = { new DocumentSection { Heading = "Details", Paragraphs = { content } } }
+    };
+
     [Fact]
     public void GenerateWordDocument_ContainsTitleAndContent()
     {
-        var bytes = _service.GenerateWordDocument("My Title", "My content");
+        var bytes = _service.GenerateWordDocument(Spec("My Title", "My content"));
 
         using var doc = WordprocessingDocument.Open(new MemoryStream(bytes), false);
         var text = doc.MainDocumentPart!.Document!.Body!.InnerText;
@@ -26,7 +36,7 @@ public class OfficeDocumentGenerationServiceTests
     [Fact]
     public void GeneratePowerPointDocument_ContainsSlides()
     {
-        var bytes = _service.GeneratePowerPointDocument("Deck Title");
+        var bytes = _service.GeneratePowerPointDocument(Spec("Deck Title", "Deck content"));
 
         using var doc = PresentationDocument.Open(new MemoryStream(bytes), false);
 

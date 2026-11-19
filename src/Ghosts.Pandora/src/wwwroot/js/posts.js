@@ -280,6 +280,11 @@ function getPostTemplate(theme, id, user, message, created) {
     return templates[theme] || templates.default;
 }
 
+// The server sends message text already encoded; anything else from the hub is escaped here
+function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+}
+
 connection.on("SendMessage", function (id, user, theme, message, created) {
     // does user div exist and have a value?
     let u = $("#user");
@@ -290,7 +295,7 @@ connection.on("SendMessage", function (id, user, theme, message, created) {
 
             // Get current theme and use appropriate template
             const currentTheme = getCurrentTheme();
-            d.innerHTML = getPostTemplate(currentTheme, id, user, message, created);
+            d.innerHTML = getPostTemplate(currentTheme, escapeHtml(id), escapeHtml(user), message, created);
 
             // Re-bind like button events for the new post
             $(d).find('.like-it').on('click', function() {
@@ -305,7 +310,7 @@ connection.on("SendMessage", function (id, user, theme, message, created) {
 
         // Get current theme and use appropriate template
         const currentTheme = getCurrentTheme();
-        d.innerHTML = getPostTemplate(currentTheme, id, user, message, created);
+        d.innerHTML = getPostTemplate(currentTheme, escapeHtml(id), escapeHtml(user), message, created);
 
         // Re-bind like button events for the new post
         $(d).find('.like-it').on('click', function() {

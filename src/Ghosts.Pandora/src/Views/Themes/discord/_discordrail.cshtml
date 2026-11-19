@@ -1,0 +1,79 @@
+@model string
+@inject Ghosts.Pandora.Infrastructure.Services.IUserService Users
+@inject Ghosts.Pandora.Infrastructure.Services.IDirectMessageService DirectMessages
+@*
+    The server list. Model: "home" when on Direct Messages, else "staff" for the organization's server.
+    Unread direct messages show under the home button as the senders' avatars, the way Discord does.
+*@
+@{
+    var world = Present.World;
+    var active = Model ?? "staff";
+    var me = ViewBag.Username as string;
+    var unread = new List<(string From, int Count)>();
+    var meUser = string.IsNullOrWhiteSpace(me) ? null : await Users.GetUserByUsernameAsync(me, "discord");
+    if (meUser != null)
+    {
+        unread = (await DirectMessages.GetUnreadMessagesAsync(meUser.Id))
+            .GroupBy(m => m.FromUsername)
+            .Select(g => (g.Key, g.Count()))
+            .Take(3)
+            .ToList();
+    }
+    var staffName = $"{world.ShortName} Staff";
+}
+<nav class="dc-rail" aria-label="Servers sidebar">
+    <div class="dc-guild@(active == "home" ? " active" : "")">
+        <span class="dc-pill"></span>
+        <a href="/messages" class="dc-guild-icon home" data-tip="Direct Messages" data-tip-side="right">
+            <svg class="ic" width="26" height="26"><use href="#i-clyde"/></svg>
+        </a>
+    </div>
+    @foreach (var (from, count) in unread)
+    {
+        <div class="dc-guild unread">
+            <span class="dc-pill"></span>
+            <a href="/messages/conversation/@from" class="dc-guild-icon" data-tip="@Present.DisplayName(from)" data-tip-side="right">
+                <img src="/u/@from/avatar" alt="">
+            </a>
+            <span class="dc-badge">@count</span>
+        </div>
+    }
+    <div class="dc-rail-sep"></div>
+    <div class="dc-guild@(active == "staff" ? " active" : "")">
+        <span class="dc-pill"></span>
+        <a href="/" class="dc-guild-icon org" data-tip="@staffName" data-tip-side="right">@world.ShortName[..1]</a>
+    </div>
+    <div class="dc-guild unread">
+        <span class="dc-pill"></span>
+        <a href="#" class="dc-guild-icon" data-tip="@world.City Community" data-tip-side="right" data-inert>
+            <img src="/img/post4.jpg" alt="">
+        </a>
+        <span class="dc-badge">2</span>
+    </div>
+    <div class="dc-guild unread">
+        <span class="dc-pill"></span>
+        <a href="#" class="dc-guild-icon" data-tip="@world.City Run Club" data-tip-side="right" data-inert>
+            <img src="/img/post6.jpg" alt="">
+        </a>
+    </div>
+    <div class="dc-guild">
+        <span class="dc-pill"></span>
+        <a href="#" class="dc-guild-icon acronym" data-tip="r/sysadmin" data-tip-side="right" data-inert>r/s</a>
+    </div>
+    <div class="dc-guild">
+        <a href="#" class="dc-guild-icon action" data-tip="Add a Server" data-tip-side="right" data-inert>
+            <svg class="ic" width="22" height="22"><use href="#i-plus"/></svg>
+        </a>
+    </div>
+    <div class="dc-guild">
+        <a href="#" class="dc-guild-icon action" data-tip="Discover" data-tip-side="right" data-inert>
+            <svg class="ic" width="22" height="22"><use href="#i-compass"/></svg>
+        </a>
+    </div>
+    <div class="dc-rail-sep"></div>
+    <div class="dc-guild">
+        <a href="#" class="dc-guild-icon action" data-tip="Download Apps" data-tip-side="right" data-inert>
+            <svg class="ic" width="22" height="22"><use href="#i-download"/></svg>
+        </a>
+    </div>
+</nav>

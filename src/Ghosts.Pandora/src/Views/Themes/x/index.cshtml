@@ -1,5 +1,40 @@
 @{
     Layout = null;
+    ViewBag.Theme = "x";
+    var me = ViewBag.Username as string ?? "user";
+    var same = StringComparer.OrdinalIgnoreCase;
+
+    // the left navigation's other destinations have no controller of their own, so they land here
+    var path = (Context.Request.Path.Value ?? "/").TrimEnd('/').ToLowerInvariant();
+    var section = path switch
+    {
+        "/notifications" => "notifications",
+        "/bookmarks" => "bookmarks",
+        "/grok" => "grok",
+        "/communities" => "communities",
+        "/premium" => "premium",
+        _ => "home"
+    };
+    var titles = new Dictionary<string, string>
+    {
+        ["home"] = "Home", ["notifications"] = "Notifications", ["bookmarks"] = "Bookmarks",
+        ["grok"] = "Grok", ["communities"] = "Communities", ["premium"] = "Premium"
+    };
+    ViewData["XNav"] = section;
+    ViewData["XAside"] = section == "home" ? "home" : "section";
+
+    // notifications: likes and replies other people left on the current user's posts
+    var mine = (Model ?? new List<Ghosts.Pandora.Infrastructure.Models.Post>()).Where(p => same.Equals(p.Username, me)).ToList();
+    var notes = mine
+        .SelectMany(p => (p.Likes ?? new List<Ghosts.Pandora.Infrastructure.Models.Like>())
+            .Where(l => !same.Equals(l.Username, me))
+            .Select(l => (When: l.CreatedUtc, Who: l.Username, Post: p, Comment: (Ghosts.Pandora.Infrastructure.Models.Comment)null)))
+        .Concat(mine.SelectMany(p => (p.Comments ?? new List<Ghosts.Pandora.Infrastructure.Models.Comment>())
+            .Where(c => !same.Equals(c.Username, me))
+            .Select(c => (When: c.CreatedUtc, Who: c.Username, Post: p, Comment: c))))
+        .OrderByDescending(n => n.When)
+        .Take(50)
+        .ToList();
 }
 @model List<Ghosts.Pandora.Infrastructure.Models.Post>
 
@@ -8,139 +43,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home / X</title>
-    <link rel="stylesheet" href="/themes/x/css/feed.css?@System.Guid.NewGuid()">
-    <link rel="icon" href="/themes/x/images/x-icon.png">
+    <meta name="current-user" content="@me">
+    <title>@titles[section] / X</title>
+    <link rel="stylesheet" href="/themes/x/css/x.css?@System.Guid.NewGuid()">
+    <link rel="icon" href="/themes/x/images/favicon.svg" type="image/svg+xml">
 </head>
 <body data-theme="x">
-    <div class="app">
-        <!-- Left Sidebar -->
-        <div class="sidebar">
-            <div class="sidebar-content">
-                <div class="logo">
-                    <a href="/"><img src="/themes/x/images/x-logo.png" alt="X" class="x-logo"></a>
-                </div>
-                <nav class="nav-menu">
-                    <a href="/" class="nav-item active">
-                        <span class="nav-icon">🏠</span>
-                        <span class="nav-text">Home</span>
-                    </a>
-                    <a href="#" class="nav-item">
-                        <span class="nav-icon">🔍</span>
-                        <span class="nav-text">Explore</span>
-                    </a>
-                    <a href="#" class="nav-item">
-                        <span class="nav-icon">🔔</span>
-                        <span class="nav-text">Notifications</span>
-                    </a>
-                    <a href="/messages" class="nav-item">
-                        <span class="nav-icon">✉️</span>
-                        <span class="nav-text">Messages</span>
-                    </a>
-                    <a href="#" class="nav-item">
-                        <span class="nav-icon">🔖</span>
-                        <span class="nav-text">Bookmarks</span>
-                    </a>
-                    <a href="#" class="nav-item">
-                        <span class="nav-icon">👥</span>
-                        <span class="nav-text">Communities</span>
-                    </a>
-                    <a href="#" class="nav-item">
-                        <span class="nav-icon">❌</span>
-                        <span class="nav-text">Premium</span>
-                    </a>
-                    <a href="/profile" class="nav-item">
-                        <span class="nav-icon">👤</span>
-                        <span class="nav-text">Profile</span>
-                    </a>
-                    <a href="#" class="nav-item">
-                        <span class="nav-icon">⚙️</span>
-                        <span class="nav-text">Settings</span>
-                    </a>
-                </nav>
-
-                <button class="tweet-btn">Post</button>
-            </div>
-        </div>
-
-        <!-- Main Content -->
-        <div class="main-content">
-            <div class="feed-header">
-                <h2>Home</h2>
-                <div class="feed-tabs">
-                    <button class="tab active">For you</button>
-                    <button class="tab">Following</button>
-                </div>
-                <br/>
-            </div>
-
-            @{
-                ViewBag.Theme = "x";
-            }
-
-            @await Html.PartialAsync("_CreatePost")
-
-            <!-- Feed -->
-            <div class="feed" id="newsfeed-items-grid">
-                @{
-                    if (Model != null)
+    @await Html.PartialAsync("/Views/Themes/x/_xsprite.cshtml")
+    <div class="x-app">
+        @await Html.PartialAsync("/Views/Themes/x/_xnav.cshtml")
+        <main class="x-main" role="main">
+            <div class="x-main-inner">
+                <div class="x-primary">
+                    @if (section == "home")
                     {
-                        foreach (var post in Model)
+                        <div class="x-sticky">
+                            <div class="x-mobile-top">
+                                <a href="/u/@me" class="x-mobile-avatar"><img src="/u/@me/avatar" alt="Profile"></a>
+                                <svg class="x-mobile-logo"><use href="#x-logo"/></svg>
+                                <span></span>
+                            </div>
+                            <nav class="x-tabs" role="tablist">
+                                <a href="/" class="x-tab active" role="tab" data-x-tab="foryou"><span>For you</span></a>
+                                <a href="/" class="x-tab" role="tab" data-x-tab="following"><span>Following</span></a>
+                            </nav>
+                        </div>
+
+                        @await Html.PartialAsync("/Views/Themes/x/_createpost.cshtml")
+
+                        <div class="feed" id="newsfeed-items-grid">
+                            @if (Model != null)
+                            {
+                                foreach (var post in Model)
+                                {
+                                    await Html.RenderPartialAsync("/Views/Themes/x/_postcard.cshtml", post);
+                                }
+                            }
+                        </div>
+                        <div class="x-empty" id="x-following-empty" hidden>
+                            <h2>Welcome to your timeline!</h2>
+                            <p>It’s empty now, but it won’t be for long. Start following people and you’ll see their posts show up here.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="x-sticky">
+                            <div class="x-topbar">
+                                <div class="x-topbar-titles">
+                                    <h2>@titles[section]</h2>
+                                    @if (section == "bookmarks")
+                                    {
+                                        <span class="x-topbar-sub">@Present.Handle(me)</span>
+                                    }
+                                </div>
+                                @if (section == "notifications")
+                                {
+                                    <button type="button" class="x-icon-btn x-topbar-end" aria-label="Settings" data-x-menu="dm"><svg><use href="#x-gear"/></svg></button>
+                                }
+                            </div>
+                            @if (section == "notifications")
+                            {
+                                <nav class="x-tabs" role="tablist">
+                                    <a href="#" class="x-tab active" role="tab" data-x-pane="x-pane-all"><span>All</span></a>
+                                    <a href="#" class="x-tab" role="tab" data-x-pane="x-pane-verified"><span>Verified</span></a>
+                                    <a href="#" class="x-tab" role="tab" data-x-pane="x-pane-mentions"><span>Mentions</span></a>
+                                </nav>
+                            }
+                        </div>
+
+                        @switch (section)
                         {
-                            await Html.RenderPartialAsync("_PostCard", post);
+                            case "notifications":
+                                <div class="x-pane" id="x-pane-all">
+                                    @foreach (var note in notes)
+                                    {
+                                        @await Html.PartialAsync("/Views/Themes/x/_xnotification.cshtml", note)
+                                    }
+                                    @if (notes.Count == 0)
+                                    {
+                                        <div class="x-pane-empty"><h2>Nothing to see here — yet</h2><p>From likes to reposts and a whole lot more, this is where all the action happens.</p></div>
+                                    }
+                                </div>
+                                <div class="x-pane" id="x-pane-verified" hidden>
+                                    <div class="x-pane-empty"><h2>Nothing to see here — yet</h2><p>Likes, mentions, reposts, and a whole lot more — when it comes from a verified account, you’ll find it here.</p></div>
+                                </div>
+                                <div class="x-pane" id="x-pane-mentions" hidden>
+                                    @foreach (var note in notes.Where(n => n.Comment != null))
+                                    {
+                                        @await Html.PartialAsync("/Views/Themes/x/_xnotification.cshtml", note)
+                                    }
+                                    @if (!notes.Any(n => n.Comment != null))
+                                    {
+                                        <div class="x-pane-empty"><h2>Nothing to see here — yet</h2><p>When someone mentions you, you’ll find it here.</p></div>
+                                    }
+                                </div>
+                                break;
+                            case "bookmarks":
+                                <div class="x-pane-empty"><h2>Save posts for later</h2><p>Bookmark posts to easily find them again in the future.</p></div>
+                                break;
+                            case "communities":
+                                <div class="x-pane-empty"><h2>Discover new Communities</h2><p>Join Communities to see posts from people who share your interests, right in your timeline.</p></div>
+                                break;
+                            case "premium":
+                                <div class="x-pane-empty">
+                                    <h2>Upgrade to Premium</h2>
+                                    <p>Enjoy an enhanced experience, exclusive creator tools, top-tier verification and security.</p>
+                                    <p class="x-pane-cta"><button type="button" class="x-btn-dark x-btn-big" data-x-unavailable>Subscribe</button></p>
+                                </div>
+                                break;
+                            case "grok":
+                                <div class="x-grok">
+                                    <svg class="x-grok-mark"><use href="#x-grok"/></svg>
+                                    <h2>Grok</h2>
+                                    <form class="x-grok-ask" data-x-unavailable>
+                                        <textarea rows="1" placeholder="Ask anything" aria-label="Ask Grok"></textarea>
+                                        <button type="submit" class="x-btn-dark" aria-label="Grok something">Ask</button>
+                                    </form>
+                                </div>
+                                break;
                         }
                     }
-                }
+                </div>
+                @await Html.PartialAsync("/Views/Themes/x/_xaside.cshtml")
             </div>
-        </div>
-
-        <!-- Right Sidebar -->
-        <div class="right-sidebar">
-            <div class="trending-widget">
-                <h3>What's happening</h3>
-                <div class="trending-item">
-                    <div class="trending-category">Trending in Technology</div>
-                    <div class="trending-topic">#JavaScript</div>
-                    <div class="trending-posts">42.1K posts</div>
-                </div>
-                <div class="trending-item">
-                    <div class="trending-category">Trending</div>
-                    <div class="trending-topic">#WebDev</div>
-                    <div class="trending-posts">28.4K posts</div>
-                </div>
-                <div class="trending-item">
-                    <div class="trending-category">Technology · Trending</div>
-                    <div class="trending-topic">React</div>
-                    <div class="trending-posts">15.2K posts</div>
-                </div>
-            </div>
-
-            <div class="suggestions-widget">
-                @{
-                    var user1 = Faker.Internet.UserName();
-                    var user2 = Faker.Internet.UserName();
-                }
-                <h3>Who to follow</h3>
-                <div class="suggestion-item">
-                    <img src="/u/@user1/avatar" alt="User" class="suggestion-avatar">
-                    <div class="suggestion-info">
-                        <div class="suggestion-name">@user1</div>
-                        <div class="suggestion-handle">@@@user1</div>
-                    </div>
-                    <button class="follow-btn">Follow</button>
-                </div>
-                <div class="suggestion-item">
-                    <img src="/u/@user2/avatar" alt="User" class="suggestion-avatar">
-                    <div class="suggestion-info">
-                        <div class="suggestion-name">@user2</div>
-                        <div class="suggestion-handle">@@@user2</div>
-                    </div>
-                    <button class="follow-btn">Follow</button>
-                </div>
-            </div>
-        </div>
+        </main>
     </div>
+    <a href="/#compose" class="x-fab" data-x-compose aria-label="Post"><svg><use href="#x-feather"/></svg></a>
 
+    <script>window.xNames = @Json.Serialize(Present.World.People.DistinctBy(p => p.Username).ToDictionary(p => p.Username, p => p.FullName));</script>
     @await Html.PartialAsync("_Scripts")
+    <script src="/themes/x/js/x.js?@System.Guid.NewGuid()"></script>
 </body>
 </html>

@@ -22,16 +22,20 @@ public class PayloadController(
             return NotFound("Payloads are not enabled");
         }
 
-        var requestPath = $"/payloads/{path}";
-        Logger.LogInformation("Payload request for path: {Path}", requestPath);
+        // A mapping's own URL is rewritten to here by the file extension middleware, so match the
+        // path both as it was requested and under /payloads
+        var requestPath = $"/{path}";
+        Logger.LogInformation("Payload request for path: {Path}", ForLog(requestPath));
 
         // Find matching payload configuration
         var payload = configuration.Payloads.Mappings
-            .FirstOrDefault(p => requestPath.StartsWith(p.Url, StringComparison.OrdinalIgnoreCase));
+            .FirstOrDefault(p => !string.IsNullOrEmpty(p.Url) &&
+                                 (requestPath.StartsWith(p.Url, StringComparison.OrdinalIgnoreCase) ||
+                                  $"/payloads{requestPath}".StartsWith(p.Url, StringComparison.OrdinalIgnoreCase)));
 
         if (payload == null)
         {
-            Logger.LogWarning("No payload mapping found for path: {Path}", requestPath);
+            Logger.LogWarning("No payload mapping found for path: {Path}", ForLog(requestPath));
             return NotFound("No payload configured for this path");
         }
 

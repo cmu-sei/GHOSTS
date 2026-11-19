@@ -1,0 +1,124 @@
+@inject Ghosts.Pandora.Infrastructure.Services.IPostService Posts
+@{
+    var me = ViewBag.Username as string ?? string.Empty;
+    var query = ViewData["ytQuery"] as string;
+    var uploads = (await Posts.GetLatestPostsByTheme("youtube", 20))
+        .Where(p => !string.Equals(p.Username, me, StringComparison.OrdinalIgnoreCase))
+        .Take(8)
+        .ToList();
+    var unseen = uploads.Count(p => p.CreatedUtc > DateTime.UtcNow.AddDays(-2));
+}
+@await Html.PartialAsync("~/Views/Themes/youtube/_icons.cshtml")
+<header class="yt-masthead" id="masthead">
+    <div class="yt-masthead-start">
+        <button class="yt-icon-btn yt-guide-btn" type="button" aria-label="Guide"><svg class="yt-icon"><use href="#yt-i-menu"/></svg></button>
+        <a class="yt-logo" href="/" title="YouTube Home"><img src="/themes/youtube/images/youtube-logo.png" alt="YouTube"></a>
+    </div>
+
+    <div class="yt-masthead-center">
+        <button class="yt-icon-btn yt-search-back" type="button" aria-label="Back"><svg class="yt-icon"><use href="#yt-i-back"/></svg></button>
+        <form class="yt-searchbox" action="/search" method="get" role="search">
+            <div class="yt-searchbox-input">
+                <svg class="yt-icon yt-searchbox-glass"><use href="#yt-i-search"/></svg>
+                <input name="q" type="text" placeholder="Search" autocomplete="off" spellcheck="false" value="@query" aria-label="Search">
+            </div>
+            <button class="yt-search-btn" type="submit" title="Search" aria-label="Search"><svg class="yt-icon"><use href="#yt-i-search"/></svg></button>
+        </form>
+        <button class="yt-icon-btn yt-voice-btn" type="button" title="Search with your voice" aria-label="Search with your voice"><svg class="yt-icon"><use href="#yt-i-mic"/></svg></button>
+    </div>
+
+    <div class="yt-masthead-end">
+        <button class="yt-icon-btn yt-mobile-search-btn" type="button" aria-label="Search"><svg class="yt-icon"><use href="#yt-i-search"/></svg></button>
+
+        <div class="yt-popup-anchor">
+            <button class="yt-create-btn" type="button" data-popup="yt-create-menu" title="Create">
+                <svg class="yt-icon"><use href="#yt-i-plus"/></svg><span>Create</span>
+            </button>
+            <div class="yt-popup yt-create-menu" id="yt-create-menu" hidden>
+                <button class="yt-menu-item" type="button" data-open-upload><svg class="yt-icon"><use href="#yt-i-upload"/></svg>Upload video</button>
+                <button class="yt-menu-item" type="button" data-toast="Live streaming isn't available on this channel yet"><svg class="yt-icon"><use href="#yt-i-live"/></svg>Go live</button>
+                <button class="yt-menu-item" type="button" data-toast="Posts are available once your channel has more subscribers"><svg class="yt-icon"><use href="#yt-i-post"/></svg>Create post</button>
+            </div>
+        </div>
+
+        <div class="yt-popup-anchor">
+            <button class="yt-icon-btn yt-notif-btn" type="button" data-popup="yt-notifications" aria-label="Notifications">
+                <svg class="yt-icon"><use href="#yt-i-bell"/></svg>
+                @if (unseen > 0)
+                {
+                    <span class="yt-notif-badge">@(unseen > 9 ? "9+" : unseen.ToString())</span>
+                }
+            </button>
+            <div class="yt-popup yt-notifications" id="yt-notifications" hidden>
+                <div class="yt-popup-header">
+                    <span>Notifications</span>
+                    <a class="yt-icon-btn" href="/account_notifications" aria-label="Settings"><svg class="yt-icon"><use href="#yt-i-settings"/></svg></a>
+                </div>
+                <div class="yt-notif-list">
+                    @if (uploads.Count == 0)
+                    {
+                        <div class="yt-notif-empty">
+                            <svg class="yt-icon"><use href="#yt-i-bell"/></svg>
+                            <p>Your notifications live here</p>
+                            <span>Subscribe to your favorite channels to get notified about their latest videos.</span>
+                        </div>
+                    }
+                    @foreach (var upload in uploads)
+                    {
+                        <a class="yt-notif@(upload.CreatedUtc > DateTime.UtcNow.AddDays(-2) ? " unread" : "")" href="/posts/@upload.Id">
+                            <span class="yt-notif-dot"></span>
+                            <img class="yt-notif-avatar" src="/u/@upload.Username/avatar" alt="">
+                            <span class="yt-notif-text">
+                                <span>@Present.DisplayName(upload.Username) uploaded: @Present.Title(upload)</span>
+                                <span class="yt-notif-time">@SocialPresentation.LongAgo(upload.CreatedUtc)</span>
+                            </span>
+                            <img class="yt-notif-thumb" src="@Present.PhotoUrl(upload)" alt="">
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="yt-popup-anchor">
+            <button class="yt-avatar-btn" type="button" data-popup="yt-account-menu" aria-label="Account menu">
+                <img src="/u/@me/avatar" alt="">
+            </button>
+            <div class="yt-popup yt-account-menu" id="yt-account-menu" hidden>
+                <div class="yt-account-header">
+                    <img src="/u/@me/avatar" alt="">
+                    <div>
+                        <div class="yt-account-name">@Present.DisplayName(me)</div>
+                        <div class="yt-account-handle">@Present.Handle(me)</div>
+                        <a class="yt-link" href="/u/@me">View your channel</a>
+                    </div>
+                </div>
+                <div class="yt-menu-section">
+                    <button class="yt-menu-item" type="button" data-toast="Google Account settings are managed by your organization"><svg class="yt-icon"><use href="#yt-i-account"/></svg>Google Account</button>
+                    <button class="yt-menu-item" type="button" data-toast="No other accounts on this device"><svg class="yt-icon"><use href="#yt-i-switch"/></svg>Switch account<svg class="yt-icon yt-menu-end"><use href="#yt-i-chevron-right"/></svg></button>
+                    <button class="yt-menu-item" type="button" data-toast="Your organization keeps you signed in on this device"><svg class="yt-icon"><use href="#yt-i-signout"/></svg>Sign out</button>
+                </div>
+                <div class="yt-menu-section">
+                    <button class="yt-menu-item" type="button" data-open-upload><svg class="yt-icon"><use href="#yt-i-studio"/></svg>YouTube Studio</button>
+                    <a class="yt-menu-item" href="/messages"><svg class="yt-icon"><use href="#yt-i-chat"/></svg>Messages</a>
+                    <a class="yt-menu-item" href="/paid_memberships"><svg class="yt-icon"><use href="#yt-i-dollar"/></svg>Purchases and memberships</a>
+                </div>
+                <div class="yt-menu-section">
+                    <a class="yt-menu-item" href="/account_privacy"><svg class="yt-icon"><use href="#yt-i-shield"/></svg>Your data in YouTube</a>
+                    <button class="yt-menu-item" type="button"><svg class="yt-icon"><use href="#yt-i-moon"/></svg>Appearance: Device theme<svg class="yt-icon yt-menu-end"><use href="#yt-i-chevron-right"/></svg></button>
+                    <button class="yt-menu-item" type="button"><svg class="yt-icon"><use href="#yt-i-translate"/></svg>Display language: English<svg class="yt-icon yt-menu-end"><use href="#yt-i-chevron-right"/></svg></button>
+                    <button class="yt-menu-item" type="button"><svg class="yt-icon"><use href="#yt-i-shield"/></svg>Restricted Mode: Off<svg class="yt-icon yt-menu-end"><use href="#yt-i-chevron-right"/></svg></button>
+                    <button class="yt-menu-item" type="button"><svg class="yt-icon"><use href="#yt-i-globe"/></svg>Location: United States<svg class="yt-icon yt-menu-end"><use href="#yt-i-chevron-right"/></svg></button>
+                    <button class="yt-menu-item" type="button"><svg class="yt-icon"><use href="#yt-i-keyboard"/></svg>Keyboard shortcuts</button>
+                </div>
+                <div class="yt-menu-section">
+                    <a class="yt-menu-item" href="/account"><svg class="yt-icon"><use href="#yt-i-settings"/></svg>Settings</a>
+                </div>
+                <div class="yt-menu-section">
+                    <button class="yt-menu-item" type="button"><svg class="yt-icon"><use href="#yt-i-help"/></svg>Help</button>
+                    <button class="yt-menu-item" type="button" data-toast="Thanks for your feedback"><svg class="yt-icon"><use href="#yt-i-feedback"/></svg>Send feedback</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+@await Html.PartialAsync("~/Views/Themes/youtube/_createpost.cshtml")

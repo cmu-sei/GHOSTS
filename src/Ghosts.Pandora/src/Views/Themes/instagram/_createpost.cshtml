@@ -1,0 +1,34 @@
+@{
+    // The composer stays on the feed for the NPC client, which types into //textarea[@class='post-input'],
+    // reads the username from the profile-pic src and clicks the post-btn inside div.post-composer.
+    // The Create button in the navigation opens this same card as Instagram's "Create new post" dialog.
+    var username = ViewBag.Username as string ?? "User";
+}
+<section class="ig-create" id="ig-create" aria-label="Create new post">
+    <div class="create-post">
+        <form method="post" action="/">
+            <input type="hidden" name="theme" value="instagram">
+            <input type="hidden" name="user" value="@username">
+            <div class="post-composer">
+                <div class="ig-create-head">
+                    <span class="ig-create-title">Create new post</span>
+                    <button type="submit" class="post-btn">Share</button>
+                </div>
+                <div class="ig-create-body">
+                    <div class="ig-create-user">
+                        <img src="/u/@username/avatar" alt="Profile" class="profile-pic">
+                        <span>@username</span>
+                    </div>
+                    <textarea name="message" placeholder="Write a caption..." class="post-input" required></textarea>
+                    <div class="ig-create-tools">
+                        <svg class="ig-i ig-i-20" aria-hidden="true"><use href="#ig-emoji"/></svg>
+                        <span class="ig-create-count">0/2,200</span>
+                    </div>
+                </div>
+                <div class="ig-create-row"><span>Add location</span><svg class="ig-i ig-i-16" aria-hidden="true"><use href="#ig-location"/></svg></div>
+                <div class="ig-create-row"><span>Add collaborators</span><svg class="ig-i ig-i-16" aria-hidden="true"><use href="#ig-person-plus"/></svg></div>
+            </div>
+        </form>
+    </div>
+    <button type="button" class="ig-create-close" aria-label="Close"><svg class="ig-i"><use href="#ig-close"/></svg></button>
+</section>

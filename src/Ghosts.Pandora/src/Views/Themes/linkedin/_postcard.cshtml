@@ -1,0 +1,126 @@
+@using Ghosts.Pandora.Infrastructure.Content
+@model Ghosts.Pandora.Infrastructure.Models.Post
+@functions {
+    // LinkedIn's own relative times: now, 5m, 3h, 2d, 1w, 4mo, 2yr
+    static string LinkedInAgo(DateTime createdUtc)
+    {
+        var age = DateTime.UtcNow - DateTime.SpecifyKind(createdUtc, DateTimeKind.Utc);
+        if (age < TimeSpan.FromMinutes(1)) return "now";
+        if (age < TimeSpan.FromHours(1)) return $"{(int)age.TotalMinutes}m";
+        if (age < TimeSpan.FromDays(1)) return $"{(int)age.TotalHours}h";
+        if (age < TimeSpan.FromDays(7)) return $"{(int)age.TotalDays}d";
+        if (age < TimeSpan.FromDays(30)) return $"{(int)(age.TotalDays / 7)}w";
+        if (age < TimeSpan.FromDays(365)) return $"{(int)(age.TotalDays / 30)}mo";
+        return $"{(int)(age.TotalDays / 365)}yr";
+    }
+}
+@{
+    // A feed post card. ViewData["LiDetail"] shows it on its own page: full text and a comment button that opens the composer below.
+    var me = ViewBag.Username as string ?? string.Empty;
+    var detail = ViewData["LiDetail"] as bool? ?? false;
+    var following = ViewData["LiFollowing"] as HashSet<string> ?? new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+    var author = Model.Username;
+    var isMe = string.Equals(author, me, StringComparison.OrdinalIgnoreCase);
+    var inWorld = Present.World.People.Any(p => string.Equals(p.Username, author, StringComparison.OrdinalIgnoreCase));
+    var hash = ContentRequest.StableHash($"{me}:{author}:degree");
+    var second = hash % 100 < (inWorld ? 70u : 35u);
+    var degree = isMe ? "You" : second ? "2nd" : "3rd+";
+
+    var liked = !string.IsNullOrWhiteSpace(me) &&
+        (Model.Likes?.Any(l => string.Equals(l.Username, me, StringComparison.OrdinalIgnoreCase)) ?? false);
+    var others = Present.Score(Model) - (liked ? 1 : 0);
+    var comments = Present.CommentCount(Model);
+    var reposts = Present.Shares(Model);
+    var total = others + (liked ? 1 : 0);
+    var icons = total <= 3 ? 1 : total <= 25 ? 2 : 3;
+    var secondIcon = ContentRequest.StableHash($"{Model.Id}:reaction") % 2 == 0 ? "celebrate" : "love";
+    var thirdIcon = secondIcon == "celebrate" ? "love" : "celebrate";
+
+    // "Maria Johnson likes this" over posts from outside the member's network
+    var liker = Model.Likes?.Select(l => l.Username)
+        .FirstOrDefault(u => !string.Equals(u, author, StringComparison.OrdinalIgnoreCase) && !string.Equals(u, me, StringComparison.OrdinalIgnoreCase));
+    var verbs = new[] { "likes this", "celebrates this", "loves this", "finds this insightful", "supports this" };
+    var context = !isMe && !second && liker != null ? verbs[ContentRequest.StableHash($"{Model.Id}:verb") % (uint)verbs.Length] : null;
+
+    var text = SocialPresentation.PlainText(Model);
+    var clamp = !detail && (text.Length > 210 || text.Count(c => c == '\n') >= 3);
+    var photo = Present.HasPhoto(Model, 30);
+    var name = Present.DisplayName(author);
+}
+<article class="li-post" data-post-id="@Model.Id">
+    @if (context != null)
+    {
+        <div class="li-post__context">
+            <a href="/u/@liker"><img src="/u/@liker/avatar" alt=""></a>
+            <span><a href="/u/@liker">@Present.DisplayName(liker)</a> @context</span>
+            <span class="li-post__context-controls">
+                <button type="button" class="li-iconbtn" data-li-postmenu aria-label="Open control menu"><svg width="24" height="24"><use href="#li-more"/></svg></button>
+                <button type="button" class="li-iconbtn" data-li-dismiss aria-label="Dismiss post by @name"><svg width="24" height="24"><use href="#li-close"/></svg></button>
+            </span>
+        </div>
+    }
+    <div class="li-post__header">
+        <a href="/u/@author" class="li-post__avatar"><img src="/u/@author/avatar" alt="View @(name)’s profile"></a>
+        <div class="li-post__meta">
+            <a href="/u/@author" class="li-post__name"><span class="li-post__display">@name</span><span class="li-post__degree"> &bull; @degree</span></a>
+            <span class="li-post__headline">@Present.Headline(author)</span>
+            <span class="li-post__time">@LinkedInAgo(Model.CreatedUtc) &bull; <svg width="16" height="16" aria-label="Visible to anyone on or off LinkedIn"><use href="#li-globe"/></svg></span>
+        </div>
+        <div class="li-post__controls">
+            @if (!isMe && !second && !following.Contains(author))
+            {
+                <form method="post" action="/api/relationships/follow" class="li-follow li-follow--link">
+                    <input type="hidden" name="username" value="@author">
+                    <button type="submit"><svg width="16" height="16"><use href="#li-plus"/></svg><span>Follow</span></button>
+                </form>
+            }
+            @if (context == null)
+            {
+                <button type="button" class="li-iconbtn" data-li-postmenu aria-label="Open control menu"><svg width="24" height="24"><use href="#li-more"/></svg></button>
+                @if (!detail)
+                {
+                    <button type="button" class="li-iconbtn" data-li-dismiss aria-label="Dismiss post by @name"><svg width="24" height="24"><use href="#li-close"/></svg></button>
+                }
+            }
+        </div>
+    </div>
+    <div class="li-post__body@(clamp ? " li-post__body--clamp" : "")"><div class="li-text">@MessageHtml.Render(Model.Message)</div>@if (clamp){<button type="button" class="li-seemore" data-li-seemore>&hellip;see more</button>}</div>
+    @if (photo)
+    {
+        <a href="/posts/@Model.Id" class="li-post__photo"><img src="@Present.PhotoUrl(Model)" alt="" loading="lazy"></a>
+    }
+    <div class="li-post__counts@(total == 0 && comments == 0 && reposts == 0 ? " li-post__counts--empty" : "")" data-li-counts data-others="@others" data-liked="@(liked ? "true" : "false")">
+        <a href="/posts/@Model.Id" class="li-post__reactions@(total == 0 ? " li-post__reactions--none" : "")">
+            <span class="li-reacticons">
+                <svg width="16" height="16"><use href="#li-r-like"/></svg>
+                @if (icons >= 2)
+                {
+                    <svg width="16" height="16"><use href="#li-r-@secondIcon"/></svg>
+                }
+                @if (icons >= 3)
+                {
+                    <svg width="16" height="16"><use href="#li-r-@thirdIcon"/></svg>
+                }
+            </span>
+            <span class="li-post__reactcount" data-li-reactcount>@(liked ? (others == 0 ? "You" : $"You and {others:N0} other{(others == 1 ? "" : "s")}") : total.ToString("N0"))</span>
+        </a>
+        <span class="li-post__engage">
+            <a href="/posts/@Model.Id" class="@(comments == 0 ? "li-hide" : "")" data-li-comment-count="@comments">@comments comment@(comments == 1 ? "" : "s")</a>
+            @if (reposts > 0)
+            {
+                <span aria-hidden="true">&bull;</span>
+                <span>@reposts.ToString("N0") repost@(reposts == 1 ? "" : "s")</span>
+            }
+        </span>
+    </div>
+    <div class="li-post__actions">
+        <button class="action-btn like-btn like-it@(liked ? " liked" : "")" data-id="@Model.Id" aria-label="React Like"><svg class="li-ic-off" width="24" height="24"><use href="#li-like"/></svg><svg class="li-ic-on" width="24" height="24"><use href="#li-liked"/></svg><span class="action-text">Like</span></button>
+        <a href="@(detail ? "#li-comment-input" : $"/posts/{Model.Id}")" class="li-action"@(detail ? " data-li-focus-comment" : "")><svg width="24" height="24"><use href="#li-comment"/></svg><span>Comment</span></a>
+        <div class="li-action-wrap">
+            <button type="button" class="li-action" data-li-repost><svg width="24" height="24"><use href="#li-repost"/></svg><span>Repost</span></button>
+        </div>
+        <div class="li-action-wrap">
+            <button type="button" class="li-action" data-li-send><svg width="24" height="24"><use href="#li-send"/></svg><span>Send</span></button>
+        </div>
+    </div>
+</article>

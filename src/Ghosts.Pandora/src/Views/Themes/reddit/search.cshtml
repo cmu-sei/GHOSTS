@@ -1,163 +1,113 @@
 @model Ghosts.Pandora.Infrastructure.ViewModels.SearchResultsViewModel
 @{
     Layout = null;
+    ViewBag.Theme = "reddit";
+    var me = ViewBag.Username as string ?? "user";
     var query = Model?.Query ?? string.Empty;
+    ViewData["Query"] = query;
+    var posts = Model?.Posts?.Where(p => string.Equals(p.Theme, "reddit", StringComparison.OrdinalIgnoreCase)).ToList() ?? new List<Post>();
+    var users = Model?.Users?.ToList() ?? new List<User>();
+    var communities = posts.Select(p => Present.Community(p)).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
 }
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reddit Search - @query</title>
-    <link rel="stylesheet" href="/themes/reddit/css/feed.css">
-    <style>
-        body {
-            background: #0b1416;
-            color: #d7dadc;
-            font-family: Noto Sans, sans-serif;
-            margin: 0;
-        }
-        .search-header {
-            background: #1a1a1b;
-            border-bottom: 1px solid #272729;
-            padding: 16px 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .search-header .reddit-text {
-            font-weight: 700;
-            font-size: 20px;
-        }
-        .search-container {
-            max-width: 960px;
-            margin: 24px auto;
-            padding: 0 16px 40px;
-            display: grid;
-            grid-template-columns: 640px 1fr;
-            gap: 24px;
-        }
-        .search-card {
-            background: #1a1a1b;
-            border: 1px solid #272729;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 24px;
-        }
-        .search-form {
-            display: flex;
-            gap: 12px;
-        }
-        .search-form input {
-            flex: 1;
-            border-radius: 999px;
-            border: 1px solid #272729;
-            background: #272729;
-            color: #d7dadc;
-            padding: 12px 16px;
-        }
-        .search-form button {
-            background: #ff4500;
-            border: none;
-            border-radius: 999px;
-            padding: 12px 20px;
-            color: #fff;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        .results-grid {
-            display: grid;
-            gap: 12px;
-        }
-        .result-card {
-            background: #0b1416;
-            border: 1px solid #272729;
-            border-radius: 12px;
-            padding: 16px;
-        }
-        .result-card a {
-            color: inherit;
-            text-decoration: none;
-        }
-        .empty-state {
-            color: #818384;
-        }
-    </style>
+    <meta name="current-user" content="@me">
+    <title>@(string.IsNullOrWhiteSpace(query) ? "Search - Reddit" : $"{query} - Reddit Search")</title>
+    <link rel="stylesheet" href="/themes/reddit/css/reddit.css?@System.Guid.NewGuid()">
+    <link rel="icon" href="/themes/reddit/images/reddit-logo.png">
 </head>
-<body>
-    <div class="search-header">
-        <div class="logo">
-            <img src="/themes/reddit/images/reddit-logo.png" alt="Reddit" class="reddit-logo">
-            <span class="reddit-text"><a href="/" style="color:#d7dadc;text-decoration:none;">reddit</a></span>
-        </div>
-        <a href="/profile" style="color:#d7dadc;text-decoration:none;">u/@(ViewBag.Username ?? "user")</a>
-    </div>
-
-    <div class="search-container">
-        <aside class="search-card">
-            <h2>Search Reddit</h2>
-            <form class="search-form" method="get" action="/search">
-                <input type="text" name="q" value="@query" placeholder="Search" />
-                <button type="submit">Search</button>
-            </form>
-        </aside>
-
-        <main>
-            <div class="search-card">
-                <h3>Communities & People</h3>
-                @if (Model?.HasQuery == true && Model.Users?.Count > 0)
-                {
-                    <div class="results-grid">
-                        @foreach (var user in Model.Users)
-                        {
-                            <div class="result-card">
-                                <a href="/u/@user.Username">
-                                    <strong>u/@user.Username</strong><br />
-                                    <span>@(string.IsNullOrWhiteSpace(user.Bio) ? "No description." : user.Bio)</span>
-                                </a>
-                            </div>
-                        }
+<body data-theme="reddit">
+    @await Html.PartialAsync("~/Views/Themes/reddit/_redditheader.cshtml")
+    <div class="r-shell">
+        @await Html.PartialAsync("~/Views/Themes/reddit/_redditnav.cshtml")
+        <main class="r-main">
+            <div class="r-content">
+                <div class="r-feed">
+                    <form class="r-search-page" action="/search" method="get" role="search">
+                        <svg class="ri"><use href="#i-search" /></svg>
+                        <input type="text" name="q" value="@query" placeholder="Search Reddit" aria-label="Search Reddit">
+                    </form>
+                    <div class="r-feedbar">
+                        <span class="r-chip" aria-pressed="true">Posts</span>
+                        <a class="r-chip" aria-pressed="false" href="#r-people">People</a>
+                        <a class="r-chip" aria-pressed="false" href="#r-communities">Communities</a>
                     </div>
-                }
-                else if (Model?.HasQuery == true)
-                {
-                    <div class="empty-state">No users found.</div>
-                }
-                else
-                {
-                    <div class="empty-state">Enter a term to search Reddit.</div>
-                }
-            </div>
-
-            <div class="search-card">
-                <h3>Posts</h3>
-                @if (Model?.HasQuery == true && Model.Posts?.Count > 0)
-                {
-                    <div class="results-grid">
-                        @foreach (var post in Model.Posts)
-                        {
-                            <div class="result-card">
-                                <a href="/posts/@post.Id">
-                                    <strong>u/@post.Username</strong><br />
-                                    <span>@Html.Raw(post.Message)</span>
-                                </a>
+                    <hr>
+                    @if (!Model?.HasQuery ?? true)
+                    {
+                        <div class="r-empty">
+                            <svg class="r-empty-snoo"><use href="#r-snoo" /></svg>
+                            <h3>Search Reddit</h3>
+                            <p>Find posts, communities and people.</p>
+                        </div>
+                    }
+                    else if (posts.Count == 0)
+                    {
+                        <div class="r-empty">
+                            <svg class="r-empty-snoo"><use href="#r-snoo" /></svg>
+                            <h3>Hm... we couldn't find any results for "@query"</h3>
+                            <p>Double-check your spelling or try different keywords to adjust your search.</p>
+                        </div>
+                    }
+                    @foreach (var post in posts)
+                    {
+                        var name = Present.Community(post);
+                        <div class="r-item">
+                            <div class="r-result" data-href="/posts/@post.Id">
+                                <div class="r-result-main">
+                                    <div class="r-post-meta">
+                                        <a class="r-sub" href="/r/@name"><span class="cicon" data-c="@(name.Sum(ch => ch) / 3 % 8)">r/</span><span class="r-sub-name">r/@name</span></a>
+                                        <span class="r-dot">&bull;</span>
+                                        @await Html.PartialAsync("~/Views/Themes/reddit/_ago.cshtml", post.CreatedUtc)
+                                    </div>
+                                    <a class="r-result-title" href="/posts/@post.Id">@MessageHtml.Render(Present.Title(post))</a>
+                                    <div class="r-result-stats">@SocialPresentation.Compact(Present.Score(post)) votes &middot; @Present.CommentCount(post) @(Present.CommentCount(post) == 1 ? "comment" : "comments")</div>
+                                </div>
+                                @if (Present.HasPhoto(post, 30))
+                                {
+                                    <img class="r-thumb" src="@Present.PhotoUrl(post)" alt="" loading="lazy">
+                                }
                             </div>
-                        }
-                    </div>
-                }
-                else if (Model?.HasQuery == true)
-                {
-                    <div class="empty-state">No posts matched "@query".</div>
-                }
-                else
-                {
-                    <div class="empty-state">Search for posts to see results.</div>
-                }
+                            <hr class="r-sep">
+                        </div>
+                    }
+                </div>
+                <aside class="r-rail">
+                    @if (communities.Count > 0)
+                    {
+                        <section class="r-card" id="r-communities">
+                            <div class="r-card-head">Communities</div>
+                            @foreach (var name in communities)
+                            {
+                                @await Html.PartialAsync("~/Views/Themes/reddit/_community.cshtml", name, new ViewDataDictionary(ViewData) { ["Mode"] = "row" })
+                            }
+                        </section>
+                    }
+                    @if (users.Count > 0)
+                    {
+                        <section class="r-card" id="r-people">
+                            <div class="r-card-head">People</div>
+                            @foreach (var user in users)
+                            {
+                                <div class="r-row">
+                                    <img src="/u/@user.Username/avatar" alt="">
+                                    <div class="r-row-main">
+                                        <a class="r-row-name" href="/u/@user.Username">u/@user.Username</a>
+                                        <div class="r-row-sub">@Present.DisplayName(user.Username)</div>
+                                    </div>
+                                </div>
+                            }
+                        </section>
+                    }
+                </aside>
             </div>
         </main>
     </div>
 
-    <script src="/js/social.js"></script>
+    @await Html.PartialAsync("_Scripts")
+    <script src="/themes/reddit/js/reddit.js?@System.Guid.NewGuid()"></script>
 </body>
 </html>

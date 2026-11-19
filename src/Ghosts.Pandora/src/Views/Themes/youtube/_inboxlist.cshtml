@@ -1,0 +1,44 @@
+@inject Ghosts.Pandora.Infrastructure.Services.IUserService Users
+@inject Ghosts.Pandora.Infrastructure.Services.IDirectMessageService Messages
+@{
+    var me = ViewBag.Username as string ?? string.Empty;
+    var activePartner = ViewData["ytPartner"] as string;
+    var meUser = string.IsNullOrWhiteSpace(me) ? null : await Users.GetUserByUsernameAsync(me, "youtube");
+    var all = new List<Ghosts.Pandora.Infrastructure.Models.DirectMessage>();
+    if (meUser != null)
+    {
+        all.AddRange(await Messages.GetReceivedMessagesAsync(meUser.Id));
+        all.AddRange(await Messages.GetSentMessagesAsync(meUser.Id));
+    }
+
+    bool Same(string a, string b) => string.Equals(a, b, StringComparison.OrdinalIgnoreCase);
+    var threads = all
+        .GroupBy(m => Same(m.FromUsername, me) ? m.ToUsername : m.FromUsername, StringComparer.OrdinalIgnoreCase)
+        .Select(g => g.OrderByDescending(m => m.CreatedUtc).First())
+        .OrderByDescending(m => m.CreatedUtc)
+        .ToList();
+}
+<div class="yt-inbox-list">
+    <div class="yt-inbox-head">
+        <h1>Messages</h1>
+        <a class="yt-icon-btn" href="/messages" title="New message" aria-label="New message"><svg class="yt-icon"><use href="#yt-i-plus"/></svg></a>
+    </div>
+    <div class="yt-inbox-scroll">
+        @if (threads.Count == 0)
+        {
+            <div class="yt-inbox-empty">No messages yet. Share videos and chat with channels you know.</div>
+        }
+        @foreach (var last in threads)
+        {
+            var partner = Same(last.FromUsername, me) ? last.ToUsername : last.FromUsername;
+            var unread = !Same(last.FromUsername, me) && last.ReadUtc == null;
+            <a class="yt-convo@(unread ? " unread" : "")@(Same(partner, activePartner) ? " active" : "")" href="/messages/conversation/@partner">
+                <img src="/u/@partner/avatar" alt="">
+                <span class="yt-convo-text">
+                    <span class="yt-convo-top"><span class="yt-convo-name">@Present.DisplayName(partner)</span><span class="yt-convo-time">@SocialPresentation.ShortAgo(last.CreatedUtc)</span></span>
+                    <span class="yt-convo-preview">@(Same(last.FromUsername, me) ? "You: " : "")@MessageHtml.Render(last.Message)</span>
+                </span>
+            </a>
+        }
+    </div>
+</div>

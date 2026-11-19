@@ -1,17 +1,119 @@
+@using Ghosts.Pandora.Infrastructure.Content
 @model Ghosts.Pandora.Infrastructure.Models.User
-@{
-    Layout = null;
-    var posts = ViewBag.Posts as List<Ghosts.Pandora.Infrastructure.Models.Post>;
-    var profileUsername = (ViewContext.RouteData.Values["username"] as string)?.Trim();
-    if (string.IsNullOrWhiteSpace(profileUsername))
+@inject Ghosts.Pandora.Infrastructure.Services.IUserService Users
+@inject Ghosts.Pandora.Infrastructure.Services.IFollowService Follows
+@functions {
+    static string LinkedInAgo(DateTime createdUtc)
     {
-        profileUsername = Context.Request.Cookies["username"];
+        var age = DateTime.UtcNow - DateTime.SpecifyKind(createdUtc, DateTimeKind.Utc);
+        if (age < TimeSpan.FromMinutes(1)) return "now";
+        if (age < TimeSpan.FromHours(1)) return $"{(int)age.TotalMinutes}m";
+        if (age < TimeSpan.FromDays(1)) return $"{(int)age.TotalHours}h";
+        if (age < TimeSpan.FromDays(7)) return $"{(int)age.TotalDays}d";
+        if (age < TimeSpan.FromDays(30)) return $"{(int)(age.TotalDays / 7)}w";
+        if (age < TimeSpan.FromDays(365)) return $"{(int)(age.TotalDays / 30)}mo";
+        return $"{(int)(age.TotalDays / 365)}yr";
     }
 
-    if (string.IsNullOrWhiteSpace(profileUsername))
+    // "3 yrs 2 mos", counting both the first and the last month as LinkedIn does
+    static string Span(DateTime from, DateTime to)
     {
-        profileUsername = Model?.Username ?? "user";
+        var months = (to.Year - from.Year) * 12 + to.Month - from.Month + 1;
+        var years = months / 12;
+        var rest = months % 12;
+        var parts = new List<string>();
+        if (years > 0) parts.Add($"{years} yr{(years == 1 ? "" : "s")}");
+        if (rest > 0) parts.Add($"{rest} mo{(rest == 1 ? "" : "s")}");
+        return string.Join(" ", parts);
     }
+
+    static readonly Dictionary<string, string[]> SkillsByDepartment = new()
+    {
+        ["Executive Office"] = new[] { "Strategic Planning", "Leadership", "Stakeholder Management", "Change Management", "Operations Management" },
+        ["Finance"] = new[] { "Financial Reporting", "Budgeting", "ERP Systems", "Accounts Payable", "Microsoft Excel" },
+        ["Human Resources"] = new[] { "Talent Acquisition", "Employee Relations", "Benefits Administration", "HRIS", "Onboarding" },
+        ["Information Technology"] = new[] { "Network Security", "Active Directory", "Incident Response", "Windows Server", "ITIL" },
+        ["Operations"] = new[] { "Process Improvement", "Dispatch Operations", "Scheduling", "Fleet Management", "Safety Compliance" },
+        ["Legal and Compliance"] = new[] { "Regulatory Compliance", "Contract Review", "Risk Management", "Legal Research", "Policy Development" },
+        ["Communications"] = new[] { "Public Relations", "Content Strategy", "Media Relations", "Crisis Communications", "Social Media" },
+        ["Facilities"] = new[] { "Building Maintenance", "HVAC", "Workplace Safety", "Vendor Management", "Space Planning" }
+    };
+
+    // The job before this one, one step below: for executives, for directors and managers, and for staff
+    static readonly Dictionary<string, string[]> EarlierTitles = new()
+    {
+        ["Executive Office"] = new[] { "Vice President of Operations", "Director of Strategy", "Office Coordinator" },
+        ["Finance"] = new[] { "Finance Director", "Senior Financial Analyst", "Staff Accountant" },
+        ["Human Resources"] = new[] { "HR Director", "Senior HR Generalist", "HR Coordinator" },
+        ["Information Technology"] = new[] { "IT Director", "Senior Systems Administrator", "IT Support Specialist" },
+        ["Operations"] = new[] { "Operations Director", "Operations Supervisor", "Operations Coordinator" },
+        ["Legal and Compliance"] = new[] { "Senior Counsel", "Compliance Manager", "Legal Assistant" },
+        ["Communications"] = new[] { "Communications Director", "Communications Manager", "Marketing Coordinator" },
+        ["Facilities"] = new[] { "Facilities Director", "Facilities Supervisor", "Facilities Technician" }
+    };
+}
+@{
+    Layout = null;
+    ViewBag.Theme = "linkedin";
+    ViewData["LiNav"] = "";
+    var me = ViewBag.Username as string ?? string.Empty;
+    var posts = (ViewBag.Posts as List<Ghosts.Pandora.Infrastructure.Models.Post>) ?? new List<Ghosts.Pandora.Infrastructure.Models.Post>();
+    var username = ViewBag.ProfileUsername as string ?? Model?.Username ?? me;
+    var isSelf = ViewBag.IsSelf as bool? ?? string.Equals(username, me, StringComparison.OrdinalIgnoreCase);
+    var isFollowing = ViewBag.IsFollowing as bool? ?? false;
+
+    var w = Present.World;
+    var person = w.People.FirstOrDefault(p => string.Equals(p.Username, username, StringComparison.OrdinalIgnoreCase));
+    var name = Present.DisplayName(username);
+    var first = name.Split(' ')[0];
+    var headline = Present.Headline(username);
+    var hash = ContentRequest.StableHash($"{username}:profile");
+    var coverHash = ContentRequest.StableHash($"{username}:identity");
+
+    var realFollowers = Model == null ? 0 : await Follows.GetFollowerCountAsync(Model.Id);
+    var followers = 40 + (int)(hash % 1900) + realFollowers;
+    var connections = 60 + (int)(hash / 11 % 700);
+    var viewers = 9 + (int)(coverHash % 171);
+    var impressions = 38 + (int)(coverHash / 7 % 2460);
+
+    // Experience and About for people in the world
+    var month = new DateTime(w.ReferenceDate.Year, w.ReferenceDate.Month, 1);
+    var start = month.AddMonths(-(4 + (int)(hash % 130)));
+    var priorEnd = start.AddMonths(-1);
+    var priorStart = priorEnd.AddMonths(-(14 + (int)(hash / 3 % 50)));
+    var vendor = w.Vendors[(int)(hash % (uint)w.Vendors.Count)];
+    var project = w.Projects[(int)(hash / 5 % (uint)w.Projects.Count)];
+    string earlier = null;
+    var skills = new string[0];
+    if (person != null)
+    {
+        var tier = person.Title.StartsWith("Chief") || person.Title == "Controller" || person.Title == "General Counsel" ? 0
+            : person.Title.StartsWith("Director") || person.Title.Contains("Manager") ? 1 : 2;
+        earlier = EarlierTitles.TryGetValue(person.Department, out var titles) ? titles[tier] : "Analyst";
+        skills = SkillsByDepartment.TryGetValue(person.Department, out var list) ? list : new string[0];
+    }
+    var article = earlier != null && "AEIOU".Contains(earlier[0]) ? "an" : "a";
+    var bio = Model?.Bio;
+    var hasBio = !string.IsNullOrWhiteSpace(bio) && !bio.StartsWith("User ", StringComparison.Ordinal);
+    var about = person != null
+        ? $"I'm the {person.Title} at {w.OrganizationName} in {w.City}, where I've spent the last {Span(start, month)} with our {person.Department} team. Most of my time right now goes to {project}.\n\nBefore {w.ShortName}, I was {article} {earlier} at {vendor}. Always glad to connect with people working in {w.Industry} and around {w.City}."
+        : hasBio ? bio : $"{headline}. Based in the {w.City} area.";
+
+    // Mutual connections, from the people who work alongside them
+    var mutual = isSelf ? new List<Ghosts.Pandora.Infrastructure.Content.Person>() : w.People
+        .Where(p => !string.Equals(p.Username, username, StringComparison.OrdinalIgnoreCase) && !string.Equals(p.Username, me, StringComparison.OrdinalIgnoreCase))
+        .OrderBy(p => ContentRequest.StableHash($"{me}:{username}:{p.Username}"))
+        .Take(2)
+        .ToList();
+    var otherMutual = 3 + (int)(ContentRequest.StableHash($"{me}:{username}:mutual") % 40);
+
+    var suggestions = (await Users.GetUsersByThemeAsync("linkedin", 30))
+        .Where(u => !string.Equals(u.Username, username, StringComparison.OrdinalIgnoreCase) && !string.Equals(u.Username, me, StringComparison.OrdinalIgnoreCase))
+        .OrderBy(u => ContentRequest.StableHash($"{username}:viewed:{u.Username}"))
+        .Take(5)
+        .ToList();
+
+    var recent = posts.OrderByDescending(p => p.CreatedUtc).ToList();
 }
 
 <!DOCTYPE html>
@@ -19,335 +121,254 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@profileUsername | LinkedIn</title>
-    <link rel="stylesheet" href="/themes/linkedin/css/feed.css">
-    <link rel="icon" href="/themes/linkedin/images/linkedin-icon.png">
-    <style>
-        .follow-action-form {
-            margin-left: 12px;
-        }
-
-        .follow-action-button {
-            background: #0a66c2;
-            border: none;
-            border-radius: 999px;
-            color: #fff;
-            padding: 8px 18px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .connections-card {
-            padding: 0 0 16px;
-        }
-
-        .connections-summary {
-            display: flex;
-            justify-content: space-between;
-            padding: 0 24px 8px;
-            font-size: 14px;
-            color: rgba(0, 0, 0, 0.6);
-        }
-
-        .connections-columns {
-            display: grid;
-            gap: 16px;
-            padding: 0 24px 16px;
-        }
-
-        .connections-column {
-            background: #f3f2ef;
-            border-radius: 8px;
-            padding: 16px;
-        }
-
-        .connections-column h3 {
-            margin: 0 0 12px;
-            font-size: 14px;
-            color: rgba(0, 0, 0, 0.8);
-        }
-
-        .connections-scroll {
-            max-height: 220px;
-            overflow-y: auto;
-        }
-
-        .connection-item {
-            background: transparent;
-        }
-
-        .connection-item:hover {
-            background: rgba(10, 102, 194, 0.08);
-        }
-    </style>
+    <meta name="current-user" content="@me">
+    <title>@name | LinkedIn</title>
+    <link rel="stylesheet" href="/themes/linkedin/css/feed.css?@System.Guid.NewGuid()">
+    <link rel="icon" href="/themes/linkedin/images/favicon.svg" type="image/svg+xml">
 </head>
-<body>
-    <div class="app">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-container">
-                <div class="header-left">
-                    <a href="/"><img src="/themes/linkedin/images/linkedin-logo.png" alt="LinkedIn" class="linkedin-logo"></a>
-                    <div class="search-container">
-                        <input type="text" placeholder="Search" class="search-input">
-                        <button class="search-btn">🔍</button>
-                    </div>
+<body data-theme="linkedin" class="li-body">
+    @await Html.PartialAsync("~/Views/Themes/linkedin/_header.cshtml")
+
+    <div class="li-page li-page--profile">
+        <main class="li-main">
+            <section class="li-card li-profile-top">
+                <div class="li-profile-top__cover li-cover--@(coverHash % 6)">
+                    @if (isSelf)
+                    {
+                        <button type="button" class="li-profile-top__camera li-inert" aria-label="Edit background"><svg width="16" height="16"><use href="#li-camera"/></svg></button>
+                    }
                 </div>
-                <nav class="header-nav">
-                    <a href="/" class="nav-item active" style="text-decoration: none; color: inherit; display: flex; flex-direction: column; align-items: center;">
-                        <span class="nav-icon">🏠</span>
-                        <span class="nav-text">Home</span>
-                    </a>
-                    <div class="nav-item">
-                        <span class="nav-icon">👥</span>
-                        <span class="nav-text">My Network</span>
-                    </div>
-                    <div class="nav-item">
-                        <span class="nav-icon">💼</span>
-                        <span class="nav-text">Jobs</span>
-                    </div>
-                    <div class="nav-item">
-                        <span class="nav-icon">💬</span>
-                        <span class="nav-text">Messaging</span>
-                    </div>
-                    <div class="nav-item">
-                        <span class="nav-icon">🔔</span>
-                        <span class="nav-text">Notifications</span>
-                    </div>
-                    <div class="nav-item">
-                        <img src="/u/@ViewBag.Username/avatar" alt="Me" class="nav-avatar">
-                        <span class="nav-text">Me</span>
-                        <span class="dropdown-arrow">▼</span>
-                    </div>
-                </nav>
-            </div>
-        </header>
-
-        <!-- Main Container -->
-        <div class="main-container">
-            <!-- Profile Header -->
-            <div class="profile-header">
-                <div class="profile-cover">
-                    <div class="cover-image"></div>
-                </div>
-
-                <div class="profile-main-info">
-                    <div class="profile-picture-container">
-                        <img src="/u/@profileUsername/avatar" alt="@profileUsername" class="profile-picture">
-                    </div>
-
-                    <div class="profile-details">
-                        <h1 class="profile-name">@profileUsername</h1>
-                        <p class="profile-headline">@(string.IsNullOrWhiteSpace(Model.Bio) ? "No headline provided." : Model.Bio)</p>
-                        <p class="profile-location">📍 Location</p>
-                        <p class="profile-connections"><span data-followers-count>0</span> followers • <span data-following-count>0</span> following</p>
-                    </div>
-
-                    <div class="profile-actions">
-                        <button class="btn btn-primary">Connect</button>
-                        <button class="btn btn-secondary">Message</button>
-                        <button class="btn btn-secondary">More</button>
-                        @await Html.PartialAsync("~/Views/Shared/_FollowActions.cshtml")
-                    </div>
-                </div>
-            </div>
-
-            <!-- Profile Content -->
-            <div class="profile-content">
-                <!-- Left Column -->
-                <aside class="profile-sidebar">
-                    <div class="profile-card connections-card" data-profile-connections data-username="@profileUsername">
-                        <h2 class="card-title">Connections</h2>
-                        <div class="connections-summary">
-                            <span><strong data-followers-count>0</strong> followers</span>
-                            <span><strong data-following-count>0</strong> following</span>
-                        </div>
-                        <div class="connections-columns">
-                            <div class="connections-column">
-                                <h3>Following (<span data-following-count>0</span>)</h3>
-                                <div class="connections-scroll" data-following-list></div>
-                            </div>
-                            <div class="connections-column">
-                                <h3>Followers (<span data-followers-count>0</span>)</h3>
-                                <div class="connections-scroll" data-followers-list></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- About Card -->
-                    <div class="profile-card">
-                        <h2 class="card-title">About</h2>
-                        <div class="about-content">
-                            <p>Experienced professional with a passion for innovation and technology.
-                            Skilled in various aspects of business development and strategic planning.</p>
-                        </div>
-                    </div>
-
-                    <!-- Experience Card -->
-                    <div class="profile-card">
-                        <h2 class="card-title">Experience</h2>
-                        <div class="experience-item">
-                            <div class="experience-logo">🏢</div>
-                            <div class="experience-details">
-                                <h3 class="experience-title">Senior Professional</h3>
-                                <p class="experience-company">Company Name</p>
-                                <p class="experience-duration">Jan 2020 - Present</p>
-                                <p class="experience-location">Location</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Education Card -->
-                    <div class="profile-card">
-                        <h2 class="card-title">Education</h2>
-                        <div class="education-item">
-                            <div class="education-logo">🎓</div>
-                            <div class="education-details">
-                                <h3 class="education-school">University Name</h3>
-                                <p class="education-degree">Bachelor's Degree</p>
-                                <p class="education-duration">2016 - 2020</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Skills Card -->
-                    <div class="profile-card">
-                        <h2 class="card-title">Skills</h2>
-                        <div class="skills-list">
-                            <div class="skill-item">
-                                <span class="skill-name">Leadership</span>
-                                <span class="skill-endorsements">12 endorsements</span>
-                            </div>
-                            <div class="skill-item">
-                                <span class="skill-name">Project Management</span>
-                                <span class="skill-endorsements">8 endorsements</span>
-                            </div>
-                            <div class="skill-item">
-                                <span class="skill-name">Strategic Planning</span>
-                                <span class="skill-endorsements">6 endorsements</span>
-                            </div>
-                        </div>
-                    </div>
-                </aside>
-
-                <!-- Main Content -->
-                <main class="profile-main">
-                    <!-- Activity Section -->
-                    <div class="profile-card">
-                        <div class="card-header">
-                            <h2 class="card-title">Activity</h2>
-                            <p class="activity-followers">500+ followers</p>
-                        </div>
-
-                        <!-- Recent Posts -->
-                        <div class="activity-posts">
-                            @if (posts != null)
-                            {
-                                @foreach (var post in posts)
-                                {
-                                    <article class="activity-post">
-                                        <div class="post-header">
-                                            <img src="/u/@post.Username/avatar" alt="@post.Username" class="post-avatar">
-                                            <div class="post-meta">
-                                                <div class="post-author">@post.Username</div>
-                                                <div class="post-time">@post.CreatedUtc.ToString("MMM d, yyyy")</div>
-                                            </div>
-                                        </div>
-
-                                        <div class="post-content">
-                                            <div class="post-text">@Html.Raw(post.Message)</div>
+                <div class="li-profile-top__body">
+                    <img class="li-profile-top__avatar" src="/u/@username/avatar" alt="@name">
+                    @if (isSelf)
+                    {
+                        <button type="button" class="li-iconbtn li-profile-top__edit li-inert" aria-label="Edit intro"><svg width="24" height="24"><use href="#li-pencil"/></svg></button>
+                    }
+                    <div class="li-profile-top__grid">
+                        <div class="li-profile-top__main">
+                            <h1>@name</h1>
+                            <p class="li-profile-top__headline">@headline</p>
+                            <div class="li-profile-top__location">
+                                Greater @w.City Area <span aria-hidden="true">&middot;</span>
+                                <details class="li-contact">
+                                    <summary>Contact info</summary>
+                                    <div class="li-contact__panel">
+                                        <h3>Contact info</h3>
+                                        <dl>
+                                            <dt>@name’s Profile</dt>
+                                            <dd><a href="/u/@username">linkedin.com/in/@username</a></dd>
+                                            @if (person != null)
                                             {
-                                                <div class="post-media">
-                                                </div>
+                                                <dt>Email</dt>
+                                                <dd><a href="mailto:@person.Email">@person.Email</a></dd>
                                             }
-                                        </div>
-
-                                        <div class="post-stats">
-                                            @{
-                                                var likesCount = post.Likes?.Count ?? 0;
-                                                var commentsCount = post.Comments?.Count ?? 0;
-                                            }
-                                            @if (likesCount > 0 || commentsCount > 0)
-                                            {
-                                                <div class="engagement-stats">
-                                                    @if (likesCount > 0)
-                                                    {
-                                                        <span>👍 @likesCount</span>
-                                                    }
-                                                    @if (commentsCount > 0)
-                                                    {
-                                                        <span>@commentsCount comments</span>
-                                                    }
-                                                </div>
-                                            }
-                                        </div>
-
-                                        <div class="post-actions">
-                                            <button class="action-btn">
-                                                <span class="action-icon">👍</span>
-                                                <span class="action-text">Like</span>
-                                            </button>
-                                            <button class="action-btn">
-                                                <span class="action-icon">💬</span>
-                                                <span class="action-text">Comment</span>
-                                            </button>
-                                            <button class="action-btn">
-                                                <span class="action-icon">📤</span>
-                                                <span class="action-text">Share</span>
-                                            </button>
-                                        </div>
-                                    </article>
-                                }
-                            }
-                            else
+                                        </dl>
+                                    </div>
+                                </details>
+                            </div>
+                            <p class="li-profile-top__counts">
+                                <a href="#" class="li-inert">@followers.ToString("N0") followers</a>
+                                <span aria-hidden="true">&middot;</span>
+                                <a href="#" class="li-inert">@(connections >= 500 ? "500+" : connections.ToString()) connections</a>
+                            </p>
+                            @if (mutual.Count > 0)
                             {
-                                <div class="no-posts">
-                                    <p>No posts to show</p>
-                                </div>
+                                <a href="#" class="li-mutual li-inert">
+                                    <span class="li-mutual__faces">
+                                        @foreach (var m in mutual)
+                                        {
+                                            <img src="/u/@m.Username/avatar" alt="">
+                                        }
+                                    </span>
+                                    <span><strong>@mutual[0].FullName</strong>, <strong>@mutual[1].FullName</strong>, and @otherMutual other mutual connections</span>
+                                </a>
                             }
                         </div>
+                        @if (person != null)
+                        {
+                            <ul class="li-profile-top__orgs">
+                                <li><span class="li-orglogo li-orglogo--32">@w.ShortName[0]</span><span>@w.OrganizationName</span></li>
+                            </ul>
+                        }
                     </div>
-                </main>
+                    <div class="li-profile-top__actions">
+                        @if (isSelf)
+                        {
+                            <button type="button" class="li-btn li-btn--primary li-inert">Open to</button>
+                            <button type="button" class="li-btn li-btn--outline li-inert">Add profile section</button>
+                            <button type="button" class="li-btn li-btn--outline li-inert">Enhance profile</button>
+                            <button type="button" class="li-btn li-btn--outline-gray li-inert">Resources</button>
+                        }
+                        else
+                        {
+                            <form method="post" action="@(isFollowing ? "/api/relationships/unfollow" : "/api/relationships/follow")" class="li-follow li-follow--toggle@(isFollowing ? " li-follow--on" : "")">
+                                <input type="hidden" name="username" value="@username">
+                                <button type="submit" class="li-btn li-btn--primary"><span class="li-follow__off"><svg width="16" height="16"><use href="#li-plus"/></svg>Follow</span><span class="li-follow__on"><svg width="16" height="16"><use href="#li-check"/></svg>Following</span></button>
+                            </form>
+                            <a href="/messages/conversation/@username" class="li-btn li-btn--outline"><svg width="16" height="16"><use href="#li-send"/></svg>Message</a>
+                            <div class="li-action-wrap li-action-wrap--inline">
+                                <button type="button" class="li-btn li-btn--outline-gray" data-li-profilemore>More</button>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </section>
 
-                <!-- Right Column -->
-                <aside class="profile-right-sidebar">
-                    <!-- People Also Viewed -->
-                    <div class="sidebar-widget">
-                        <h3 class="widget-title">People also viewed</h3>
-                        <div class="people-list">
-                            <div class="person-item">
-                                <img src="/themes/linkedin/images/person1.jpg" alt="Person" class="person-avatar">
-                                <div class="person-info">
-                                    <div class="person-name">Jane Smith</div>
-                                    <div class="person-title">Marketing Manager</div>
-                                </div>
-                                <button class="connect-btn">Connect</button>
-                            </div>
-                            <div class="person-item">
-                                <img src="/themes/linkedin/images/person2.jpg" alt="Person" class="person-avatar">
-                                <div class="person-info">
-                                    <div class="person-name">Mike Johnson</div>
-                                    <div class="person-title">Software Engineer</div>
-                                </div>
-                                <button class="connect-btn">Connect</button>
-                            </div>
+            @if (isSelf)
+            {
+                <section class="li-card li-section">
+                    <h2>Analytics</h2>
+                    <p class="li-section__private"><svg width="16" height="16"><use href="#li-eye"/></svg>Private to you</p>
+                    <div class="li-analytics">
+                        <a href="#" class="li-inert"><svg width="24" height="24"><use href="#li-network"/></svg><span><strong>@viewers profile views</strong>Discover who’s viewed your profile.</span></a>
+                        <a href="#" class="li-inert"><svg width="24" height="24"><use href="#li-chart"/></svg><span><strong>@impressions.ToString("N0") post impressions</strong>Check out who’s engaging with your posts.</span></a>
+                        <a href="#" class="li-inert"><svg width="24" height="24"><use href="#li-search"/></svg><span><strong>@(3 + (int)(coverHash % 60)) search appearances</strong>See how often you appear in search results.</span></a>
+                    </div>
+                </section>
+            }
+
+            <section class="li-card li-section">
+                <h2>About</h2>
+                <div class="li-post__body li-about@(about.Length > 260 ? " li-post__body--clamp" : "")"><div class="li-text">@MessageHtml.Render(about)</div>@if (about.Length > 260){<button type="button" class="li-seemore" data-li-seemore>&hellip;see more</button>}</div>
+                @if (skills.Length > 0)
+                {
+                    <div class="li-topskills">
+                        <svg width="24" height="24"><use href="#li-star"/></svg>
+                        <div>
+                            <strong>Top skills</strong>
+                            <span>@string.Join(" • ", skills.Take(4))</span>
                         </div>
                     </div>
+                }
+            </section>
 
-                    <!-- LinkedIn Learning -->
-                    <div class="sidebar-widget">
-                        <h3 class="widget-title">LinkedIn Learning</h3>
-                        <div class="learning-item">
-                            <div class="learning-title">Leadership Skills</div>
-                            <div class="learning-progress">Progress: 75%</div>
-                        </div>
+            <section class="li-card li-section li-activity">
+                <div class="li-section__head">
+                    <div>
+                        <h2>Activity</h2>
+                        <a href="#" class="li-section__followers li-inert">@followers.ToString("N0") followers</a>
                     </div>
-                </aside>
-            </div>
-        </div>
+                    @if (isSelf)
+                    {
+                        <a href="/#li-composer" class="li-btn li-btn--outline">Create a post</a>
+                    }
+                </div>
+                <div class="li-pills">
+                    <span class="li-pill li-pill--on">Posts</span>
+                    <span class="li-pill li-inert">Comments</span>
+                    <span class="li-pill li-inert">Images</span>
+                </div>
+                @if (recent.Count == 0)
+                {
+                    <div class="li-activity__empty">
+                        <strong>@(isSelf ? "You haven’t posted yet" : $"{first} hasn’t posted yet")</strong>
+                        <span>@(isSelf ? "Posts you share will be displayed here." : $"Recent posts {first} shares will be displayed here.")</span>
+                    </div>
+                }
+                else
+                {
+                    <ul class="li-activity__list" data-li-activity>
+                        @for (var i = 0; i < recent.Count; i++)
+                        {
+                            var post = recent[i];
+                            var score = Present.Score(post);
+                            var postComments = Present.CommentCount(post);
+                            var photo = Present.HasPhoto(post, 30);
+                            <li class="@(i >= 3 ? "li-activity__more" : "")">
+                                <a href="/posts/@post.Id" class="li-activity__item">
+                                    <span class="li-activity__by"><strong>@name</strong> posted this &bull; @LinkedInAgo(post.CreatedUtc)</span>
+                                    <span class="li-activity__row">
+                                        @if (photo)
+                                        {
+                                            <img src="@Present.PhotoUrl(post)" alt="" loading="lazy">
+                                        }
+                                        <span class="li-activity__text li-text">@MessageHtml.Render(post.Message)</span>
+                                    </span>
+                                    <span class="li-activity__counts">
+                                        <span class="li-reacticons"><svg width="16" height="16"><use href="#li-r-like"/></svg>@if (score > 3){<svg width="16" height="16"><use href="#li-r-celebrate"/></svg>}</span>
+                                        @score.ToString("N0")
+                                        @if (postComments > 0)
+                                        {
+                                            <span class="li-activity__comments">@postComments comment@(postComments == 1 ? "" : "s")</span>
+                                        }
+                                    </span>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                    @if (recent.Count > 3)
+                    {
+                        <button type="button" class="li-section__all" data-li-activity-all>Show all @recent.Count posts <svg width="16" height="16"><use href="#li-arrow"/></svg></button>
+                    }
+                }
+            </section>
+
+            @if (person != null)
+            {
+                <section class="li-card li-section">
+                    <h2>Experience</h2>
+                    <ul class="li-experience">
+                        <li>
+                            <span class="li-orglogo">@w.ShortName[0]</span>
+                            <div>
+                                <h3>@person.Title</h3>
+                                <p>@w.OrganizationName &middot; Full-time</p>
+                                <p class="li-muted">@start.ToString("MMM yyyy") - Present &middot; @Span(start, month)</p>
+                                <p class="li-muted">Greater @w.City Area &middot; On-site</p>
+                                <p class="li-experience__desc">@person.Department. Working on @project with the @w.ShortName team.</p>
+                                <p class="li-experience__skills"><svg width="16" height="16"><use href="#li-star"/></svg><strong>Skills:</strong> @string.Join(" · ", skills.Take(3))</p>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="li-orglogo li-orglogo--vendor">@vendor[0]</span>
+                            <div>
+                                <h3>@earlier</h3>
+                                <p>@vendor &middot; Full-time</p>
+                                <p class="li-muted">@priorStart.ToString("MMM yyyy") - @priorEnd.ToString("MMM yyyy") &middot; @Span(priorStart, priorEnd)</p>
+                                <p class="li-muted">Greater @w.City Area &middot; Hybrid</p>
+                            </div>
+                        </li>
+                    </ul>
+                </section>
+            }
+        </main>
+
+        <aside class="li-right">
+            @if (isSelf)
+            {
+                <div class="li-card li-side-links">
+                    <a href="#" class="li-inert"><span><strong>Profile language</strong>English</span><svg width="24" height="24"><use href="#li-pencil"/></svg></a>
+                    <a href="#" class="li-inert"><span><strong>Public profile &amp; URL</strong>www.linkedin.com/in/@username</span><svg width="24" height="24"><use href="#li-pencil"/></svg></a>
+                </div>
+            }
+            @if (suggestions.Count > 0)
+            {
+                <div class="li-card li-follow-card">
+                    <div class="li-news__head">
+                        <h2 class="li-side-title">@(isSelf ? "People you may know" : "More profiles for you")</h2>
+                    </div>
+                    <ul class="li-follow-list li-follow-list--divided">
+                        @foreach (var user in suggestions)
+                        {
+                            <li>
+                                <a href="/u/@user.Username"><img src="/u/@user.Username/avatar" alt="" class="li-follow-list__avatar"></a>
+                                <div class="li-follow-list__info">
+                                    <a href="/u/@user.Username" class="li-follow-list__name">@Present.DisplayName(user.Username) <span class="li-post__degree">&bull; 2nd</span></a>
+                                    <span class="li-follow-list__headline">@Present.Headline(user.Username)</span>
+                                    <form method="post" action="/api/relationships/follow" class="li-follow" data-li-done="Pending">
+                                        <input type="hidden" name="username" value="@user.Username">
+                                        <button type="submit" class="li-btn li-btn--outline-gray"><svg width="16" height="16"><use href="#li-connect"/></svg><span>Connect</span></button>
+                                    </form>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            }
+            @await Html.PartialAsync("~/Views/Themes/linkedin/_footer.cshtml")
+        </aside>
     </div>
 
-    <script src="/themes/linkedin/js/linkedin.js"></script>
-    <script src="/js/connections.js"></script>
+    <script src="/themes/linkedin/js/linkedin.js?@System.Guid.NewGuid()"></script>
 </body>
 </html>

@@ -1,101 +1,113 @@
+@model List<Ghosts.Pandora.Infrastructure.Models.Post>
+@inject Ghosts.Pandora.Infrastructure.Services.IUserService Users
+@inject Ghosts.Pandora.Infrastructure.Services.IFollowService Follows
 @{
     Layout = null;
+    ViewBag.Theme = "instagram";
+    ViewData["IgActive"] = "home";
+    var me = ViewBag.Username as string ?? string.Empty;
+
+    var people = (await Users.GetUsersByThemeAsync("instagram", 40))
+        .Where(u => !string.Equals(u.Username, me, StringComparison.OrdinalIgnoreCase))
+        .GroupBy(u => u.Username, StringComparer.OrdinalIgnoreCase).Select(g => g.First())
+        .ToList();
+    var stories = people.Take(14).ToList();
+    ViewData["IgStoryUsers"] = new HashSet<string>(stories.Select(s => s.Username), StringComparer.OrdinalIgnoreCase);
+
+    var meUser = await Users.GetUserByUsernameAsync(me, "instagram");
+    var following = meUser == null ? new HashSet<string>() : new HashSet<string>((await Follows.GetFollowingAsync(meUser.Id, 500)).Select(u => u.Username), StringComparer.OrdinalIgnoreCase);
+    var suggestions = people.Where(u => !following.Contains(u.Username)).Reverse().Take(5).ToList();
 }
-@model List<Ghosts.Pandora.Infrastructure.Models.Post>
-
-@ViewBag.Theme = "instagram";
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="current-user" content="@me">
     <title>Instagram</title>
     <link rel="stylesheet" href="/themes/instagram/css/feed.css?@System.Guid.NewGuid()">
-    <link rel="icon" href="/themes/instagram/images/instagram-icon.png">
+    <link rel="icon" href="/themes/instagram/images/favicon.svg" type="image/svg+xml">
 </head>
-<body data-theme="instagram">
-<div class="app">
-    <!-- Header -->
-    <header class="header">
-        <div class="header-container">
-            <div class="logo">
-                <a href="/"><img src="/themes/instagram/images/instagram-logo.png" alt="Instagram" class="instagram-logo"></a>
-            </div>
-            <div class="search-container">
-                <div class="search-box">
-                    <span class="search-icon">🔍</span>
-                    <input type="text" placeholder="Search" class="search-input">
-                </div>
-            </div>
-            <div class="header-actions">
-                <a href="/" class="action-btn" style="text-decoration: none;">🏠</a>
-                <a href="/messages" class="action-btn" style="text-decoration: none;">💬</a>
-                <button class="action-btn">➕</button>
-                <button class="action-btn">🧭</button>
-                <button class="action-btn">❤️</button>
-                <div class="profile-menu">
-                    <img src="/u/@ViewBag.Username/avatar" alt="Profile" class="header-avatar">
-                </div>
-            </div>
-        </div>
-    </header>
+<body data-theme="instagram" class="ig ig-home">
+@await Html.PartialAsync("~/Views/Themes/instagram/_igsprite.cshtml")
+@await Html.PartialAsync("~/Views/Themes/instagram/_ignav.cshtml")
 
-    <!-- Main Content -->
-    <div class="main-container">
-        <!-- Stories -->
-        <div class="stories-container">
-            <div class="stories-list">
-                <!-- Your Story -->
-                <div class="story-item your-story">
-                    <div class="story-avatar">
-                        <img src="/u/@ViewBag.Username/avatar" alt="Your story" class="avatar">
-                        <div class="add-story">+</div>
-                    </div>
-                    <span class="story-username">Your Story</span>
-                </div>
-
-                <!-- Friend Stories -->
-                <div class="story-item">
-                    <div class="story-avatar">
-                        <img src="/u/david-lightman/avatar" alt="Friend story" class="avatar">
-                    </div>
-                    <span class="story-username">friend1</span>
-                </div>
-                <div class="story-item">
-                    <div class="story-avatar">
-                        <img src="/u/general-berenger/avatar" alt="Friend story" class="avatar">
-                    </div>
-                    <span class="story-username">friend2</span>
-                </div>
-                <div class="story-item">
-                    <div class="story-avatar">
-                        <img src="/u/stephen+falken/avatar" alt="Friend story" class="avatar">
-                    </div>
-                    <span class="story-username">friend3</span>
-                </div>
+<main class="ig-main">
+    <div class="ig-home-wrap">
+        <div class="ig-feed-col">
+            <div class="ig-stories" aria-label="Stories">
+                <button type="button" class="ig-stories-arrow ig-stories-prev" aria-label="Previous" hidden><svg class="ig-i ig-i-16" style="transform:rotate(180deg)"><use href="#ig-arrow"/></svg></button>
+                <ul class="ig-stories-list">
+                    @foreach (var s in stories)
+                    {
+                        <li>
+                            <button type="button" class="ig-story" data-user="@s.Username" data-photo="@Present.PhotoUrl(s.Id, 7)" data-ago="@((s.Id.ToByteArray()[0] % 23) + 1)h">
+                                <span class="ig-story-ring"><img src="/u/@s.Username/avatar" alt="@s.Username's profile picture"></span>
+                                <span class="ig-story-name">@s.Username</span>
+                            </button>
+                        </li>
+                    }
+                </ul>
+                <button type="button" class="ig-stories-arrow ig-stories-next" aria-label="Next"><svg class="ig-i ig-i-16"><use href="#ig-arrow"/></svg></button>
             </div>
-        </div>
 
-        @await Html.PartialAsync("_CreatePost")
+            @await Html.PartialAsync("_CreatePost")
 
-        <!-- Feed -->
-        <div class="feed" id="newsfeed-items-grid">
-            @{
-                if (Model != null)
+            <div class="feed" id="newsfeed-items-grid">
+                @if (Model != null)
                 {
                     foreach (var post in Model)
                     {
                         await Html.RenderPartialAsync("_PostCard", post);
                     }
                 }
-            }
-        </div>
-    </div>
+            </div>
 
-</div>
+            <div class="ig-caught-up">
+                <span class="ig-caught-up-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12.5 10 16.5 18 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                <div class="ig-caught-up-title">You're all caught up</div>
+                <div class="ig-muted">You've seen all new posts from the past 3 days.</div>
+            </div>
+        </div>
+
+        <aside class="ig-rail">
+            <div class="ig-rail-me">
+                <a href="/u/@me"><img src="/u/@me/avatar" alt="" class="ig-avatar-44"></a>
+                <div class="ig-rail-who">
+                    <a href="/u/@me" class="ig-strong">@me</a>
+                    <span class="ig-muted">@Present.DisplayName(me)</span>
+                </div>
+                <a href="/login" class="ig-link-blue">Switch</a>
+            </div>
+            @if (suggestions.Count > 0)
+            {
+                <div class="ig-rail-head">
+                    <span>Suggested for you</span>
+                    <a href="/search?tab=explore" class="ig-strong">See All</a>
+                </div>
+                @foreach (var s in suggestions)
+                {
+                    <div class="ig-rail-user">
+                        <a href="/u/@s.Username"><img src="/u/@s.Username/avatar" alt="" class="ig-avatar-44"></a>
+                        <div class="ig-rail-who">
+                            <a href="/u/@s.Username" class="ig-strong">@s.Username</a>
+                            <span class="ig-muted">Suggested for you</span>
+                        </div>
+                        <button type="button" class="ig-link-blue ig-follow" data-username="@s.Username">Follow</button>
+                    </div>
+                }
+            }
+            <footer class="ig-rail-footer">
+                <nav>
+                    <a href="#" data-ig-inert>About</a> · <a href="#" data-ig-inert>Help</a> · <a href="#" data-ig-inert>Press</a> · <a href="#" data-ig-inert>API</a> · <a href="#" data-ig-inert>Jobs</a> · <a href="#" data-ig-inert>Privacy</a> · <a href="#" data-ig-inert>Terms</a> · <a href="#" data-ig-inert>Locations</a> · <a href="#" data-ig-inert>Language</a> · <a href="#" data-ig-inert>Meta Verified</a>
+                </nav>
+                <div>© @DateTime.UtcNow.Year Instagram from Meta</div>
+            </footer>
+        </aside>
+    </div>
+</main>
 
 @await Html.PartialAsync("_Scripts")
-
+<script src="/themes/instagram/js/instagram.js?@System.Guid.NewGuid()"></script>
 </body>
 </html>

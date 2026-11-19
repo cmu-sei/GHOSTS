@@ -64,8 +64,8 @@ public class RelationshipsController(
         }
 
         var theme = ResolveThemeName();
-        var followerUser = await userService.GetUserByUsernameAsync(follower, theme);
-        var followeeUser = await userService.GetUserByUsernameAsync(username, theme);
+        var followerUser = await userService.GetOrCreateUserAsync(follower, theme);
+        var followeeUser = await userService.GetOrCreateUserAsync(username, theme);
 
         if (followerUser == null || followeeUser == null)
         {
@@ -98,7 +98,7 @@ public class RelationshipsController(
         }
 
         var theme = ResolveThemeName();
-        var user = await userService.GetUserByUsernameAsync(username, theme);
+        var user = await userService.GetOrCreateUserAsync(username, theme);
         if (user == null)
         {
             return NotFound("User not found.");
@@ -122,7 +122,7 @@ public class RelationshipsController(
         }
 
         var theme = ResolveThemeName();
-        var user = await userService.GetUserByUsernameAsync(username, theme);
+        var user = await userService.GetOrCreateUserAsync(username, theme);
         if (user == null)
         {
             return NotFound("User not found.");
@@ -146,7 +146,7 @@ public class RelationshipsController(
         }
 
         var theme = ResolveThemeName();
-        var user = await userService.GetUserByUsernameAsync(username, theme);
+        var user = await userService.GetOrCreateUserAsync(username, theme);
         if (user == null)
         {
             return NotFound("User not found.");
@@ -175,7 +175,7 @@ public class RelationshipsController(
     private string ResolveThemeName()
     {
         var queryTheme = HttpContext.Request.Query["theme"].ToString();
-        var theme = !string.IsNullOrWhiteSpace(queryTheme) ? queryTheme : ThemeRead();
+        var theme = !string.IsNullOrWhiteSpace(queryTheme) ? KnownTheme(queryTheme) : ThemeRead();
 
         ThemeWrite(theme);
         return theme;

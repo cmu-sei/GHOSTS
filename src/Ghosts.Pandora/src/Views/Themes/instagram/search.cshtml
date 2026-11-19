@@ -1,160 +1,115 @@
 @model Ghosts.Pandora.Infrastructure.ViewModels.SearchResultsViewModel
+@inject Ghosts.Pandora.Infrastructure.Services.IPostService PostService
 @{
     Layout = null;
+    ViewBag.Theme = "instagram";
     var query = Model?.Query ?? string.Empty;
+    var tab = Context.Request.Query["tab"].ToString();
+    var reels = tab == "reels" && Model?.HasQuery != true;
+    ViewData["IgActive"] = Model?.HasQuery == true ? "search" : reels ? "reels" : "explore";
+    ViewData["IgMobileTitle"] = Model?.HasQuery == true ? "Search" : reels ? "Reels" : "Explore";
+    var explore = Model?.HasQuery == true ? new List<Post>() : await PostService.GetLatestPostsByTheme("instagram", 30);
 }
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Search • Instagram</title>
-    <link rel="stylesheet" href="css/profile.css">
-    <style>
-        body {
-            background: #fafafa;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-        }
-        .header {
-            background: #fff;
-            border-bottom: 1px solid #dbdbdb;
-            padding: 16px 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .header .logo {
-            font-size: 24px;
-            font-weight: 600;
-        }
-        .search-container {
-            max-width: 640px;
-            margin: 32px auto;
-            background: #fff;
-            border: 1px solid #dbdbdb;
-            padding: 24px;
-            border-radius: 12px;
-        }
-        .search-form {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-        .search-form input {
-            flex: 1;
-            padding: 12px 16px;
-            border-radius: 8px;
-            border: 1px solid #dbdbdb;
-            background: #fafafa;
-        }
-        .search-form button {
-            padding: 12px 20px;
-            border-radius: 8px;
-            border: none;
-            background: #0095f6;
-            color: #fff;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        h2 {
-            font-size: 16px;
-            text-transform: uppercase;
-            letter-spacing: .08em;
-            margin-top: 32px;
-            color: #8e8e8e;
-        }
-        .results-grid {
-            display: grid;
-            gap: 12px;
-            margin-top: 12px;
-        }
-        .result-card {
-            padding: 16px;
-            border: 1px solid #dbdbdb;
-            border-radius: 12px;
-            background: #fff;
-        }
-        .result-card a {
-            color: inherit;
-            text-decoration: none;
-        }
-        .empty-state {
-            padding: 16px;
-            color: #8e8e8e;
-        }
-    </style>
+    <meta name="current-user" content="@ViewBag.Username">
+    <title>@(Model?.HasQuery == true ? $"{query} • Instagram search" : reels ? "Reels • Instagram" : "Explore • Instagram")</title>
+    <link rel="stylesheet" href="/themes/instagram/css/feed.css?@System.Guid.NewGuid()">
+    <link rel="icon" href="/themes/instagram/images/favicon.svg" type="image/svg+xml">
 </head>
-<body>
-    <div class="header">
-        <div class="logo">Instagram</div>
-        <div class="nav-actions">
-            <a href="/" class="action-btn">🏠</a>
-            <a href="/messages" class="action-btn">💬</a>
-            <a href="/profile" class="action-btn">👤</a>
-        </div>
-    </div>
+<body data-theme="instagram" class="ig ig-search-view">
+@await Html.PartialAsync("~/Views/Themes/instagram/_igsprite.cshtml")
+@await Html.PartialAsync("~/Views/Themes/instagram/_ignav.cshtml")
 
-    <div class="search-container">
-        <form class="search-form" method="get" action="/search">
-            <input type="text" name="q" value="@query" placeholder="Search" />
-            <button type="submit">Search</button>
+<main class="ig-main">
+    <div class="ig-search-page">
+        <form class="ig-search-form" method="get" action="/search">
+            <svg class="ig-i ig-i-16" aria-hidden="true"><use href="#ig-search"/></svg>
+            <input type="text" name="q" value="@query" placeholder="Search" autocomplete="off" aria-label="Search input">
         </form>
 
-        <section>
-            <h2>Accounts</h2>
-            @if (Model?.HasQuery == true && Model.Users?.Count > 0)
-            {
-                <div class="results-grid">
-                    @foreach (var user in Model.Users)
+        @if (Model?.HasQuery == true)
+        {
+            <section class="ig-search-section">
+                <h2>Accounts</h2>
+                @if (Model.Users?.Count > 0)
+                {
+                    foreach (var user in Model.Users)
                     {
-                        <div class="result-card">
-                            <a href="/u/@user.Username">
-                                <strong>@user.Username</strong><br />
-                                <span>@(string.IsNullOrWhiteSpace(user.Bio) ? "No bio available." : user.Bio)</span>
-                            </a>
-                        </div>
+                        <a href="/u/@user.Username" class="ig-search-user">
+                            <img src="/u/@user.Username/avatar" alt="" class="ig-avatar-44">
+                            <span class="ig-rail-who">
+                                <span class="ig-strong">@user.Username</span>
+                                <span class="ig-muted">@Present.DisplayName(user.Username)</span>
+                            </span>
+                        </a>
                     }
-                </div>
-            }
-            else if (Model?.HasQuery == true)
-            {
-                <div class="empty-state">No accounts found.</div>
-            }
-            else
-            {
-                <div class="empty-state">Try searching for friends, hashtags, or keywords.</div>
-            }
-        </section>
+                }
+                else
+                {
+                    <div class="ig-search-empty">No results found.</div>
+                }
+            </section>
 
-        <section>
-            <h2>Posts</h2>
-            @if (Model?.HasQuery == true && Model.Posts?.Count > 0)
-            {
-                <div class="results-grid">
-                    @foreach (var post in Model.Posts)
-                    {
-                        <div class="result-card">
-                            <a href="/posts/@post.Id">
-                                <strong>@post.Username</strong><br />
-                                <span>@Html.Raw(post.Message)</span>
+            <section class="ig-search-section" style="max-width:none">
+                <h2 style="max-width:470px;margin:0 auto">Posts</h2>
+                @if (Model.Posts?.Count > 0)
+                {
+                    <div class="ig-grid" style="margin-top:8px">
+                        @foreach (var p in Model.Posts)
+                        {
+                            <a href="/posts/@p.Id" class="ig-tile">
+                                <img src="@Present.PhotoUrl(p)" alt="@SocialPresentation.PlainText(p)" loading="lazy">
+                                <span class="ig-tile-overlay">
+                                    <span><svg class="ig-i"><use href="#ig-heart-fill"/></svg>@SocialPresentation.Compact(Present.Score(p))</span>
+                                    <span><svg class="ig-i" style="transform:scaleX(-1)"><use href="#ig-comment"/></svg>@Present.CommentCount(p)</span>
+                                </span>
                             </a>
-                        </div>
-                    }
-                </div>
-            }
-            else if (Model?.HasQuery == true)
-            {
-                <div class="empty-state">No posts found.</div>
-            }
-            else
-            {
-                <div class="empty-state">Search to discover new posts.</div>
-            }
-        </section>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="ig-search-empty">No posts found.</div>
+                }
+            </section>
+        }
+        else
+        {
+            <div class="ig-grid@(reels ? " ig-grid-reels" : "")">
+                @foreach (var p in explore)
+                {
+                    <a href="/posts/@p.Id" class="ig-tile">
+                        <img src="@Present.PhotoUrl(p, reels ? 1 : 0)" alt="@SocialPresentation.PlainText(p)" loading="lazy">
+                        @if (reels)
+                        {
+                            <span class="ig-tile-plays"><svg class="ig-i"><use href="#ig-play"/></svg>@SocialPresentation.Compact(Present.Views(p))</span>
+                        }
+                        else
+                        {
+                            if (p.Id.ToByteArray()[5] % 4 == 0)
+                            {
+                                <svg class="ig-tile-badge" aria-label="Carousel"><use href="#ig-carousel"/></svg>
+                            }
+                            else if (p.Id.ToByteArray()[5] % 4 == 1)
+                            {
+                                <svg class="ig-tile-badge" aria-label="Clip"><use href="#ig-reels"/></svg>
+                            }
+                        }
+                        <span class="ig-tile-overlay">
+                            <span><svg class="ig-i"><use href="#ig-heart-fill"/></svg>@SocialPresentation.Compact(Present.Score(p))</span>
+                            <span><svg class="ig-i" style="transform:scaleX(-1)"><use href="#ig-comment"/></svg>@Present.CommentCount(p)</span>
+                        </span>
+                    </a>
+                }
+            </div>
+        }
     </div>
+</main>
 
-    <script src="/js/social.js"></script>
+<script src="/themes/instagram/js/instagram.js?@System.Guid.NewGuid()"></script>
 </body>
 </html>

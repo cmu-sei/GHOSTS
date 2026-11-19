@@ -1,0 +1,73 @@
+@model Ghosts.Pandora.Infrastructure.Models.Post
+@*
+    One Discord message. ViewData["grouped"]: the message follows another from the same author within a few
+    minutes, so it shows without avatar and name. ViewData["inThread"]: shown as the start of its own thread,
+    so it gets no thread preview. Replies (comments) are the message's thread.
+*@
+@{
+    var grouped = ViewData["grouped"] as bool? ?? false;
+    var inThread = ViewData["inThread"] as bool? ?? false;
+    var roleCss = (Func<string, string>)Context.Items["dc.rolecss"];
+    var stamp = (Func<DateTime, string>)Context.Items["dc.stamp"];
+    var time = (Func<DateTime, string>)Context.Items["dc.time"];
+    var iso = ((Func<DateTime, string>)Context.Items["dc.iso"])(Model.CreatedUtc);
+    var currentUser = ViewBag.Username as string;
+    var likes = Model.Likes?.Count ?? 0;
+    var liked = !string.IsNullOrWhiteSpace(currentUser) &&
+        (Model.Likes?.Any(l => string.Equals(l.Username, currentUser, StringComparison.OrdinalIgnoreCase)) ?? false);
+    // "Ann Lee, Bo Diaz and 2 others", as in Discord's reaction tooltip
+    var names = (Model.Likes ?? new List<Ghosts.Pandora.Infrastructure.Models.Like>()).Select(l => Present.DisplayName(l.Username)).ToList();
+    var likers = names.Count > 3 ? $"{string.Join(", ", names.Take(3))} and {names.Count - 3} other{(names.Count == 4 ? "" : "s")}"
+        : names.Count > 1 ? $"{string.Join(", ", names.Take(names.Count - 1))} and {names[^1]}"
+        : string.Join("", names);
+    var replies = (Model.Comments ?? new List<Ghosts.Pandora.Infrastructure.Models.Comment>()).OrderBy(c => c.CreatedUtc).ToList();
+    var last = replies.LastOrDefault();
+    var ago = last == null ? null : SocialPresentation.ShortAgo(last.CreatedUtc);
+    ago = ago == "now" ? "just now" : ago != null && char.IsDigit(ago[0]) ? $"{ago} ago" : ago;
+}
+<div class="message@(grouped ? " grouped" : "")" data-post-id="@Model.Id" data-author="@Model.Username" data-time="@iso">
+    @if (grouped)
+    {
+        <time class="message-gutter-time" datetime="@iso" data-f="time">@time(Model.CreatedUtc)</time>
+    }
+    else
+    {
+        <a href="/u/@Model.Username" class="message-avatar-link"><img src="/u/@Model.Username/avatar" alt="" class="message-avatar"></a>
+    }
+    <div class="message-content">
+        @if (!grouped)
+        {
+            <h3 class="message-header">
+                <a href="/u/@Model.Username" class="message-author dc-name @roleCss(Model.Username)">@Present.DisplayName(Model.Username)</a>
+                <time class="message-timestamp" datetime="@iso" data-f="stamp">@stamp(Model.CreatedUtc)</time>
+            </h3>
+        }
+        <div class="message-text">@MessageHtml.Render(Model.Message)</div>
+        <div class="message-reactions">@if (likes > 0)
+            {<button type="button" class="reaction@(liked ? " me" : "")" data-emoji="❤️" data-tip="@likers reacted with :heart:"><span class="reaction-emoji">❤️</span><span class="reaction-count">@likes</span></button>}</div>
+        @if (last != null && !inThread)
+        {
+            <a href="/posts/@Model.Id" class="dc-thread-embed">
+                <span class="dc-thread-embed-head">
+                    <span class="dc-thread-embed-name">@(((Func<Ghosts.Pandora.Infrastructure.Models.Post, string>)Context.Items["dc.threadname"])(Model))</span>
+                    <span class="dc-thread-embed-count">@replies.Count @(replies.Count == 1 ? "Message" : "Messages") <svg class="ic" width="14" height="14"><use href="#i-chevron-right"/></svg></span>
+                </span>
+                <span class="dc-thread-embed-last">
+                    <img src="/u/@last.Username/avatar" alt="" class="dc-thread-embed-avatar">
+                    <span class="dc-name @roleCss(last.Username)">@Present.DisplayName(last.Username)</span>
+                    <span class="dc-thread-embed-text">@MessageHtml.Render(last.Message)</span>
+                    <time class="dc-thread-embed-ago" datetime="@(((Func<DateTime, string>)Context.Items["dc.iso"])(last.CreatedUtc))" data-f="ago">@ago</time>
+                </span>
+            </a>
+        }
+    </div>
+    <div class="message-actions">
+        <button class="message-action like-it@(liked ? " liked reacted" : "")" data-id="@Model.Id" data-tip="Click to react with :heart:">❤️</button>
+        <button type="button" class="message-action" data-reply data-tip="Reply"><svg class="ic" width="20" height="20"><use href="#i-reply"/></svg></button>
+        @if (!inThread)
+        {
+            <a href="/posts/@Model.Id" class="message-action" data-tip="@(last == null ? "Create Thread" : "Open Thread")"><svg class="ic" width="20" height="20"><use href="#i-threads"/></svg></a>
+        }
+        <button type="button" class="message-action" data-message-menu data-tip="More"><svg class="ic" width="20" height="20"><use href="#i-more"/></svg></button>
+    </div>
+</div>
