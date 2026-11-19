@@ -14,7 +14,7 @@
     var threads = new List<(Comment Comment, List<Comment> Replies)>();
     foreach (var comment in (post?.Comments ?? new List<Comment>()).OrderBy(c => c.CreatedUtc))
     {
-        if (threads.Count > 0 && comment.Username == post.Username && threads[^1].Comment.Username != post.Username)
+        if (threads.Count > 0 && comment.Username == post?.Username && threads[^1].Comment.Username != post?.Username)
             threads[^1].Replies.Add(comment);
         else
             threads.Add((comment, new List<Comment>()));

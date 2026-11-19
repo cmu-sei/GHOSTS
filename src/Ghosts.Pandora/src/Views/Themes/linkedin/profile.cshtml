@@ -84,7 +84,7 @@
     var vendor = w.Vendors[(int)(hash % (uint)w.Vendors.Count)];
     var project = w.Projects[(int)(hash / 5 % (uint)w.Projects.Count)];
     string earlier = null;
-    string[] skills = null;
+    var skills = new string[0];
     if (person != null)
     {
         var tier = person.Title.StartsWith("Chief") || person.Title == "Controller" || person.Title == "General Counsel" ? 0
@@ -230,7 +230,7 @@
             <section class="li-card li-section">
                 <h2>About</h2>
                 <div class="li-post__body li-about@(about.Length > 260 ? " li-post__body--clamp" : "")"><div class="li-text">@MessageHtml.Render(about)</div>@if (about.Length > 260){<button type="button" class="li-seemore" data-li-seemore>&hellip;see more</button>}</div>
-                @if (skills != null && skills.Length > 0)
+                @if (skills.Length > 0)
                 {
                     <div class="li-topskills">
                         <svg width="24" height="24"><use href="#li-star"/></svg>

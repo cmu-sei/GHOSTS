@@ -82,7 +82,7 @@ public class BaseController : Controller
     internal static string ForLog(string value) =>
         string.IsNullOrEmpty(value)
             ? value
-            : new string(System.Linq.Enumerable.Where(value, c => !char.IsControl(c)).ToArray());
+            : new string(System.Linq.Enumerable.Where(value, c => !char.IsControl(c)).ToArray()).ReplaceLineEndings("");
 
     internal void CookieWrite(string key, string value)
     {

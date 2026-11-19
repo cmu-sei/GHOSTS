@@ -36,7 +36,7 @@ public class HomeController(
 
         // Social mode - original behavior
         // Log unhandled routes for debugging
-        Logger.LogWarning("Unhandled route: {Path}", path);
+        Logger.LogWarning("Unhandled route: {Path}", ForLog(path));
 
         // Try to extract useful information from the path
         var segments = path.Split('/', StringSplitOptions.RemoveEmptyEntries);

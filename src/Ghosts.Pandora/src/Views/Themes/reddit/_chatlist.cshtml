@@ -36,7 +36,7 @@
                 <img src="/u/@chat.Partner/avatar" alt="">
                 <div class="r-chat-item-main">
                     <div class="r-chat-item-top"><span class="r-chat-item-name">@chat.Partner</span><span class="r-chat-item-time">@When(chat.Last.CreatedUtc)</span></div>
-                    <div class="r-chat-item-preview">@(chat.Last.FromUserId == user.Id ? "You: " : "")@MessageHtml.Render(chat.Last.Message)</div>
+                    <div class="r-chat-item-preview">@(chat.Last.FromUserId == user?.Id ? "You: " : "")@MessageHtml.Render(chat.Last.Message)</div>
                 </div>
             </a>
         }

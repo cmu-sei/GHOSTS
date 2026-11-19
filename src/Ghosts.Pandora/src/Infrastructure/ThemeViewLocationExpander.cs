@@ -20,6 +20,7 @@ public class ThemeViewLocationExpander : IViewLocationExpander
             http.Response.Cookies.Append(CookieName(http), theme, new CookieOptions
             {
                 HttpOnly = true,
+                Secure = http.Request.IsHttps,
                 IsEssential = true,
                 Expires = DateTimeOffset.UtcNow.AddDays(30)
             });

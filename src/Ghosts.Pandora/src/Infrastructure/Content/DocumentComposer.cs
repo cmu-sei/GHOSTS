@@ -673,7 +673,7 @@ public class DocumentComposer(World world)
         var start = request.Date.AddMonths(-rng.Next(4, 9));
         for (var i = 0; i < names.Length; i++)
         {
-            var planned = start.AddDays(i * rng.Next(25, 45));
+            var planned = start.AddDays((double)i * rng.Next(25, 45));
             var slip = rng.Next(3) == 0 ? rng.Next(5, 30) : 0;
             var forecast = planned.AddDays(slip);
             var status = forecast < request.Date ? "Complete" : planned < request.Date.AddDays(30) ? (slip > 0 ? "At risk" : "On track") : "Not started";

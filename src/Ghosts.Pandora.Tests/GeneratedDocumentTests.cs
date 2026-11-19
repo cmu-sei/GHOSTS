@@ -50,7 +50,8 @@ public class GeneratedDocumentTests : IClassFixture<PandoraFactory>
         Assert.Equal(DocxType, response.Content.Headers.ContentType?.MediaType);
         Assert.Equal("network-assessment.docx", response.Content.Headers.ContentDisposition?.FileNameStar);
 
-        using (var document = WordprocessingDocument.Open(new MemoryStream(body), false))
+        using (var stream = new MemoryStream(body))
+        using (var document = WordprocessingDocument.Open(stream, false))
         {
             AssertValid(document);
             var text = document.MainDocumentPart!.Document!.Body!.InnerText;
@@ -77,7 +78,8 @@ public class GeneratedDocumentTests : IClassFixture<PandoraFactory>
 
         Assert.Equal(DocxType, response.Content.Headers.ContentType?.MediaType);
         Assert.Equal(fileName, response.Content.Headers.ContentDisposition?.FileNameStar);
-        using var document = WordprocessingDocument.Open(new MemoryStream(body), false);
+        using var stream = new MemoryStream(body);
+        using var document = WordprocessingDocument.Open(stream, false);
         AssertValid(document);
     }
 
@@ -90,7 +92,8 @@ public class GeneratedDocumentTests : IClassFixture<PandoraFactory>
 
         Assert.Equal(PptxType, response.Content.Headers.ContentType?.MediaType);
         Assert.Equal(fileName, response.Content.Headers.ContentDisposition?.FileNameStar);
-        using var presentation = PresentationDocument.Open(new MemoryStream(body), false);
+        using var stream = new MemoryStream(body);
+        using var presentation = PresentationDocument.Open(stream, false);
         AssertValid(presentation);
 
         var slides = presentation.PresentationPart!.SlideParts.ToList();
@@ -105,10 +108,12 @@ public class GeneratedDocumentTests : IClassFixture<PandoraFactory>
         var (xlsx, response) = await Get("/finance/quarterly/budget.xlsx");
         Assert.Equal(XlsxType, response.Content.Headers.ContentType?.MediaType);
 
-        using (var document = SpreadsheetDocument.Open(new MemoryStream(xlsx), false))
+        using (var stream = new MemoryStream(xlsx))
+        using (var document = SpreadsheetDocument.Open(stream, false))
             AssertValid(document);
 
-        using var workbook = new XLWorkbook(new MemoryStream(xlsx));
+        using var workbookStream = new MemoryStream(xlsx);
+        using var workbook = new XLWorkbook(workbookStream);
         var sheet = workbook.Worksheet(1);
         Assert.Equal(["Category", "Owner", "Budget", "Actual", "Variance"], sheet.Row(1).CellsUsed().Select(c => c.GetString()));
         Assert.True(sheet.Cell(2, 3).Value.IsNumber);

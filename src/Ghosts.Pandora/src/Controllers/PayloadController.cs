@@ -35,7 +35,7 @@ public class PayloadController(
 
         if (payload == null)
         {
-            Logger.LogWarning("No payload mapping found for path: {Path}", requestPath);
+            Logger.LogWarning("No payload mapping found for path: {Path}", ForLog(requestPath));
             return NotFound("No payload configured for this path");
         }
 
