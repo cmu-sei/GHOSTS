@@ -36,6 +36,10 @@ var freetypeLib = RuntimeInformation.OSArchitecture == Architecture.Arm64
     ? "/lib/aarch64-linux-gnu/libfreetype.so.6"
     : "";
 
+// Dashboard groups: visual nesting only, so each site and client still starts and stops on its own
+var pandoraSites = builder.AddGroup("pandora-sites", "Pandora social and website instances");
+var ghostsClients = builder.AddGroup("ghosts-clients", "GHOSTS Universal clients");
+
 // A Pandora site for every template it has: each social theme and each website type, on 6360 and up.
 // They are off until started from the dashboard, and share the pandora database and the content
 // directory, so they show one world (users and posts are kept apart by theme).
@@ -47,6 +51,7 @@ var freetypeLib = RuntimeInformation.OSArchitecture == Architecture.Arm64
 foreach (var (name, theme, port) in pandoraThemes)
 {
     builder.AddProject<Projects.Ghosts_Pandora>(name)
+        .WithParentRelationship(pandoraSites)
         .WithExplicitStart()
         .WaitFor(postgres)
         .WithReference(dbPandora, "PostgreSQL")
@@ -67,6 +72,7 @@ foreach (var (name, theme, port) in pandoraThemes)
 foreach (var (name, siteType, siteName, port) in pandoraWebsites)
 {
     builder.AddProject<Projects.Ghosts_Pandora>(name)
+        .WithParentRelationship(pandoraSites)
         .WithExplicitStart()
         .WaitFor(postgres)
         .WithReference(dbPandora, "PostgreSQL")
@@ -233,6 +239,7 @@ var baserow = builder.AddContainer("baserow", "baserow/baserow")
 
 // GHOSTS Universal Clients (built from source, demo/testing), off until started from the dashboard
 var client1 = builder.AddDockerfile("ghosts-client-1", "../../", "src/Dockerfile-client-universal")
+    .WithParentRelationship(ghostsClients)
     .WithExplicitStart()
     .WithContainerName("ghosts-client-1")
     // A real hostname, so the client reports "ghosts-client-1" and can be bound to a manifest host by name.
@@ -243,6 +250,7 @@ var client1 = builder.AddDockerfile("ghosts-client-1", "../../", "src/Dockerfile
     .WaitFor(api);
 
 var client2 = builder.AddDockerfile("ghosts-client-2", "../../", "src/Dockerfile-client-universal")
+    .WithParentRelationship(ghostsClients)
     .WithExplicitStart()
     .WithContainerName("ghosts-client-2")
     // A real hostname, so the client reports "ghosts-client-2" and can be bound to a manifest host by name.
@@ -253,6 +261,7 @@ var client2 = builder.AddDockerfile("ghosts-client-2", "../../", "src/Dockerfile
     .WaitFor(api);
 
 var client3 = builder.AddDockerfile("ghosts-client-3", "../../", "src/Dockerfile-client-universal")
+    .WithParentRelationship(ghostsClients)
     .WithExplicitStart()
     .WithContainerName("ghosts-client-3")
     // A real hostname, so the client reports "ghosts-client-3" and can be bound to a manifest host by name.
@@ -277,3 +286,20 @@ var docs = builder.AddExecutable("docs", "mkdocs", "../../", "serve", "--dev-add
     });
 
 builder.Build().Run();
+
+/// <summary>A resource with no process of its own, used only to group others in the dashboard.</summary>
+sealed class GroupResource(string name) : Resource(name);
+
+static class GroupResourceExtensions
+{
+    public static IResourceBuilder<GroupResource> AddGroup(this IDistributedApplicationBuilder builder, string name, string description) =>
+        builder.AddResource(new GroupResource(name))
+            .WithInitialState(new CustomResourceSnapshot
+            {
+                ResourceType = "Group",
+                CreationTimeStamp = DateTime.UtcNow,
+                State = "Group",
+                Properties = [new(CustomResourceKnownProperties.Source, description)]
+            })
+            .ExcludeFromManifest();
+}
