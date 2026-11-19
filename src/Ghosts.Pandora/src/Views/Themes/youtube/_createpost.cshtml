@@ -1,0 +1,144 @@
+@{
+    var username = ViewBag.Username as string ?? "User";
+    var seed = Guid.NewGuid();
+}
+@* YouTube Studio's upload dialog. The form posts the same fields as before (theme, user, message);
+   the title is the message, and youtube.js appends the description to it on publish. *@
+<div class="yt-upload-backdrop" id="yt-upload" hidden>
+    <div class="yt-upload-dialog" role="dialog" aria-modal="true" aria-labelledby="yt-upload-title" data-step="select">
+        <form method="post" action="/" enctype="multipart/form-data">
+            <input type="hidden" name="theme" value="youtube">
+            <input type="hidden" name="user" value="@username">
+
+            <div class="yt-upload-header">
+                <h1 id="yt-upload-title">Upload videos</h1>
+                <button class="yt-icon-btn" type="button" title="Send feedback" data-toast="Thanks for your feedback"><svg class="yt-icon"><use href="#yt-i-feedback"/></svg></button>
+                <button class="yt-icon-btn" type="button" title="Close" data-close-upload><svg class="yt-icon"><use href="#yt-i-close"/></svg></button>
+            </div>
+
+            <div class="yt-upload-select">
+                <label class="yt-upload-drop">
+                    <span class="yt-upload-circle"><svg viewBox="0 0 24 24"><use href="#yt-i-upload-arrow"/></svg></span>
+                    <input class="yt-upload-file" type="file" accept="video/*,.mp4,.mov,.avi,.mkv,.webm,.wmv,.flv,.3gp">
+                    <span class="yt-upload-lead">Drag and drop video files to upload</span>
+                    <span class="yt-upload-sub">Your videos will be private until you publish them.</span>
+                    <span class="yt-upload-pick">Select files</span>
+                </label>
+                <p class="yt-upload-legal">
+                    By submitting your videos to YouTube, you acknowledge that you agree to YouTube's
+                    <a class="yt-link" href="/t/terms">Terms of Service</a> and <a class="yt-link" href="/howyoutubeworks/policies/community-guidelines">Community Guidelines</a>.
+                    Please make sure that you do not violate others' copyright or privacy rights. <a class="yt-link" href="/howyoutubeworks/policies/copyright">Learn more</a>
+                </p>
+            </div>
+
+            <ol class="yt-upload-stepper">
+                <li data-for="details"><span>Details</span><i></i></li>
+                <li data-for="elements"><span>Video elements</span><i></i></li>
+                <li data-for="checks"><span>Checks</span><i></i></li>
+                <li data-for="visibility"><span>Visibility</span><i></i></li>
+            </ol>
+
+            <div class="yt-upload-body">
+                <div class="yt-upload-main">
+                    <section data-panel="details">
+                        <h2>Details</h2>
+                        <div class="yt-field">
+                            <label for="yt-upload-name">Title (required)</label>
+                            <textarea id="yt-upload-name" name="message" maxlength="100" rows="2" required placeholder="Add a title that describes your video (type @@ to mention a channel)"></textarea>
+                            <span class="yt-counter" data-count-for="yt-upload-name">0/100</span>
+                        </div>
+                        <div class="yt-upload-error" hidden>Your video needs a title</div>
+                        <div class="yt-field yt-field-tall">
+                            <label for="yt-upload-description">Description</label>
+                            <textarea id="yt-upload-description" maxlength="5000" rows="6" placeholder="Tell viewers about your video (type @@ to mention a channel)"></textarea>
+                            <span class="yt-counter" data-count-for="yt-upload-description">0/5000</span>
+                        </div>
+
+                        <h3>Thumbnail</h3>
+                        <p class="yt-upload-help">Set a thumbnail that stands out and draws viewers' attention. <a class="yt-link" href="/howyoutubeworks">Learn more</a></p>
+                        <div class="yt-thumb-options">
+                            <label class="yt-thumb-upload">
+                                <input type="file" name="file" accept="image/png,image/jpeg">
+                                <svg class="yt-icon"><use href="#yt-i-image"/></svg>
+                                <span>Upload file</span>
+                            </label>
+                            @for (var i = 0; i < 3; i++)
+                            {
+                                <button class="yt-thumb-auto@(i == 0 ? " selected" : "")" type="button"><img src="@Present.PhotoUrl(seed, i)" alt=""></button>
+                            }
+                        </div>
+
+                        <h3>Playlists</h3>
+                        <p class="yt-upload-help">Add your video to one or more playlists to organize your content for viewers. <a class="yt-link" href="/howyoutubeworks">Learn more</a></p>
+                        <button class="yt-select" type="button"><span>Select</span><svg class="yt-icon"><use href="#yt-i-chevron-down"/></svg></button>
+
+                        <h3>Audience</h3>
+                        <p class="yt-upload-help"><b>Is this video made for kids? (required)</b><br>Regardless of your location, you're legally required to comply with the Children's Online Privacy Protection Act (COPPA) and/or other laws.</p>
+                        <label class="yt-radio"><input type="radio" name="yt-kids" value="yes"><span></span>Yes, it's made for kids</label>
+                        <label class="yt-radio"><input type="radio" name="yt-kids" value="no" checked><span></span>No, it's not made for kids</label>
+                    </section>
+
+                    <section data-panel="elements" hidden>
+                        <h2>Video elements</h2>
+                        <p class="yt-upload-help">Use cards and an end screen to show viewers related videos, websites, and calls to action. <a class="yt-link" href="/howyoutubeworks">Learn more</a></p>
+                        <div class="yt-element-row"><div><b>Add subtitles</b><span>Reach a broader audience by adding subtitles to your video</span></div><button class="yt-pill" type="button">Add</button></div>
+                        <div class="yt-element-row"><div><b>Add an end screen</b><span>Promote related content at the end of your video</span></div><button class="yt-pill" type="button">Add</button></div>
+                        <div class="yt-element-row"><div><b>Add cards</b><span>Promote related content during your video</span></div><button class="yt-pill" type="button">Add</button></div>
+                    </section>
+
+                    <section data-panel="checks" hidden>
+                        <h2>Checks</h2>
+                        <p class="yt-upload-help">We'll check your video for issues that may restrict its visibility and then you will have the opportunity to fix issues before publishing your video. <a class="yt-link" href="/howyoutubeworks">Learn more</a></p>
+                        <div class="yt-check-row"><b>Copyright</b><span class="yt-check-ok"><svg class="yt-icon"><use href="#yt-i-check-circle"/></svg>No issues found</span></div>
+                        <p class="yt-upload-help">Remember: These check results aren't final. Issues may come up in the future that impact your video.</p>
+                    </section>
+
+                    <section data-panel="visibility" hidden>
+                        <h2>Visibility</h2>
+                        <p class="yt-upload-help">Choose when to publish and who can see your video</p>
+                        <div class="yt-visibility">
+                            <b>Save or publish</b>
+                            <span>Make your video public, unlisted, or private</span>
+                            <label class="yt-radio"><input type="radio" name="yt-visibility" value="private"><span></span><div><b>Private</b><small>Only you and people you choose can watch your video</small></div></label>
+                            <label class="yt-radio"><input type="radio" name="yt-visibility" value="unlisted"><span></span><div><b>Unlisted</b><small>Anyone with the video link can watch your video</small></div></label>
+                            <label class="yt-radio"><input type="radio" name="yt-visibility" value="public" checked><span></span><div><b>Public</b><small>Everyone can watch your video</small></div></label>
+                        </div>
+                    </section>
+                </div>
+
+                <aside class="yt-upload-preview">
+                    <div class="yt-upload-player">
+                        <img src="@Present.PhotoUrl(seed, 0)" alt="">
+                        <span class="yt-upload-processing">Processing video…</span>
+                    </div>
+                    <dl>
+                        <dt>Video link</dt>
+                        <dd><a class="yt-link yt-upload-link" href="#">https://youtu.be/</a><button class="yt-icon-btn" type="button" title="Copy video link" data-toast="Link copied to clipboard"><svg class="yt-icon"><use href="#yt-i-copy"/></svg></button></dd>
+                        <dt>Filename</dt>
+                        <dd class="yt-upload-filename"></dd>
+                        <dt>Video quality</dt>
+                        <dd><span class="yt-quality">SD</span> <span class="yt-quality">HD</span></dd>
+                    </dl>
+                </aside>
+            </div>
+
+            <div class="yt-upload-published">
+                <svg class="yt-icon"><use href="#yt-i-check-circle"/></svg>
+                <h2>Video published</h2>
+                <p>Your video is now public. Share a link so people can watch it.</p>
+                <a class="yt-link yt-upload-watch" href="/">https://youtu.be/</a>
+            </div>
+
+            <div class="yt-upload-footer">
+                <div class="yt-upload-status">
+                    <svg class="yt-icon"><use href="#yt-i-upload-arrow"/></svg>
+                    <span class="yt-upload-progress">Uploading 0%</span>
+                </div>
+                <button class="yt-text-btn yt-upload-back" type="button">Back</button>
+                <button class="yt-pill yt-pill-dark yt-upload-next" type="button">Next</button>
+                <button class="yt-pill yt-pill-dark yt-upload-publish" type="submit">Publish</button>
+                <button class="yt-pill yt-pill-dark yt-upload-done" type="button" data-close-upload>Close</button>
+            </div>
+        </form>
+    </div>
+</div>

@@ -2,14 +2,17 @@ using System.Text;
 using System.Text.Json;
 using CsvHelper;
 using System.Globalization;
+using Ghosts.Pandora.Infrastructure.Content;
 
 namespace Ghosts.Pandora.Infrastructure.Services;
 
 public interface IDataFormatGenerationService
 {
     string GenerateJson(int rows = 10);
-    byte[] GenerateCsv(int rows = 10, int columns = 5);
+    string GenerateJson(DocumentSpec about, DataTable table);
+    byte[] GenerateCsv(DataTable table);
     string GenerateText(int paragraphs = 5);
+    string GenerateText(DocumentSpec spec);
     string GenerateHtml(string title = null);
     string GenerateScript();
     string GenerateStylesheet();
@@ -35,27 +38,106 @@ public class DataFormatGenerationService : IDataFormatGenerationService
         });
     }
 
-    public byte[] GenerateCsv(int rows = 10, int columns = 5)
+    public string GenerateJson(DocumentSpec about, DataTable table)
     {
-        _logger.LogInformation("Generating CSV with {Rows} rows and {Columns} columns", rows, columns);
+        _logger.LogInformation("Generating JSON: {Title}", about.Title);
+
+        var keys = table.Columns.Select(CamelCase).ToList();
+        var data = table.Rows.Select(row =>
+        {
+            var record = new Dictionary<string, object>();
+            for (var i = 0; i < keys.Count; i++)
+                record[keys[i]] = DataTable.Plain(row[i]) is DateTime date ? date.ToString("yyyy-MM-dd") : DataTable.Plain(row[i]);
+            return record;
+        }).ToList();
+
+        return JsonSerializer.Serialize(new Dictionary<string, object>
+        {
+            ["title"] = about.Title,
+            ["organization"] = about.Organization,
+            ["updated"] = about.Date.ToString("yyyy-MM-dd"),
+            ["count"] = data.Count,
+            ["data"] = data
+        }, new JsonSerializerOptions { WriteIndented = true });
+    }
+
+    public byte[] GenerateCsv(DataTable table)
+    {
+        _logger.LogInformation("Generating CSV: {Name} with {Rows} rows", table.Name, table.Rows.Count);
 
         using var memoryStream = new MemoryStream();
         using var writer = new StreamWriter(memoryStream);
         using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
 
-        var data = ContentGenerationHelper.GenerateRandomCsvData(rows, columns);
+        foreach (var column in table.Columns)
+            csv.WriteField(column);
+        csv.NextRecord();
 
-        foreach (var row in data)
+        foreach (var row in table.Rows)
         {
-            foreach (var field in row)
+            foreach (var value in row)
             {
-                csv.WriteField(field);
+                csv.WriteField(DataTable.Plain(value) switch
+                {
+                    decimal d => d.ToString("0.00", CultureInfo.InvariantCulture),
+                    DateTime dt => dt.ToString("yyyy-MM-dd"),
+                    var other => Convert.ToString(other, CultureInfo.InvariantCulture)
+                });
             }
             csv.NextRecord();
         }
 
         writer.Flush();
         return memoryStream.ToArray();
+    }
+
+    public string GenerateText(DocumentSpec spec)
+    {
+        _logger.LogInformation("Generating text: {Title}", spec.Title);
+
+        var text = new StringBuilder();
+        text.AppendLine(spec.Organization.ToUpperInvariant());
+        text.AppendLine(spec.Title);
+        if (!string.IsNullOrWhiteSpace(spec.Subtitle))
+            text.AppendLine(spec.Subtitle);
+        text.AppendLine($"Prepared by {spec.Author.FullName}, {spec.Author.Title} | {spec.Date:MMMM d, yyyy} | {spec.Classification}");
+
+        foreach (var section in spec.Sections)
+        {
+            text.AppendLine();
+            text.AppendLine(section.Heading.ToUpperInvariant());
+            text.AppendLine();
+            foreach (var paragraph in section.Paragraphs)
+            {
+                text.AppendLine(paragraph);
+                text.AppendLine();
+            }
+            foreach (var bullet in section.Bullets)
+                text.AppendLine($"  - {bullet}");
+            if (section.Table != null)
+                AppendTable(text, section.Table);
+        }
+
+        return text.ToString();
+    }
+
+    private static void AppendTable(StringBuilder text, DataTable table)
+    {
+        var cells = table.Rows.Select(r => r.Select(DataTable.Format).ToArray()).Prepend(table.Columns.ToArray()).ToList();
+        var widths = table.Columns.Select((_, i) => Math.Min(40, cells.Max(r => r[i].Length))).ToArray();
+        string Line(string[] row) => string.Join("  ", row.Select((c, i) => (c.Length > widths[i] ? c[..(widths[i] - 1)] + "…" : c).PadRight(widths[i]))).TrimEnd();
+
+        text.AppendLine(Line(cells[0]));
+        text.AppendLine(string.Join("  ", widths.Select(w => new string('-', w))));
+        foreach (var row in cells.Skip(1))
+            text.AppendLine(Line(row));
+        text.AppendLine();
+    }
+
+    private static string CamelCase(string column)
+    {
+        var words = column.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return string.Concat(words.Select((w, i) => i == 0 ? w.ToLowerInvariant() : char.ToUpperInvariant(w[0]) + w[1..].ToLowerInvariant()));
     }
 
     public string GenerateText(int paragraphs = 5)

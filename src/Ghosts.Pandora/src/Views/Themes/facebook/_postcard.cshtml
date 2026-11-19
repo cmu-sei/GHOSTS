@@ -1,0 +1,150 @@
+@* Facebook post card. GHOSTS clients use div.post-user-name > a[href] and the exact class "post-action like-btn like-it" on the Like button.
+   Set ViewBag.FbDetail = true for the post page: every comment is shown and the composer is the page's #commentForm. *@
+@model Ghosts.Pandora.Infrastructure.Models.Post
+@{
+    var me = ViewBag.Username as string ?? string.Empty;
+    var detail = ViewBag.FbDetail as bool? ?? false;
+    var us = System.Globalization.CultureInfo.GetCultureInfo("en-US");
+    var liked = !string.IsNullOrWhiteSpace(me) &&
+        (Model.Likes?.Any(l => string.Equals(l.Username, me, StringComparison.OrdinalIgnoreCase)) ?? false);
+    var likedClass = liked ? " liked" : string.Empty;
+
+    Func<DateTime, string> ago = utc =>
+    {
+        var age = DateTime.UtcNow - utc;
+        if (age < TimeSpan.FromMinutes(1)) return "Just now";
+        if (age < TimeSpan.FromDays(7)) return SocialPresentation.ShortAgo(utc);
+        return utc.ToString(utc.Year == DateTime.UtcNow.Year ? "MMMM d" : "MMMM d, yyyy", us);
+    };
+
+    var text = SocialPresentation.PlainText(Model);
+    var uploaded = SocialPresentation.UploadedImage(Model);
+    var photo = uploaded == null && Present.HasPhoto(Model, 40) ? Present.PhotoUrl(Model) : null;
+    var bigText = uploaded == null && photo == null && text.Length > 0 && text.Length <= 85;
+
+    var comments = (Model.Comments ?? new List<Comment>()).OrderBy(c => c.CreatedUtc).ToList();
+    var shown = detail ? comments : comments.TakeLast(2).ToList();
+    // a new post starts with only its real likes and picks up the rest of its engagement over a few hours
+    var realLikes = Model.Likes?.Count ?? 0;
+    // Present.Score already grows the baseline in over a post's first hours
+    var score = Present.Score(Model);
+    var shares = Present.Shares(Model);
+
+    var otherLiker = Model.Likes?.Select(l => l.Username).FirstOrDefault(u => !string.IsNullOrEmpty(u) && !string.Equals(u, me, StringComparison.OrdinalIgnoreCase));
+    string Others(int n) => n == 1 ? "1 other" : $"{SocialPresentation.Compact(n)} others";
+    var reactionText = liked
+        ? (score > 1 ? $"You and {Others(score - 1)}" : "You")
+        : otherLiker != null && score > 1 ? $"{Present.DisplayName(otherLiker)} and {Others(score - 1)}" : SocialPresentation.Compact(score);
+
+    var mix = Math.Abs(Model.Id.GetHashCode()) % 3;
+    var reactions = new List<string> { "like" };
+    if (score >= 4) reactions.Add(mix == 1 ? "haha" : "love");
+    if (score >= 40 && mix != 2) reactions.Add(mix == 1 ? "love" : "haha");
+}
+<article class="post" data-post-id="@Model.Id">
+    <div class="post-header">
+        <div class="post-user-info">
+            <a href="/u/@Model.Username" class="fb-post-avatar"><img src="/u/@Model.Username/avatar" class="profile-pic" alt=""></a>
+            <div class="post-meta">
+                <div class="post-user-name"><a href="/u/@Model.Username">@Present.DisplayName(Model.Username)</a></div>
+                <div class="post-time">
+                    <a href="/posts/@Model.Id" title="@Model.CreatedUtc.ToString("dddd, MMMM d, yyyy 'at' h:mm tt", us)">@ago(Model.CreatedUtc)</a>
+                    <span aria-hidden="true">·</span>
+                    <svg class="fb-globe" aria-label="Shared with Public"><use href="#fb-globe"></use></svg>
+                </div>
+            </div>
+        </div>
+        <button type="button" class="post-menu" aria-label="Actions for this post"><svg class="fb-i"><use href="#fb-dots"></use></svg></button>
+        @if (!detail)
+        {
+            <button type="button" class="fb-post-hide" aria-label="Hide post"><svg class="fb-i"><use href="#fb-close"></use></svg></button>
+        }
+    </div>
+    <div class="post-content">
+        <div class="post-text@(bigText ? " fb-big-text" : "")">@MessageHtml.Render(Model.Message)</div>
+        @if (photo != null)
+        {
+            <a href="/posts/@Model.Id" class="fb-post-photo"><img src="@photo" alt="" loading="lazy"></a>
+        }
+    </div>
+    <div class="post-stats" hidden="@(score == 0 && comments.Count == 0 && shares == 0 ? "hidden" : null)">
+        <div class="fb-reactions" data-total="@score" hidden="@(score == 0 ? "hidden" : null)">
+            <span class="fb-reaction-icons">
+                @foreach (var reaction in reactions)
+                {
+                    <svg><use href="#fb-react-@reaction"></use></svg>
+                }
+            </span>
+            <span class="fb-reaction-text">@reactionText</span>
+        </div>
+        <div class="fb-counts">
+            @if (comments.Count > 0)
+            {
+                <a href="/posts/@Model.Id" class="fb-comment-count" data-count="@comments.Count">@comments.Count @(comments.Count == 1 ? "comment" : "comments")</a>
+            }
+            @if (shares > 0)
+            {
+                <span>@SocialPresentation.Compact(shares) @(shares == 1 ? "share" : "shares")</span>
+            }
+        </div>
+    </div>
+    <div class="post-actions">
+        <button class="post-action like-btn like-it@(likedClass)" data-id="@Model.Id"><svg class="fb-i"><use href="@(liked ? "#fb-like-fill" : "#fb-like")"></use></svg><span>Like</span></button>
+        @if (detail)
+        {
+            <label for="fb-detail-comment" class="post-action comment-btn"><svg class="fb-i"><use href="#fb-comment"></use></svg><span>Comment</span></label>
+        }
+        else
+        {
+            <a href="/posts/@Model.Id" class="post-action comment-btn"><svg class="fb-i"><use href="#fb-comment"></use></svg><span>Comment</span></a>
+        }
+        <button type="button" class="post-action share-btn"><svg class="fb-i"><use href="#fb-share"></use></svg><span>Share</span></button>
+    </div>
+    @if (detail || comments.Count > 0)
+    {
+        <div class="fb-comments">
+            @if (detail && comments.Count > 0)
+            {
+                <div class="fb-comment-sort">Most relevant <svg><use href="#fb-chev-down"></use></svg></div>
+            }
+            @if (!detail && comments.Count > shown.Count)
+            {
+                <a href="/posts/@Model.Id" class="fb-more-comments">View more comments</a>
+            }
+            <div class="fb-comment-list">
+                @foreach (var comment in shown)
+                {
+                    <div class="fb-comment">
+                        <a href="/u/@comment.Username" class="fb-comment-avatar"><img src="/u/@comment.Username/avatar" alt=""></a>
+                        <div class="fb-comment-main">
+                            <div class="fb-comment-bubble">
+                                <a href="/u/@comment.Username" class="fb-comment-author">@Present.DisplayName(comment.Username)</a>
+                                <div class="fb-comment-text">@MessageHtml.Render(comment.Message)</div>
+                            </div>
+                            <div class="fb-comment-meta">
+                                <span title="@comment.CreatedUtc.ToString("dddd, MMMM d, yyyy 'at' h:mm tt", us)">@ago(comment.CreatedUtc).Replace("Just now", "1m")</span>
+                                <button type="button">Like</button>
+                                <button type="button" data-fb-reply>Reply</button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+            <form method="post" action="/posts/@Model.Id/comments" class="@(detail ? "fb-comment-composer" : "fb-comment-composer fb-comment-form")" id="@(detail ? "commentForm" : null)">
+                <input type="hidden" name="theme" value="facebook">
+                <input type="hidden" name="user" value="@me">
+                <img src="/u/@me/avatar" class="fb-comment-me" alt="">
+                <div class="fb-comment-box">
+                    <input type="text" name="message" id="@(detail ? "fb-detail-comment" : null)" placeholder="@(detail ? $"Comment as {Present.DisplayName(me)}" : "Write a comment…")" autocomplete="off" required>
+                    <div class="fb-comment-tools">
+                        <svg aria-hidden="true"><use href="#fb-emoji"></use></svg>
+                        <svg aria-hidden="true"><use href="#fb-camera"></use></svg>
+                        <svg aria-hidden="true"><use href="#fb-gif"></use></svg>
+                        <svg aria-hidden="true"><use href="#fb-sticker"></use></svg>
+                        <button type="submit" class="fb-comment-send" aria-label="Comment"><svg><use href="#fb-send"></use></svg></button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    }
+</article>

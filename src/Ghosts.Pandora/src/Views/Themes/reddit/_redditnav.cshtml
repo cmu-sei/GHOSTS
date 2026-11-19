@@ -1,0 +1,49 @@
+@inject Ghosts.Pandora.Infrastructure.Services.IPostService PostService
+@{
+    var active = ViewData["Nav"] as string ?? string.Empty;
+    var communities = (await PostService.GetPostsByTheme("reddit", 200))
+        .GroupBy(p => Present.Community(p))
+        .OrderByDescending(g => g.Count()).ThenBy(g => g.Key, StringComparer.OrdinalIgnoreCase)
+        .Select(g => g.Key)
+        .Take(12)
+        .ToList();
+    string Current(string key) => string.Equals(active, key, StringComparison.OrdinalIgnoreCase) ? "page" : null;
+}
+<nav class="r-nav" aria-label="Primary">
+    <a href="/" class="r-nav-link" aria-current="@Current("home")"><svg class="ri"><use href="#i-home" /></svg>Home</a>
+    <a href="/r/popular" class="r-nav-link" aria-current="@Current("popular")"><svg class="ri"><use href="#i-popular" /></svg>Popular</a>
+    <a href="/explore" class="r-nav-link" aria-current="@Current("explore")"><svg class="ri"><use href="#i-explore" /></svg>Explore</a>
+    <a href="/r/all" class="r-nav-link" aria-current="@Current("all")"><svg class="ri"><use href="#i-all" /></svg>All</a>
+    <hr>
+    <details open>
+        <summary>Communities<svg class="ri"><use href="#i-chev" /></svg></summary>
+        <a href="/explore" class="r-nav-link"><svg class="ri"><use href="#i-plus" /></svg>Create a community</a>
+        <a href="/explore" class="r-nav-link"><svg class="ri"><use href="#i-gear" /></svg>Manage communities</a>
+        @foreach (var community in communities)
+        {
+            <a href="/r/@community" class="r-nav-link" aria-current="@Current(community)"><span class="cicon" data-c="@(community.Sum(ch => ch) / 3 % 8)">r/</span>r/@community<svg class="ri r-star"><use href="#i-star" /></svg></a>
+        }
+    </details>
+    <hr>
+    <details open>
+        <summary>Resources<svg class="ri"><use href="#i-chev" /></svg></summary>
+        <a href="#" class="r-nav-link"><svg class="ri"><use href="#i-about" /></svg>About Reddit</a>
+        <a href="#" class="r-nav-link"><svg class="ri"><use href="#i-ad" /></svg>Advertise</a>
+        <a href="#" class="r-nav-link"><svg class="ri"><use href="#i-pro" /></svg>Reddit Pro</a>
+        <a href="#" class="r-nav-link"><svg class="ri"><use href="#i-help" /></svg>Help</a>
+        <a href="#" class="r-nav-link"><svg class="ri"><use href="#i-book" /></svg>Blog</a>
+        <a href="#" class="r-nav-link"><svg class="ri"><use href="#i-case" /></svg>Careers</a>
+        <a href="#" class="r-nav-link"><svg class="ri"><use href="#i-mic" /></svg>Press</a>
+        <hr>
+        <a href="/explore" class="r-nav-link"><svg class="ri"><use href="#i-people" /></svg>Communities</a>
+        <a href="/r/popular" class="r-nav-link"><svg class="ri"><use href="#i-trophy" /></svg>Best of Reddit</a>
+        <a href="/explore" class="r-nav-link"><svg class="ri"><use href="#i-grid" /></svg>Topics</a>
+        <hr>
+        <a href="#" class="r-nav-link"><svg class="ri"><use href="#i-rules" /></svg>Reddit Rules</a>
+        <a href="#" class="r-nav-link"><svg class="ri"><use href="#i-lock" /></svg>Privacy Policy</a>
+        <a href="#" class="r-nav-link"><svg class="ri"><use href="#i-doc" /></svg>User Agreement</a>
+        <a href="#" class="r-nav-link"><svg class="ri"><use href="#i-access" /></svg>Accessibility</a>
+    </details>
+    <p class="r-nav-foot"><a href="#">Reddit, Inc.</a> &copy; @DateTime.UtcNow.Year. All rights reserved.</p>
+</nav>
+<div class="r-scrim" data-r="nav"></div>

@@ -297,7 +297,7 @@
                             </div>
                         </div>
                         <div class="post-content">
-                            @Html.Raw(post.Message)
+                            @MessageHtml.Render(post.Message)
                         </div>
                         <div class="post-actions">
                             <span class="post-action like-it" data-id="@post.Id">

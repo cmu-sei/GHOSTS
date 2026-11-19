@@ -1,144 +1,142 @@
-using System.Web;
-
 namespace Ghosts.Pandora.Infrastructure.Services;
 
+/// <summary>
+/// Keeps generated content on disk, so a URL returns the same file every time it is asked for.
+/// Content is generated once per path and kept until the content directory is deleted; nothing
+/// here expires or rewrites it. When <c>StoreResults</c> is off, or the store is full, content
+/// is still generated (deterministically) but not written.
+/// </summary>
 public class ContentManager
 {
     private readonly ApplicationConfiguration _configuration;
     private readonly ILogger<ContentManager> _logger;
-    private readonly string _baseDir;
-    private readonly string _defaultFileName;
-    private readonly string _extension;
+    private readonly long _maxBytes;
+    private long _storedBytes;
+    private bool _fullLogged;
 
-    public string FileName { get; private set; }
-    public string RelativePath { get; private set; }
-    public string FullPath { get; private set; }
+    // one lock per stripe of keys, so two requests for the same path generate it once
+    private readonly object[] _locks = Enumerable.Range(0, 64).Select(_ => new object()).ToArray();
 
-    public ContentManager(
-        ApplicationConfiguration configuration,
-        ILogger<ContentManager> logger,
-        string defaultFileName = "index",
-        string extension = "txt")
+    public string Root { get; }
+
+    public ContentManager(ApplicationConfiguration configuration, IWebHostEnvironment environment, ILogger<ContentManager> logger)
     {
         _configuration = configuration;
         _logger = logger;
-        _baseDir = configuration.Pandora.ContentCacheDirectory;
-        _defaultFileName = defaultFileName;
-        _extension = extension;
+        Root = Path.GetFullPath(Path.Combine(environment.ContentRootPath, configuration.Pandora.ContentCacheDirectory));
+        _maxBytes = configuration.Pandora.MaxStoredMegabytes * 1024L * 1024L;
+
+        if (Directory.Exists(Root))
+            _storedBytes = Directory.EnumerateFiles(Root, "*", SearchOption.AllDirectories).Sum(f => new FileInfo(f).Length);
     }
 
-    public bool IsStoring()
+    public bool IsStoring() => _configuration.Pandora.StoreResults;
+
+    /// <summary>
+    /// Returns the stored content for <paramref name="path"/> under <paramref name="category"/>,
+    /// or generates, stores and returns it.
+    /// </summary>
+    public byte[] GetOrCreate(string category, string path, string extension, Func<byte[]> generate)
     {
-        return _configuration.Pandora.StoreResults;
-    }
-
-    public void Resolve(HttpRequest request)
-    {
-        var urlPath = HttpUtility.UrlDecode(request.Path.Value?.TrimStart('/') ?? "");
-
-        if (urlPath.EndsWith("/"))
+        var relativePath = SafeRelativePath(category, path, extension);
+        if (!IsStoring() || relativePath == null)
         {
-            urlPath += $"{_defaultFileName}.{_extension}";
-        }
-        else if (!urlPath.EndsWith($".{_extension}"))
-        {
-            urlPath += $".{_extension}";
-        }
-
-        RelativePath = urlPath;
-        FileName = Path.GetFileName(urlPath);
-        FullPath = Path.Combine(_baseDir, urlPath);
-
-        var directory = Path.GetDirectoryName(FullPath);
-        if (!string.IsNullOrEmpty(directory))
-        {
-            Directory.CreateDirectory(directory);
+            if (relativePath == null)
+                _logger.LogDebug("Not storing content for an unsafe path in {Category}", category);
+            return generate();
         }
 
-        _logger.LogInformation("{Extension} request received. Filename: {FileName} Path: {RelativePath}",
-            _extension.ToUpper(), FileName, RelativePath);
-    }
+        var fullPath = Path.GetFullPath(Path.Combine(Root, relativePath));
+        if (!fullPath.StartsWith(Root + Path.DirectorySeparatorChar, StringComparison.Ordinal))
+            return generate();
 
-    public string GuessMediaType()
-    {
-        var extension = Path.GetExtension(FullPath);
-        return extension.ToLower() switch
+        lock (_locks[(int)(Content.ContentRequest.StableHash(relativePath) % (uint)_locks.Length)])
         {
-            ".pdf" => "application/pdf",
-            ".doc" => "application/msword",
-            ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            ".xls" => "application/vnd.ms-excel",
-            ".xlsx" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            ".ppt" => "application/vnd.ms-powerpoint",
-            ".pptx" => "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-            ".jpg" or ".jpeg" => "image/jpeg",
-            ".png" => "image/png",
-            ".gif" => "image/gif",
-            ".json" => "application/json",
-            ".csv" => "text/csv",
-            ".txt" => "text/plain",
-            ".html" or ".htm" => "text/html",
-            ".css" => "text/css",
-            ".js" => "application/javascript",
-            ".zip" => "application/zip",
-            ".tar" => "application/x-tar",
-            _ => "application/octet-stream"
-        };
+            var stored = Load(fullPath);
+            if (stored != null)
+                return stored;
+
+            var content = generate();
+            Save(fullPath, content);
+            return content;
+        }
     }
 
-    public async Task<byte[]> LoadAsync()
+    /// <summary>
+    /// The store path for a request, or null when the path cannot be stored safely. Every
+    /// segment must be a plain file name: no "." or "..", no separators, no control characters.
+    /// </summary>
+    public static string SafeRelativePath(string category, string path, string extension)
+    {
+        var segments = (path ?? string.Empty).Split('/', StringSplitOptions.RemoveEmptyEntries).ToList();
+        if (segments.Count == 0)
+            segments.Add("index");
+        if (segments.Count > 16)
+            return null;
+
+        var invalid = Path.GetInvalidFileNameChars();
+        foreach (var segment in segments)
+        {
+            if (segment is "." or ".." || segment.Length > 100 || segment.Trim() != segment ||
+                segment.IndexOfAny(invalid) >= 0 || segment.Contains('\\') || segment.Contains(':') || segment.Any(char.IsControl))
+                return null;
+        }
+
+        // a stored file always carries the extension it is served with: memo.doc is kept as memo.docx
+        var last = segments[^1];
+        var stem = Path.GetFileNameWithoutExtension(last);
+        segments[^1] = $"{(string.IsNullOrEmpty(stem) ? "index" : stem)}.{extension}";
+
+        return Path.Combine([category, .. segments]);
+    }
+
+    private byte[] Load(string fullPath)
     {
         try
         {
-            if (string.IsNullOrEmpty(FullPath) || !File.Exists(FullPath))
-            {
-                return null;
-            }
-
-            return await File.ReadAllBytesAsync(FullPath);
+            return File.Exists(fullPath) ? File.ReadAllBytes(fullPath) : null;
         }
-        catch (Exception ex)
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {
-            _logger.LogWarning(ex, "Failed to load cached content from {FullPath}", FullPath);
+            _logger.LogWarning("Could not read stored content {FullPath}: {Message}", fullPath, e.Message);
             return null;
         }
     }
 
-    public async Task SaveAsync(byte[] content)
+    /// <summary>Writes to a temporary file and moves it into place, so a reader never sees a partial file.</summary>
+    private void Save(string fullPath, byte[] content)
     {
+        if (Interlocked.Read(ref _storedBytes) + content.Length > _maxBytes)
+        {
+            if (!_fullLogged)
+            {
+                _logger.LogWarning("Content store {Root} has reached its {Megabytes} MB limit; new content is served but not stored",
+                    Root, _configuration.Pandora.MaxStoredMegabytes);
+                _fullLogged = true;
+            }
+            return;
+        }
+
+        var temporary = $"{fullPath}.{Guid.NewGuid():N}.tmp";
         try
         {
-            var directory = Path.GetDirectoryName(FullPath);
-            if (!string.IsNullOrEmpty(directory))
+            Directory.CreateDirectory(Path.GetDirectoryName(fullPath)!);
+            File.WriteAllBytes(temporary, content);
+            File.Move(temporary, fullPath, overwrite: false);
+            Interlocked.Add(ref _storedBytes, content.Length);
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            // another process may have stored the same path first; its copy wins
+            _logger.LogWarning("Could not store content {FullPath}: {Message}", fullPath, e.Message);
+            try
             {
-                Directory.CreateDirectory(directory);
+                File.Delete(temporary);
             }
-
-            await File.WriteAllBytesAsync(FullPath, content);
-            _logger.LogDebug("Saved content to {FullPath}", FullPath);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Failed to save content to {FullPath}", FullPath);
-        }
-    }
-
-    public async Task SaveAsync(string content)
-    {
-        try
-        {
-            var directory = Path.GetDirectoryName(FullPath);
-            if (!string.IsNullOrEmpty(directory))
+            catch (Exception cleanup) when (cleanup is IOException or UnauthorizedAccessException)
             {
-                Directory.CreateDirectory(directory);
+                _logger.LogDebug("Could not remove {Temporary}: {Message}", temporary, cleanup.Message);
             }
-
-            await File.WriteAllTextAsync(FullPath, content);
-            _logger.LogDebug("Saved content to {FullPath}", FullPath);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Failed to save content to {FullPath}", FullPath);
         }
     }
 }

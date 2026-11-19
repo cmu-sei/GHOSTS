@@ -24,22 +24,14 @@ public class HomeController(
         // Check if we're in website mode
         if (applicationConfiguration.Mode.Type.Equals("website", StringComparison.OrdinalIgnoreCase))
         {
-            // If requesting root, serve website homepage
-            if (string.IsNullOrEmpty(path) || path == "/")
-            {
-                var homepage = websiteGenerationService.GenerateHomepage(
-                    applicationConfiguration.Mode.SiteType,
-                    applicationConfiguration.Mode.SiteName,
-                    applicationConfiguration.Mode.ArticleCount
-                );
-                return Content(homepage, "text/html");
-            }
+            // Every page the site links to exists; anything else gets the site's own not-found page
+            var page = websiteGenerationService.RenderPage(path);
+            if (page != null)
+                return Content(page, "text/html; charset=utf-8");
 
-            // For other paths in website mode, generate appropriate content or 404
-            Logger.LogInformation("Website mode: serving path {Path}", path);
-
-            // Return 404 for unhandled paths in website mode
-            return NotFound();
+            Logger.LogInformation("Website mode: no page at {Path}", ForLog(path));
+            Response.StatusCode = StatusCodes.Status404NotFound;
+            return Content(websiteGenerationService.NotFoundPage(), "text/html; charset=utf-8");
         }
 
         // Social mode - original behavior
@@ -70,8 +62,7 @@ public class HomeController(
         }
 
         var queryTheme = Request.Query["theme"].ToString();
-        if (string.IsNullOrEmpty(queryTheme))
-            queryTheme = ThemeRead();
+        queryTheme = string.IsNullOrEmpty(queryTheme) ? ThemeRead() : KnownTheme(queryTheme);
 
         var post = new Post
         {
@@ -135,7 +126,7 @@ public class HomeController(
 
         UserWrite(username);
 
-        await hubContext.Clients.All.SendAsync("SendMessage", post.Id, username, this.ThemeRead(), post.Message, post.CreatedUtc);
+        await hubContext.Clients.All.SendAsync("SendMessage", post.Id, username, post.Theme, MessageHtml.ToHtml(post.Message), post.CreatedUtc);
 
         return NoContent();
     }

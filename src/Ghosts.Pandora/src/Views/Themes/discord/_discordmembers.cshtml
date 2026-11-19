@@ -1,0 +1,50 @@
+@model List<string>
+@*
+    The member list. Model: the usernames to list. People who are online are grouped under their hoisted role,
+    the rest of the online people under "Online", and everyone else under "Offline", as Discord does.
+*@
+@{
+    var roles = ((string Department, string Role, string Css)[])Context.Items["dc.roles"];
+    var role = (Func<string, string>)Context.Items["dc.role"];
+    var roleCss = (Func<string, string>)Context.Items["dc.rolecss"];
+    var presence = (Func<string, string>)Context.Items["dc.presence"];
+    var activity = (Func<string, string>)Context.Items["dc.activity"];
+    var owner = Present.World.HeadOf("Information Technology").Username;
+
+    var people = (Model ?? new List<string>()).Distinct(StringComparer.OrdinalIgnoreCase)
+        .OrderBy(u => Present.DisplayName(u), StringComparer.OrdinalIgnoreCase).ToList();
+    var online = people.Where(u => presence(u) != "offline").ToList();
+    var groups = new List<(string Title, List<string> People)>();
+    foreach (var r in roles)
+        groups.Add((r.Role, online.Where(u => role(u) == r.Role).ToList()));
+    groups.Add(("Online", online.Where(u => role(u) == null).ToList()));
+    groups.Add(("Offline", people.Where(u => presence(u) == "offline").ToList()));
+    groups.RemoveAll(g => g.People.Count == 0);
+}
+<aside class="dc-members" aria-label="Members">
+    @foreach (var group in groups)
+    {
+        <h3 class="dc-members-head">@group.Title — @group.People.Count</h3>
+        foreach (var u in group.People)
+        {
+            var p = presence(u);
+            var a = activity(u);
+            <a href="/u/@u" class="dc-member@(p == "offline" ? " offline" : "")">
+                <span class="dc-avatar s32"><img src="/u/@u/avatar" alt=""><i class="dc-status @p"></i></span>
+                <span class="dc-member-text">
+                    <span class="dc-member-line">
+                        <span class="dc-member-name dc-name @roleCss(u)">@Present.DisplayName(u)</span>
+                        @if (string.Equals(u, owner, StringComparison.OrdinalIgnoreCase))
+                        {
+                            <svg class="ic dc-crown" width="14" height="14" aria-label="Server Owner"><use href="#i-crown"/></svg>
+                        }
+                    </span>
+                    @if (a != null)
+                    {
+                        <span class="dc-member-activity">@a</span>
+                    }
+                </span>
+            </a>
+        }
+    }
+</aside>

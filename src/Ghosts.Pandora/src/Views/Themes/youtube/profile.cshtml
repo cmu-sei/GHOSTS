@@ -1,17 +1,30 @@
 @model Ghosts.Pandora.Infrastructure.Models.User
+@functions {
+    // A stable, plausible subscriber count for a channel (the watch page uses the same formula)
+    static int Subscribers(string username)
+    {
+        var unit = Ghosts.Pandora.Infrastructure.Content.ContentRequest.StableHash($"{username}:subscribers") % 10000 / 10000d;
+        return 80 + (int)(unit * unit * unit * 480000);
+    }
+}
 @{
     Layout = null;
-    var posts = ViewBag.Posts as List<Ghosts.Pandora.Infrastructure.Models.Post>;
-    var profileUsername = (ViewContext.RouteData.Values["username"] as string)?.Trim();
-    if (string.IsNullOrWhiteSpace(profileUsername))
-    {
-        profileUsername = Context.Request.Cookies["username"];
-    }
+    ViewBag.Theme = "youtube";
+    var posts = ViewBag.Posts as List<Ghosts.Pandora.Infrastructure.Models.Post> ?? new List<Ghosts.Pandora.Infrastructure.Models.Post>();
+    var username = Model?.Username ?? ViewBag.ProfileUsername as string ?? string.Empty;
+    var isSelf = ViewBag.IsSelf as bool? ?? false;
+    var isFollowing = ViewBag.IsFollowing as bool? ?? false;
+    ViewData["ytActive"] = isSelf ? "yourvideos" : string.Empty;
 
-    if (string.IsNullOrWhiteSpace(profileUsername))
-    {
-        profileUsername = Model?.Username ?? "user";
-    }
+    var name = Present.DisplayName(username);
+    var headline = Present.Headline(username);
+    var bio = string.IsNullOrWhiteSpace(Model?.Bio) || Model.Bio == $"User {username}" ? headline : Model.Bio;
+    var inWorld = headline.EndsWith(Present.World.OrganizationName, StringComparison.Ordinal);
+    var banners = new[] { 1, 2, 3, 4, 7, 8, 9, 10 };
+    var banner = $"/img/last-photo{banners[Ghosts.Pandora.Infrastructure.Content.ContentRequest.StableHash($"{username}:banner") % banners.Length]}-large.jpg";
+    var latest = posts.OrderByDescending(p => p.CreatedUtc).ToList();
+    var popular = posts.OrderByDescending(p => Present.Views(p)).ToList();
+    var featured = popular.FirstOrDefault();
 }
 
 <!DOCTYPE html>
@@ -19,296 +32,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@profileUsername - YouTube</title>
-    <link rel="stylesheet" href="/themes/youtube/css/feed.css">
-    <link rel="icon" href="/themes/youtube/images/youtube-icon.png">
-    <style>
-        .follow-action-form {
-            display: inline-block;
-            margin-right: 12px;
-        }
-
-        .follow-action-button {
-            background: #ff0000;
-            border: none;
-            color: #fff;
-            padding: 10px 20px;
-            border-radius: 999px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .channel-connections {
-            background: #fff;
-            border-radius: 16px;
-            padding: 24px;
-            margin-top: 24px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
-        }
-
-        .connections-heading {
-            margin: 0 0 12px;
-            font-size: 20px;
-        }
-
-        .connections-summary {
-            display: flex;
-            justify-content: space-between;
-            font-size: 14px;
-            color: #606060;
-            margin-bottom: 16px;
-        }
-
-        .connections-columns {
-            display: grid;
-            gap: 16px;
-        }
-
-        .connections-column {
-            background: #f9f9f9;
-            border-radius: 12px;
-            padding: 16px;
-        }
-
-        .connections-column h3 {
-            margin: 0 0 12px;
-            font-size: 15px;
-            text-transform: uppercase;
-            color: #202020;
-        }
-
-        .connections-scroll {
-            max-height: 220px;
-            overflow-y: auto;
-        }
-    </style>
+    <meta name="current-user" content="@ViewBag.Username">
+    <title>@name - YouTube</title>
+    <link rel="stylesheet" href="/themes/youtube/css/feed.css?@System.Guid.NewGuid()">
+    <link rel="icon" href="/themes/youtube/images/youtube-icon.svg" type="image/svg+xml">
 </head>
-<body>
-    <div class="app">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-left">
-                <button class="menu-btn">☰</button>
-                <div class="logo">
-                    <img src="/themes/youtube/images/youtube-logo.png" alt="YouTube" class="youtube-logo">
-                </div>
-            </div>
-            <div class="header-center">
-                <div class="search-container">
-                    <input type="text" placeholder="Search" class="search-input">
-                    <button class="search-btn">🔍</button>
-                </div>
-                <button class="mic-btn">🎤</button>
-            </div>
-            <div class="header-right">
-                <button class="header-btn">📹</button>
-                <button class="header-btn">🔔</button>
-                <div class="user-menu">
-                    <img src="/u/@ViewBag.Username/avatar" alt="Profile" class="user-avatar">
-                </div>
-            </div>
-        </header>
+<body data-theme="youtube" class="yt-browse-page">
+    @await Html.PartialAsync("~/Views/Themes/youtube/_masthead.cshtml")
+    @await Html.PartialAsync("~/Views/Themes/youtube/_guide.cshtml")
 
-        <div class="main-container">
-            <!-- Sidebar -->
-            <aside class="sidebar">
-                <div class="sidebar-section">
-                    <div class="sidebar-item">
-                        <span class="sidebar-icon">🏠</span>
-                        <span class="sidebar-text">Home</span>
-                    </div>
-                    <div class="sidebar-item">
-                        <span class="sidebar-icon">🎬</span>
-                        <span class="sidebar-text">Shorts</span>
-                    </div>
-                    <div class="sidebar-item">
-                        <span class="sidebar-icon">📺</span>
-                        <span class="sidebar-text">Subscriptions</span>
-                    </div>
-                </div>
+    <main class="yt-page-manager">
+        <div class="yt-channel">
+            <div class="yt-channel-banner"><img src="@banner" alt=""></div>
 
-                <div class="sidebar-divider"></div>
-
-                <div class="sidebar-section">
-                    <div class="sidebar-item">
-                        <span class="sidebar-icon">📚</span>
-                        <span class="sidebar-text">Library</span>
-                    </div>
-                    <div class="sidebar-item">
-                        <span class="sidebar-icon">🕒</span>
-                        <span class="sidebar-text">History</span>
-                    </div>
-                </div>
-            </aside>
-
-            <!-- Main Content -->
-            <main class="channel-content">
-                <!-- Channel Header -->
-                <div class="channel-header">
-                    <div class="channel-banner">
-                        <div class="banner-image"></div>
-                    </div>
-
-                    <div class="channel-info">
-                        <div class="channel-avatar-section">
-                            <img src="/u/@profileUsername/avatar" alt="@profileUsername" class="channel-avatar">
-                        </div>
-
-                        <div class="channel-details">
-                            <h1 class="channel-name">@profileUsername</h1>
-                            <div class="channel-meta">
-                                <span class="channel-handle">@($"@{profileUsername}")</span>
-                                <span class="channel-stats"><span data-followers-count>0</span> subscribers • <span data-following-count>0</span> following</span>
-                            </div>
-                        <div class="channel-description">@(string.IsNullOrWhiteSpace(Model.Bio) ? "No description." : Model.Bio)</div>
-                    </div>
-
-                    <div class="channel-actions">
-                        @await Html.PartialAsync("~/Views/Shared/_FollowActions.cshtml")
-                        <button class="btn btn-secondary">Join</button>
-                    </div>
-                </div>
-
-                <div class="channel-connections" data-profile-connections data-username="@profileUsername">
-                    <h2 class="connections-heading">Community</h2>
-                    <div class="connections-summary">
-                        <span><strong data-followers-count>0</strong> subscribers</span>
-                        <span><strong data-following-count>0</strong> following</span>
-                    </div>
-                    <div class="connections-columns">
-                        <div class="connections-column">
-                            <h3>Following (<span data-following-count>0</span>)</h3>
-                            <div class="connections-scroll" data-following-list></div>
-                        </div>
-                        <div class="connections-column">
-                            <h3>Subscribers (<span data-followers-count>0</span>)</h3>
-                            <div class="connections-scroll" data-followers-list></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Channel Navigation -->
-                    <nav class="channel-nav">
-                        <div class="nav-item active">HOME</div>
-                        <div class="nav-item">VIDEOS</div>
-                        <div class="nav-item">SHORTS</div>
-                        <div class="nav-item">LIVE</div>
-                        <div class="nav-item">PLAYLISTS</div>
-                        <div class="nav-item">COMMUNITY</div>
-                        <div class="nav-item">ABOUT</div>
-                    </nav>
-                </div>
-
-                <!-- Channel Content -->
-                <div class="channel-main">
-                    <!-- Featured Video Section -->
-                    <div class="featured-section">
-                        <h2 class="section-title">Featured</h2>
-                        @if (posts != null && posts.Any())
+            <div class="yt-channel-header">
+                <img class="yt-channel-avatar" src="/u/@username/avatar" alt="">
+                <div class="yt-channel-text">
+                    <h1 class="yt-channel-name">@name</h1>
+                    <div class="yt-channel-meta"><span><b>@Present.Handle(username)</b></span><span>@SocialPresentation.Compact(Subscribers(username)) subscribers</span><span>@posts.Count video@(posts.Count == 1 ? "" : "s")</span></div>
+                    <div class="yt-channel-desc"><span>@bio</span><b>...more</b></div>
+                    @if (inWorld)
+                    {
+                        <div class="yt-channel-links"><a class="yt-link" href="https://@Present.World.Domain">@Present.World.Domain</a></div>
+                    }
+                    <div class="yt-channel-actions">
+                        @if (isSelf)
                         {
-                            var featuredPost = posts.First();
-                            <div class="featured-video">
-                                <div class="video-thumbnail">
-                                    {
-                                    }
-                                    else
-                                    {
-                                        <div class="thumbnail-placeholder">
-                                            <span class="play-icon">▶️</span>
-                                        </div>
-                                    }
-                                    <div class="video-duration">12:34</div>
+                            <button class="yt-pill" type="button" data-toast="Channel customization opens in YouTube Studio">Customize channel</button>
+                            <button class="yt-pill" type="button" data-open-upload>Manage videos</button>
+                        }
+                        else
+                        {
+                            <button class="yt-pill yt-subscribe" type="button" data-username="@username" data-subscribed="@(isFollowing ? "true" : "false")">Subscribe</button>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <nav class="yt-tabs">
+                <button class="yt-tab active" type="button" data-tab="home">Home</button>
+                <button class="yt-tab" type="button" data-tab="videos">Videos</button>
+                <button class="yt-tab" type="button" data-tab="shorts">Shorts</button>
+                <button class="yt-tab" type="button" data-tab="playlists">Playlists</button>
+                <form class="yt-tab-search" action="/search" method="get">
+                    <button class="yt-icon-btn" type="submit" aria-label="Search"><svg class="yt-icon"><use href="#yt-i-search"/></svg></button>
+                    <input type="hidden" name="q" value="@name">
+                </form>
+            </nav>
+
+            <section class="yt-tab-panel" data-panel="home">
+                @if (featured == null)
+                {
+                    <div class="yt-empty">
+                        <svg class="yt-icon"><use href="#yt-i-your-videos"/></svg>
+                        <h2>This channel doesn't have any content</h2>
+                        @if (isSelf)
+                        {
+                            <p>Upload a video to get started.</p>
+                            <p><button class="yt-pill yt-pill-dark" type="button" data-open-upload>Upload video</button></p>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="yt-channel-featured" data-post-id="@featured.Id">
+                        <a class="yt-thumb" href="/posts/@featured.Id">
+                            <img src="@Present.PhotoUrl(featured)" alt="">
+                            <span class="yt-badge">@Present.Duration(featured.Id)</span>
+                        </a>
+                        <div>
+                            <h2><a href="/posts/@featured.Id">@Present.Title(featured)</a></h2>
+                            <div class="yt-stats"><span>@SocialPresentation.Compact(Present.Views(featured)) views</span><span>@SocialPresentation.LongAgo(featured.CreatedUtc)</span></div>
+                            <p>@MessageHtml.Render(featured.Message)</p>
+                        </div>
+                    </div>
+
+                    <div class="yt-shelf-head">
+                        <h2>Videos</h2>
+                        <button class="yt-text-btn" type="button" data-tab-link="videos"><svg class="yt-icon" style="display:inline;vertical-align:-7px;margin-right:4px"><use href="#yt-i-play"/></svg>Play all</button>
+                    </div>
+                    <div class="yt-shelf-row">
+                        @foreach (var post in latest.Take(5))
+                        {
+                            await Html.RenderPartialAsync("~/Views/Themes/youtube/_postcard.cshtml", post);
+                        }
+                    </div>
+
+                    @if (popular.Count > 5)
+                    {
+                        <div class="yt-shelf-head"><h2>Popular videos</h2></div>
+                        <div class="yt-shelf-row">
+                            @foreach (var post in popular.Take(5))
+                            {
+                                await Html.RenderPartialAsync("~/Views/Themes/youtube/_postcard.cshtml", post);
+                            }
+                        </div>
+                    }
+                }
+            </section>
+
+            <section class="yt-tab-panel" data-panel="videos" hidden>
+                <div class="yt-channel-sort">
+                    <button class="yt-chip selected" type="button" data-sort="latest">Latest</button>
+                    <button class="yt-chip" type="button" data-sort="popular">Popular</button>
+                    <button class="yt-chip" type="button" data-sort="oldest">Oldest</button>
+                </div>
+                <div class="yt-rich-grid">
+                    @foreach (var post in latest)
+                    {
+                        await Html.RenderPartialAsync("~/Views/Themes/youtube/_postcard.cshtml", post);
+                    }
+                </div>
+                @if (posts.Count == 0)
+                {
+                    <div class="yt-tab-empty">This channel has no videos.</div>
+                }
+            </section>
+
+            <section class="yt-tab-panel" data-panel="shorts" hidden>
+                <div class="yt-shorts-grid">
+                    @foreach (var post in popular)
+                    {
+                        <div class="yt-short" data-post-id="@post.Id">
+                            <a class="yt-thumb" href="/posts/@post.Id"><img src="@Present.PhotoUrl(post.Id, 5)" alt="" loading="lazy"></a>
+                            <div class="yt-details">
+                                <div class="yt-meta">
+                                    <h3 class="yt-title"><a href="/posts/@post.Id">@Present.Title(post)</a></h3>
+                                    <div class="yt-stats"><span>@SocialPresentation.Compact(Present.Views(post) / 3) views</span></div>
                                 </div>
-                                <div class="video-info">
-                                    <h3 class="video-title">@Html.Raw(featuredPost.Message.Length > 100 ? featuredPost.Message.Substring(0, 100) + "..." : featuredPost.Message)</h3>
-                                    <div class="video-meta">
-                                        <span>1.2M views • @featuredPost.CreatedUtc.ToString("MMM d, yyyy")</span>
+                                <button class="yt-icon-btn yt-card-menu" type="button" aria-label="Action menu"><svg class="yt-icon"><use href="#yt-i-more-vert"/></svg></button>
+                            </div>
+                        </div>
+                    }
+                </div>
+                @if (posts.Count == 0)
+                {
+                    <div class="yt-tab-empty">This channel has no Shorts.</div>
+                }
+            </section>
+
+            <section class="yt-tab-panel" data-panel="playlists" hidden>
+                <h3 class="yt-section-title">Created playlists</h3>
+                @if (featured != null)
+                {
+                    <div class="yt-rich-grid">
+                        @foreach (var (title, list) in new[] { ("Popular uploads", popular), ("Uploads", latest) })
+                        {
+                            <div class="yt-video-card">
+                                <a class="yt-thumb-wrap yt-playlist-thumb" href="/posts/@list[0].Id">
+                                    <span class="yt-thumb"><img src="@Present.PhotoUrl(list[0])" alt="" loading="lazy"><span class="yt-badge"><svg class="yt-icon"><use href="#yt-i-playlists"/></svg>@list.Count video@(list.Count == 1 ? "" : "s")</span></span>
+                                </a>
+                                <div class="yt-details">
+                                    <div class="yt-meta">
+                                        <h3 class="yt-title"><a href="/posts/@list[0].Id">@title</a></h3>
+                                        <a class="yt-playlist-link" href="/posts/@list[0].Id">View full playlist</a>
                                     </div>
                                 </div>
                             </div>
                         }
                     </div>
-
-                    <!-- Recent Videos Section -->
-                    <div class="videos-section">
-                        <h2 class="section-title">Recent uploads</h2>
-                        <div class="videos-grid">
-                            @if (posts != null)
-                            {
-                                @foreach (var post in posts)
-                                {
-                                    <div class="video-card">
-                                        <div class="video-thumbnail">
-                                            {
-                                            }
-                                            else
-                                            {
-                                                <div class="thumbnail-placeholder">
-                                                    <span class="play-icon">▶️</span>
-                                                </div>
-                                            }
-                                            <div class="video-duration">@{var duration = new Random().Next(3, 25);}@duration:@(new Random().Next(10, 59))</div>
-                                        </div>
-
-                                        <div class="video-info">
-                                            <h3 class="video-title">@Html.Raw(post.Message.Length > 60 ? post.Message.Substring(0, 60) + "..." : post.Message)</h3>
-                                            <div class="video-meta">
-                                                <div class="video-views">@{var views = new Random().Next(1000, 500000);}@views.ToString("N0") views</div>
-                                                <div class="video-date">@post.CreatedUtc.ToString("MMM d, yyyy")</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                }
-                            }
-                            else
-                            {
-                                <div class="no-videos">
-                                    <p>No videos available</p>
-                                </div>
-                            }
-                        </div>
-                    </div>
-
-                    <!-- About Section -->
-                    <div class="about-section">
-                        <h2 class="section-title">About</h2>
-                        <div class="about-content">
-                            <div class="about-text">
-                                <p>Welcome to my YouTube channel! I create content about technology, programming, and digital innovation.</p>
-                                <p>New videos every week covering the latest trends in tech and tutorials to help you improve your skills.</p>
-                            </div>
-                            <div class="about-stats">
-                                <div class="stat-item">
-                                    <div class="stat-number">1.2M</div>
-                                    <div class="stat-label">Subscribers</div>
-                                </div>
-                                <div class="stat-item">
-                                    <div class="stat-number">245</div>
-                                    <div class="stat-label">Videos</div>
-                                </div>
-                                <div class="stat-item">
-                                    <div class="stat-number">52M</div>
-                                    <div class="stat-label">Views</div>
-                                </div>
-                            </div>
-                            <div class="about-details">
-                                <div class="detail-item">
-                                    <span class="detail-icon">📅</span>
-                                    <span class="detail-text">Joined Jan 15, 2020</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-icon">🌍</span>
-                                    <span class="detail-text">United States</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </main>
+                }
+                else
+                {
+                    <div class="yt-tab-empty">This channel has no playlists.</div>
+                }
+            </section>
         </div>
-    </div>
+    </main>
 
-    <script src="/themes/youtube/js/youtube.js"></script>
-    <script src="/js/connections.js"></script>
+    @await Html.PartialAsync("_Scripts")
+    <script src="/themes/youtube/js/youtube.js?@System.Guid.NewGuid()"></script>
 </body>
 </html>

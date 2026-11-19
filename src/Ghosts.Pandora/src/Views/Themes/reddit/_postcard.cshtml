@@ -1,0 +1,43 @@
+@model Ghosts.Pandora.Infrastructure.Models.Post
+@{
+    var me = ViewBag.Username as string;
+    var voted = !string.IsNullOrWhiteSpace(me) &&
+        (Model.Likes?.Any(l => string.Equals(l.Username, me, StringComparison.OrdinalIgnoreCase)) ?? false);
+    var score = Present.Score(Model);
+    var community = Present.Community(Model);
+    var body = Present.Body(Model);
+    var created = new DateTimeOffset(DateTime.SpecifyKind(Model.CreatedUtc, DateTimeKind.Utc)).ToUnixTimeSeconds();
+}
+<div class="r-item" data-score="@score" data-created="@created">
+    <article class="r-post" data-post-id="@Model.Id" data-href="/posts/@Model.Id">
+        <div class="r-post-meta">
+            <a class="r-sub" href="/r/@community"><span class="cicon" data-c="@(community.Sum(ch => ch) / 3 % 8)">r/</span><span class="r-sub-name">r/@community</span></a>
+            <span class="r-dot">&bull;</span>
+            @await Html.PartialAsync("~/Views/Themes/reddit/_ago.cshtml", Model.CreatedUtc)
+            <div class="r-post-tools">
+                <button type="button" class="r-icon-btn r-overflow" aria-label="Open user actions" data-r="more"><svg class="ri"><use href="#i-more" /></svg></button>
+            </div>
+        </div>
+        <a class="r-post-title" href="/posts/@Model.Id">@Present.Title(Model)</a>
+        @if (body.Length > 0)
+        {
+            <div class="r-post-body">@MessageHtml.Render(body)</div>
+        }
+        @if (Present.HasPhoto(Model, 30))
+        {
+            var photo = Present.PhotoUrl(Model);
+            <a class="r-media" href="/posts/@Model.Id" tabindex="-1"><span class="r-media-bg" style="background-image:url('@photo')"></span><img src="@photo" alt="" loading="lazy"></a>
+        }
+        <div class="post-actions">
+            <span class="r-vote" data-vote="@(voted ? "up" : "")" data-base="@(score - (voted ? 1 : 0))">
+                <button type="button" class="action-btn like-it" data-id="@Model.Id" aria-label="Upvote" aria-pressed="@(voted ? "true" : "false")"><svg class="ri"><use href="#i-up" /></svg></button>
+                <span class="r-score">@SocialPresentation.Compact(score)</span>
+                <button type="button" aria-label="Downvote" data-r="down"><svg class="ri"><use href="#i-down" /></svg></button>
+            </span>
+            <a class="r-pill" href="/posts/@Model.Id#comments" aria-label="@Present.CommentCount(Model) comments"><svg class="ri ri-sm"><use href="#i-comment" /></svg><span>@SocialPresentation.Compact(Present.CommentCount(Model))</span></a>
+            <button type="button" class="r-pill r-award" aria-label="Give award" title="Give award"><svg class="ri ri-sm"><use href="#i-award" /></svg></button>
+            <button type="button" class="r-pill" data-r="share" data-url="/posts/@Model.Id"><svg class="ri ri-sm"><use href="#i-share" /></svg><span>Share</span></button>
+        </div>
+    </article>
+    <hr class="r-sep">
+</div>

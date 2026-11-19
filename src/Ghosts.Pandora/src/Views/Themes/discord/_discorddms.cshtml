@@ -1,0 +1,72 @@
+@model string
+@inject Ghosts.Pandora.Infrastructure.Services.IUserService Users
+@inject Ghosts.Pandora.Infrastructure.Services.IDirectMessageService DirectMessages
+@*
+    The Direct Messages sidebar. Model: the username of the open conversation, or null on the Friends page.
+    It lists the people the signed-in user has messaged, newest conversation first, plus the open one.
+*@
+@{
+    var me = ViewBag.Username as string;
+    var presence = (Func<string, string>)Context.Items["dc.presence"];
+    var activity = (Func<string, string>)Context.Items["dc.activity"];
+    var presenceLabel = (Func<string, string>)Context.Items["dc.presencelabel"];
+    var meUser = string.IsNullOrWhiteSpace(me) ? null : await Users.GetUserByUsernameAsync(me, "discord");
+    var partners = meUser == null ? new List<string>() : (await DirectMessages.GetConversationPartnersAsync(meUser.Id)).Select(u => u.Username).ToList();
+    var unread = meUser == null ? new HashSet<string>() : (await DirectMessages.GetUnreadMessagesAsync(meUser.Id)).Select(m => m.FromUsername).ToHashSet(StringComparer.OrdinalIgnoreCase);
+    if (!string.IsNullOrWhiteSpace(Model) && !partners.Contains(Model, StringComparer.OrdinalIgnoreCase))
+        partners.Insert(0, Model);
+    var friends = (await Users.GetUsersByThemeAsync("discord", 60)).Select(u => u.Username)
+        .Where(u => !string.Equals(u, me, StringComparison.OrdinalIgnoreCase))
+        .OrderBy(u => Present.DisplayName(u), StringComparer.OrdinalIgnoreCase).ToList();
+}
+<aside class="dc-sidebar dc-dm-sidebar" aria-label="Direct Messages">
+    <div class="dc-dm-find">
+        <input type="text" class="dc-dm-find-input" placeholder="Find or start a conversation" aria-label="Find or start a conversation">
+    </div>
+    <div class="dc-sidebar-scroll">
+        <a href="/messages" class="dc-nav-item@(Model == null ? " selected" : "")"><svg class="ic" width="24" height="24"><use href="#i-friends"/></svg> Friends</a>
+        <div class="dc-nav-item" data-inert><svg class="ic" width="24" height="24"><use href="#i-nitro"/></svg> Nitro</div>
+        <div class="dc-nav-item" data-inert><svg class="ic" width="24" height="24"><use href="#i-shop"/></svg> Shop</div>
+        <div class="dc-sidebar-sep"></div>
+        <div class="dc-dm-head">
+            <span>Direct Messages</span>
+            <button type="button" class="dc-category-add" data-popover="dc-new-dm" data-tip="Create DM"><svg class="ic" width="16" height="16"><use href="#i-plus"/></svg></button>
+        </div>
+        @foreach (var partner in partners)
+        {
+            var p = presence(partner);
+            <a href="/messages/conversation/@partner" class="dc-dm@(string.Equals(partner, Model, StringComparison.OrdinalIgnoreCase) ? " selected" : "")@(unread.Contains(partner) ? " unread" : "")">
+                <span class="dc-avatar s32"><img src="/u/@partner/avatar" alt=""><i class="dc-status @p"></i></span>
+                <span class="dc-dm-text">
+                    <span class="dc-dm-name">@Present.DisplayName(partner)</span>
+                    <span class="dc-dm-sub">@(activity(partner) ?? (p == "offline" ? "" : presenceLabel(p)))</span>
+                </span>
+            </a>
+        }
+        @if (partners.Count == 0)
+        {
+            <div class="dc-dm-none">Messages you send and receive show up here.</div>
+        }
+    </div>
+</aside>
+
+@* Discord's "Select Friends" popout; it posts the first message to /messages/send, which opens the conversation *@
+<div class="dc-popover dc-new-dm" id="dc-new-dm" hidden>
+    <form method="post" action="/messages/send" class="dc-new-dm-form">
+        <strong>Select Friends</strong>
+        <p>Pick a friend, then say hello.</p>
+        <input type="text" name="toUsername" class="dc-new-dm-input" placeholder="Type the username of a friend" required autocomplete="off">
+        <div class="dc-new-dm-list">
+            @foreach (var friend in friends)
+            {
+                <button type="button" class="dc-new-dm-pick" data-username="@friend">
+                    <span class="dc-avatar s32"><img src="/u/@friend/avatar" alt=""></span>
+                    <span>@Present.DisplayName(friend)</span>
+                    <small>@friend</small>
+                </button>
+            }
+        </div>
+        <input type="text" name="message" class="dc-new-dm-input" placeholder="Message" required autocomplete="off">
+        <button type="submit" class="dc-btn primary wide">Create DM</button>
+    </form>
+</div>

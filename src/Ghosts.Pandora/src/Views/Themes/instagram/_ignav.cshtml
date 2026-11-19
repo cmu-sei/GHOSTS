@@ -1,0 +1,161 @@
+@inject Ghosts.Pandora.Infrastructure.Services.IPostService Posts
+@inject Ghosts.Pandora.Infrastructure.Services.IUserService Users
+@inject Ghosts.Pandora.Infrastructure.Services.IDirectMessageService Dms
+@{
+    // The left navigation (a bottom bar on phones), its Search and Notifications panels and the More menu
+    var me = ViewBag.Username as string ?? string.Empty;
+    var active = ViewData["IgActive"] as string ?? string.Empty;
+    var mobileTitle = ViewData["IgMobileTitle"] as string;
+    var mobileBack = ViewData["IgMobileBack"] as string ?? "/";
+
+    // Activity on the current user's posts, newest first
+    var myPosts = string.IsNullOrWhiteSpace(me) ? new List<Post>() : await Posts.GetPostsByUserAndTheme(me, "instagram", 30);
+    var activity = myPosts
+        .SelectMany(p => (p.Comments ?? new List<Comment>())
+            .Where(c => !string.Equals(c.Username, me, StringComparison.OrdinalIgnoreCase))
+            .Select(c => (Post: p, User: c.Username, Text: c.Message, When: c.CreatedUtc, IsComment: true))
+            .Concat((p.Likes ?? new List<Like>())
+                .Where(l => !string.Equals(l.Username, me, StringComparison.OrdinalIgnoreCase))
+                .Select(l => (Post: p, User: l.Username, Text: (string)null, When: l.CreatedUtc, IsComment: false))))
+        .Where(a => !string.IsNullOrWhiteSpace(a.User))
+        .OrderByDescending(a => a.When)
+        .Take(30)
+        .ToList();
+
+    var meUser = string.IsNullOrWhiteSpace(me) ? null : await Users.GetUserByUsernameAsync(me, "instagram");
+    // threads whose latest message is an unread one from the other person
+    var unread = 0;
+    if (meUser != null)
+    {
+        var lastSent = (await Dms.GetSentMessagesAsync(meUser.Id)).GroupBy(m => m.ToUserId).ToDictionary(g => g.Key, g => g.Max(m => m.CreatedUtc));
+        unread = (await Dms.GetUnreadMessagesAsync(meUser.Id))
+            .Where(m => !lastSent.TryGetValue(m.FromUserId, out var sentAt) || m.CreatedUtc > sentAt)
+            .Select(m => m.FromUserId).Distinct().Count();
+    }
+}
+
+@if (mobileTitle == null)
+{
+    <header class="ig-topbar">
+        <a href="/" class="ig-topbar-logo"><img src="/themes/instagram/images/wordmark.png" alt="Instagram" width="103" height="29"></a>
+        <div class="ig-topbar-actions">
+            <form method="get" action="/search" class="ig-topbar-search">
+                <svg class="ig-i ig-i-16" aria-hidden="true"><use href="#ig-search"/></svg>
+                <input type="text" name="q" class="ig-search-field" placeholder="Search" autocomplete="off" aria-label="Search input">
+            </form>
+            <a href="#" class="ig-topbar-btn" data-ig-panel="notifications" aria-label="Notifications"><svg class="ig-i"><use href="#ig-heart"/></svg>@if (activity.Count > 0){<span class="ig-dot"></span>}</a>
+        </div>
+    </header>
+}
+else
+{
+    <header class="ig-topbar ig-topbar-titled">
+        <a href="@mobileBack" class="ig-topbar-btn" aria-label="Back"><svg class="ig-i"><use href="#ig-back"/></svg></a>
+        <h1 class="ig-topbar-title">@mobileTitle</h1>
+        <span class="ig-topbar-btn" aria-hidden="true"></span>
+    </header>
+}
+
+<nav class="ig-nav" aria-label="Primary">
+    <a href="/" class="ig-logo" aria-label="Instagram">
+        <img class="ig-logo-wordmark" src="/themes/instagram/images/wordmark.png" alt="Instagram" width="103" height="29">
+        <svg class="ig-i ig-logo-glyph" aria-hidden="true"><use href="#ig-glyph"/></svg>
+    </a>
+    <div class="ig-nav-items">
+        <a href="/" class="ig-nav-item ig-nav-home@(active == "home" ? " is-active" : "")">
+            <span class="ig-nav-icon"><svg class="ig-i"><use href="#@(active == "home" ? "ig-home-fill" : "ig-home")"/></svg></span><span class="ig-nav-label">Home</span>
+        </a>
+        <a href="/search" class="ig-nav-item ig-nav-search@(active == "search" ? " is-active" : "")" data-ig-panel="search">
+            <span class="ig-nav-icon"><svg class="ig-i"><use href="#@(active == "search" ? "ig-search-bold" : "ig-search")"/></svg></span><span class="ig-nav-label">Search</span>
+        </a>
+        <a href="/search?tab=explore" class="ig-nav-item ig-nav-explore@(active == "explore" ? " is-active" : "")">
+            <span class="ig-nav-icon"><svg class="ig-i"><use href="#@(active == "explore" ? "ig-explore-fill" : "ig-explore")"/></svg></span><span class="ig-nav-label">Explore</span>
+        </a>
+        <a href="/search?tab=reels" class="ig-nav-item ig-nav-reels@(active == "reels" ? " is-active" : "")">
+            <span class="ig-nav-icon"><svg class="ig-i"><use href="#ig-reels"/></svg></span><span class="ig-nav-label">Reels</span>
+        </a>
+        <a href="/messages" class="ig-nav-item ig-nav-messages@(active == "messages" ? " is-active" : "")">
+            <span class="ig-nav-icon"><svg class="ig-i"><use href="#@(active == "messages" ? "ig-messages-fill" : "ig-messages")"/></svg>@if (unread > 0){<span class="ig-badge">@unread</span>}</span><span class="ig-nav-label">Messages</span>
+        </a>
+        <a href="#" class="ig-nav-item ig-nav-notifications" data-ig-panel="notifications">
+            <span class="ig-nav-icon"><svg class="ig-i"><use href="#ig-heart"/></svg>@if (activity.Count > 0){<span class="ig-dot"></span>}</span><span class="ig-nav-label">Notifications</span>
+        </a>
+        <a href="/#create" class="ig-nav-item ig-nav-create" data-ig-create>
+            <span class="ig-nav-icon"><svg class="ig-i"><use href="#ig-create"/></svg></span><span class="ig-nav-label">Create</span>
+        </a>
+        <a href="/u/@me" class="ig-nav-item ig-nav-profile@(active == "profile" ? " is-active" : "")">
+            <span class="ig-nav-icon"><img src="/u/@me/avatar" alt="" class="ig-nav-avatar"></span><span class="ig-nav-label">Profile</span>
+        </a>
+    </div>
+    <div class="ig-nav-bottom">
+        <a href="#" class="ig-nav-item ig-nav-threads" data-ig-inert>
+            <span class="ig-nav-icon"><svg class="ig-i"><use href="#ig-threads"/></svg></span><span class="ig-nav-label">Threads</span>
+        </a>
+        <a href="#" class="ig-nav-item ig-nav-more" data-ig-more>
+            <span class="ig-nav-icon"><svg class="ig-i"><use href="#ig-menu"/></svg></span><span class="ig-nav-label">More</span>
+        </a>
+        <div class="ig-more-menu" role="menu" hidden>
+            <a href="#" role="menuitem" data-ig-inert><svg class="ig-i ig-i-18"><use href="#ig-gear"/></svg>Settings</a>
+            <a href="#" role="menuitem" data-ig-inert><svg class="ig-i ig-i-18"><use href="#ig-reels"/></svg>Your activity</a>
+            <a href="/u/@me?tab=saved" role="menuitem"><svg class="ig-i ig-i-18"><use href="#ig-save"/></svg>Saved</a>
+            <a href="#" role="menuitem" data-ig-inert><svg class="ig-i ig-i-18"><use href="#ig-emoji"/></svg>Switch appearance</a>
+            <a href="#" role="menuitem" data-ig-inert><svg class="ig-i ig-i-18"><use href="#ig-info"/></svg>Report a problem</a>
+            <div class="ig-more-sep"></div>
+            <a href="#" role="menuitem" data-ig-inert>Switch accounts</a>
+            <div class="ig-more-thin"></div>
+            <a href="/login" role="menuitem">Log out</a>
+        </div>
+    </div>
+</nav>
+
+<aside class="ig-panel" id="ig-panel-search" aria-label="Search" hidden>
+    <h2 class="ig-panel-title">Search</h2>
+    <form method="get" action="/search" class="ig-panel-search">
+        <input type="text" name="q" class="ig-search-field" placeholder="Search" autocomplete="off" aria-label="Search input">
+    </form>
+    <div class="ig-panel-sep"></div>
+    <div class="ig-panel-head"><span>Recent</span></div>
+    <div class="ig-panel-empty">No recent searches.</div>
+</aside>
+
+<aside class="ig-panel" id="ig-panel-notifications" aria-label="Notifications" hidden>
+    <h2 class="ig-panel-title">Notifications</h2>
+    @if (activity.Count == 0)
+    {
+        <div class="ig-panel-blank">
+            <svg class="ig-i ig-i-62" aria-hidden="true"><use href="#ig-heart"/></svg>
+            <div class="ig-panel-blank-title">Activity On Your Posts</div>
+            <div class="ig-panel-blank-text">When someone likes or comments on one of your posts, you'll see it here.</div>
+        </div>
+    }
+    else
+    {
+        var lastHeading = string.Empty;
+        foreach (var a in activity)
+        {
+            var age = DateTime.UtcNow - DateTime.SpecifyKind(a.When, DateTimeKind.Utc);
+            var heading = age < TimeSpan.FromDays(1) ? "Today" : age < TimeSpan.FromDays(7) ? "This week" : age < TimeSpan.FromDays(30) ? "This month" : "Earlier";
+            if (heading != lastHeading)
+            {
+                lastHeading = heading;
+                <div class="ig-panel-head"><span>@heading</span></div>
+            }
+            <a class="ig-activity" href="/posts/@a.Post.Id">
+                <img src="/u/@a.User/avatar" alt="" class="ig-avatar-44">
+                <span class="ig-activity-text">
+                    <b>@a.User</b>
+                    @if (a.IsComment)
+                    {
+                        <text>commented: @MessageHtml.Render(a.Text)</text>
+                    }
+                    else
+                    {
+                        <text>liked your post.</text>
+                    }
+                    <span class="ig-muted">@SocialPresentation.ShortAgo(a.When)</span>
+                </span>
+                <img src="@Present.PhotoUrl(a.Post)" alt="" class="ig-activity-thumb">
+            </a>
+        }
+    }
+</aside>

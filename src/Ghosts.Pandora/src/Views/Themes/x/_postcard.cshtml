@@ -1,0 +1,44 @@
+@* A post in an X timeline. The like button keeps the exact class "action-btn like-it" inside div.tweet-actions for GHOSTS clients. *@
+@model Ghosts.Pandora.Infrastructure.Models.Post
+@{
+    var me = ViewBag.Username as string;
+    var liked = !string.IsNullOrWhiteSpace(me) &&
+        (Model.Likes?.Any(l => string.Equals(l.Username, me, StringComparison.OrdinalIgnoreCase)) ?? false);
+    var text = SocialPresentation.UploadedImage(Model) != null ? SocialPresentation.PlainText(Model) : Model.Message;
+    var photo = Present.HasPhoto(Model, 25) ? Present.PhotoUrl(Model) : null;
+    var replies = Present.CommentCount(Model);
+    var reposts = Present.Shares(Model);
+    var likes = Present.Score(Model);
+    var views = Present.Views(Model);
+    string Count(int n) => n > 0 ? SocialPresentation.Compact(n) : "";
+}
+<article class="tweet" data-post-id="@Model.Id" data-href="/posts/@Model.Id" data-username="@Model.Username">
+    <a href="/u/@Model.Username" class="tweet-avatar-link"><img src="/u/@Model.Username/avatar" alt="" class="tweet-avatar"></a>
+    <div class="tweet-content">
+        <div class="tweet-header">
+            <a href="/u/@Model.Username" class="tweet-name">@Present.DisplayName(Model.Username)</a>
+            <a href="/u/@Model.Username" class="tweet-handle">@Present.Handle(Model.Username)</a>
+            <span class="tweet-dot">·</span>
+            <a href="/posts/@Model.Id" class="tweet-time" title="@Model.CreatedUtc.ToString("h:mm tt · MMM d, yyyy")"><time datetime="@Model.CreatedUtc.ToString("o")">@SocialPresentation.ShortAgo(Model.CreatedUtc)</time></a>
+            <div class="tweet-header-icons">
+                <button type="button" class="x-icon-btn" aria-label="Grok actions"><svg><use href="#x-grok"/></svg></button>
+                <button type="button" class="x-icon-btn" aria-label="More" data-x-menu="post"><svg><use href="#x-dots"/></svg></button>
+            </div>
+        </div>
+        <div class="tweet-text">@MessageHtml.Render(text)</div>
+        @if (photo != null)
+        {
+            <a href="/posts/@Model.Id" class="tweet-media"><img src="@photo" alt="Image" loading="lazy"></a>
+        }
+        <div class="tweet-actions" role="group">
+            <a href="/posts/@Model.Id" class="action-btn act-reply" aria-label="Reply"><span class="ab-ic"><svg><use href="#x-reply"/></svg></span><span class="ab-n">@Count(replies)</span></a>
+            <button type="button" class="action-btn act-repost" aria-label="Repost" data-count="@reposts"><span class="ab-ic"><svg><use href="#x-repost"/></svg></span><span class="ab-n">@Count(reposts)</span></button>
+            <button type="button" class="action-btn like-it@(liked ? " liked" : "")" aria-label="Like" data-id="@Model.Id" data-count="@likes"><span class="ab-ic"><svg class="ic-off"><use href="#x-like"/></svg><svg class="ic-on"><use href="#x-like-fill"/></svg></span><span class="ab-n">@Count(likes)</span></button>
+            <a href="/posts/@Model.Id" class="action-btn act-views" aria-label="View post analytics"><span class="ab-ic"><svg><use href="#x-views"/></svg></span><span class="ab-n">@Count(views)</span></a>
+            <div class="ab-end">
+                <button type="button" class="action-btn act-bookmark" aria-label="Bookmark"><span class="ab-ic"><svg class="ic-off"><use href="#x-bookmark"/></svg><svg class="ic-on"><use href="#x-bookmark-fill"/></svg></span></button>
+                <button type="button" class="action-btn act-share" aria-label="Share post"><span class="ab-ic"><svg><use href="#x-share"/></svg></span></button>
+            </div>
+        </div>
+    </div>
+</article>

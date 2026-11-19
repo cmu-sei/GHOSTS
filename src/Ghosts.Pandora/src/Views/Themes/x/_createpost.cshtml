@@ -1,0 +1,31 @@
+@* The X composer. GHOSTS clients find it by .tweet-input-container > textarea.tweet-input,
+   .tweet-composer > img.tweet-avatar and .tweet-toolbar > button.tweet-btn, so those keep their exact classes. *@
+@{
+    var username = ViewBag.Username as string ?? "User";
+}
+<div class="compose-tweet" id="compose">
+    <form method="post" action="/">
+        <input type="hidden" name="theme" value="x">
+        <input type="hidden" name="user" value="@username">
+        <div class="tweet-composer">
+            <img src="/u/@username/avatar" alt="Profile" class="tweet-avatar">
+            <div class="tweet-input-container">
+                <textarea name="message" placeholder="What’s happening?" class="tweet-input" maxlength="280" rows="1" required></textarea>
+                <div class="x-reply-scope"><svg><use href="#x-globe"/></svg>Everyone can reply</div>
+                <div class="tweet-toolbar" data-empty="true">
+                    <div class="tweet-options">
+                        <button type="button" class="option-btn" aria-label="Add photos or video"><svg><use href="#x-media"/></svg></button>
+                        <button type="button" class="option-btn" aria-label="Add a GIF"><svg><use href="#x-gif"/></svg></button>
+                        <button type="button" class="option-btn" aria-label="Enhance your post with Grok"><svg><use href="#x-grok"/></svg></button>
+                        <button type="button" class="option-btn" aria-label="Add poll"><svg><use href="#x-poll"/></svg></button>
+                        <button type="button" class="option-btn" aria-label="Add emoji"><svg><use href="#x-emoji"/></svg></button>
+                        <button type="button" class="option-btn" aria-label="Schedule post"><svg><use href="#x-schedule"/></svg></button>
+                        <button type="button" class="option-btn" aria-label="Tag location" disabled><svg><use href="#x-location"/></svg></button>
+                    </div>
+                    <svg class="x-counter" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="9" class="x-counter-track"/><circle cx="10" cy="10" r="9" class="x-counter-bar"/></svg>
+                    <button type="submit" class="tweet-btn">Post</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

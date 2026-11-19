@@ -1,433 +1,217 @@
 @model Ghosts.Pandora.Infrastructure.Models.User
+@inject Ghosts.Pandora.Infrastructure.Services.IPostService PostService
 @{
-    var profileUsername = (ViewContext.RouteData.Values["username"] as string)?.Trim();
-    if (string.IsNullOrWhiteSpace(profileUsername))
-    {
-        profileUsername = Context.Request.Cookies["username"];
-    }
+    Layout = null;
+    ViewBag.Theme = "reddit";
+    var me = ViewBag.Username as string ?? "user";
+    var name = Model?.Username ?? ViewBag.ProfileUsername as string ?? me;
+    var isSelf = ViewBag.IsSelf as bool? ?? string.Equals(name, me, StringComparison.OrdinalIgnoreCase);
+    var tab = (Context.Request.Query["tab"].ToString() ?? string.Empty).ToLowerInvariant();
+    var tabs = isSelf
+        ? new[] { "overview", "posts", "comments", "saved", "hidden", "upvoted", "downvoted" }
+        : new[] { "overview", "posts", "comments" };
+    if (!tabs.Contains(tab)) tab = "overview";
 
-    profileUsername ??= "user";
+    var posts = (ViewBag.Posts as List<Post>) ?? new List<Post>();
+    var themePosts = await PostService.GetPostsByTheme("reddit", 200);
+    var comments = themePosts
+        .SelectMany(p => (p.Comments ?? new List<Comment>()).Where(c => string.Equals(c.Username, name, StringComparison.OrdinalIgnoreCase)).Select(c => (Post: p, Comment: c)))
+        .OrderByDescending(x => x.Comment.CreatedUtc)
+        .ToList();
+    var upvoted = themePosts.Where(p => p.Likes?.Any(l => string.Equals(l.Username, name, StringComparison.OrdinalIgnoreCase)) == true).ToList();
+
+    // Karma is what the account earned here plus a stable history from before, as real accounts have
+    var hash = Ghosts.Pandora.Infrastructure.Content.ContentRequest.StableHash(name.ToLowerInvariant());
+    int CommentScore(Comment c) => 1 + (int)(c.Id * 2654435761L % 40);
+    var postKarma = posts.Sum(p => Present.Score(p)) + (int)(hash % 4200);
+    var commentKarma = comments.Sum(x => CommentScore(x.Comment)) + (int)(hash / 7 % 2600);
+    var cakeDay = DateTime.SpecifyKind(Model?.CreatedUtc ?? DateTime.UtcNow, DateTimeKind.Utc).AddDays(-(400 + hash % 3200));
+    var bio = Model?.Bio;
+    if (string.IsNullOrWhiteSpace(bio) || bio == $"User {name}") bio = null;
+
+    // Overview interleaves posts and comments, newest first
+    var overview = posts.Select(p => (When: p.CreatedUtc, Post: p, Comment: (Comment)null))
+        .Concat(comments.Select(x => (When: x.Comment.CreatedUtc, x.Post, x.Comment)))
+        .OrderByDescending(x => x.When)
+        .ToList();
+    string Label(string t) => t switch { "upvoted" => "Upvoted", "downvoted" => "Downvoted", _ => char.ToUpperInvariant(t[0]) + t[1..] };
+}
+@functions {
+    private async Task RenderComment(Post post, Comment c, Func<Comment, int> scoreOf)
+    {
+        var community = Present.Community(post);
+        var score = scoreOf(c);
+        <div class="r-item">
+            <div class="r-pcomment" data-href="/posts/@post.Id#comments">
+                <div class="r-pcomment-post">
+                    <span class="cicon" data-c="@(community.Sum(ch => ch) / 3 % 8)">r/</span>
+                    <a class="r-sub" href="/r/@community">r/@community</a>
+                    <a class="r-ptitle" href="/posts/@post.Id">@MessageHtml.Render(Present.Title(post))</a>
+                </div>
+                <div class="r-pcomment-who"><a href="/u/@c.Username">@c.Username</a> @(string.Equals(post.Username, c.Username, StringComparison.OrdinalIgnoreCase) ? "commented" : $"replied to {post.Username}") &bull; @await Html.PartialAsync("~/Views/Themes/reddit/_ago.cshtml", c.CreatedUtc)</div>
+                <div class="r-c-text">@MessageHtml.Render(c.Message)</div>
+                <div class="r-c-actions">
+                    <span class="r-vote" data-base="@score"><button type="button" aria-label="Upvote" aria-pressed="false"><svg class="ri"><use href="#i-up" /></svg></button><span class="r-score">@score</span><button type="button" aria-label="Downvote" data-r="down"><svg class="ri"><use href="#i-down" /></svg></button></span>
+                    <a class="r-c-btn" href="/posts/@post.Id#comments"><svg class="ri ri-sm"><use href="#i-comment" /></svg>Reply</a>
+                    <button type="button" class="r-c-btn" data-r="share" data-url="/posts/@post.Id"><svg class="ri ri-sm"><use href="#i-share" /></svg>Share</button>
+                    <button type="button" class="r-c-btn" aria-label="More options" data-r="more"><svg class="ri ri-sm"><use href="#i-more" /></svg></button>
+                </div>
+            </div>
+            <hr class="r-sep">
+        </div>
+    }
 }
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>u/@profileUsername - Reddit</title>
-    <link rel="stylesheet" href="css/profile.css">
-    <link rel="icon" href="images/reddit-icon.png">
-    <style>
-        .follow-action-form {
-            display: inline-block;
-            margin-right: 8px;
-        }
-
-        .follow-action-button {
-            background: #ff4500;
-            border: none;
-            color: #fff;
-            padding: 8px 18px;
-            border-radius: 999px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .connections-card {
-            background: #1a1a1b;
-            border: 1px solid #343536;
-            border-radius: 12px;
-            padding: 20px;
-            margin-top: 16px;
-        }
-
-        .connections-title {
-            margin: 0 0 12px;
-            font-size: 18px;
-            color: #d7dadc;
-        }
-
-        .connections-summary {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 16px;
-            font-size: 14px;
-            color: #818384;
-        }
-
-        .connections-columns {
-            display: grid;
-            gap: 12px;
-        }
-
-        .connections-column {
-            background: #272729;
-            border-radius: 8px;
-            padding: 16px;
-        }
-
-        .connections-column h3 {
-            margin: 0 0 12px;
-            font-size: 14px;
-            color: #d7dadc;
-        }
-
-        .connections-scroll {
-            max-height: 220px;
-            overflow-y: auto;
-        }
-
-        .connection-item {
-            background: transparent;
-        }
-
-        .connection-item:hover {
-            background: rgba(255, 69, 0, 0.15);
-        }
-
-        .connection-name {
-            color: #d7dadc;
-        }
-
-        .connection-bio {
-            color: #818384;
-        }
-    </style>
+    <meta name="current-user" content="@me">
+    <title>@name (u/@name) - Reddit</title>
+    <link rel="stylesheet" href="/themes/reddit/css/reddit.css?@System.Guid.NewGuid()">
+    <link rel="icon" href="/themes/reddit/images/reddit-logo.png">
 </head>
-<body>
-    <div class="app">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-left">
-                <div class="logo">
-                    <img src="images/reddit-logo.png" alt="Reddit" class="reddit-logo">
-                    <span class="reddit-text">reddit</span>
+<body data-theme="reddit">
+    @await Html.PartialAsync("~/Views/Themes/reddit/_redditheader.cshtml")
+    <div class="r-shell">
+        @await Html.PartialAsync("~/Views/Themes/reddit/_redditnav.cshtml")
+        <main class="r-main">
+            <div class="r-content" data-profile-connections data-username="@name">
+                <div class="r-feed r-profile">
+                    <div class="r-profile-head">
+                        <div class="r-pavatar"><img src="/u/@name/avatar" alt=""></div>
+                        <div>
+                            <h1>@name</h1>
+                            <div class="r-handle">u/@name</div>
+                        </div>
+                    </div>
+                    <div class="r-profile-mobile">
+                        <div class="r-pmeta"><b>@((postKarma + commentKarma).ToString("N0"))</b> karma &middot; <b><span data-followers-count>0</span></b> followers &middot; Cake day @cakeDay.ToString("MMM d, yyyy")</div>
+                        <div class="r-pcard-actions">
+                            @if (isSelf)
+                            {
+                                <button type="button" class="r-btn r-btn-sm" data-r="share" data-url="/u/@name"><svg class="ri ri-sm"><use href="#i-share" /></svg>Share</button>
+                            }
+                            else
+                            {
+                                @await Html.PartialAsync("~/Views/Shared/_FollowActions.cshtml")
+                                <a href="/messages/conversation/@name" class="r-btn r-btn-sm"><svg class="ri ri-sm"><use href="#i-chat" /></svg>Chat</a>
+                            }
+                        </div>
+                    </div>
+                    <nav class="r-tabs" aria-label="Profile">
+                        @foreach (var t in tabs)
+                        {
+                            <a href="/u/@name?tab=@t" class="r-chip" aria-pressed="@(t == tab ? "true" : "false")">@Label(t)</a>
+                        }
+                    </nav>
+                    @if (isSelf && tab is "overview" or "posts")
+                    {
+                        <div class="r-profile-tools">
+                            <a href="/#create-post" class="r-btn r-btn-sm r-btn-outline"><svg class="ri ri-sm"><use href="#i-plus" /></svg>Create Post</a>
+                        </div>
+                    }
+                    <hr>
+                    <div class="feed">
+                        @switch (tab)
+                        {
+                            case "posts":
+                                foreach (var post in posts)
+                                {
+                                    await Html.RenderPartialAsync("~/Views/Themes/reddit/_postcard.cshtml", post);
+                                }
+                                break;
+                            case "comments":
+                                foreach (var x in comments)
+                                {
+                                    await RenderComment(x.Post, x.Comment, CommentScore);
+                                }
+                                break;
+                            case "upvoted":
+                                foreach (var post in upvoted)
+                                {
+                                    await Html.RenderPartialAsync("~/Views/Themes/reddit/_postcard.cshtml", post);
+                                }
+                                break;
+                            case "overview":
+                                foreach (var x in overview)
+                                {
+                                    if (x.Comment == null)
+                                    {
+                                        await Html.RenderPartialAsync("~/Views/Themes/reddit/_postcard.cshtml", x.Post);
+                                    }
+                                    else
+                                    {
+                                        await RenderComment(x.Post, x.Comment, CommentScore);
+                                    }
+                                }
+                                break;
+                        }
+                    </div>
+                    @{
+                        var empty = tab switch
+                        {
+                            "posts" => posts.Count == 0,
+                            "comments" => comments.Count == 0,
+                            "upvoted" => upvoted.Count == 0,
+                            "overview" => overview.Count == 0,
+                            _ => true
+                        };
+                    }
+                    @if (empty)
+                    {
+                        <div class="r-empty">
+                            <svg class="r-empty-snoo"><use href="#r-snoo" /></svg>
+                            <h3>@(isSelf ? "You don't" : $"u/{name} doesn't") have any @(tab == "overview" ? "activity" : Label(tab).ToLowerInvariant() + (tab is "posts" or "comments" ? "" : " posts")) yet</h3>
+                            <p>@(isSelf ? "Once you do, it'll show up here." : "Check back later.")</p>
+                        </div>
+                    }
                 </div>
-                <div class="search-container">
-                    <input type="text" placeholder="Search Reddit" class="search-input">
-                    <button class="search-btn">🔍</button>
-                </div>
+                <aside class="r-rail">
+                    <section class="r-card r-pcard">
+                        <div class="r-pcard-banner"></div>
+                        <div class="r-pcard-inner">
+                            <h2>@name</h2>
+                            @if (bio != null)
+                            {
+                                <p class="r-about-desc">@bio</p>
+                            }
+                            <div class="r-pcard-actions">
+                                @if (isSelf)
+                                {
+                                    <button type="button" class="r-btn r-btn-sm" data-r="share" data-url="/u/@name"><svg class="ri ri-sm"><use href="#i-share" /></svg>Share</button>
+                                }
+                                else
+                                {
+                                    @await Html.PartialAsync("~/Views/Shared/_FollowActions.cshtml")
+                                    <a href="/messages/conversation/@name" class="r-btn r-btn-sm"><svg class="ri ri-sm"><use href="#i-chat" /></svg>Chat</a>
+                                }
+                            </div>
+                            <div class="r-pfollowers"><span data-followers-count>0</span> followers</div>
+                            <div class="r-pstats">
+                                <div><b>@postKarma.ToString("N0")</b><span>Post karma</span></div>
+                                <div><b>@commentKarma.ToString("N0")</b><span>Comment karma</span></div>
+                                <div><b>@cakeDay.ToString("MMM d, yyyy")</b><span>Cake day</span></div>
+                                <div><b>0</b><span>Gold earned</span></div>
+                            </div>
+                            @if (isSelf)
+                            {
+                                <div class="r-psection">
+                                    <h3>Settings</h3>
+                                    <div class="r-psetting"><img src="/u/@name/avatar" alt=""><div>Profile<small>Customize your profile</small></div><button type="button" class="r-btn r-btn-sm">Update</button></div>
+                                    <div class="r-psetting"><svg class="ri"><use href="#i-user" /></svg><div>Avatar<small>Style your avatar</small></div><button type="button" class="r-btn r-btn-sm">Style Avatar</button></div>
+                                    <div class="r-psetting"><svg class="ri"><use href="#i-gear" /></svg><div>Mod Tools<small>Moderate your profile</small></div><button type="button" class="r-btn r-btn-sm">Mod Settings</button></div>
+                                </div>
+                            }
+                        </div>
+                    </section>
+                </aside>
             </div>
-            <div class="header-right">
-                <button class="header-btn">📈</button>
-                <button class="header-btn">💬</button>
-                <button class="header-btn">🔔</button>
-                <button class="header-btn">➕</button>
-                <div class="user-menu">
-                    <img src="/u/@profileUsername/avatar" alt="@profileUsername" class="user-avatar">
-                    <span class="username">u/@profileUsername</span>
-                    <span class="dropdown-arrow">▼</span>
-                </div>
-            </div>
-        </header>
-
-        <div class="main-container">
-            <!-- Profile Header -->
-            <div class="profile-header">
-                <div class="profile-banner">
-                    <img src="images/profile-banner.jpg" alt="Profile Banner" class="banner-image">
-                </div>
-                <div class="profile-info">
-                    <div class="profile-left">
-                        <img src="/u/@profileUsername/avatar" alt="@profileUsername" class="profile-avatar">
-                        <div class="profile-details">
-                            <h1 class="profile-username">u/@profileUsername</h1>
-                            <div class="profile-stats">
-                                <div class="stat-item">
-                                    <span class="stat-value">1.2k</span>
-                                    <span class="stat-label">Karma</span>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-value">3y</span>
-                                    <span class="stat-label">Cake day</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="profile-right">
-                        @await Html.PartialAsync("~/Views/Shared/_FollowActions.cshtml")
-                        <button class="chat-btn">Chat</button>
-                        <button class="more-btn">⋯</button>
-                    </div>
-                </div>
-                <div class="connections-card" data-profile-connections data-username="@profileUsername">
-                    <h2 class="connections-title">Connections</h2>
-                    <div class="connections-summary">
-                        <span><strong data-followers-count>0</strong> followers</span>
-                        <span><strong data-following-count>0</strong> following</span>
-                    </div>
-                    <div class="connections-columns">
-                        <div class="connections-column">
-                            <h3>Following (<span data-following-count>0</span>)</h3>
-                            <div class="connections-scroll" data-following-list></div>
-                        </div>
-                        <div class="connections-column">
-                            <h3>Followers (<span data-followers-count>0</span>)</h3>
-                            <div class="connections-scroll" data-followers-list></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="profile-content">
-                <!-- Left Sidebar -->
-                <div class="sidebar">
-                    <div class="about-card">
-                        <h3>About</h3>
-                        <div class="about-content">
-                            <p>@(string.IsNullOrWhiteSpace(Model.Bio) ? "No description." : Model.Bio)</p>
-
-                            <div class="about-stats">
-                                <div class="about-stat">
-                                    <span class="about-icon">🍰</span>
-                                    <span class="about-text">Joined March 15, 2021</span>
-                                </div>
-                                <div class="about-stat">
-                                    <span class="about-icon">⭐</span>
-                                    <span class="about-text">1,247 Post Karma</span>
-                                </div>
-                                <div class="about-stat">
-                                    <span class="about-icon">💬</span>
-                                    <span class="about-text">892 Comment Karma</span>
-                                </div>
-                                <div class="about-stat">
-                                    <span class="about-icon">👥</span>
-                                    <span class="about-text"><span data-followers-count>0</span> followers • <span data-following-count>0</span> following</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="active-communities-card">
-                        <h3>Active in these communities</h3>
-                        <div class="community-list">
-                            <div class="community-item">
-                                <img src="images/programming-icon.jpg" alt="programming" class="community-icon">
-                                <div class="community-info">
-                                    <div class="community-name">r/programming</div>
-                                    <div class="community-members">5.2M members</div>
-                                </div>
-                            </div>
-                            <div class="community-item">
-                                <img src="images/javascript-icon.jpg" alt="javascript" class="community-icon">
-                                <div class="community-info">
-                                    <div class="community-name">r/javascript</div>
-                                    <div class="community-members">2.1M members</div>
-                                </div>
-                            </div>
-                            <div class="community-item">
-                                <img src="images/webdev-icon.jpg" alt="webdev" class="community-icon">
-                                <div class="community-info">
-                                    <div class="community-name">r/webdev</div>
-                                    <div class="community-members">1.8M members</div>
-                                </div>
-                            </div>
-                            <div class="community-item">
-                                <img src="images/reactjs-icon.jpg" alt="reactjs" class="community-icon">
-                                <div class="community-info">
-                                    <div class="community-name">r/reactjs</div>
-                                    <div class="community-members">450k members</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Main Content -->
-                <div class="main-content">
-                    <!-- Profile Tabs -->
-                    <div class="profile-tabs">
-                        <button class="tab-btn active">POSTS</button>
-                        <button class="tab-btn">COMMENTS</button>
-                        <button class="tab-btn">SAVED</button>
-                        <button class="tab-btn">HIDDEN</button>
-                        <button class="tab-btn">UPVOTED</button>
-                        <button class="tab-btn">DOWNVOTED</button>
-                    </div>
-
-                    <!-- Sort Options -->
-                    <div class="sort-container">
-                        <div class="sort-tabs">
-                            <button class="sort-tab active">🔥 Hot</button>
-                            <button class="sort-tab">🆕 New</button>
-                            <button class="sort-tab">⭐ Top</button>
-                        </div>
-                    </div>
-
-                    <!-- Posts -->
-                    <div class="posts-feed">
-                        <!-- Post 1 -->
-                        <div class="post">
-                            <div class="post-votes">
-                                <button class="vote-btn upvote upvoted">▲</button>
-                                <span class="vote-count">234</span>
-                                <button class="vote-btn downvote">▼</button>
-                            </div>
-                            <div class="post-content">
-                                <div class="post-header">
-                                    <img src="images/programming-icon.jpg" alt="programming" class="subreddit-icon">
-                                    <span class="subreddit-name">r/programming</span>
-                                    <span class="post-meta">
-                                        • Posted by u/johndoe
-                                        <span class="post-time">2 days ago</span>
-                                    </span>
-                                </div>
-                                <h2 class="post-title">Best practices for writing clean, maintainable JavaScript code</h2>
-                                <div class="post-text">
-                                    After years of working with JavaScript, I've compiled a list of best practices that have helped me write cleaner, more maintainable code. Here are the top 10 tips that every developer should know:
-
-                                    1. Use meaningful variable names
-                                    2. Keep functions small and focused
-                                    3. Avoid deep nesting
-                                    4. Use const and let instead of var
-                                    5. Implement proper error handling
-                                    ...
-                                </div>
-                                <div class="post-actions">
-                                    <button class="action-btn">
-                                        <span class="action-icon">💬</span>
-                                        <span class="action-text">45 Comments</span>
-                                    </button>
-                                    <button class="action-btn">
-                                        <span class="action-icon">🔗</span>
-                                        <span class="action-text">Share</span>
-                                    </button>
-                                    <button class="action-btn">
-                                        <span class="action-icon">💾</span>
-                                        <span class="action-text">Save</span>
-                                    </button>
-                                    <button class="action-btn">
-                                        <span class="action-icon">⋯</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Post 2 -->
-                        <div class="post">
-                            <div class="post-votes">
-                                <button class="vote-btn upvote upvoted">▲</button>
-                                <span class="vote-count">156</span>
-                                <button class="vote-btn downvote">▼</button>
-                            </div>
-                            <div class="post-content">
-                                <div class="post-header">
-                                    <img src="images/webdev-icon.jpg" alt="webdev" class="subreddit-icon">
-                                    <span class="subreddit-name">r/webdev</span>
-                                    <span class="post-meta">
-                                        • Posted by u/johndoe
-                                        <span class="post-time">5 days ago</span>
-                                    </span>
-                                </div>
-                                <h2 class="post-title">My experience transitioning from jQuery to React</h2>
-                                <div class="post-text">
-                                    Recently made the switch from jQuery to React for a major project. Here's what I learned during the transition and tips for others considering the same move...
-                                </div>
-                                <div class="post-actions">
-                                    <button class="action-btn">
-                                        <span class="action-icon">💬</span>
-                                        <span class="action-text">23 Comments</span>
-                                    </button>
-                                    <button class="action-btn">
-                                        <span class="action-icon">🔗</span>
-                                        <span class="action-text">Share</span>
-                                    </button>
-                                    <button class="action-btn">
-                                        <span class="action-icon">💾</span>
-                                        <span class="action-text">Save</span>
-                                    </button>
-                                    <button class="action-btn">
-                                        <span class="action-icon">⋯</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Post 3 -->
-                        <div class="post">
-                            <div class="post-votes">
-                                <button class="vote-btn upvote upvoted">▲</button>
-                                <span class="vote-count">89</span>
-                                <button class="vote-btn downvote">▼</button>
-                            </div>
-                            <div class="post-content">
-                                <div class="post-header">
-                                    <img src="images/reactjs-icon.jpg" alt="reactjs" class="subreddit-icon">
-                                    <span class="subreddit-name">r/reactjs</span>
-                                    <span class="post-meta">
-                                        • Posted by u/johndoe
-                                        <span class="post-time">1 week ago</span>
-                                    </span>
-                                </div>
-                                <h2 class="post-title">Useful React hooks that aren't talked about enough</h2>
-                                <div class="post-text">
-                                    While useState and useEffect get all the attention, there are several other React hooks that can significantly improve your development experience. Let me share some hidden gems...
-                                </div>
-                                <div class="post-actions">
-                                    <button class="action-btn">
-                                        <span class="action-icon">💬</span>
-                                        <span class="action-text">67 Comments</span>
-                                    </button>
-                                    <button class="action-btn">
-                                        <span class="action-icon">🔗</span>
-                                        <span class="action-text">Share</span>
-                                    </button>
-                                    <button class="action-btn">
-                                        <span class="action-icon">💾</span>
-                                        <span class="action-text">Save</span>
-                                    </button>
-                                    <button class="action-btn">
-                                        <span class="action-icon">⋯</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Post 4 -->
-                        <div class="post">
-                            <div class="post-votes">
-                                <button class="vote-btn upvote upvoted">▲</button>
-                                <span class="vote-count">312</span>
-                                <button class="vote-btn downvote">▼</button>
-                            </div>
-                            <div class="post-content">
-                                <div class="post-header">
-                                    <img src="images/javascript-icon.jpg" alt="javascript" class="subreddit-icon">
-                                    <span class="subreddit-name">r/javascript</span>
-                                    <span class="post-meta">
-                                        • Posted by u/johndoe
-                                        <span class="post-time">2 weeks ago</span>
-                                    </span>
-                                </div>
-                                <h2 class="post-title">Understanding JavaScript closures with practical examples</h2>
-                                <div class="post-text">
-                                    Closures are one of the most powerful features in JavaScript, but they can be confusing for beginners. Here's a comprehensive guide with real-world examples...
-                                </div>
-                                <div class="post-actions">
-                                    <button class="action-btn">
-                                        <span class="action-icon">💬</span>
-                                        <span class="action-text">128 Comments</span>
-                                    </button>
-                                    <button class="action-btn">
-                                        <span class="action-icon">🔗</span>
-                                        <span class="action-text">Share</span>
-                                    </button>
-                                    <button class="action-btn">
-                                        <span class="action-icon">💾</span>
-                                        <span class="action-text">Save</span>
-                                    </button>
-                                    <button class="action-btn">
-                                        <span class="action-icon">⋯</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        </main>
     </div>
 
-    <script src="js/profile.js"></script>
+    @await Html.PartialAsync("_Scripts")
     <script src="/js/connections.js"></script>
+    <script src="/themes/reddit/js/reddit.js?@System.Guid.NewGuid()"></script>
 </body>
 </html>

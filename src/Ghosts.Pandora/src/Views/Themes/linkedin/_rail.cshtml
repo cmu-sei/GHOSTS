@@ -1,0 +1,92 @@
+@using Ghosts.Pandora.Infrastructure.Content
+@model IEnumerable<Ghosts.Pandora.Infrastructure.Models.Post>
+@inject Ghosts.Pandora.Infrastructure.Services.IUserService Users
+@{
+    // The right rail: LinkedIn News built from the world and what people post, people to follow, puzzles and the footer.
+    var me = ViewBag.Username as string ?? string.Empty;
+    var following = ViewData["LiFollowing"] as HashSet<string> ?? new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+    var w = Present.World;
+    var year = w.ReferenceDate.Year;
+    var industry = char.ToUpperInvariant(w.Industry[0]) + w.Industry[1..];
+    // A topic people really post about: a hashtag, a name of two or more words or an acronym
+    var topic = Present.Trending(Model ?? Enumerable.Empty<Ghosts.Pandora.Infrastructure.Models.Post>(), 12)
+        .Select(t => t.Topic)
+        .FirstOrDefault(t => t != w.City && t != w.ShortName && t != w.Projects[0] &&
+                             (t.StartsWith("#") || t.Contains(' ') || t.Length >= 3 && t.All(char.IsUpper)));
+
+    var stories = new[]
+    {
+        $"{w.OrganizationName} pushes ahead on {w.Projects[0]}",
+        $"{w.City} employers step up hiring",
+        $"{industry} leaders set {year + 1} priorities",
+        topic != null ? $"{topic} is trending in {w.City}" : $"{w.City} sees a surge in new small businesses",
+        $"{w.Vendors[0]} expands its {w.City} office",
+        $"{w.ShortName}'s {w.Projects[1]} enters next phase",
+        $"Remote work rules tighten across {w.City}"
+    };
+
+    var suggestions = (await Users.GetUsersByThemeAsync("linkedin", 20))
+        .Where(u => !string.Equals(u.Username, me, StringComparison.OrdinalIgnoreCase) && !following.Contains(u.Username))
+        .OrderBy(u => ContentRequest.StableHash($"{me}:suggest:{u.Username}"))
+        .Take(3)
+        .ToList();
+
+    // The puzzles are numbered by day, as on the real site
+    var day = (w.ReferenceDate - new DateTime(2024, 4, 30)).Days;
+    var played = (int)(ContentRequest.StableHash($"{me}:{day}:played") % 9) + 2;
+}
+<div class="li-card li-news">
+    <div class="li-news__head">
+        <h2>LinkedIn News</h2>
+        <svg width="16" height="16"><use href="#li-info"/></svg>
+    </div>
+    <h3 class="li-news__sub">Top stories</h3>
+    <ul class="li-news__list" data-li-news>
+        @for (var i = 0; i < stories.Length; i++)
+        {
+            var hash = ContentRequest.StableHash($"{w.Seed}:news:{i}");
+            var hours = i == 0 ? 2 + (int)(hash % 3) : 1 + (int)(hash % 22);
+            var readers = 900 + (int)(hash / 13 % 14800);
+            <li class="@(i >= 5 ? "li-news__more" : "")">
+                <a href="/search?q=@Uri.EscapeDataString(i == 3 && topic != null ? topic : w.ShortName)" class="li-news__title">@stories[i]</a>
+                <span class="li-news__meta">@(hours >= 20 ? "1d ago" : $"{hours}h ago") &bull; @readers.ToString("N0") readers</span>
+            </li>
+        }
+    </ul>
+    <button type="button" class="li-news__toggle" data-li-news-toggle>Show more <svg width="16" height="16"><use href="#li-caret"/></svg></button>
+    <h3 class="li-news__sub li-news__sub--puzzles">Today's puzzles</h3>
+    <ul class="li-puzzles">
+        <li><span class="li-puzzle li-puzzle--zip"></span><a href="#" class="li-inert"><strong>Zip #@(day - 80)</strong><span>@played connections played</span></a></li>
+        <li><span class="li-puzzle li-puzzle--tango"></span><a href="#" class="li-inert"><strong>Tango #@(day - 30)</strong><span>@(played + 3) connections played</span></a></li>
+        <li><span class="li-puzzle li-puzzle--queens"></span><a href="#" class="li-inert"><strong>Queens #@day</strong><span>@(played * 2) connections played</span></a></li>
+    </ul>
+</div>
+
+@if (suggestions.Count > 0)
+{
+    <div class="li-card li-follow-card">
+        <div class="li-news__head">
+            <h2>Add to your feed</h2>
+            <svg width="16" height="16"><use href="#li-info"/></svg>
+        </div>
+        <ul class="li-follow-list">
+            @foreach (var user in suggestions)
+            {
+                <li>
+                    <a href="/u/@user.Username"><img src="/u/@user.Username/avatar" alt="" class="li-follow-list__avatar"></a>
+                    <div class="li-follow-list__info">
+                        <a href="/u/@user.Username" class="li-follow-list__name">@Present.DisplayName(user.Username)</a>
+                        <span class="li-follow-list__headline">@Present.Headline(user.Username)</span>
+                        <form method="post" action="/api/relationships/follow" class="li-follow">
+                            <input type="hidden" name="username" value="@user.Username">
+                            <button type="submit" class="li-btn li-btn--outline-gray"><svg width="16" height="16"><use href="#li-plus"/></svg><span>Follow</span></button>
+                        </form>
+                    </div>
+                </li>
+            }
+        </ul>
+        <a href="/search?q=@Uri.EscapeDataString(w.ShortName)" class="li-follow-card__all">View all recommendations <svg width="16" height="16"><use href="#li-arrow"/></svg></a>
+    </div>
+}
+
+@await Html.PartialAsync("~/Views/Themes/linkedin/_footer.cshtml")

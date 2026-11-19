@@ -1,13 +1,56 @@
 @model Ghosts.Pandora.Infrastructure.Models.Post
+@inject Ghosts.Pandora.Infrastructure.Services.IPostService Posts
+@inject Ghosts.Pandora.Infrastructure.Services.IUserService Users
+@inject Ghosts.Pandora.Infrastructure.Services.IFollowService Follows
+@functions {
+    // A stable, plausible subscriber count for a channel
+    static int Subscribers(string username)
+    {
+        var unit = Ghosts.Pandora.Infrastructure.Content.ContentRequest.StableHash($"{username}:subscribers") % 10000 / 10000d;
+        return 80 + (int)(unit * unit * unit * 480000);
+    }
+
+    // A stable like count for a comment; most get none
+    static int CommentLikes(Ghosts.Pandora.Infrastructure.Models.Comment c)
+    {
+        var unit = Ghosts.Pandora.Infrastructure.Content.ContentRequest.StableHash($"comment:{c.Id}:{c.PostId}") % 1000 / 1000d;
+        return unit < .3 ? 0 : (int)(unit * unit * unit * 240);
+    }
+}
 @{
     Layout = null;
     ViewBag.Theme = "youtube";
-    var currentUser = ViewBag.Username as string;
-    var currentUserLiked = Model != null && !string.IsNullOrWhiteSpace(currentUser) &&
-        (Model.Likes?.Any(l => string.Equals(l.Username, currentUser, StringComparison.OrdinalIgnoreCase)) ?? false);
-    var likedClass = currentUserLiked ? " liked" : string.Empty;
-    var likesCount = Model?.Likes?.Count ?? 0;
-    var commentsCount = Model?.Comments?.Count ?? 0;
+    ViewData["ytActive"] = string.Empty;
+    var me = ViewBag.Username as string ?? string.Empty;
+
+    var title = Model != null ? Present.Title(Model) : "Video unavailable";
+    var isOwner = Model != null && string.Equals(Model.Username, me, StringComparison.OrdinalIgnoreCase);
+    var liked = Model != null && !string.IsNullOrWhiteSpace(me) &&
+        (Model.Likes?.Any(l => string.Equals(l.Username, me, StringComparison.OrdinalIgnoreCase)) ?? false);
+
+    var related = new List<Ghosts.Pandora.Infrastructure.Models.Post>();
+    var subscribed = false;
+    var comments = new List<Ghosts.Pandora.Infrastructure.Models.Comment>();
+    if (Model != null)
+    {
+        related = (await Posts.GetLatestPostsByTheme("youtube", 30)).Where(p => p.Id != Model.Id).Take(20).ToList();
+
+        var meUser = string.IsNullOrWhiteSpace(me) ? null : await Users.GetUserByUsernameAsync(me, "youtube");
+        if (!isOwner && meUser != null && Model.User != null)
+            subscribed = await Follows.IsFollowingAsync(meUser.Id, Model.User.Id);
+
+        // "Top comments": the ones with the most likes first, newest breaking ties
+        comments = (Model.Comments ?? new List<Ghosts.Pandora.Infrastructure.Models.Comment>())
+            .OrderByDescending(c => CommentLikes(c))
+            .ThenByDescending(c => c.CreatedUtc)
+            .ToList();
+    }
+
+    var hashtags = Model == null ? new List<string>() :
+        System.Text.RegularExpressions.Regex.Matches(SocialPresentation.PlainText(Model), @"#\w+").Select(m => m.Value).Distinct().Take(3).ToList();
+    var durationText = Model != null ? Present.Duration(Model.Id) : "0:00";
+    var durationSeconds = durationText.Split(':').Aggregate(0, (total, part) => total * 60 + int.Parse(part));
+    var next = related.FirstOrDefault();
 }
 
 <!DOCTYPE html>
@@ -15,436 +58,211 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="current-user" content="@ViewBag.Username">
-    <title>@(Model != null ? $"{Model.Username} on YouTube" : "Video")</title>
+    <meta name="current-user" content="@me">
+    <title>@title - YouTube</title>
+    <link rel="stylesheet" href="/themes/youtube/css/feed.css?@System.Guid.NewGuid()">
     <link rel="stylesheet" href="/themes/youtube/css/video.css?@System.Guid.NewGuid()">
-    <link rel="icon" href="/themes/youtube/images/youtube-icon.png">
+    <link rel="icon" href="/themes/youtube/images/youtube-icon.svg" type="image/svg+xml">
 </head>
-<body>
-    <div class="app">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-left">
-                <button class="menu-btn">☰</button>
-                <div class="logo">
-                    <a href="/"><img src="/themes/youtube/images/youtube-logo.png" alt="YouTube" class="youtube-logo"></a>
-                </div>
-            </div>
-            <div class="header-center">
-                <div class="search-container">
-                    <input type="text" placeholder="Search" class="search-input">
-                    <button class="search-btn">🔍</button>
-                </div>
-                <button class="mic-btn">🎤</button>
-            </div>
-            <div class="header-right">
-                <button class="header-btn">📹</button>
-                <button class="header-btn">🔔</button>
-                <div class="user-menu">
-                    <img src="/themes/youtube/images/profile-avatar.jpg" alt="Profile" class="user-avatar">
-                </div>
-            </div>
-        </header>
+<body data-theme="youtube" class="yt-watch-page">
+    @await Html.PartialAsync("~/Views/Themes/youtube/_masthead.cshtml")
+    @await Html.PartialAsync("~/Views/Themes/youtube/_guide.cshtml")
 
-        <div class="main-container">
-            <!-- Primary Content -->
-            <div class="primary-content">
-                <!-- Video Player -->
-                <div class="video-player-container">
-                    <div class="video-player">
-                        <div class="video-placeholder">
-                            <div class="play-button">▶</div>
-                            <div class="video-controls">
-                                <div class="progress-bar">
-                                    <div class="progress-filled" style="width: 35%;"></div>
-                                    <div class="progress-thumb" style="left: 35%;"></div>
+    <main class="yt-page-manager yt-watch">
+        @if (Model == null)
+        {
+            <div class="yt-unavailable">
+                <div class="yt-unavailable-player">
+                    <svg viewBox="0 0 24 24" class="yt-icon"><use href="#yt-i-block"/></svg>
+                    <p>Video unavailable</p>
+                    <span>This video isn't available anymore</span>
+                </div>
+                <a class="yt-pill" href="/">Go to home</a>
+            </div>
+        }
+        else
+        {
+            <div class="yt-watch-columns">
+                <div class="yt-primary">
+                    <div class="yt-player" data-duration="@durationSeconds">
+                        <video class="yt-video" poster="@Present.PhotoUrl(Model)" src="/video/watch/@(Model.Id).mp4" preload="metadata" playsinline></video>
+                        <div class="yt-player-surface"></div>
+                        <button class="yt-large-play" type="button" aria-label="Play">
+                            <svg viewBox="0 0 68 48"><path class="yt-large-play-bg" d="M66.52 7.74c-.78-2.93-2.49-5.41-5.42-6.19C55.79.13 34 0 34 0S12.21.13 6.9 1.55C3.97 2.33 2.27 4.81 1.48 7.74.06 13.05 0 24 0 24s.06 10.95 1.48 16.26c.78 2.93 2.49 5.41 5.42 6.19C12.21 47.87 34 48 34 48s21.79-.13 27.1-1.55c2.93-.78 4.64-3.26 5.42-6.19C67.94 34.95 68 24 68 24s-.06-10.95-1.48-16.26z"/><path d="M45 24 27 14v20" fill="#fff"/></svg>
+                        </button>
+                        <div class="yt-spinner"></div>
+                        <div class="yt-player-gradient"></div>
+                        <div class="yt-player-controls">
+                            <div class="yt-progress">
+                                <div class="yt-progress-list"><div class="yt-progress-loaded"></div><div class="yt-progress-played"></div></div>
+                                <div class="yt-progress-scrubber"></div>
+                            </div>
+                            <div class="yt-controls-row">
+                                <div class="yt-controls-left">
+                                    <button class="yt-player-btn yt-play-btn" type="button" title="Play (k)"><svg class="yt-icon"><use href="#yt-i-play"/></svg></button>
+                                    @if (next != null)
+                                    {
+                                        <a class="yt-player-btn yt-next-btn" href="/posts/@next.Id" title="Next (SHIFT+n)"><svg class="yt-icon"><use href="#yt-i-next"/></svg></a>
+                                    }
+                                    <button class="yt-player-btn yt-mute-btn" type="button" title="Mute (m)"><svg class="yt-icon"><use href="#yt-i-volume"/></svg></button>
+                                    <div class="yt-volume-slider"><span></span></div>
+                                    <div class="yt-time"><span class="yt-time-current">0:00</span><span class="yt-time-sep"> / </span><span>@durationText</span></div>
                                 </div>
-                                <div class="controls-bottom">
-                                    <div class="controls-left">
-                                        <button class="control-btn play-pause">⏸️</button>
-                                        <button class="control-btn">🔊</button>
-                                        <span class="volume-slider"></span>
-                                        <span class="time-display">4:23 / 12:34</span>
-                                    </div>
-                                    <div class="controls-right">
-                                        <button class="control-btn">⚙️</button>
-                                        <button class="control-btn">🎬</button>
-                                        <button class="control-btn">⛶</button>
-                                    </div>
+                                <div class="yt-controls-right">
+                                    <button class="yt-player-btn yt-autoplay on" type="button" title="Autoplay is on"><span class="yt-autoplay-track"><span class="yt-autoplay-knob"><svg viewBox="0 0 24 24"><use href="#yt-i-play"/></svg></span></span></button>
+                                    <button class="yt-player-btn yt-cc-btn" type="button" title="Subtitles/closed captions (c)"><svg class="yt-icon"><use href="#yt-i-cc"/></svg></button>
+                                    <button class="yt-player-btn yt-settings-btn" type="button" title="Settings"><svg class="yt-icon"><use href="#yt-i-gear-fill"/></svg><span class="yt-hd-badge">HD</span></button>
+                                    <button class="yt-player-btn yt-miniplayer-btn" type="button" title="Miniplayer (i)"><svg class="yt-icon"><use href="#yt-i-miniplayer"/></svg></button>
+                                    <button class="yt-player-btn yt-theater-btn" type="button" title="Theater mode (t)"><svg class="yt-icon"><use href="#yt-i-theater"/></svg></button>
+                                    <button class="yt-player-btn yt-fullscreen-btn" type="button" title="Full screen (f)"><svg class="yt-icon"><use href="#yt-i-fullscreen"/></svg></button>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Video Info -->
-                <div class="video-info">
-                    <h1 class="video-title">Building a React App from Scratch - Complete Tutorial</h1>
-
-                    <div class="video-metadata">
-                        <div class="metadata-left">
-                            <span class="view-count">@likesCount likes</span>
-                            <span class="upload-date">@Model?.CreatedUtc.ToString("MMM d, yyyy")</span>
+                        <div class="yt-player-settings" hidden>
+                            <div><span>Stable Volume</span><b>On</b></div>
+                            <div><span>Ambient mode</span><b>On</b></div>
+                            <div><span>Subtitles/CC</span><b>Off</b></div>
+                            <div><span>Sleep timer</span><b>Off</b></div>
+                            <div><span>Playback speed</span><b>Normal</b></div>
+                            <div><span>Quality</span><b>Auto (1080p HD)</b></div>
                         </div>
-                        <div class="metadata-right">
-                            <div class="action-buttons">
-                                <button class="action-btn like-it@(likedClass)" data-id="@((Model?.Id ?? Guid.Empty).ToString())">
-                                    <span class="action-icon">@(currentUserLiked ? "👍" : "👍")</span>
-                                    <span class="action-count">@likesCount</span>
+                    </div>
+
+                    <h1 class="yt-watch-title">@title</h1>
+
+                    <div class="yt-watch-top-row">
+                        <div class="yt-owner">
+                            <a href="/u/@Model.Username"><img class="yt-owner-avatar" src="/u/@Model.Username/avatar" alt=""></a>
+                            <div class="yt-owner-text">
+                                <a class="yt-owner-name" href="/u/@Model.Username" data-username="@Model.Username" data-display-name>@Present.DisplayName(Model.Username)</a>
+                                <div class="yt-owner-subs">@SocialPresentation.Compact(Subscribers(Model.Username)) subscribers</div>
+                            </div>
+                            @if (isOwner)
+                            {
+                                <button class="yt-pill" type="button" data-toast="Analytics are available in YouTube Studio">Analytics</button>
+                                <button class="yt-pill" type="button" data-open-upload>Edit video</button>
+                            }
+                            else
+                            {
+                                <button class="yt-pill yt-subscribe" type="button" data-username="@Model.Username" data-subscribed="@(subscribed ? "true" : "false")">Subscribe</button>
+                            }
+                        </div>
+                        <div class="yt-actions">
+                            <div class="yt-like-group">
+                                <button class="yt-like-btn like-it@(liked ? " liked" : "")" type="button" data-id="@Model.Id" data-count="@Present.Score(Model)" data-liked="@(liked ? "true" : "false")" aria-pressed="@(liked ? "true" : "false")" title="I like this">
+                                    <svg class="yt-icon"><use href="#yt-i-@(liked ? "like-fill" : "like")"/></svg><span>@SocialPresentation.Compact(Present.Score(Model))</span>
                                 </button>
-                                <button class="action-btn">
-                                    <span class="action-icon">👎</span>
-                                </button>
-                                <button class="action-btn">
-                                    <span class="action-icon">🔗</span>
-                                    <span class="action-text">Share</span>
-                                </button>
-                                <button class="action-btn">
-                                    <span class="action-icon">💾</span>
-                                    <span class="action-text">Save</span>
-                                </button>
-                                <button class="action-btn">
-                                    <span class="action-icon">⋯</span>
-                                </button>
+                                <button class="yt-dislike-btn" type="button" title="I dislike this"><svg class="yt-icon"><use href="#yt-i-dislike"/></svg></button>
+                            </div>
+                            <button class="yt-pill yt-action-share" type="button" data-id="@Model.Id"><svg class="yt-icon"><use href="#yt-i-share"/></svg>Share</button>
+                            <button class="yt-pill yt-action-download" type="button" data-toast="Get YouTube Premium to download videos"><svg class="yt-icon"><use href="#yt-i-download"/></svg>Download</button>
+                            <button class="yt-pill yt-action-save" type="button" data-toast="Saved to Watch later"><svg class="yt-icon"><use href="#yt-i-save"/></svg>Save</button>
+                            <button class="yt-pill yt-action-more" type="button" data-toast="Thanks for reporting" aria-label="More actions"><svg class="yt-icon"><use href="#yt-i-more"/></svg></button>
+                        </div>
+                    </div>
+
+                    <div class="yt-description">
+                        <div class="yt-description-info">
+                            <span class="yt-when-collapsed">@SocialPresentation.Compact(Present.Views(Model)) views&nbsp;&nbsp;@SocialPresentation.LongAgo(Model.CreatedUtc)</span>
+                            <span class="yt-when-expanded">@Present.Views(Model).ToString("N0") views&nbsp;&nbsp;@Model.CreatedUtc.ToString("MMM d, yyyy")</span>
+                            @foreach (var tag in hashtags)
+                            {
+                                <a class="yt-hashtag" href="/search?q=@Uri.EscapeDataString(tag.TrimStart('#'))">@tag</a>
+                            }
+                        </div>
+                        <div class="yt-description-snippet"><span class="yt-description-text">@MessageHtml.Render(Model.Message)</span> <span class="yt-description-more">...more</span></div>
+                        <div class="yt-description-extra">
+                            <a class="yt-description-channel" href="/u/@Model.Username">
+                                <img src="/u/@Model.Username/avatar" alt="">
+                                <span><b>@Present.DisplayName(Model.Username)</b><small>@SocialPresentation.Compact(Subscribers(Model.Username)) subscribers</small></span>
+                            </a>
+                            <div class="yt-description-links">
+                                <a class="yt-pill" href="/u/@Model.Username"><svg class="yt-icon"><use href="#yt-i-your-videos"/></svg>Videos</a>
+                                <a class="yt-pill" href="/u/@Model.Username"><svg class="yt-icon"><use href="#yt-i-account"/></svg>About</a>
+                            </div>
+                            <button class="yt-text-btn yt-description-less" type="button">Show less</button>
+                        </div>
+                    </div>
+
+                    <section class="yt-comments" data-post-id="@Model.Id">
+                        <div class="yt-comments-header">
+                            <h2 class="yt-comments-count" data-count="@comments.Count">@comments.Count.ToString("N0") Comment@(comments.Count == 1 ? "" : "s")</h2>
+                            <div class="yt-popup-anchor">
+                                <button class="yt-comments-sort" type="button"><svg class="yt-icon"><use href="#yt-i-sort"/></svg>Sort by</button>
+                                <div class="yt-popup yt-sort-menu" id="yt-sort-menu" hidden>
+                                    <button class="yt-menu-item checked" type="button" data-sort="top">Top comments</button>
+                                    <button class="yt-menu-item" type="button" data-sort="newest">Newest first</button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                <!-- Channel Info -->
-                <div class="channel-info" data-profile-connections data-username="@(Model?.Username ?? "channel")">
-                    <div class="channel-details">
-                        <img src="/u/@(Model?.Username ?? "channel")/avatar" alt="Channel" class="channel-avatar">
-                        <div class="channel-text">
-                            <h3 class="channel-name">@(Model?.Username ?? "Channel")</h3>
-                            <span class="subscriber-count"><span data-followers-count>0</span> subscribers</span>
-                        </div>
-                    </div>
-                    <button class="subscribe-btn subscribed">
-                        <span class="subscribe-text">Subscribed</span>
-                        <span class="bell-icon">🔔</span>
-                    </button>
-                </div>
-
-                <!-- Video Description -->
-                <div class="video-description">
-                    <div class="description-preview">
-                        <p class="description-text">
-                            In this comprehensive tutorial, we'll build a complete React application from scratch! Perfect for beginners and intermediate developers looking to strengthen their React skills.
-                            <br><br>
-                            🎯 What you'll learn:
-                            <br>• Setting up a React project with Vite
-                            <br>• Component structure and JSX
-                            <br>• State management with useState and useEffect
-                            <br>• Handling user input and forms
-                            <br>• API integration and data fetching
-                            <br>• Styling with CSS modules
-                            <br>• Deployment to production
-                            <br><br>
-                            📋 Timestamps:
-                            <br>0:00 Introduction
-                            <br>1:30 Project setup
-                            <br>3:45 Creating components
-                            <br>6:20 Adding state management
-                            <br>9:15 API integration
-                            <br>11:40 Final touches and deployment
-                            <br><br>
-                            💻 Source code: https://github.com/coding-tutorials/react-app
-                            <br>📚 React documentation: https://react.dev
-                            <br><br>
-                            #React #JavaScript #WebDevelopment #Programming #Tutorial
-                        </p>
-                        <button class="show-more-btn">Show more</button>
-                    </div>
-                </div>
-
-                <!-- Comments Section -->
-                <div class="comments-section">
-                    <div class="comments-header">
-                        <h3 class="comments-count">@commentsCount Comments</h3>
-                        <div class="sort-comments">
-                            <button class="sort-btn">
-                                <span class="sort-icon">⚏</span>
-                                <span class="sort-text">Sort by</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Add Comment -->
-                    <div class="add-comment" data-post-id="@(Model?.Id ?? Guid.Empty)">
-                        <img src="/u/@(ViewBag.Username ?? "user")/avatar" alt="Your avatar" class="comment-avatar">
-                        <div class="comment-input-container">
-                            <input type="text" placeholder="Add a comment..." class="comment-input">
-                            <div class="comment-actions">
-                                <button class="cancel-btn">Cancel</button>
-                                <button class="comment-btn comment-post-btn">Comment</button>
+                        <div class="yt-add-comment add-comment">
+                            <img class="yt-add-comment-avatar" src="/u/@me/avatar" alt="">
+                            <div class="yt-add-comment-box">
+                                <input class="comment-input" type="text" placeholder="Add a comment..." autocomplete="off" maxlength="2000">
+                                <button class="yt-icon-btn yt-emoji-btn" type="button" aria-label="Emoji"><svg class="yt-icon"><use href="#yt-i-emoji"/></svg></button>
+                                <span class="yt-flex-spacer"></span>
+                                <button class="yt-text-btn yt-comment-cancel" type="button">Cancel</button>
+                                <button class="yt-pill yt-pill-blue comment-post-btn" type="button" disabled>Comment</button>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Comments List -->
-                    <div class="comments-list">
-                        <!-- Comment 1 -->
-                        <div class="comment">
-                            <img src="/themes/youtube/images/user1-avatar.jpg" alt="User" class="comment-avatar">
-                            <div class="comment-content">
-                                <div class="comment-header">
-                                    <span class="commenter-name">#TechEnthusiast42</span>
-                                    <span class="comment-time">2 hours ago</span>
-                                </div>
-                                <div class="comment-text">
-                                    This is exactly what I needed! Your explanation of hooks is so clear and easy to follow. Thank you for making such high-quality content! 🙏
-                                </div>
-                                <div class="comment-actions">
-                                    <button class="comment-action like-action">
-                                        <span class="action-icon">👍</span>
-                                        <span class="like-count">42</span>
-                                    </button>
-                                    <button class="comment-action">
-                                        <span class="action-icon">👎</span>
-                                    </button>
-                                    <button class="reply-btn">Reply</button>
-                                </div>
-
-                                <!-- Replies -->
-                                <div class="replies">
-                                    <div class="reply">
-                                        <img src="/themes/youtube/images/channel1.jpg" alt="Channel" class="comment-avatar">
-                                        <div class="comment-content">
-                                            <div class="comment-header">
-                                                <span class="commenter-name">#CodingTutorials</span>
-                                                <span class="creator-badge">✓</span>
-                                                <span class="comment-time">1 hour ago</span>
-                                            </div>
-                                            <div class="comment-text">
-                                                #TechEnthusiast42 So glad it helped! That's exactly why I make these tutorials. Happy coding! 🚀
-                                            </div>
-                                            <div class="comment-actions">
-                                                <button class="comment-action">
-                                                    <span class="action-icon">👍</span>
-                                                    <span class="like-count">15</span>
-                                                </button>
-                                                <button class="comment-action">
-                                                    <span class="action-icon">👎</span>
-                                                </button>
-                                                <button class="reply-btn">Reply</button>
-                                            </div>
+                        <div class="comments-list">
+                            @foreach (var comment in comments)
+                            {
+                                var likes = CommentLikes(comment);
+                                var byOwner = string.Equals(comment.Username, Model.Username, StringComparison.OrdinalIgnoreCase);
+                                <div class="yt-comment" data-created="@comment.CreatedUtc.ToString("o")" data-likes="@likes">
+                                    <a class="yt-comment-avatar" href="/u/@comment.Username"><img src="/u/@comment.Username/avatar" alt=""></a>
+                                    <div class="yt-comment-body">
+                                        <div class="yt-comment-head">
+                                            <a class="yt-comment-author@(byOwner ? " owner" : "")" href="/u/@comment.Username">@Present.Handle(comment.Username)</a>
+                                            <span class="yt-comment-time">@SocialPresentation.LongAgo(comment.CreatedUtc)</span>
+                                        </div>
+                                        <div class="yt-comment-text">@MessageHtml.Render(comment.Message)</div>
+                                        <div class="yt-comment-toolbar">
+                                            <button class="yt-icon-btn yt-comment-like" type="button" aria-label="Like this comment"><svg class="yt-icon"><use href="#yt-i-like"/></svg></button><span class="yt-comment-likes">@(likes > 0 ? SocialPresentation.Compact(likes) : "")</span>
+                                            <button class="yt-icon-btn yt-comment-dislike" type="button" aria-label="Dislike this comment"><svg class="yt-icon"><use href="#yt-i-dislike"/></svg></button>
+                                            <button class="yt-text-btn yt-comment-reply" type="button">Reply</button>
                                         </div>
                                     </div>
+                                    <button class="yt-icon-btn yt-comment-menu" type="button" aria-label="Action menu"><svg class="yt-icon"><use href="#yt-i-more-vert"/></svg></button>
                                 </div>
-                            </div>
+                            }
                         </div>
-
-                        <!-- Comment 2 -->
-                        <div class="comment">
-                            <img src="/themes/youtube/images/user2-avatar.jpg" alt="User" class="comment-avatar">
-                            <div class="comment-content">
-                                <div class="comment-header">
-                                    <span class="commenter-name">#ReactNewbie</span>
-                                    <span class="comment-time">4 hours ago</span>
-                                </div>
-                                <div class="comment-text">
-                                    I'm just starting with React and this tutorial is perfect! Could you do a follow-up on advanced patterns like custom hooks?
-                                </div>
-                                <div class="comment-actions">
-                                    <button class="comment-action">
-                                        <span class="action-icon">👍</span>
-                                        <span class="like-count">28</span>
-                                    </button>
-                                    <button class="comment-action">
-                                        <span class="action-icon">👎</span>
-                                    </button>
-                                    <button class="reply-btn">Reply</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Comment 3 -->
-                        <div class="comment">
-                            <img src="/themes/youtube/images/user3-avatar.jpg" alt="User" class="comment-avatar">
-                            <div class="comment-content">
-                                <div class="comment-header">
-                                    <span class="commenter-name">#WebDevExpert</span>
-                                    <span class="comment-time">6 hours ago</span>
-                                </div>
-                                <div class="comment-text">
-                                    Great tutorial! One suggestion: it would be helpful to mention TypeScript integration for those interested in adding type safety to their React projects.
-                                </div>
-                                <div class="comment-actions">
-                                    <button class="comment-action">
-                                        <span class="action-icon">👍</span>
-                                        <span class="like-count">67</span>
-                                    </button>
-                                    <button class="comment-action">
-                                        <span class="action-icon">👎</span>
-                                    </button>
-                                    <button class="reply-btn">Reply</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Comment 4 -->
-                        <div class="comment">
-                            <img src="/themes/youtube/images/user4-avatar.jpg" alt="User" class="comment-avatar">
-                            <div class="comment-content">
-                                <div class="comment-header">
-                                    <span class="commenter-name">#CodeLearner2024</span>
-                                    <span class="comment-time">8 hours ago</span>
-                                </div>
-                                <div class="comment-text">
-                                    Bookmarked for later! Your teaching style is really easy to follow. Do you have any recommendations for practice projects after completing this tutorial?
-                                </div>
-                                <div class="comment-actions">
-                                    <button class="comment-action">
-                                        <span class="action-icon">👍</span>
-                                        <span class="like-count">19</span>
-                                    </button>
-                                    <button class="comment-action">
-                                        <span class="action-icon">👎</span>
-                                    </button>
-                                    <button class="reply-btn">Reply</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    </section>
                 </div>
+
+                <aside class="yt-secondary" aria-label="Up next">
+                    <div class="yt-chips yt-related-chips">
+                        <button class="yt-chip selected" type="button">All</button>
+                        <button class="yt-chip" type="button">From @Present.DisplayName(Model.Username)</button>
+                        <button class="yt-chip" type="button">Related</button>
+                        <button class="yt-chip" type="button">For you</button>
+                        <button class="yt-chip" type="button">Recently uploaded</button>
+                        <button class="yt-chip" type="button">Watched</button>
+                    </div>
+                    @foreach (var video in related)
+                    {
+                        <div class="yt-compact-video" data-post-id="@video.Id">
+                            <a class="yt-thumb" href="/posts/@video.Id" tabindex="-1" aria-hidden="true">
+                                <img src="@Present.PhotoUrl(video)" alt="" loading="lazy">
+                                <span class="yt-badge">@Present.Duration(video.Id)</span>
+                            </a>
+                            <a class="yt-compact-meta" href="/posts/@video.Id">
+                                <h3 class="yt-compact-title">@Present.Title(video)</h3>
+                                <span class="yt-compact-channel" data-username="@video.Username" data-display-name>@Present.DisplayName(video.Username)</span>
+                                <span class="yt-stats"><span>@SocialPresentation.Compact(Present.Views(video)) views</span><span>@SocialPresentation.LongAgo(video.CreatedUtc)</span></span>
+                            </a>
+                            <button class="yt-icon-btn yt-card-menu" type="button" aria-label="Action menu"><svg class="yt-icon"><use href="#yt-i-more-vert"/></svg></button>
+                        </div>
+                    }
+                </aside>
             </div>
-
-            <!-- Sidebar -->
-            <div class="sidebar">
-                <div class="up-next-section">
-                    <h3 class="sidebar-title">Up next</h3>
-
-                    <!-- Autoplay Toggle -->
-                    <div class="autoplay-toggle">
-                        <span class="autoplay-text">Autoplay</span>
-                        <div class="toggle-switch active">
-                            <div class="toggle-slider"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Related Videos -->
-                <div class="related-videos">
-                    <!-- Related Video 1 -->
-                    <div class="related-video">
-                        <div class="video-thumbnail">
-                            <img src="/themes/youtube/images/related1.jpg" alt="Related video" class="thumbnail-img">
-                            <span class="video-duration">15:42</span>
-                        </div>
-                        <div class="video-details">
-                            <h4 class="video-title">Advanced React Patterns You Should Know</h4>
-                            <div class="video-meta">
-                                <span class="channel-name">Coding Tutorials</span>
-                                <div class="meta-info">
-                                    <span>892K views</span>
-                                    <span>•</span>
-                                    <span>1 week ago</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Related Video 2 -->
-                    <div class="related-video">
-                        <div class="video-thumbnail">
-                            <img src="/themes/youtube/images/related2.jpg" alt="Related video" class="thumbnail-img">
-                            <span class="video-duration">8:23</span>
-                        </div>
-                        <div class="video-details">
-                            <h4 class="video-title">React vs Vue vs Angular - Which One to Choose?</h4>
-                            <div class="video-meta">
-                                <span class="channel-name">Tech Comparison</span>
-                                <div class="meta-info">
-                                    <span>1.2M views</span>
-                                    <span>•</span>
-                                    <span>3 days ago</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Related Video 3 -->
-                    <div class="related-video">
-                        <div class="video-thumbnail">
-                            <img src="/themes/youtube/images/related3.jpg" alt="Related video" class="thumbnail-img">
-                            <span class="video-duration">22:15</span>
-                        </div>
-                        <div class="video-details">
-                            <h4 class="video-title">Building a Full Stack App with React and Node.js</h4>
-                            <div class="video-meta">
-                                <span class="channel-name">Full Stack Dev</span>
-                                <div class="meta-info">
-                                    <span>567K views</span>
-                                    <span>•</span>
-                                    <span>2 weeks ago</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Related Video 4 -->
-                    <div class="related-video">
-                        <div class="video-thumbnail">
-                            <img src="/themes/youtube/images/related4.jpg" alt="Related video" class="thumbnail-img">
-                            <span class="video-duration">11:37</span>
-                        </div>
-                        <div class="video-details">
-                            <h4 class="video-title">React Hooks Explained in 10 Minutes</h4>
-                            <div class="video-meta">
-                                <span class="channel-name">Quick Tutorials</span>
-                                <div class="meta-info">
-                                    <span>334K views</span>
-                                    <span>•</span>
-                                    <span>5 days ago</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Related Video 5 -->
-                    <div class="related-video">
-                        <div class="video-thumbnail">
-                            <img src="/themes/youtube/images/related5.jpg" alt="Related video" class="thumbnail-img">
-                            <span class="video-duration">18:54</span>
-                        </div>
-                        <div class="video-details">
-                            <h4 class="video-title">State Management in React - Redux vs Context API</h4>
-                            <div class="video-meta">
-                                <span class="channel-name">React Masters</span>
-                                <div class="meta-info">
-                                    <span>678K views</span>
-                                    <span>•</span>
-                                    <span>1 month ago</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Related Video 6 -->
-                    <div class="related-video">
-                        <div class="video-thumbnail">
-                            <img src="/themes/youtube/images/related6.jpg" alt="Related video" class="thumbnail-img">
-                            <span class="video-duration">7:28</span>
-                        </div>
-                        <div class="video-details">
-                            <h4 class="video-title">CSS Grid vs Flexbox - When to Use Which?</h4>
-                            <div class="video-meta">
-                                <span class="channel-name">CSS Guru</span>
-                                <div class="meta-info">
-                                    <span>445K views</span>
-                                    <span>•</span>
-                                    <span>2 weeks ago</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+        }
+    </main>
 
     @await Html.PartialAsync("_Scripts")
-    <script src="/themes/youtube/js/video.js"></script>
+    <script src="/themes/youtube/js/youtube.js?@System.Guid.NewGuid()"></script>
 </body>
 </html>

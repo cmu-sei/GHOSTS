@@ -1,7 +1,29 @@
+@using Ghosts.Pandora.Infrastructure.Content
 @model Ghosts.Pandora.Infrastructure.ViewModels.SearchResultsViewModel
+@inject Ghosts.Pandora.Infrastructure.Services.IUserService Users
 @{
     Layout = null;
+    ViewBag.Theme = "linkedin";
+    ViewData["LiNav"] = "";
+    var me = ViewBag.Username as string ?? string.Empty;
     var query = Model?.Query ?? string.Empty;
+    var hasQuery = Model?.HasQuery == true;
+
+    // People match on their name and headline too, as on LinkedIn, not only on the username
+    var people = new List<Ghosts.Pandora.Infrastructure.Models.User>(Model?.Users ?? Array.Empty<Ghosts.Pandora.Infrastructure.Models.User>());
+    if (hasQuery)
+    {
+        foreach (var user in await Users.GetUsersByThemeAsync("linkedin", 200))
+        {
+            if (people.Any(p => string.Equals(p.Username, user.Username, StringComparison.OrdinalIgnoreCase)))
+                continue;
+            if (Present.DisplayName(user.Username).Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                Present.Headline(user.Username).Contains(query, StringComparison.OrdinalIgnoreCase))
+                people.Add(user);
+        }
+    }
+    people = people.Where(p => !string.Equals(p.Username, me, StringComparison.OrdinalIgnoreCase)).ToList();
+    var posts = Model?.Posts ?? Array.Empty<Ghosts.Pandora.Infrastructure.Models.Post>();
 }
 
 <!DOCTYPE html>
@@ -9,139 +31,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LinkedIn Search - @query</title>
-    <link rel="stylesheet" href="/themes/linkedin/css/feed.css">
-    <style>
-        .search-wrapper {
-            max-width: 960px;
-            margin: 32px auto;
-            display: grid;
-            grid-template-columns: 280px 1fr;
-            gap: 24px;
-        }
-        .side-card, .result-card {
-            background: #fff;
-            border-radius: 8px;
-            padding: 24px;
-            box-shadow: 0 0 0 1px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.08);
-        }
-        .search-form {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .search-form input {
-            padding: 12px;
-            border-radius: 4px;
-            border: 1px solid rgba(0,0,0,0.3);
-        }
-        .search-form button {
-            background: #0a66c2;
-            color: #fff;
-            border: none;
-            border-radius: 24px;
-            padding: 10px 16px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        .results-column h2 {
-            margin-top: 0;
-            font-size: 18px;
-        }
-        .result-list {
-            display: grid;
-            gap: 12px;
-            margin-bottom: 32px;
-        }
-        .result-card a {
-            color: inherit;
-            text-decoration: none;
-        }
-        .empty-state {
-            color: rgba(0,0,0,0.6);
-        }
-    </style>
+    <meta name="current-user" content="@me">
+    <title>@(hasQuery ? $"{query} | Search | LinkedIn" : "Search | LinkedIn")</title>
+    <link rel="stylesheet" href="/themes/linkedin/css/feed.css?@System.Guid.NewGuid()">
+    <link rel="icon" href="/themes/linkedin/images/favicon.svg" type="image/svg+xml">
 </head>
-<body>
-    <div class="header">
-        <div class="header-container">
-            <div class="header-left">
-                <a href="/"><img src="/themes/linkedin/images/linkedin-logo.png" alt="LinkedIn" class="linkedin-logo"></a>
-            </div>
-            <nav class="header-nav">
-                <a href="/" class="nav-item" style="text-decoration: none; color: inherit; display: flex; flex-direction: column; align-items: center;"><span class="nav-icon">🏠</span><span class="nav-text">Home</span></a>
-                <div class="nav-item"><span class="nav-icon">👥</span><span class="nav-text">My Network</span></div>
-                <div class="nav-item"><span class="nav-icon">💼</span><span class="nav-text">Jobs</span></div>
-                <div class="nav-item"><span class="nav-icon">💬</span><span class="nav-text">Messaging</span></div>
-                <div class="nav-item"><span class="nav-icon">🔔</span><span class="nav-text">Notifications</span></div>
-            </nav>
+<body data-theme="linkedin" class="li-body">
+    @await Html.PartialAsync("~/Views/Themes/linkedin/_header.cshtml")
+
+    <div class="li-searchbar">
+        <div class="li-searchbar__inner">
+            <a href="#li-people" class="li-pill li-pill--sm li-pill--on">People</a>
+            <a href="#li-posts" class="li-pill li-pill--sm">Posts</a>
+            <span class="li-pill li-pill--sm li-inert">Companies</span>
+            <span class="li-pill li-pill--sm li-inert">Jobs</span>
+            <span class="li-pill li-pill--sm li-inert">Groups</span>
+            <span class="li-searchbar__sep"></span>
+            <span class="li-pill li-pill--sm li-inert">All filters</span>
         </div>
     </div>
 
-    <div class="search-wrapper">
-        <aside class="side-card">
-            <h2>Search LinkedIn</h2>
-            <form class="search-form" method="get" action="/search">
-                <input type="text" name="q" value="@query" placeholder="Search for people or posts" />
-                <button type="submit">Search</button>
-            </form>
+    <div class="li-page li-page--search">
+        <aside class="li-left">
+            <div class="li-card li-onpage">
+                <h2>On this page</h2>
+                <a href="#li-people">People</a>
+                <a href="#li-posts">Posts</a>
+            </div>
         </aside>
 
-        <main class="results-column">
-            <section>
-                <h2>People</h2>
-                @if (Model?.HasQuery == true && Model.Users?.Count > 0)
-                {
-                    <div class="result-list">
-                        @foreach (var user in Model.Users)
+        <main class="li-main">
+            @if (!hasQuery)
+            {
+                <div class="li-card li-empty">
+                    <h2>Search LinkedIn</h2>
+                    <p>Find people, posts and more by typing in the search box above.</p>
+                </div>
+            }
+            else
+            {
+                <section class="li-card li-results" id="li-people">
+                    <h2>People</h2>
+                    @if (people.Count == 0)
+                    {
+                        <p class="li-results__none">No people found for “@query”.</p>
+                    }
+                    <ul>
+                        @foreach (var user in people.Take(10))
                         {
-                            <div class="result-card">
-                                <a href="/u/@user.Username">
-                                    <strong>@user.Username</strong><br />
-                                    <span>@(string.IsNullOrWhiteSpace(user.Bio) ? "No headline provided." : user.Bio)</span>
-                                </a>
-                            </div>
+                            var isWorld = Present.World.People.Any(p => string.Equals(p.Username, user.Username, StringComparison.OrdinalIgnoreCase));
+                            var degree = ContentRequest.StableHash($"{me}:{user.Username}:degree") % 100 < (isWorld ? 70u : 35u) ? "2nd" : "3rd+";
+                            <li class="li-results__person">
+                                <a href="/u/@user.Username"><img src="/u/@user.Username/avatar" alt=""></a>
+                                <div class="li-results__info">
+                                    <a href="/u/@user.Username" class="li-results__name">@Present.DisplayName(user.Username) <span class="li-post__degree">&bull; @degree</span></a>
+                                    <span class="li-results__headline">@Present.Headline(user.Username)</span>
+                                    <span class="li-results__location">Greater @Present.World.City Area</span>
+                                </div>
+                                <form method="post" action="/api/relationships/follow" class="li-follow" data-li-done="Pending">
+                                    <input type="hidden" name="username" value="@user.Username">
+                                    <button type="submit" class="li-btn li-btn--outline-gray"><span>Connect</span></button>
+                                </form>
+                            </li>
                         }
-                    </div>
-                }
-                else if (Model?.HasQuery == true)
-                {
-                    <div class="empty-state">No people found.</div>
-                }
-                else
-                {
-                    <div class="empty-state">Use the search box to find professionals.</div>
-                }
-            </section>
+                    </ul>
+                </section>
 
-            <section>
-                <h2>Posts</h2>
-                @if (Model?.HasQuery == true && Model.Posts?.Count > 0)
-                {
-                    <div class="result-list">
-                        @foreach (var post in Model.Posts)
+                <section class="li-results-posts" id="li-posts">
+                    <h2 class="li-results-posts__title">Posts</h2>
+                    @if (posts.Count == 0)
+                    {
+                        <div class="li-card li-results__none">No posts found for “@query”.</div>
+                    }
+                    <div class="feed">
+                        @foreach (var post in posts)
                         {
-                            <div class="result-card">
-                                <a href="/posts/@post.Id">
-                                    <strong>@post.Username</strong><br />
-                                    <span>@Html.Raw(post.Message)</span>
-                                </a>
-                            </div>
+                            await Html.RenderPartialAsync("_PostCard", post);
                         }
                     </div>
-                }
-                else if (Model?.HasQuery == true)
-                {
-                    <div class="empty-state">No posts matched your query.</div>
-                }
-                else
-                {
-                    <div class="empty-state">Search to discover relevant posts.</div>
-                }
-            </section>
+                </section>
+            }
         </main>
+
+        <aside class="li-right">
+            @await Html.PartialAsync("~/Views/Themes/linkedin/_footer.cshtml")
+        </aside>
     </div>
 
-    <script src="/js/social.js"></script>
+    @await Html.PartialAsync("_Scripts")
+    <script src="/themes/linkedin/js/linkedin.js?@System.Guid.NewGuid()"></script>
 </body>
 </html>

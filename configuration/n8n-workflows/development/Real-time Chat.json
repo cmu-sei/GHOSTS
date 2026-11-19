@@ -272,7 +272,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://host.docker.internal:8800/messages/send",
+        "url": "http://host.docker.internal:6360/messages/send",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -294,7 +294,7 @@
             },
             {
               "name": "Origin",
-              "value": "http://host.docker.internal:8800"
+              "value": "http://host.docker.internal:6360"
             },
             {
               "name": "Pragma",
@@ -302,7 +302,7 @@
             },
             {
               "name": "Referer",
-              "value": "http://host.docker.internal:8800/messages"
+              "value": "http://host.docker.internal:6360/messages"
             },
             {
               "name": "Sec-Fetch-Dest",
@@ -395,7 +395,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://host.docker.internal:8800/messages/send",
+        "url": "http://host.docker.internal:6360/messages/send",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -417,7 +417,7 @@
             },
             {
               "name": "Origin",
-              "value": "http://host.docker.internal:8800"
+              "value": "http://host.docker.internal:6360"
             },
             {
               "name": "Pragma",
@@ -425,7 +425,7 @@
             },
             {
               "name": "Referer",
-              "value": "http://host.docker.internal:8800/messages"
+              "value": "http://host.docker.internal:6360/messages"
             },
             {
               "name": "Sec-Fetch-Dest",

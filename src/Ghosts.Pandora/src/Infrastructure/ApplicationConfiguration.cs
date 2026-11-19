@@ -16,6 +16,8 @@ public class ApplicationConfiguration
 
     public GhostsConfig Ghosts { get; set; }
 
+    public WorldConfig World { get; set; } = new();
+
     public class CleanupJobConfig
     {
         public int Hours { get; set; }
@@ -62,6 +64,7 @@ public class ApplicationConfiguration
         public bool Enabled { get; set; } = true;
         public bool StoreResults { get; set; } = true;
         public string ContentCacheDirectory { get; set; } = "_data";
+        public int MaxStoredMegabytes { get; set; } = 1024;
         public bool OllamaEnabled { get; set; } = false;
         public string OllamaApiUrl { get; set; } = "http://localhost:11434/api/generate";
         public int OllamaTimeout { get; set; } = 60;
@@ -107,21 +110,16 @@ public class ApplicationConfiguration
         public string ApiUrl { get; set; }
         public string WorkflowsUrl { get; set; }
     }
-}
 
-public static class ApplicationConfigurationLoader
-{
-    public static ApplicationConfiguration Load()
+    /// <summary>
+    /// The fictional organization generated content is about. Unset values come from the seed,
+    /// which is itself kept in the content directory when not set here.
+    /// </summary>
+    public class WorldConfig
     {
-        var builder = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json")
-            .AddEnvironmentVariables();
-
-        var config = builder.Build();
-        var appConfig = new ApplicationConfiguration();
-        config.GetSection("ApplicationConfiguration").Bind(appConfig);
-
-        return appConfig;
+        public int? Seed { get; set; }
+        public DateTime? ReferenceDate { get; set; }
+        public string OrganizationName { get; set; }
+        public string Domain { get; set; }
     }
 }

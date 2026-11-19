@@ -1,4 +1,6 @@
 @model Ghosts.Pandora.Infrastructure.Models.Post
+@inject Ghosts.Pandora.Infrastructure.Services.IUserService Users
+@inject Ghosts.Pandora.Infrastructure.Services.IFollowService Follows
 @{
     Layout = null;
     ViewBag.Theme = "x";
@@ -7,12 +9,32 @@
         ViewBag.ProfileUsername = Model.Username;
     }
 
-    var currentUser = ViewBag.Username as string;
-    var currentUserLiked = Model != null && !string.IsNullOrWhiteSpace(currentUser) &&
-        (Model.Likes?.Any(l => string.Equals(l.Username, currentUser, StringComparison.OrdinalIgnoreCase)) ?? false);
-    var likedClass = currentUserLiked ? " liked" : string.Empty;
-    var likesCount = Model?.Likes?.Count ?? 0;
-    var commentsCount = Model?.Comments?.Count ?? 0;
+    var me = ViewBag.Username as string ?? "user";
+    ViewData["XNav"] = "";
+    ViewData["XAside"] = "post";
+    ViewData["XPerson"] = Model?.Username;
+
+    var author = Model?.Username ?? "";
+    var isMe = string.Equals(author, me, StringComparison.OrdinalIgnoreCase);
+    var liked = Model != null && (Model.Likes?.Any(l => string.Equals(l.Username, me, StringComparison.OrdinalIgnoreCase)) ?? false);
+    var text = Model == null ? "" : SocialPresentation.UploadedImage(Model) != null ? SocialPresentation.PlainText(Model) : Model.Message;
+    var photo = Model != null && Present.HasPhoto(Model, 25) ? Present.PhotoUrl(Model) : null;
+    var replies = Model == null ? 0 : Present.CommentCount(Model);
+    var reposts = Model == null ? 0 : Present.Shares(Model);
+    var likes = Model == null ? 0 : Present.Score(Model);
+    var views = Model == null ? 0 : Present.Views(Model);
+    var comments = Model?.Comments?.OrderBy(c => c.CreatedUtc).ToList() ?? new List<Ghosts.Pandora.Infrastructure.Models.Comment>();
+    string Count(int n) => n > 0 ? SocialPresentation.Compact(n) : "";
+
+    var following = false;
+    if (Model != null && !isMe)
+    {
+        var meUser = await Users.GetUserByUsernameAsync(me, "x");
+        following = meUser != null && await Follows.IsFollowingAsync(meUser.Id, Model.UserId);
+    }
+
+    var plain = Model == null ? "" : SocialPresentation.PlainText(Model);
+    var title = Model == null ? "Post / X" : $"{Present.DisplayName(author)} on X: \"{(plain.Length > 80 ? plain[..80] + "…" : plain)}\" / X";
 }
 
 <!DOCTYPE html>
@@ -20,370 +42,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="current-user" content="@ViewBag.Username">
-    <title>@(Model != null ? $"{Model.Username} on X" : "Post") / X</title>
-    <link rel="stylesheet" href="/themes/x/css/post.css?@System.Guid.NewGuid()">
-    <link rel="icon" href="/themes/x/images/x-icon.png">
+    <meta name="current-user" content="@me">
+    <title>@title</title>
+    <link rel="stylesheet" href="/themes/x/css/x.css?@System.Guid.NewGuid()">
+    <link rel="icon" href="/themes/x/images/favicon.svg" type="image/svg+xml">
 </head>
-<body>
-    <div class="app">
-        <!-- Left Sidebar -->
-        <div class="sidebar">
-            <div class="sidebar-content">
-                <div class="logo">
-                    <a href="/"><img src="/themes/x/images/x-logo.png" alt="X" class="x-logo"></a>
-                </div>
-                <nav class="nav-menu">
-                    <a href="/" class="nav-item">
-                        <span class="nav-icon">🏠</span>
-                        <span class="nav-text">Home</span>
-                    </a>
-                    <a href="#" class="nav-item">
-                        <span class="nav-icon">🔍</span>
-                        <span class="nav-text">Explore</span>
-                    </a>
-                    <a href="#" class="nav-item">
-                        <span class="nav-icon">🔔</span>
-                        <span class="nav-text">Notifications</span>
-                    </a>
-                    <a href="#" class="nav-item">
-                        <span class="nav-icon">✉️</span>
-                        <span class="nav-text">Messages</span>
-                    </a>
-                    <a href="#" class="nav-item">
-                        <span class="nav-icon">🔖</span>
-                        <span class="nav-text">Bookmarks</span>
-                    </a>
-                    <a href="#" class="nav-item">
-                        <span class="nav-icon">👥</span>
-                        <span class="nav-text">Communities</span>
-                    </a>
-                    <a href="#" class="nav-item">
-                        <span class="nav-icon">❌</span>
-                        <span class="nav-text">Premium</span>
-                    </a>
-                    <a href="profile.html" class="nav-item">
-                        <span class="nav-icon">👤</span>
-                        <span class="nav-text">Profile</span>
-                    </a>
-                    <a href="#" class="nav-item">
-                        <span class="nav-icon">⋯</span>
-                        <span class="nav-text">More</span>
-                    </a>
-                </nav>
-                <button class="post-button">Post</button>
-            </div>
-            <div class="user-info">
-                <img src="/u/@(Model?.Username ?? "user")/avatar" alt="@(Model?.Username ?? "User")" class="user-avatar">
-                <div class="user-details">
-                    <div class="username">@(Model?.Username ?? "User")</div>
-                    <div class="handle">@($"@{Model?.Username ?? "user"}")</div>
-                </div>
-                <span class="more-options">⋯</span>
-            </div>
-        </div>
-
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Header -->
-            <div class="post-header">
-                <div class="header-nav">
-                    <button class="back-btn">←</button>
-                    <h1>Post</h1>
-                </div>
-            </div>
-
-            <!-- Main Post -->
-            <div class="main-post">
-                <div class="post-author">
-                    <img src="/u/@(Model?.Username ?? "user")/avatar" alt="@(Model?.Username ?? "User")" class="author-avatar">
-                    <div class="author-info">
-                        <div class="author-name">@(Model?.Username ?? "User")</div>
-                        <div class="author-handle">@($"@{Model?.Username ?? "user"}")</div>
-                    </div>
-                    <button class="follow-btn">Follow</button>
-                    <button class="post-more">⋯</button>
-                </div>
-
-                <div class="post-content">
-                    <div class="post-text">
-                        @Html.Raw(Model?.Message ?? "Post unavailable.")
-                    </div>
-
-                    <div class="post-timestamp">
-                        @if (Model != null)
-                        {
-                            <span class="post-time">@Model.CreatedUtc.ToString("h:mm tt")</span>
-                            <span class="post-separator">·</span>
-                            <span class="post-date">@Model.CreatedUtc.ToString("MMM d, yyyy")</span>
-                        }
-                    </div>
-
-                    <div class="post-stats">
-                        <div class="stat-item">
-                            <span class="stat-number">@commentsCount</span>
-                            <span class="stat-label">Comments</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-number">@likesCount</span>
-                            <span class="stat-label">Likes</span>
+<body data-theme="x">
+    @await Html.PartialAsync("/Views/Themes/x/_xsprite.cshtml")
+    <div class="x-app">
+        @await Html.PartialAsync("/Views/Themes/x/_xnav.cshtml")
+        <main class="x-main" role="main">
+            <div class="x-main-inner">
+                <div class="x-primary">
+                    <div class="x-sticky">
+                        <div class="x-topbar">
+                            <a href="/" class="x-back" aria-label="Back" onclick="if (history.length > 1) { history.back(); return false; }"><svg><use href="#x-back"/></svg></a>
+                            <h2>Post</h2>
                         </div>
                     </div>
 
-                    <div class="post-actions">
-                        <button class="action-btn reply">
-                            <span class="action-icon">💬</span>
-                        </button>
-                        <button class="action-btn repost">
-                            <span class="action-icon">🔄</span>
-                        </button>
-                        <button class="action-btn like-it@(likedClass)" data-id="@((Model?.Id ?? Guid.Empty).ToString())">
-                            <span class="action-icon">@(currentUserLiked ? "❤️" : "🤍")</span>
-                            <span class="action-count">@likesCount</span>
-                        </button>
-                        <button class="action-btn bookmark">
-                            <span class="action-icon">🔖</span>
-                        </button>
-                        <button class="action-btn share">
-                            <span class="action-icon">📤</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Reply Section -->
-            <div class="reply-section" data-post-id="@(Model?.Id ?? Guid.Empty)">
-                <div class="reply-compose">
-                    <img src="/u/@(ViewBag.Username ?? "user")/avatar" alt="Profile" class="reply-avatar">
-                    <div class="reply-content">
-                        <textarea placeholder="Post your reply" class="reply-textarea comment-input"></textarea>
-                        <div class="reply-actions">
-                            <div class="reply-options">
-                                <button class="reply-option">📷</button>
-                                <button class="reply-option">🎥</button>
-                                <button class="reply-option">📊</button>
-                                <button class="reply-option">😊</button>
+                    @if (Model == null)
+                    {
+                        <div class="x-empty">
+                            <h2>Hmm...this page doesn’t exist.</h2>
+                            <p>Try searching for something else.</p>
+                            <a href="/search" class="x-btn-dark">Search</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <article class="x-focal" data-post-id="@Model.Id" data-username="@author">
+                            <div class="x-focal-head">
+                                <a href="/u/@author"><img src="/u/@author/avatar" alt="" class="x-who-avatar"></a>
+                                <div class="x-focal-names">
+                                    <a href="/u/@author" class="tweet-name">@Present.DisplayName(author)</a>
+                                    <a href="/u/@author" class="tweet-handle">@Present.Handle(author)</a>
+                                </div>
+                                <div class="x-focal-tools">
+                                    @if (!isMe)
+                                    {
+                                        <button type="button" class="x-follow@(following ? " following" : "")" data-x-follow="@author">@(following ? "Following" : "Follow")</button>
+                                    }
+                                    <button type="button" class="x-icon-btn" aria-label="Grok actions"><svg><use href="#x-grok"/></svg></button>
+                                    <button type="button" class="x-icon-btn" aria-label="More" data-x-menu="post"><svg><use href="#x-dots"/></svg></button>
+                                </div>
                             </div>
-                            <button class="reply-btn comment-post-btn">Reply</button>
+
+                            <div class="x-focal-text">@MessageHtml.Render(text)</div>
+                            @if (photo != null)
+                            {
+                                <div class="tweet-media"><img src="@photo" alt="Image"></div>
+                            }
+
+                            <div class="x-focal-meta">
+                                <a href="/posts/@Model.Id"><time datetime="@Model.CreatedUtc.ToString("o")">@Model.CreatedUtc.ToString("h:mm tt · MMM d, yyyy")</time></a>
+                                · <b>@SocialPresentation.Compact(views)</b> Views
+                            </div>
+
+                            <div class="x-focal-actions" role="group">
+                                <button type="button" class="action-btn act-reply" aria-label="Reply" data-count="@replies" onclick="document.querySelector('.x-reply-box .comment-input').focus()"><span class="ab-ic"><svg><use href="#x-reply"/></svg></span><span class="ab-n">@Count(replies)</span></button>
+                                <button type="button" class="action-btn act-repost" aria-label="Repost" data-count="@reposts"><span class="ab-ic"><svg><use href="#x-repost"/></svg></span><span class="ab-n">@Count(reposts)</span></button>
+                                <button type="button" class="action-btn like-it@(liked ? " liked" : "")" aria-label="Like" data-id="@Model.Id" data-count="@likes"><span class="ab-ic"><svg class="ic-off"><use href="#x-like"/></svg><svg class="ic-on"><use href="#x-like-fill"/></svg></span><span class="ab-n">@Count(likes)</span></button>
+                                <button type="button" class="action-btn act-bookmark" aria-label="Bookmark"><span class="ab-ic"><svg class="ic-off"><use href="#x-bookmark"/></svg><svg class="ic-on"><use href="#x-bookmark-fill"/></svg></span></button>
+                                <button type="button" class="action-btn act-share" aria-label="Share post"><span class="ab-ic"><svg><use href="#x-share"/></svg></span></button>
+                            </div>
+                        </article>
+
+                        @* social.js posts the reply: it needs .comment-input and .comment-post-btn as siblings inside .comment-input-container *@
+                        <div class="x-reply-box comment-input-container" data-post-id="@Model.Id" data-empty>
+                            <div class="x-reply-to">Replying to <a href="/u/@author">@Present.Handle(author)</a></div>
+                            <img src="/u/@me/avatar" alt="" class="x-reply-avatar">
+                            <textarea class="comment-input" placeholder="Post your reply" rows="1" maxlength="280"></textarea>
+                            <div class="x-reply-tools">
+                                <button type="button" class="option-btn" aria-label="Add photos or video"><svg><use href="#x-media"/></svg></button>
+                                <button type="button" class="option-btn" aria-label="Add a GIF"><svg><use href="#x-gif"/></svg></button>
+                                <button type="button" class="option-btn" aria-label="Enhance your post with Grok"><svg><use href="#x-grok"/></svg></button>
+                                <button type="button" class="option-btn" aria-label="Add emoji"><svg><use href="#x-emoji"/></svg></button>
+                                <button type="button" class="option-btn" aria-label="Tag location" disabled><svg><use href="#x-location"/></svg></button>
+                            </div>
+                            <button type="button" class="comment-post-btn">Reply</button>
                         </div>
-                    </div>
+
+                        <div class="x-replies">
+                            @foreach (var comment in comments)
+                            {
+                                var who = comment.Username;
+                                <article class="tweet" data-username="@who">
+                                    <a href="/u/@who" class="tweet-avatar-link"><img src="/u/@who/avatar" alt="" class="tweet-avatar"></a>
+                                    <div class="tweet-content">
+                                        <div class="tweet-header">
+                                            <a href="/u/@who" class="tweet-name">@Present.DisplayName(who)</a>
+                                            <a href="/u/@who" class="tweet-handle">@Present.Handle(who)</a>
+                                            <span class="tweet-dot">·</span>
+                                            <span class="tweet-time" title="@comment.CreatedUtc.ToString("h:mm tt · MMM d, yyyy")">@SocialPresentation.ShortAgo(comment.CreatedUtc)</span>
+                                            <div class="tweet-header-icons">
+                                                <button type="button" class="x-icon-btn" aria-label="Grok actions"><svg><use href="#x-grok"/></svg></button>
+                                                <button type="button" class="x-icon-btn" aria-label="More" data-x-menu="post"><svg><use href="#x-dots"/></svg></button>
+                                            </div>
+                                        </div>
+                                        <div class="tweet-text">@MessageHtml.Render(comment.Message)</div>
+                                        <div class="tweet-actions" role="group">
+                                            <button type="button" class="action-btn act-reply" aria-label="Reply" onclick="document.querySelector('.x-reply-box .comment-input').focus()"><span class="ab-ic"><svg><use href="#x-reply"/></svg></span><span class="ab-n"></span></button>
+                                            <button type="button" class="action-btn act-repost" aria-label="Repost" data-count="0"><span class="ab-ic"><svg><use href="#x-repost"/></svg></span><span class="ab-n"></span></button>
+                                            <button type="button" class="action-btn act-like" aria-label="Like" data-count="0"><span class="ab-ic"><svg class="ic-off"><use href="#x-like"/></svg><svg class="ic-on"><use href="#x-like-fill"/></svg></span><span class="ab-n"></span></button>
+                                            <span class="action-btn act-views"><span class="ab-ic"><svg><use href="#x-views"/></svg></span><span class="ab-n"></span></span>
+                                            <div class="ab-end">
+                                                <button type="button" class="action-btn act-bookmark" aria-label="Bookmark"><span class="ab-ic"><svg class="ic-off"><use href="#x-bookmark"/></svg><svg class="ic-on"><use href="#x-bookmark-fill"/></svg></span></button>
+                                                <button type="button" class="action-btn act-share" aria-label="Share post"><span class="ab-ic"><svg><use href="#x-share"/></svg></span></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </article>
+                            }
+                        </div>
+                    }
                 </div>
+                @await Html.PartialAsync("/Views/Themes/x/_xaside.cshtml")
             </div>
-
-            <!-- Replies -->
-            <div class="replies">
-                <div class="reply">
-                    <img src="images/user2-avatar.jpg" alt="Tech News" class="reply-avatar">
-                    <div class="reply-content">
-                        <div class="reply-header">
-                            <span class="reply-name">Tech News</span>
-                            <span class="reply-handle">#technews</span>
-                            <span class="reply-verified">✓</span>
-                            <span class="reply-time">· 1h</span>
-                            <span class="reply-more">⋯</span>
-                        </div>
-                        <div class="reply-text">
-                            Congratulations! Can't wait to try it out. What's the biggest improvement?
-                        </div>
-                        <div class="reply-actions">
-                            <button class="action-btn">
-                                <span class="action-icon">💬</span>
-                                <span class="action-count">3</span>
-                            </button>
-                            <button class="action-btn">
-                                <span class="action-icon">🔄</span>
-                                <span class="action-count">8</span>
-                            </button>
-                            <button class="action-btn">
-                                <span class="action-icon">❤️</span>
-                                <span class="action-count">24</span>
-                            </button>
-                            <button class="action-btn">
-                                <span class="action-icon">📤</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="reply">
-                    <img src="images/user3-avatar.jpg" alt="Design Inspiration" class="reply-avatar">
-                    <div class="reply-content">
-                        <div class="reply-header">
-                            <span class="reply-name">Design Inspiration</span>
-                            <span class="reply-handle">#designinspo</span>
-                            <span class="reply-time">· 45m</span>
-                            <span class="reply-more">⋯</span>
-                        </div>
-                        <div class="reply-text">
-                            Amazing work! The attention to detail really shows. Your team should be proud 👏
-                        </div>
-                        <div class="reply-actions">
-                            <button class="action-btn">
-                                <span class="action-icon">💬</span>
-                                <span class="action-count">1</span>
-                            </button>
-                            <button class="action-btn">
-                                <span class="action-icon">🔄</span>
-                                <span class="action-count">5</span>
-                            </button>
-                            <button class="action-btn">
-                                <span class="action-icon">❤️</span>
-                                <span class="action-count">18</span>
-                            </button>
-                            <button class="action-btn">
-                                <span class="action-icon">📤</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="reply">
-                    <img src="images/suggested1.jpg" alt="Jane Smith" class="reply-avatar">
-                    <div class="reply-content">
-                        <div class="reply-header">
-                            <span class="reply-name">Jane Smith</span>
-                            <span class="reply-handle">#janesmith</span>
-                            <span class="reply-time">· 30m</span>
-                            <span class="reply-more">⋯</span>
-                        </div>
-                        <div class="reply-text">
-                            This is exactly what we needed! How long did the development process take?
-                        </div>
-                        <div class="reply-actions">
-                            <button class="action-btn">
-                                <span class="action-icon">💬</span>
-                                <span class="action-count">2</span>
-                            </button>
-                            <button class="action-btn">
-                                <span class="action-icon">🔄</span>
-                                <span class="action-count">3</span>
-                            </button>
-                            <button class="action-btn">
-                                <span class="action-icon">❤️</span>
-                                <span class="action-count">12</span>
-                            </button>
-                            <button class="action-btn">
-                                <span class="action-icon">📤</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Nested Reply -->
-                <div class="reply nested">
-                    <div class="reply-thread"></div>
-                    <img src="images/user1-avatar.jpg" alt="Alice Johnson" class="reply-avatar">
-                    <div class="reply-content">
-                        <div class="reply-header">
-                            <span class="reply-name">Alice Johnson</span>
-                            <span class="reply-handle">#alicej</span>
-                            <span class="reply-time">· 15m</span>
-                            <span class="reply-more">⋯</span>
-                        </div>
-                        <div class="reply-text">
-                            <span class="reply-to">Replying to #janesmith</span>
-                            About 3 months from concept to deployment! The hardest part was getting the UX just right.
-                        </div>
-                        <div class="reply-actions">
-                            <button class="action-btn">
-                                <span class="action-icon">💬</span>
-                            </button>
-                            <button class="action-btn">
-                                <span class="action-icon">🔄</span>
-                                <span class="action-count">1</span>
-                            </button>
-                            <button class="action-btn">
-                                <span class="action-icon">❤️</span>
-                                <span class="action-count">7</span>
-                            </button>
-                            <button class="action-btn">
-                                <span class="action-icon">📤</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="reply">
-                    <img src="images/suggested2.jpg" alt="Tech Guru" class="reply-avatar">
-                    <div class="reply-content">
-                        <div class="reply-header">
-                            <span class="reply-name">Tech Guru</span>
-                            <span class="reply-handle">#techguru</span>
-                            <span class="reply-time">· 10m</span>
-                            <span class="reply-more">⋯</span>
-                        </div>
-                        <div class="reply-text">
-                            Looks promising! Will this be available for all users or rolling out gradually?
-                        </div>
-                        <div class="reply-actions">
-                            <button class="action-btn">
-                                <span class="action-icon">💬</span>
-                            </button>
-                            <button class="action-btn">
-                                <span class="action-icon">🔄</span>
-                            </button>
-                            <button class="action-btn">
-                                <span class="action-icon">❤️</span>
-                                <span class="action-count">4</span>
-                            </button>
-                            <button class="action-btn">
-                                <span class="action-icon">📤</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Right Sidebar -->
-        <div class="right-sidebar">
-            <div class="search-bar">
-                <input type="text" placeholder="Search">
-                <span class="search-icon">🔍</span>
-            </div>
-
-            <div class="trending-section">
-                <h2>What's happening</h2>
-                <div class="trending-item">
-                    <div class="trending-category">Technology · Trending</div>
-                    <div class="trending-topic">Product Launch</div>
-                    <div class="trending-posts">12.5k posts</div>
-                </div>
-                <div class="trending-item">
-                    <div class="trending-category">Programming · Trending</div>
-                    <div class="trending-topic">New Features</div>
-                    <div class="trending-posts">8.2k posts</div>
-                </div>
-                <div class="trending-item">
-                    <div class="trending-category">Tech News · Trending</div>
-                    <div class="trending-topic">Software Update</div>
-                    <div class="trending-posts">15.7k posts</div>
-                </div>
-            </div>
-
-            <div class="suggestions-section">
-                <h2>Who to follow</h2>
-                <div class="suggestion-item">
-                    <img src="images/suggested1.jpg" alt="User" class="suggestion-avatar">
-                    <div class="suggestion-info">
-                        <div class="suggestion-name">Jane Smith</div>
-                        <div class="suggestion-handle">#janesmith</div>
-                    </div>
-                    <button class="follow-btn">Follow</button>
-                </div>
-                <div class="suggestion-item">
-                    <img src="images/suggested2.jpg" alt="User" class="suggestion-avatar">
-                    <div class="suggestion-info">
-                        <div class="suggestion-name">Tech Guru</div>
-                        <div class="suggestion-handle">#techguru</div>
-                    </div>
-                    <button class="follow-btn">Follow</button>
-                </div>
-            </div>
-        </div>
+        </main>
     </div>
 
+    <script>window.xNames = @Json.Serialize(Present.World.People.DistinctBy(p => p.Username).ToDictionary(p => p.Username, p => p.FullName));</script>
     @await Html.PartialAsync("_Scripts")
-    <script src="/themes/x/js/post.js"></script>
+    <script src="/themes/x/js/x.js?@System.Guid.NewGuid()"></script>
 </body>
 </html>

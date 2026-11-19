@@ -55,207 +55,200 @@ function getPostTemplate(theme, id, user, message, created) {
             <article class="post" data-post-id="${id}">
                 <div class="post-header">
                     <div class="post-user-info">
-                        <img src="/u/${user}/avatar" class="profile-pic">
-                        <div>
-                            <div class="post-user-name"><a href="/u/${user}">${user}</a></div>
-                            <div class="post-time">${new Date(created).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'})} · 🌍</div>
+                        <a href="/u/${user}" class="fb-post-avatar"><img src="/u/${user}/avatar" class="profile-pic" alt=""></a>
+                        <div class="post-meta">
+                            <div class="post-user-name"><a href="/u/${user}">${typeof fbDisplayName === 'function' ? fbDisplayName(user) : user}</a></div>
+                            <div class="post-time"><a href="/posts/${id}">Just now</a> <span aria-hidden="true">·</span> <svg class="fb-globe" aria-label="Shared with Public"><use href="#fb-globe"></use></svg></div>
                         </div>
                     </div>
-                    <button class="post-menu">⋯</button>
+                    <button type="button" class="post-menu" aria-label="Actions for this post"><svg class="fb-i"><use href="#fb-dots"></use></svg></button>
+                    <button type="button" class="fb-post-hide" aria-label="Hide post"><svg class="fb-i"><use href="#fb-close"></use></svg></button>
                 </div>
                 <div class="post-content">
                     <div class="post-text">${message}</div>
                 </div>
-                <div class="post-stats">
-                    <span>0 comments</span>
+                <div class="post-stats" hidden>
+                    <div class="fb-reactions" data-total="0"><span class="fb-reaction-icons"><svg><use href="#fb-react-like"></use></svg></span><span class="fb-reaction-text"></span></div>
+                    <div class="fb-counts"></div>
                 </div>
                 <div class="post-actions">
-                    <button class="post-action like-btn like-it" data-id="${id}">👍 Like</button>
-                    <button class="post-action comment-btn" data-action="comment">💬 Comment</button>
-                    <button class="post-action share-btn" data-action="share">📤 Share</button>
+                    <button class="post-action like-btn like-it" data-id="${id}"><svg class="fb-i"><use href="#fb-like"></use></svg><span>Like</span></button>
+                    <a href="/posts/${id}" class="post-action comment-btn"><svg class="fb-i"><use href="#fb-comment"></use></svg><span>Comment</span></a>
+                    <button type="button" class="post-action share-btn"><svg class="fb-i"><use href="#fb-share"></use></svg><span>Share</span></button>
                 </div>
             </article>`,
 
         instagram: `
-            <div class="post" data-post-id="${id}">
-                <div class="post-header">
-                    <div class="post-user">
-                        <img src="/u/${user}/avatar" alt="${user}" class="post-avatar">
-                        <div class="user-info">
-                            <span class="username"><a href="/u/${user}">${user}</a></span>
-                            <span class="location">📍 Location</span>
+            <article class="post" data-post-id="${id}">
+                <header class="post-header">
+                    <a href="/u/${user}" class="ig-ring"><img src="/u/${user}/avatar" alt="${user}'s profile picture" class="post-avatar"></a>
+                    <div class="post-meta">
+                        <div class="post-meta-line">
+                            <a href="/u/${user}" class="post-user">${user}</a>
+                            <span class="ig-sep">•</span>
+                            <a href="/posts/${id}" class="post-ago"><time datetime="${created}">now</time></a>
                         </div>
                     </div>
-                    <button class="more-options">⋯</button>
+                    <button type="button" class="ig-icon-btn ig-post-more" aria-label="More options" data-user="${user}"><svg class="ig-i"><use href="#ig-dots"/></svg></button>
+                </header>
+                <div class="post-media" data-ig-dbl-like>
+                    <img src="${window.igPhoto ? igPhoto(id, message) : ''}" alt="">
+                    <span class="ig-burst" aria-hidden="true"><svg><use href="#ig-heart-fill"/></svg></span>
                 </div>
                 <div class="post-actions">
                     <div class="action-buttons">
-                        <button class="action-btn like-btn like-it" data-id="${id}">❤️</button>
-                        <button class="action-btn comment-btn">💬</button>
-                        <button class="action-btn share-btn">📤</button>
+                        <button class="action-btn like-btn like-it" data-id="${id}" aria-label="Like"></button>
+                        <a href="/posts/${id}" class="ig-icon-btn" aria-label="Comment"><svg class="ig-i"><use href="#ig-comment"/></svg></a>
+                        <button type="button" class="ig-icon-btn ig-share" aria-label="Share Post"><svg class="ig-i"><use href="#ig-share"/></svg></button>
                     </div>
-                    <button class="save-btn">🔖</button>
+                    <button type="button" class="ig-icon-btn ig-save" aria-label="Save"><svg class="ig-i"><use href="#ig-save"/></svg></button>
                 </div>
-                <div class="post-info">
-                    <div class="caption">
-                        <span class="username">${user}</span>
-                        <span class="caption-text">${message}</span>
-                    </div>
-                    <div class="post-time">${new Date(created).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'})}</div>
+                <div class="post-likes"><span class="ig-like-count" data-base="${window.igScore ? igScore(id) : 0}">${(window.igScore ? igScore(id) : 0).toLocaleString('en-US')}</span> likes</div>
+                <div class="post-caption">
+                    <a href="/u/${user}" class="post-user">${user}</a>
+                    <span class="caption-text">${window.igCaption ? igCaption(message) : message}</span>
                 </div>
-            </div>`,
+                <div class="ig-recent-comments"></div>
+                <div class="add-comment">
+                    <input type="text" class="comment-input" placeholder="Add a comment…" aria-label="Add a comment…" autocomplete="off">
+                    <button type="button" class="comment-post-btn">Post</button>
+                    <svg class="ig-i ig-i-13 ig-emoji" aria-hidden="true"><use href="#ig-emoji"/></svg>
+                </div>
+            </article>`,
 
         x: `
-            <div class="tweet" data-post-id="${id}">
-                <img src="/u/${user}/avatar" alt="${user}" class="tweet-avatar">
+            <article class="tweet" data-post-id="${id}" data-href="/posts/${id}" data-username="${user}">
+                <a href="/u/${user}" class="tweet-avatar-link"><img src="/u/${user}/avatar" alt="" class="tweet-avatar"></a>
                 <div class="tweet-content">
                     <div class="tweet-header">
-                        <span class="tweet-name">${user}</span>
-                        <span class="tweet-handle">@${user}</span>
-                        <span class="tweet-time">· ${new Date(created).toLocaleDateString()}</span>
-                        <span class="tweet-more">⋯</span>
-                    </div>
-                    <div class="tweet-text">${message}</div>
-                    <div class="tweet-actions">
-                        <button class="action-btn">
-                            <span class="action-icon">💬</span>
-                            <span class="action-count">0</span>
-                        </button>
-                        <button class="action-btn">
-                            <span class="action-icon">🔄</span>
-                            <span class="action-count">0</span>
-                        </button>
-                        <button class="action-btn like-it" data-id="${id}">
-                            <span class="action-icon">❤️</span>
-                            <span class="action-count">0</span>
-                        </button>
-                        <button class="action-btn">
-                            <span class="action-icon">📊</span>
-                            <span class="action-count">0</span>
-                        </button>
-                        <button class="action-btn">
-                            <span class="action-icon">📤</span>
-                        </button>
-                    </div>
-                </div>
-            </div>`,
-
-        linkedin: `
-            <article class="post" data-post-id="${id}">
-                <div class="post-header">
-                    <div class="post-author">
-                        <img src="/u/${user}/avatar" alt="${user}" class="author-avatar">
-                        <div class="author-info">
-                            <div class="author-name">${user}</div>
-                            <div class="author-title">Professional</div>
-                            <div class="post-time">${new Date(created).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'})} • 🌍</div>
+                        <a href="/u/${user}" class="tweet-name">${(window.xNames && window.xNames[user]) || user}</a>
+                        <a href="/u/${user}" class="tweet-handle">@${user}</a>
+                        <span class="tweet-dot">·</span>
+                        <a href="/posts/${id}" class="tweet-time"><time datetime="${created}">now</time></a>
+                        <div class="tweet-header-icons">
+                            <button type="button" class="x-icon-btn" aria-label="Grok actions"><svg><use href="#x-grok"/></svg></button>
+                            <button type="button" class="x-icon-btn" aria-label="More" data-x-menu="post"><svg><use href="#x-dots"/></svg></button>
                         </div>
                     </div>
-                    <button class="post-menu">⋯</button>
+                    <div class="tweet-text">${message}</div>
+                    <div class="tweet-actions" role="group">
+                        <a href="/posts/${id}" class="action-btn act-reply" aria-label="Reply"><span class="ab-ic"><svg><use href="#x-reply"/></svg></span><span class="ab-n"></span></a>
+                        <button type="button" class="action-btn act-repost" aria-label="Repost" data-count="0"><span class="ab-ic"><svg><use href="#x-repost"/></svg></span><span class="ab-n"></span></button>
+                        <button type="button" class="action-btn like-it" aria-label="Like" data-id="${id}" data-count="0"><span class="ab-ic"><svg class="ic-off"><use href="#x-like"/></svg><svg class="ic-on"><use href="#x-like-fill"/></svg></span><span class="ab-n"></span></button>
+                        <a href="/posts/${id}" class="action-btn act-views" aria-label="View post analytics"><span class="ab-ic"><svg><use href="#x-views"/></svg></span><span class="ab-n"></span></a>
+                        <div class="ab-end">
+                            <button type="button" class="action-btn act-bookmark" aria-label="Bookmark"><span class="ab-ic"><svg class="ic-off"><use href="#x-bookmark"/></svg><svg class="ic-on"><use href="#x-bookmark-fill"/></svg></span></button>
+                            <button type="button" class="action-btn act-share" aria-label="Share post"><span class="ab-ic"><svg><use href="#x-share"/></svg></span></button>
+                        </div>
+                    </div>
                 </div>
-                <div class="post-content">
-                    <div class="post-text">${message}</div>
+            </article>`,
+
+        linkedin: `
+            <article class="li-post" data-post-id="${id}">
+                <div class="li-post__header">
+                    <a href="/u/${user}" class="li-post__avatar"><img src="/u/${user}/avatar" alt=""></a>
+                    <div class="li-post__meta">
+                        <a href="/u/${user}" class="li-post__name"><span class="li-post__display">${window.LinkedInTheme ? LinkedInTheme.name(user) : user}</span><span class="li-post__degree"> &bull; ${document.querySelector('meta[name="current-user"]')?.content === user ? 'You' : '2nd'}</span></a>
+                        <span class="li-post__headline">${window.LinkedInTheme ? LinkedInTheme.headline(user) : ''}</span>
+                        <span class="li-post__time">now &bull; <svg width="16" height="16"><use href="#li-globe"/></svg></span>
+                    </div>
+                    <div class="li-post__controls">
+                        <button type="button" class="li-iconbtn" data-li-postmenu aria-label="Open control menu"><svg width="24" height="24"><use href="#li-more"/></svg></button>
+                        <button type="button" class="li-iconbtn" data-li-dismiss aria-label="Dismiss post"><svg width="24" height="24"><use href="#li-close"/></svg></button>
+                    </div>
                 </div>
-                <div class="post-actions">
-                    <button class="action-btn like-btn like-it" data-id="${id}">
-                        <span class="action-icon">👍</span>
-                        <span class="action-text">Like</span>
-                    </button>
-                    <button class="action-btn comment-btn">
-                        <span class="action-icon">💬</span>
-                        <span class="action-text">Comment</span>
-                    </button>
-                    <button class="action-btn share-btn">
-                        <span class="action-icon">📤</span>
-                        <span class="action-text">Share</span>
-                    </button>
+                <div class="li-post__body${message.length > 240 ? ' li-post__body--clamp' : ''}"><div class="li-text">${message}</div>${message.length > 240 ? '<button type="button" class="li-seemore" data-li-seemore>&hellip;see more</button>' : ''}</div>
+                ${(/<img src="(\/images\/[0-9a-f-]{36}\/image\.(?:jpg|png))"/.exec(message) || [])[1] ? `<a href="/posts/${id}" class="li-post__photo"><img src="${/<img src="([^"]+)"/.exec(message)[1]}" alt=""></a>` : ''}
+                <div class="li-post__counts li-post__counts--empty" data-li-counts data-others="0" data-liked="false">
+                    <a href="/posts/${id}" class="li-post__reactions li-post__reactions--none"><span class="li-reacticons"><svg width="16" height="16"><use href="#li-r-like"/></svg></span><span class="li-post__reactcount" data-li-reactcount>0</span></a>
+                    <span class="li-post__engage"></span>
+                </div>
+                <div class="li-post__actions">
+                    <button class="action-btn like-btn like-it" data-id="${id}" aria-label="React Like"><svg class="li-ic-off" width="24" height="24"><use href="#li-like"/></svg><svg class="li-ic-on" width="24" height="24"><use href="#li-liked"/></svg><span class="action-text">Like</span></button>
+                    <a href="/posts/${id}" class="li-action"><svg width="24" height="24"><use href="#li-comment"/></svg><span>Comment</span></a>
+                    <div class="li-action-wrap"><button type="button" class="li-action" data-li-repost><svg width="24" height="24"><use href="#li-repost"/></svg><span>Repost</span></button></div>
+                    <div class="li-action-wrap"><button type="button" class="li-action" data-li-send><svg width="24" height="24"><use href="#li-send"/></svg><span>Send</span></button></div>
                 </div>
             </article>`,
 
         reddit: `
-            <div class="post" data-post-id="${id}">
-                <div class="post-votes">
-                    <button class="vote-btn upvote like-it" data-id="${id}">▲</button>
-                    <span class="vote-count">0</span>
-                    <button class="vote-btn downvote">▼</button>
-                </div>
-                <div class="post-content">
-                    <div class="post-header">
-                        <img src="/u/${user}/avatar" alt="${user}" class="subreddit-icon">
-                        <span class="subreddit-name">r/general</span>
-                        <span class="post-meta">
-                            • Posted by u/${user}
-                            <span class="post-time">${new Date(created).toLocaleDateString()}</span>
-                        </span>
+            <div class="r-item" data-score="1" data-created="${Math.floor(new Date(created).getTime() / 1000)}">
+                <article class="r-post" data-post-id="${id}" data-href="/posts/${id}">
+                    <div class="r-post-meta">
+                        <a class="r-sub" href="/u/${user}"><img class="r-uicon" src="/u/${user}/avatar" alt=""><span class="r-sub-name">u/${user}</span></a>
+                        <span class="r-dot">&bull;</span>
+                        <time datetime="${created}">just now</time>
+                        <div class="r-post-tools"><button type="button" class="r-icon-btn r-overflow" aria-label="Open user actions" data-r="more"><svg class="ri"><use href="#i-more"/></svg></button></div>
                     </div>
-                    <div class="post-text">${message}</div>
+                    ${(() => {
+                        // the first sentence is the title, as Pandora's SocialPresentation.Title does on the server
+                        const parts = /^([\s\S]{10,}?[.!?])\s+([\s\S]+)$/.exec(message);
+                        return parts
+                            ? `<a class="r-post-title" href="/posts/${id}">${parts[1].replace(/\.$/, '')}</a><div class="r-post-body">${parts[2]}</div>`
+                            : `<a class="r-post-title" href="/posts/${id}">${message}</a>`;
+                    })()}
                     <div class="post-actions">
-                        <button class="action-btn">
-                            <span class="action-icon">💬</span>
-                            <span class="action-text">0 Comments</span>
-                        </button>
-                        <button class="action-btn like-it" data-id="${id}">
-                            <span class="action-icon">❤️</span>
-                            <span class="action-text">0 Likes</span>
-                        </button>
-                        <button class="action-btn">
-                            <span class="action-icon">🔗</span>
-                            <span class="action-text">Share</span>
-                        </button>
+                        <span class="r-vote" data-vote="" data-base="1">
+                            <button type="button" class="action-btn like-it" data-id="${id}" aria-label="Upvote" aria-pressed="false"><svg class="ri"><use href="#i-up"/></svg></button>
+                            <span class="r-score">1</span>
+                            <button type="button" aria-label="Downvote" data-r="down"><svg class="ri"><use href="#i-down"/></svg></button>
+                        </span>
+                        <a class="r-pill" href="/posts/${id}#comments" aria-label="0 comments"><svg class="ri ri-sm"><use href="#i-comment"/></svg><span>0</span></a>
+                        <button type="button" class="r-pill r-award" aria-label="Give award" title="Give award"><svg class="ri ri-sm"><use href="#i-award"/></svg></button>
+                        <button type="button" class="r-pill" data-r="share" data-url="/posts/${id}"><svg class="ri ri-sm"><use href="#i-share"/></svg><span>Share</span></button>
                     </div>
-                </div>
+                </article>
+                <hr class="r-sep">
             </div>`,
 
-        youtube: `
-            <div class="video-card" data-post-id="${id}">
-                <div class="video-thumbnail">
-                    <div class="thumbnail-placeholder">
-                        <span>Video</span>
+        youtube: (() => {
+            // The message arrives HTML-encoded, with an uploaded image tag when there is one
+            const box = document.createElement('div');
+            box.innerHTML = message;
+            const upload = box.querySelector('img');
+            const text = box.textContent.trim();
+            const end = text.match(/[.!?](\s|$)/);
+            const title = escapeHtml(end && end.index > 10 ? text.slice(0, end.index + 1).replace(/\.$/, '') : text);
+            const hex = String(id).replace(/-/g, '');
+            const thumb = upload ? upload.getAttribute('src') : `/img/video${parseInt(hex.slice(0, 8), 16) % 17 + 1}.jpg`;
+            const seconds = 45 + parseInt(hex.slice(-6), 16) % 1500;
+            const owner = document.querySelector(`[data-username="${user}"][data-display-name]`);
+            const name = owner ? escapeHtml(owner.textContent.trim()) : user;
+            return `
+            <div class="yt-video-card" data-post-id="${id}" data-created="${escapeHtml(created)}" data-views="0">
+                <a class="yt-thumb" href="/posts/${id}" tabindex="-1" aria-hidden="true">
+                    <img src="${thumb}" alt="">
+                    <span class="yt-badge">${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}</span>
+                </a>
+                <div class="yt-details">
+                    <a class="yt-avatar" href="/u/${user}"><img src="/u/${user}/avatar" alt=""></a>
+                    <div class="yt-meta">
+                        <h3 class="yt-title"><a href="/posts/${id}" title="${title}">${title}</a></h3>
+                        <div class="yt-byline"><a href="/u/${user}" data-username="${user}" data-display-name>${name}</a></div>
+                        <div class="yt-stats"><span>No views</span><span>just now</span></div>
                     </div>
+                    <button class="yt-icon-btn yt-card-menu" type="button" aria-label="Action menu"><svg class="yt-icon"><use href="#yt-i-more-vert"/></svg></button>
                 </div>
-                <div class="video-info">
-                    <img src="/u/${user}/avatar" alt="${user}" class="channel-avatar">
-                    <div class="video-details">
-                        <div class="video-title">${message}</div>
-                        <div class="video-meta">
-                            <span class="channel-name">${user}</span>
-                            <div class="video-stats">
-                                <span>0 likes</span>
-                                <span>•</span>
-                                <span>0 comments</span>
-                                <span>•</span>
-                                <span>${new Date(created).toLocaleDateString()}</span>
-                            </div>
-                            <div class="video-actions">
-                                <button class="like-it" data-id="${id}">
-                                    ❤️ 0
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>`,
+            </div>`;
+        })(),
 
         discord: `
-            <div class="message" data-post-id="${id}">
-                <img src="/u/${user}/avatar" alt="${user}" class="message-avatar">
+            <div class="message" data-post-id="${id}" data-author="${user}" data-time="${created}">
+                <a href="/u/${user}" class="message-avatar-link"><img src="/u/${user}/avatar" alt="" class="message-avatar"></a>
                 <div class="message-content">
-                    <div class="message-header">
-                        <span class="message-author">${user}</span>
-                        <span class="message-timestamp">${new Date(created).toLocaleDateString()}</span>
-                    </div>
+                    <h3 class="message-header">
+                        <a href="/u/${user}" class="message-author dc-name">${user}</a>
+                        <time class="message-timestamp" datetime="${created}" data-f="stamp">Today at ${new Date(created).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}</time>
+                    </h3>
                     <div class="message-text">${message}</div>
-                    <div class="message-reactions">
-                        <div class="reaction">
-                            <span class="reaction-emoji">💬</span>
-                            <span class="reaction-count">0</span>
-                        </div>
-                    </div>
+                    <div class="message-reactions"></div>
                 </div>
                 <div class="message-actions">
-                    <button class="message-action like-it" data-id="${id}" title="Add Reaction">😀</button>
-                    <button class="message-action" title="Reply">↩️</button>
-                    <button class="message-action" title="More">⋯</button>
+                    <button class="message-action like-it" data-id="${id}" data-tip="Click to react with :heart:">❤️</button>
+                    <button type="button" class="message-action" data-reply data-tip="Reply"><svg class="ic" width="20" height="20"><use href="#i-reply"/></svg></button>
+                    <a href="/posts/${id}" class="message-action" data-tip="Create Thread"><svg class="ic" width="20" height="20"><use href="#i-threads"/></svg></a>
+                    <button type="button" class="message-action" data-message-menu data-tip="More"><svg class="ic" width="20" height="20"><use href="#i-more"/></svg></button>
                 </div>
             </div>`,
 
@@ -287,8 +280,9 @@ function getPostTemplate(theme, id, user, message, created) {
 }
 
 // Universal like functionality
+// Delegated, so it covers posts added later; namespaced, so calling it again never binds twice
 function initializeLikes() {
-    $(document).on('click', '.like-it', function(e) {
+    $(document).off('click.pandoraLike').on('click.pandoraLike', '.like-it', function(e) {
         e.preventDefault();
         const postId = $(this).data("id");
         console.log("posting like for", postId);
@@ -446,11 +440,13 @@ function initializeSearch() {
 function showSearchSuggestions(query, input) {
     hideSearchSuggestions();
 
-    const suggestions = [
-        'Sarah Wilson', 'Mike Johnson', 'Emma Davis', 'Tech Company',
-        'Beach Photos', 'Marathon Training', 'JavaScript Tutorial',
-        'React Development', 'Node.js Tips', 'CSS Tricks'
-    ].filter(item => item.toLowerCase().includes(query.toLowerCase()));
+    // suggest the people on this page, read from their avatar links (/u/{username}/avatar)
+    const people = [...document.querySelectorAll('img[src^="/u/"]')]
+        .map(img => decodeURIComponent(img.getAttribute('src').split('/')[2] || ''))
+        .filter(Boolean);
+    const suggestions = [...new Set(people)]
+        .filter(item => item.toLowerCase().includes(query.toLowerCase()))
+        .slice(0, 8);
 
     if (suggestions.length === 0) return;
 
@@ -601,6 +597,8 @@ function initializeComments() {
 }
 
 function addCommentToUI(commentText, commentContainer) {
+    // the comment is shown as typed, never as markup
+    commentText = escapeHtml(commentText);
     const theme = getCurrentTheme();
     let commentsList = $('.comments-list');
 
@@ -910,7 +908,15 @@ function showToast(message) {
 }
 
 // SignalR message handling
+// The server sends message text already encoded; anything else from the hub is escaped here
+function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+}
+
 connection.on("SendMessage", function (id, user, theme, message, created) {
+    // every Pandora page hears every post; show only the ones made on this site's theme
+    if (theme && theme !== getCurrentTheme()) return;
+
     const userInput = $("#user");
     const shouldShowMessage = !userInput.val() || userInput.val() === user;
 
@@ -922,7 +928,7 @@ connection.on("SendMessage", function (id, user, theme, message, created) {
 
             // Get current theme and use appropriate template
             const currentTheme = getCurrentTheme();
-            newPostElement.innerHTML = getPostTemplate(currentTheme, id, user, message, created);
+            newPostElement.innerHTML = getPostTemplate(currentTheme, escapeHtml(id), escapeHtml(user), message, created);
 
             // Re-bind event handlers for the new post
             initializeLikes();

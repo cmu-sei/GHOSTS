@@ -93,11 +93,12 @@
         const item = document.createElement('a');
         item.className = 'connection-item';
         item.href = `/u/${encodeURIComponent(user.username)}`;
+        const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
         item.innerHTML = `
-            <img src="${user.avatar}" alt="${user.username}" class="connection-avatar" />
+            <img src="${escape(user.avatar)}" alt="${escape(user.username)}" class="connection-avatar" />
             <div class="connection-meta">
-                <span class="connection-name">${user.username}</span>
-                ${user.bio ? `<span class="connection-bio">${user.bio}</span>` : ''}
+                <span class="connection-name">${escape(user.username)}</span>
+                ${user.bio ? `<span class="connection-bio">${escape(user.bio)}</span>` : ''}
             </div>`;
         return item;
     }
@@ -198,8 +199,8 @@
         })
             .then(resp => resp.ok ? resp.json() : Promise.reject())
             .then(() => {
-                const isCurrentlyFollowing = action === '/unfollow';
-                const nextAction = isCurrentlyFollowing ? '/follow' : '/unfollow';
+                const isCurrentlyFollowing = action.endsWith('/unfollow');
+                const nextAction = isCurrentlyFollowing ? '/api/relationships/follow' : '/api/relationships/unfollow';
                 const nextLabel = isCurrentlyFollowing ? 'Follow' : 'Unfollow';
 
                 form.setAttribute('action', nextAction);

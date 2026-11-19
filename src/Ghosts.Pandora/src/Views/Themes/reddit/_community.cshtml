@@ -1,0 +1,78 @@
+@model string
+@{
+    // What Reddit shows about a community. The big ones carry their real descriptions and sizes;
+    // anything else (the local city community) gets stable numbers from its name.
+    var mode = ViewData["Mode"] as string ?? "about";
+    var name = Model ?? "AskReddit";
+    var known = new Dictionary<string, (int Members, string Title, string Description, DateTime Created)>(StringComparer.OrdinalIgnoreCase)
+    {
+        ["AskReddit"] = (57_400_000, "Ask Reddit...", "r/AskReddit is the place to ask and answer thought-provoking questions.", new DateTime(2008, 1, 25)),
+        ["news"] = (31_200_000, "News", "The place for news articles about current events in the United States and the rest of the world. Discuss it all here.", new DateTime(2008, 1, 25)),
+        ["pics"] = (32_100_000, "Reddit Pics", "A place for photographs, pictures, and other images.", new DateTime(2008, 1, 25)),
+        ["CasualConversation"] = (2_400_000, "Casual Conversation", "The friendlier part of Reddit. Have a fun conversation about anything that is on your mind.", new DateTime(2011, 3, 1)),
+        ["LifeProTips"] = (23_000_000, "Life Pro Tips", "Tips that improve your life in one way or another.", new DateTime(2011, 12, 13)),
+        ["sysadmin"] = (1_100_000, "Sysadmin", "A reddit dedicated to the profession of Computer System Administration.", new DateTime(2008, 3, 25)),
+        ["food"] = (24_300_000, "Food", "The Internet's Kitchen. A community for sharing food, recipes and restaurants.", new DateTime(2008, 1, 25)),
+        ["running"] = (3_700_000, "Running", "News, training, races, gear and everything else running.", new DateTime(2008, 2, 3)),
+        ["jobs"] = (1_300_000, "Jobs", "Discussion and advice about jobs, careers, job searching and the workplace.", new DateTime(2008, 1, 30))
+    };
+    var hash = Ghosts.Pandora.Infrastructure.Content.ContentRequest.StableHash(name.ToLowerInvariant());
+    (int Members, string Title, string Description, DateTime Created) info = known.TryGetValue(name, out var k) ? k
+        : (18_000 + (int)(hash % 140_000), name, $"News, events and conversation for the {name} area. Locals, commuters and visitors welcome.",
+           new DateTime(2009 + (int)(hash % 10), 1 + (int)(hash % 12), 1 + (int)(hash % 27)));
+    var visitors = info.Members / (6 + (int)(hash % 9));
+    var contributions = visitors / (14 + (int)(hash % 20));
+    var color = name.Sum(ch => ch) / 3 % 8;
+}
+@switch (mode)
+{
+    case "row":
+        <div class="r-row">
+            <span class="cicon" data-c="@color">r/</span>
+            <div class="r-row-main">
+                <a class="r-row-name" href="/r/@name">r/@name</a>
+                <div class="r-row-sub">@info.Members.ToString("N0") members</div>
+            </div>
+        </div>
+        break;
+
+    case "card":
+        <div class="r-explore-card">
+            <div class="r-row">
+                <span class="cicon" data-c="@color">r/</span>
+                <div class="r-row-main">
+                    <a class="r-row-name" href="/r/@name">r/@name</a>
+                    <div class="r-row-sub">@SocialPresentation.Compact(visitors) weekly visitors</div>
+                </div>
+                <button type="button" class="r-btn r-btn-sm r-btn-primary" data-r="join" data-community="@name">Join</button>
+            </div>
+            <p>@info.Description</p>
+        </div>
+        break;
+
+    default:
+        <section class="r-card r-about">
+            <div class="r-about-head">
+                <h2>r/@name</h2>
+                <button type="button" class="r-btn r-btn-sm r-btn-primary" data-r="join" data-community="@name">Join</button>
+            </div>
+            <p class="r-about-title">@info.Title</p>
+            <p class="r-about-desc">@info.Description</p>
+            <ul class="r-about-meta">
+                <li><svg class="ri ri-sm"><use href="#i-cake" /></svg>Created @info.Created.ToString("MMM d, yyyy")</li>
+                <li><svg class="ri ri-sm"><use href="#i-globe" /></svg>Public</li>
+            </ul>
+            <div class="r-about-stats">
+                <div><b>@SocialPresentation.Compact(visitors)</b><span>Weekly visitors</span></div>
+                <div><b>@SocialPresentation.Compact(contributions)</b><span>Weekly contributions</span></div>
+            </div>
+            <div class="r-rules">
+                <div class="r-card-head">r/@name Rules</div>
+                <details><summary><span>1</span><span>Be civil</span><svg class="ri ri-sm"><use href="#i-chev" /></svg></summary><p>Treat others with respect. Personal attacks, harassment and hate speech are removed.</p></details>
+                <details><summary><span>2</span><span>No spam or self-promotion</span><svg class="ri ri-sm"><use href="#i-chev" /></svg></summary><p>Links to your own business, referral codes and repeated posts are removed.</p></details>
+                <details><summary><span>3</span><span>Stay on topic</span><svg class="ri ri-sm"><use href="#i-chev" /></svg></summary><p>Posts must be relevant to r/@name.</p></details>
+                <details><summary><span>4</span><span>No personal information</span><svg class="ri ri-sm"><use href="#i-chev" /></svg></summary><p>Do not post anyone's address, phone number or other private details.</p></details>
+            </div>
+        </section>
+        break;
+}

@@ -1,0 +1,19 @@
+@* An account with its bio and a Follow button, as in X's "Relevant people" and People search results.
+   ViewData["XFollowing"]: the usernames the current user already follows. *@
+@model string
+@{
+    var me = ViewBag.Username as string ?? "";
+    var following = (ViewData["XFollowing"] as HashSet<string>)?.Contains(Model) == true;
+}
+<div class="x-who x-who-wide" data-href="/u/@Model">
+    <img src="/u/@Model/avatar" alt="" class="x-who-avatar">
+    <div class="x-who-names">
+        <a href="/u/@Model" class="x-who-name">@Present.DisplayName(Model)</a>
+        <a href="/u/@Model" class="x-who-handle">@Present.Handle(Model)</a>
+        <div class="x-who-bio">@Present.Headline(Model)</div>
+    </div>
+    @if (!string.Equals(Model, me, StringComparison.OrdinalIgnoreCase))
+    {
+        <button type="button" class="x-follow@(following ? " following" : "")" data-x-follow="@Model">@(following ? "Following" : "Follow")</button>
+    }
+</div>

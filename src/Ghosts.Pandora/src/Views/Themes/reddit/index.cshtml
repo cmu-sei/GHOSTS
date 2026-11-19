@@ -1,147 +1,181 @@
+@model List<Ghosts.Pandora.Infrastructure.Models.Post>
 @{
     Layout = null;
-}
-@model List<Ghosts.Pandora.Infrastructure.Models.Post>
+    ViewBag.Theme = "reddit";
+    var me = ViewBag.Username as string ?? "user";
+    var all = Model ?? new List<Post>();
+    var posts = all;
 
+    // "/" is Home, "/r/popular" and "/r/all" are the site-wide feeds, "/r/<name>" is a community, "/explore" lists communities
+    var sub = ViewContext.RouteData.Values["subreddit"] as string;
+    var explore = string.Equals(Context.Request.Path.Value?.TrimEnd('/'), "/explore", StringComparison.OrdinalIgnoreCase);
+    var nav = explore ? "explore" : sub == null ? "home" : sub.ToLowerInvariant() is "popular" or "all" ? sub.ToLowerInvariant() : null;
+    string community = null;
+    if (nav == null)
+    {
+        community = all.Select(p => Present.Community(p)).FirstOrDefault(c => string.Equals(c, sub, StringComparison.OrdinalIgnoreCase)) ?? sub;
+        posts = all.Where(p => string.Equals(Present.Community(p), community, StringComparison.OrdinalIgnoreCase)).ToList();
+        nav = community;
+    }
+    else if (nav == "popular")
+    {
+        posts = all.OrderByDescending(p => Present.Score(p)).ToList();
+    }
+    ViewData["Nav"] = nav;
+
+    var communities = all.GroupBy(p => Present.Community(p))
+        .OrderByDescending(g => g.Sum(p => Present.Score(p))).Select(g => g.Key).ToList();
+    var recent = all.OrderByDescending(p => p.Comments?.Count > 0 ? p.Comments.Max(c => c.CreatedUtc) : p.CreatedUtc).Take(5).ToList();
+    var palette = new[] { "#ff4500", "#0079d3", "#46d160", "#ffb000", "#7193ff", "#ff585b", "#0dd3bb", "#ea0027" };
+    var title = community != null ? $"r/{community}"
+        : nav is "popular" or "all" ? $"r/{nav}"
+        : explore ? "Explore communities on Reddit"
+        : "Reddit - The heart of the internet";
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reddit</title>
-    <link rel="stylesheet" href="/themes/reddit/css/feed.css?@System.Guid.NewGuid()">
-    <link rel="icon" href="/themes/reddit/images/reddit-icon.png">
+    <title>@title</title>
+    <link rel="stylesheet" href="/themes/reddit/css/reddit.css?@System.Guid.NewGuid()">
+    <link rel="icon" href="/themes/reddit/images/reddit-logo.png">
+    <meta name="current-user" content="@me">
 </head>
 <body data-theme="reddit">
-    <div class="app">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-container">
-                <div class="header-left">
-                    <a href="/"><img src="/themes/reddit/images/reddit-logo.png" alt="Reddit" class="reddit-logo"></a>
-                    <input type="text" placeholder="Search Reddit" class="search-input">
-                </div>
-                <div class="header-right">
-                    <button class="header-btn">Popular</button>
-                    <button class="header-btn">All</button>
-                    <a href="/messages" class="header-btn" style="text-decoration: none;">💬</a>
-                    <div class="user-menu">
-                        <img src="/u/@ViewBag.Username/avatar" alt="User" class="user-avatar">
-                        <span class="username">@ViewBag.Username</span>
-                        <span class="dropdown-arrow">▼</span>
-                    </div>
-                </div>
-            </div>
-        </header>
-
-        <div class="main-container">
-            <!-- Left Sidebar -->
-            <aside class="left-sidebar">
-                <div class="subreddit-list">
-                    <div class="sidebar-section">
-                        <h3>FEEDS</h3>
-                        <a href="/" class="feed-item active" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px;">
-                            <span class="feed-icon">🏠</span>
-                            <span class="feed-name">Home</span>
-                        </a>
-                        <div class="feed-item">
-                            <span class="feed-icon">📈</span>
-                            <span class="feed-name">Popular</span>
-                        </div>
-                        <div class="feed-item">
-                            <span class="feed-icon">🎯</span>
-                            <span class="feed-name">All</span>
-                        </div>
-                    </div>
-
-                    <div class="sidebar-section">
-                        <h3>RECENT COMMUNITIES</h3>
-                        <div class="community-item">
-                            <img src="/themes/reddit/images/community1.jpg" alt="Community" class="community-icon">
-                            <span class="community-name">r/programming</span>
-                        </div>
-                        <div class="community-item">
-                            <img src="/themes/reddit/images/community2.jpg" alt="Community" class="community-icon">
-                            <span class="community-name">r/webdev</span>
-                        </div>
-                        <div class="community-item">
-                            <img src="/themes/reddit/images/community3.jpg" alt="Community" class="community-icon">
-                            <span class="community-name">r/javascript</span>
+    @await Html.PartialAsync("~/Views/Themes/reddit/_redditheader.cshtml")
+    <div class="r-shell">
+        @await Html.PartialAsync("~/Views/Themes/reddit/_redditnav.cshtml")
+        <main class="r-main">
+            @if (community != null)
+            {
+                var color = community.Sum(ch => ch) / 3 % 8;
+                <div class="r-community-head">
+                    <div class="r-banner" style="--banner:@palette[color]"></div>
+                    <div class="r-community-row">
+                        <span class="cicon" data-c="@color">r/</span>
+                        <h1>r/@community</h1>
+                        <div class="r-actions">
+                            <a href="#create-post" class="r-btn r-btn-outline" data-r="create"><svg class="ri"><use href="#i-plus" /></svg>Create Post</a>
+                            <button type="button" class="r-btn r-btn-primary" data-r="join" data-community="@community">Join</button>
+                            <button type="button" class="r-btn r-btn-outline r-round" aria-label="Community options" data-r="more"><svg class="ri"><use href="#i-more" /></svg></button>
                         </div>
                     </div>
                 </div>
-            </aside>
-
-            <!-- Main Content -->
-            <main class="main-content">
-                <div class="feed-header">
-                    <h2>Popular posts</h2>
-                    <div class="sort-options">
-                        <button class="sort-btn active">Hot</button>
-                        <button class="sort-btn">New</button>
-                        <button class="sort-btn">Top</button>
-                        <button class="sort-btn">Rising</button>
-                    </div>
-                </div>
-
-                @{
-                    ViewBag.Theme = "reddit";
-                }
-
-                @await Html.PartialAsync("_CreatePost")
-
-                <!-- Feed -->
-                <div class="feed" id="newsfeed-items-grid">
-                    @{
-                        if (Model != null)
-                        {
-                            foreach (var post in Model)
+            }
+            <div class="r-content">
+                <div class="r-feed">
+                    @if (explore)
+                    {
+                        <h1 class="r-heading">Explore Communities</h1>
+                        <div class="r-explore-grid">
+                            @foreach (var name in communities)
                             {
-                                await Html.RenderPartialAsync("_PostCard", post);
+                                @await Html.PartialAsync("~/Views/Themes/reddit/_community.cshtml", name, new ViewDataDictionary(ViewData) { ["Mode"] = "card" })
                             }
+                        </div>
+                    }
+                    else
+                    {
+                        <section class="create-post" id="create-post">
+                            <form method="post" action="/">
+                                <input type="hidden" name="theme" value="reddit">
+                                <input type="hidden" name="user" value="@me">
+                                <div class="post-composer">
+                                    <div class="r-composer-top">
+                                        <h2>Create post</h2>
+                                        <span class="r-target"><img src="/u/@me/avatar" alt="">u/@me</span>
+                                    </div>
+                                    <div class="post-type-tabs" role="tablist">
+                                        <button type="button" role="tab" aria-selected="true">Text</button>
+                                        <button type="button" role="tab" aria-selected="false">Images &amp; Video</button>
+                                        <button type="button" role="tab" aria-selected="false">Link</button>
+                                        <button type="button" role="tab" aria-selected="false">Poll</button>
+                                    </div>
+                                    <label class="r-field">
+                                        <span class="r-sr">Title</span>
+                                        <input type="text" placeholder="Title*" class="post-title" maxlength="300" required>
+                                        <span class="r-count" aria-hidden="true">0/300</span>
+                                    </label>
+                                    <textarea name="message" placeholder="Body text" class="post-input" required></textarea>
+                                    <div class="r-composer-actions">
+                                        <button type="submit" class="post-btn">Post</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </section>
+
+                        <div class="r-feedbar" role="toolbar" aria-label="Sort posts">
+                            <button type="button" class="r-chip" aria-pressed="true" data-sort="best">Best</button>
+                            <button type="button" class="r-chip" aria-pressed="false" data-sort="hot">Hot</button>
+                            <button type="button" class="r-chip" aria-pressed="false" data-sort="new">New</button>
+                            <button type="button" class="r-chip" aria-pressed="false" data-sort="top">Top</button>
+                            <button type="button" class="r-chip r-layout" aria-label="Change post view" title="Change post view" data-r="layout"><svg class="ri"><use href="#i-card" /></svg><svg class="ri ri-sm"><use href="#i-chev" /></svg></button>
+                        </div>
+                        <hr>
+
+                        <div class="feed" id="newsfeed-items-grid">
+                            @foreach (var post in posts)
+                            {
+                                await Html.RenderPartialAsync("~/Views/Themes/reddit/_postcard.cshtml", post);
+                            }
+                        </div>
+                        @if (posts.Count == 0)
+                        {
+                            <div class="r-empty">
+                                <svg class="r-empty-snoo"><use href="#r-snoo" /></svg>
+                                <h3>@(community != null ? "This community doesn't have any posts yet" : "Nothing here yet")</h3>
+                                <p>Make one and get this feed started.</p>
+                            </div>
                         }
                     }
                 </div>
-            </main>
-
-            <!-- Right Sidebar -->
-            <aside class="right-sidebar">
-                <div class="community-info">
-                    <div class="info-header">
-                        <h3>r/general</h3>
-                    </div>
-                    <div class="community-stats">
-                        <div class="stat">
-                            <span class="stat-number">1.2m</span>
-                            <span class="stat-label">Members</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-number">5.4k</span>
-                            <span class="stat-label">Online</span>
-                        </div>
-                    </div>
-                    <button class="join-btn">Joined</button>
-                </div>
-
-                <div class="community-rules">
-                    <h3>Community Rules</h3>
-                    <div class="rule-item">
-                        <span class="rule-number">1.</span>
-                        <span class="rule-text">Be respectful</span>
-                    </div>
-                    <div class="rule-item">
-                        <span class="rule-number">2.</span>
-                        <span class="rule-text">No spam or self-promotion</span>
-                    </div>
-                    <div class="rule-item">
-                        <span class="rule-number">3.</span>
-                        <span class="rule-text">Stay on topic</span>
-                    </div>
-                </div>
-            </aside>
-        </div>
+                @if (!explore)
+                {
+                    <aside class="r-rail">
+                        @if (community != null)
+                        {
+                            @await Html.PartialAsync("~/Views/Themes/reddit/_community.cshtml", community)
+                        }
+                        else if (nav == "popular")
+                        {
+                            <section class="r-card">
+                                <div class="r-card-head">Popular Communities</div>
+                                @foreach (var name in communities)
+                                {
+                                    @await Html.PartialAsync("~/Views/Themes/reddit/_community.cshtml", name, new ViewDataDictionary(ViewData) { ["Mode"] = "row" })
+                                }
+                                <a href="/explore" class="r-link-btn">See more</a>
+                            </section>
+                        }
+                        else if (recent.Count > 0)
+                        {
+                            <section class="r-card" data-r-recent>
+                                <div class="r-card-head">Recent Posts<button type="button" data-r="clear">Clear</button></div>
+                                @foreach (var post in recent)
+                                {
+                                    var name = Present.Community(post);
+                                    <div class="r-recent">
+                                        <div class="r-recent-main">
+                                            <div class="r-recent-meta"><span class="cicon" data-c="@(name.Sum(ch => ch) / 3 % 8)">r/</span><a class="r-sub" href="/r/@name">r/@name</a></div>
+                                            <a class="r-recent-title" href="/posts/@post.Id">@Present.Title(post)</a>
+                                            <div class="r-recent-stats">@SocialPresentation.Compact(Present.Score(post)) upvotes &middot; @Present.CommentCount(post) @(Present.CommentCount(post) == 1 ? "comment" : "comments")</div>
+                                        </div>
+                                        @if (Present.HasPhoto(post, 30))
+                                        {
+                                            <a href="/posts/@post.Id" tabindex="-1"><img class="r-thumb" src="@Present.PhotoUrl(post)" alt="" loading="lazy"></a>
+                                        }
+                                    </div>
+                                }
+                            </section>
+                        }
+                    </aside>
+                }
+            </div>
+        </main>
     </div>
 
     @await Html.PartialAsync("_Scripts")
+    <script src="/themes/reddit/js/reddit.js?@System.Guid.NewGuid()"></script>
 </body>
 </html>

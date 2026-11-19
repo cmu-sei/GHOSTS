@@ -2,11 +2,40 @@
 @{
     Layout = null;
     ViewBag.Theme = "discord";
-    var currentUser = ViewBag.Username as string;
-    var currentUserLiked = Model != null && !string.IsNullOrWhiteSpace(currentUser) &&
-        (Model.Likes?.Any(l => string.Equals(l.Username, currentUser, StringComparison.OrdinalIgnoreCase)) ?? false);
-    var likedClass = currentUserLiked ? " liked" : string.Empty;
-    var likesCount = Model?.Likes?.Count ?? 0;
+    await Html.RenderPartialAsync("~/Views/Themes/discord/_discordhelpers.cshtml");
+    var roleCss = (Func<string, string>)Context.Items["dc.rolecss"];
+    var stamp = (Func<DateTime, string>)Context.Items["dc.stamp"];
+    var time = (Func<DateTime, string>)Context.Items["dc.time"];
+    var day = (Func<DateTime, string>)Context.Items["dc.day"];
+    var iso = (Func<DateTime, string>)Context.Items["dc.iso"];
+    var world = Present.World;
+    var me = ViewBag.Username as string ?? "user";
+    var server = $"{world.ShortName} Staff";
+    var title = Model == null ? "Unknown thread" : ((Func<Ghosts.Pandora.Infrastructure.Models.Post, string>)Context.Items["dc.threadname"])(Model);
+
+    // the replies, grouped the way the channel groups messages; the starter message comes first
+    var rows = new List<(Ghosts.Pandora.Infrastructure.Models.Comment Reply, bool Grouped, bool NewDay)>();
+    if (Model != null)
+    {
+        var previousAuthor = Model.Username;
+        var previousTime = Model.CreatedUtc;
+        foreach (var reply in (Model.Comments ?? new List<Ghosts.Pandora.Infrastructure.Models.Comment>()).OrderBy(c => c.CreatedUtc))
+        {
+            var newDay = reply.CreatedUtc.Date != previousTime.Date;
+            var grouped = !newDay && rows.Count > 0 && string.Equals(previousAuthor, reply.Username, StringComparison.OrdinalIgnoreCase)
+                          && reply.CreatedUtc - previousTime < TimeSpan.FromMinutes(7);
+            rows.Add((reply, grouped, newDay));
+            previousAuthor = reply.Username;
+            previousTime = reply.CreatedUtc;
+        }
+    }
+    rows.Reverse();
+
+    var members = Model == null ? new List<string> { me } : new[] { Model.Username, me }
+        .Concat((Model.Comments ?? new List<Ghosts.Pandora.Infrastructure.Models.Comment>()).Select(c => c.Username))
+        .Concat((Model.Likes ?? new List<Ghosts.Pandora.Infrastructure.Models.Like>()).Select(l => l.Username))
+        .Where(u => !string.IsNullOrWhiteSpace(u)).ToList();
+    ViewData["dc.thread"] = Model?.Id;
 }
 
 <!DOCTYPE html>
@@ -14,246 +43,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Message Thread - Discord</title>
+    <title>Discord | @title | @server</title>
     <link rel="stylesheet" href="/themes/discord/css/feed.css">
     <link rel="icon" href="/themes/discord/images/discord-icon.png">
+    <meta name="current-user" content="@me">
 </head>
-<body>
-    <div class="app">
-        <!-- Thread View -->
-        <div class="thread-container">
-            <div class="thread-header">
-                <button class="back-btn">←</button>
-                <div class="thread-info">
-                    <h2 class="thread-title"># general</h2>
-                    <span class="thread-subtitle">Thread</span>
-                </div>
-                <button class="close-thread">✕</button>
+<body data-theme="discord" data-me="@me" data-me-name="@Present.DisplayName(me)" data-me-role="@roleCss(me)">
+    @await Html.PartialAsync("~/Views/Themes/discord/_discordicons.cshtml")
+    <div class="dc-app">
+        <header class="dc-titlebar">
+            <div class="dc-titlebar-title"><span class="dc-titlebar-icon org">@world.ShortName[..1]</span>@server</div>
+            <div class="dc-titlebar-actions">
+                <button type="button" class="dc-icon-btn" data-popover="dc-inbox" data-tip="Inbox"><svg class="ic" width="20" height="20"><use href="#i-inbox"/></svg></button>
+                <button type="button" class="dc-icon-btn" data-tip="Help" data-inert><svg class="ic" width="20" height="20"><use href="#i-help"/></svg></button>
             </div>
-
-            <div class="thread-content">
-                <!-- Original Message -->
-            @if (Model != null)
-            {
-                <div class="original-message" data-profile-connections data-username="@(Model.Username)">
-                    <img src="/u/@Model.Username/avatar" alt="@Model.Username" class="message-avatar">
-                    <div class="message-content">
-                        <div class="message-header">
-                            <span class="message-author">@Model.Username</span>
-                            <span class="message-timestamp">@Model.CreatedUtc.ToString("MMM d, yyyy h:mm tt")</span>
-                        </div>
-                        <div class="message-text">
-                            @Html.Raw(Model.Message)
-                        </div>
-                        <div class="message-reactions">
-                            <div class="reaction">
-                                <span class="reaction-emoji">❤️</span>
-                                <span class="reaction-count">@likesCount</span>
-                            </div>
-                        </div>
-                        <div class="message-actions">
-                            <button class="message-action like-it@(likedClass)" data-id="@Model.Id" title="Add reaction">
-                                @(currentUserLiked ? "❤️ Liked" : "😀 React")
-                            </button>
-                        </div>
-                    </div>
+            <div class="dc-popover dc-panel dc-inbox" id="dc-inbox" hidden>
+                <div class="dc-panel-head">
+                    <svg class="ic" width="20" height="20"><use href="#i-inbox"/></svg><strong>Inbox</strong>
+                    <div class="dc-tabs small"><button type="button" class="dc-tab selected">For You</button><button type="button" class="dc-tab">Unreads</button><button type="button" class="dc-tab">Mentions</button></div>
                 </div>
-            }
-            else
-            {
-                <div class="original-message">
-                    <div class="message-content">
-                        <div class="message-text">This message is unavailable.</div>
-                    </div>
-                </div>
-            }
-
-                <!-- Thread Replies -->
-                <div class="thread-replies">
-                    <div class="thread-message">
-                        <img src="/themes/discord/images/user2-avatar.jpg" alt="User" class="message-avatar">
-                        <div class="message-content">
-                            <div class="message-header">
-                                <span class="message-author">TechNinja</span>
-                                <span class="message-timestamp">Today at 2:52 PM</span>
-                            </div>
-                            <div class="message-text">
-                                #AliceGamer Absolutely! I'm about halfway through and loving every minute. The combat system feels so much more refined than the previous games.
-                            </div>
-                            <div class="message-reactions">
-                                <div class="reaction">
-                                    <span class="reaction-emoji">💯</span>
-                                    <span class="reaction-count">5</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="thread-message">
-                        <img src="/themes/discord/images/user4-avatar.jpg" alt="User" class="message-avatar">
-                        <div class="message-content">
-                            <div class="message-header">
-                                <span class="message-author">DevGuru</span>
-                                <span class="message-timestamp">Today at 3:15 PM</span>
-                            </div>
-                            <div class="message-text">
-                                I've been waiting for a good excuse to pick this up! You've convinced me. Installing it now 🎮
-                            </div>
-                            <div class="message-reactions">
-                                <div class="reaction">
-                                    <span class="reaction-emoji">🎮</span>
-                                    <span class="reaction-count">3</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="thread-message">
-                        <img src="/themes/discord/images/user5-avatar.jpg" alt="User" class="message-avatar">
-                        <div class="message-content">
-                            <div class="message-header">
-                                <span class="message-author">ReactPro</span>
-                                <span class="message-timestamp">Today at 3:28 PM</span>
-                            </div>
-                            <div class="message-text">
-                                Just finished it last week! The boss fights are incredible. Make sure you explore all the side quests - they add so much to the story.
-                            </div>
-                            <div class="message-reactions">
-                                <div class="reaction">
-                                    <span class="reaction-emoji">👍</span>
-                                    <span class="reaction-count">8</span>
-                                </div>
-                                <div class="reaction">
-                                    <span class="reaction-emoji">⚔️</span>
-                                    <span class="reaction-count">4</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="thread-message">
-                        <img src="/themes/discord/images/user6-avatar.jpg" alt="User" class="message-avatar">
-                        <div class="message-content">
-                            <div class="message-header">
-                                <span class="message-author">GameMaster</span>
-                                <span class="message-timestamp">Today at 4:12 PM</span>
-                            </div>
-                            <div class="message-text">
-                                Without spoilers - does it live up to the hype? I've been on the fence about getting it.
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="thread-message">
-                        <img src="/themes/discord/images/user1-avatar.jpg" alt="User" class="message-avatar">
-                        <div class="message-content">
-                            <div class="message-header">
-                                <span class="message-author">AliceGamer</span>
-                                <span class="message-timestamp">Today at 4:15 PM</span>
-                            </div>
-                            <div class="message-text">
-                                #GameMaster 100% yes! It absolutely lives up to the hype and then some. The story, gameplay, graphics - everything is top tier. Definitely worth full price.
-                            </div>
-                            <div class="message-reactions">
-                                <div class="reaction">
-                                    <span class="reaction-emoji">💯</span>
-                                    <span class="reaction-count">6</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <div class="dc-empty"><strong>You're all caught up!</strong><span>Check back here for mentions, friend requests and more.</span></div>
             </div>
+        </header>
 
-            <!-- Message Input -->
-            <div class="thread-input">
-                <div class="input-wrapper">
-                    <textarea placeholder="Reply to thread..." class="thread-message-input" rows="1"></textarea>
-                    <div class="input-actions">
-                        <button class="input-action" title="Attach File">📎</button>
-                        <button class="input-action" title="Emoji">🙂</button>
-                        <button class="send-btn" disabled>Send</button>
+        <div class="dc-base">
+            @await Html.PartialAsync("~/Views/Themes/discord/_discordrail.cshtml", "staff")
+            @await Html.PartialAsync("~/Views/Themes/discord/_discordchannels.cshtml", Model == null ? new List<Ghosts.Pandora.Infrastructure.Models.Post>() : new List<Ghosts.Pandora.Infrastructure.Models.Post> { Model })
+
+            <main class="dc-chat dc-thread-view">
+                <div class="dc-chat-header">
+                    <a href="/" class="dc-icon-btn dc-mobile-only" data-tip="Back to #general"><svg class="ic" width="22" height="22"><use href="#i-back"/></svg></a>
+                    <a href="/" class="dc-chat-parent dc-desktop-only"><svg class="ic" width="20" height="20"><use href="#i-hash"/></svg>general</a>
+                    <svg class="ic dc-chat-crumb dc-desktop-only" width="16" height="16"><use href="#i-chevron-right"/></svg>
+                    <svg class="ic dc-chat-icon" width="22" height="22"><use href="#i-threads"/></svg>
+                    <h1 class="dc-chat-title">@title</h1>
+                    <div class="dc-chat-tools">
+                        <button type="button" class="dc-icon-btn dc-desktop-only" data-popover="dc-notify" data-tip="Notification Settings"><svg class="ic" width="22" height="22"><use href="#i-bell"/></svg></button>
+                        <button type="button" class="dc-icon-btn dc-desktop-only" data-popover="dc-pins" data-tip="Pinned Messages"><svg class="ic" width="22" height="22"><use href="#i-pin"/></svg></button>
+                        <button type="button" class="dc-icon-btn selected" data-toggle-members data-tip="Hide Member List"><svg class="ic" width="22" height="22"><use href="#i-members"/></svg></button>
+                        <label class="dc-search dc-desktop-only">
+                            <input type="text" class="dc-search-input" placeholder="Search @server" aria-label="Search">
+                            <svg class="ic" width="16" height="16"><use href="#i-search"/></svg>
+                        </label>
+                    </div>
+                    <div class="dc-popover dc-menu dc-notify" id="dc-notify" hidden>
+                        <button type="button" class="dc-menu-item dc-radio selected" data-radio>Use Parent Channel Default <small>All Messages</small></button>
+                        <button type="button" class="dc-menu-item dc-radio" data-radio>All Messages</button>
+                        <button type="button" class="dc-menu-item dc-radio" data-radio>Only @@mentions</button>
+                        <button type="button" class="dc-menu-item dc-radio" data-radio>Nothing</button>
+                    </div>
+                    <div class="dc-popover dc-panel dc-pins" id="dc-pins" hidden>
+                        <div class="dc-panel-head"><svg class="ic" width="20" height="20"><use href="#i-pin"/></svg><strong>Pinned Messages</strong></div>
+                        <div class="dc-empty"><strong>This thread doesn't have any pinned messages... yet.</strong><span>Pin important messages here so people can find them later.</span></div>
                     </div>
                 </div>
-            </div>
+
+                <div class="dc-chat-body">
+                    <div class="dc-chat-main">
+                        <div class="messages-list dc-thread-replies">
+                            @foreach (var row in rows)
+                            {
+                                var reply = row.Reply;
+                                <div class="message dc-reply@(row.Grouped ? " grouped" : "")" data-author="@reply.Username" data-time="@iso(reply.CreatedUtc)">
+                                    @if (row.Grouped)
+                                    {
+                                        <time class="message-gutter-time" datetime="@iso(reply.CreatedUtc)" data-f="time">@time(reply.CreatedUtc)</time>
+                                    }
+                                    else
+                                    {
+                                        <a href="/u/@reply.Username" class="message-avatar-link"><img src="/u/@reply.Username/avatar" alt="" class="message-avatar"></a>
+                                    }
+                                    <div class="message-content">
+                                        @if (!row.Grouped)
+                                        {
+                                            <h3 class="message-header">
+                                                <a href="/u/@reply.Username" class="message-author dc-name @roleCss(reply.Username)">@Present.DisplayName(reply.Username)</a>
+                                                <time class="message-timestamp" datetime="@iso(reply.CreatedUtc)" data-f="stamp">@stamp(reply.CreatedUtc)</time>
+                                            </h3>
+                                        }
+                                        <div class="message-text">@MessageHtml.Render(reply.Message)</div>
+                                    </div>
+                                    <div class="message-actions">
+                                        <button type="button" class="message-action" data-reply data-tip="Reply"><svg class="ic" width="20" height="20"><use href="#i-reply"/></svg></button>
+                                        <button type="button" class="message-action" data-message-menu data-tip="More"><svg class="ic" width="20" height="20"><use href="#i-more"/></svg></button>
+                                    </div>
+                                </div>
+                                if (row.NewDay)
+                                {
+                                    <div class="dc-divider" role="separator"><time datetime="@iso(reply.CreatedUtc)" data-f="day">@day(reply.CreatedUtc)</time></div>
+                                }
+                            }
+                            @if (Model != null)
+                            {
+                                await Html.RenderPartialAsync("_PostCard", Model, new ViewDataDictionary(ViewData) { ["inThread"] = true });
+                                <div class="dc-divider" role="separator"><time datetime="@iso(Model.CreatedUtc)" data-f="day">@day(Model.CreatedUtc)</time></div>
+                            }
+                            <div class="dc-channel-start dc-thread-start">
+                                <div class="dc-channel-start-icon"><svg class="ic" width="36" height="36"><use href="#i-threads"/></svg></div>
+                                <h2>@title</h2>
+                                @if (Model != null)
+                                {
+                                    <p>Started by <a href="/u/@Model.Username" class="dc-name @roleCss(Model.Username)">@Present.DisplayName(Model.Username)</a></p>
+                                }
+                                else
+                                {
+                                    <p>This thread was deleted or you don't have access to it.</p>
+                                }
+                            </div>
+                        </div>
+
+                        @if (Model != null)
+                        {
+                            <div class="message-input-container comment-input-container" data-post-id="@Model.Id">
+                                <div class="dc-reply-bar" hidden>
+                                    <span>Replying to <strong class="dc-reply-name"></strong></span>
+                                    <button type="button" class="dc-icon-btn" data-reply-cancel data-tip="Cancel Reply"><svg class="ic" width="16" height="16"><use href="#i-close"/></svg></button>
+                                </div>
+                                <div class="message-input-wrapper">
+                                    <button type="button" class="attachment-btn" data-popover="dc-upload-menu" data-tip="Upload a File or Use Apps"><svg class="ic" width="24" height="24"><use href="#i-plus-circle"/></svg></button>
+                                    <div class="dc-popover dc-menu dc-upload-menu" id="dc-upload-menu" hidden>
+                                        <button type="button" class="dc-menu-item" data-inert><svg class="ic" width="20" height="20"><use href="#i-upload"/></svg> Upload a File</button>
+                                        <button type="button" class="dc-menu-item" data-inert><svg class="ic" width="20" height="20"><use href="#i-apps"/></svg> Use Apps</button>
+                                    </div>
+                                    <div class="input-area">
+                                        <input type="text" class="comment-input" placeholder="Message #@title" autocomplete="off" aria-label="Message">
+                                        <button type="button" class="comment-post-btn" data-tip="Send"><svg class="ic" width="20" height="20"><use href="#i-forward"/></svg></button>
+                                        <div class="input-actions">
+                                            <button type="button" class="input-action" data-picker="gif" data-tip="Open GIF picker"><svg class="ic" width="24" height="24"><use href="#i-gif"/></svg></button>
+                                            <button type="button" class="input-action" data-picker="sticker" data-tip="Open sticker picker"><svg class="ic" width="24" height="24"><use href="#i-sticker"/></svg></button>
+                                            <button type="button" class="input-action" data-picker="emoji" data-tip="Select emoji"><svg class="ic" width="24" height="24"><use href="#i-emoji"/></svg></button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="dc-typing"></div>
+                            </div>
+                        }
+                    </div>
+                    @await Html.PartialAsync("~/Views/Themes/discord/_discordmembers.cshtml", members)
+                </div>
+            </main>
         </div>
-
-        <!-- Thread Sidebar -->
-        <div class="thread-sidebar">
-            <div class="sidebar-section">
-                <h3 class="sidebar-title">Thread Participants</h3>
-                <div class="participants-list">
-                    <div class="participant">
-                        <img src="/themes/discord/images/user1-avatar.jpg" alt="User" class="participant-avatar">
-                        <div class="participant-info">
-                            <div class="participant-name">AliceGamer</div>
-                            <div class="participant-status">Online</div>
-                        </div>
-                    </div>
-                    <div class="participant">
-                        <img src="/themes/discord/images/user2-avatar.jpg" alt="User" class="participant-avatar">
-                        <div class="participant-info">
-                            <div class="participant-name">TechNinja</div>
-                            <div class="participant-status">Online</div>
-                        </div>
-                    </div>
-                    <div class="participant">
-                        <img src="/themes/discord/images/user4-avatar.jpg" alt="User" class="participant-avatar">
-                        <div class="participant-info">
-                            <div class="participant-name">DevGuru</div>
-                            <div class="participant-status">Online</div>
-                        </div>
-                    </div>
-                    <div class="participant">
-                        <img src="/themes/discord/images/user5-avatar.jpg" alt="User" class="participant-avatar">
-                        <div class="participant-info">
-                            <div class="participant-name">ReactPro</div>
-                            <div class="participant-status">Online</div>
-                        </div>
-                    </div>
-                    <div class="participant">
-                        <img src="/themes/discord/images/user6-avatar.jpg" alt="User" class="participant-avatar">
-                        <div class="participant-info">
-                            <div class="participant-name">GameMaster</div>
-                            <div class="participant-status">Idle</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="sidebar-section">
-                <h3 class="sidebar-title">Thread Tools</h3>
-                <div class="thread-tools">
-                    <button class="tool-btn">📌 Pin Thread</button>
-                    <button class="tool-btn">🔔 Notification Settings</button>
-                    <button class="tool-btn">🔗 Copy Thread Link</button>
-                    <button class="tool-btn">📝 Edit Thread</button>
-                    <button class="tool-btn">🗑️ Delete Thread</button>
-                </div>
-            </div>
-
-            <div class="sidebar-section">
-                <h3 class="sidebar-title">Related Channels</h3>
-                <div class="related-channels">
-                    <div class="channel-link">
-                        <span class="channel-icon">#</span>
-                        <span class="channel-name">gaming-discussion</span>
-                    </div>
-                    <div class="channel-link">
-                        <span class="channel-icon">#</span>
-                        <span class="channel-name">game-reviews</span>
-                    </div>
-                    <div class="channel-link">
-                        <span class="channel-icon">#</span>
-                        <span class="channel-name">spoiler-talk</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+        @await Html.PartialAsync("~/Views/Themes/discord/_discorduserpanel.cshtml")
+        <div class="dc-scrim" data-drawer-close></div>
     </div>
 
     <script src="/lib/jquery/dist/jquery.min.js"></script>
     <script src="/js/signalr.min.js"></script>
     <script src="/js/social.js"></script>
+    <script src="/themes/discord/js/discord.js"></script>
 </body>
 </html>

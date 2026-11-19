@@ -1,0 +1,111 @@
+@using Ghosts.Pandora.Infrastructure.Content
+@inject Ghosts.Pandora.Infrastructure.Services.IUserService Users
+@inject Ghosts.Pandora.Infrastructure.Services.IDirectMessageService DirectMessages
+@{
+    // The global nav. ViewData["LiNav"] names the active item: home, network, jobs, messaging or notifications.
+    var me = ViewBag.Username as string ?? string.Empty;
+    var active = ViewData["LiNav"] as string ?? string.Empty;
+    var query = Context.Request.Path.StartsWithSegments("/search") ? Context.Request.Query["q"].ToString() : string.Empty;
+
+    var unread = 0;
+    var meUser = string.IsNullOrWhiteSpace(me) ? null : await Users.GetUserByUsernameAsync(me, "linkedin");
+    if (meUser != null)
+    {
+        unread = (await DirectMessages.GetUnreadMessagesAsync(meUser.Id)).Count();
+    }
+    var notifications = (int)(ContentRequest.StableHash($"{me}:notifications") % 9);
+    string Active(string item) => item == active ? " li-nav__item--active" : string.Empty;
+}
+@await Html.PartialAsync("~/Views/Themes/linkedin/_icons.cshtml")
+<header class="li-nav">
+    <div class="li-nav__inner">
+        <a href="/" class="li-nav__logo linkedin-logo" aria-label="LinkedIn"><svg width="34" height="34"><use href="#li-logo"/></svg></a>
+        <a href="/u/@me" class="li-nav__me-mobile" aria-label="Your profile"><img src="/u/@me/avatar" alt=""></a>
+        <form class="li-search" action="/search" method="get" role="search">
+            <svg class="li-search__icon" width="16" height="16"><use href="#li-search"/></svg>
+            <input class="li-search__input" type="text" name="q" value="@query" placeholder="Search" autocomplete="off" aria-label="Search">
+        </form>
+        <nav class="li-nav__items" aria-label="Primary">
+            <a href="/" class="li-nav__item@(Active("home"))">
+                <svg class="li-nav__icon" width="24" height="24"><use href="#li-home"/></svg>
+                <span class="li-nav__label">Home</span>
+            </a>
+            <a href="#" class="li-nav__item li-inert@(Active("network"))">
+                <svg class="li-nav__icon" width="24" height="24"><use href="#li-network"/></svg>
+                <span class="li-nav__label">My Network</span>
+            </a>
+            <a href="#" class="li-nav__item li-inert@(Active("jobs"))">
+                <svg class="li-nav__icon" width="24" height="24"><use href="#li-jobs"/></svg>
+                <span class="li-nav__label">Jobs</span>
+            </a>
+            <a href="/messages" class="li-nav__item@(Active("messaging"))">
+                <span class="li-nav__iconwrap">
+                    <svg class="li-nav__icon" width="24" height="24"><use href="#li-messaging"/></svg>
+                    @if (unread > 0)
+                    {
+                        <span class="li-badge">@unread</span>
+                    }
+                </span>
+                <span class="li-nav__label">Messaging</span>
+            </a>
+            <a href="#" class="li-nav__item li-inert@(Active("notifications"))">
+                <span class="li-nav__iconwrap">
+                    <svg class="li-nav__icon" width="24" height="24"><use href="#li-bell"/></svg>
+                    @if (notifications > 0)
+                    {
+                        <span class="li-badge">@notifications</span>
+                    }
+                </span>
+                <span class="li-nav__label">Notifications</span>
+            </a>
+            <div class="li-nav__item li-nav__me" data-li-menu>
+                <img class="li-nav__avatar" src="/u/@me/avatar" alt="">
+                <span class="li-nav__label">Me <svg width="16" height="16"><use href="#li-caret"/></svg></span>
+                <div class="li-menu li-menu--me" role="menu">
+                    <div class="li-menu__profile">
+                        <img src="/u/@me/avatar" alt="">
+                        <div>
+                            <div class="li-menu__name">@Present.DisplayName(me)</div>
+                            <div class="li-menu__headline">@Present.Headline(me)</div>
+                        </div>
+                    </div>
+                    <a class="li-menu__view" href="/u/@me">View Profile</a>
+                    <div class="li-menu__section">
+                        <h4>Account</h4>
+                        <a href="#" class="li-inert"><svg width="16" height="16"><use href="#li-premium"/></svg> Try Premium for $0</a>
+                        <a href="#" class="li-inert">Settings &amp; Privacy</a>
+                        <a href="#" class="li-inert">Help</a>
+                        <a href="#" class="li-inert">Language</a>
+                    </div>
+                    <div class="li-menu__section">
+                        <h4>Manage</h4>
+                        <a href="/u/@me">Posts &amp; Activity</a>
+                        <a href="#" class="li-inert">Job Posting Account</a>
+                    </div>
+                    <div class="li-menu__section">
+                        <a href="#" class="li-inert">Sign Out</a>
+                    </div>
+                </div>
+            </div>
+            <div class="li-nav__item li-nav__business li-inert">
+                <svg class="li-nav__icon" width="24" height="24"><use href="#li-grid"/></svg>
+                <span class="li-nav__label">For Business <svg width="16" height="16"><use href="#li-caret"/></svg></span>
+            </div>
+            <a href="#" class="li-nav__premium li-inert">Try Premium for $0</a>
+        </nav>
+        <a href="/messages" class="li-nav__msg-mobile" aria-label="Messaging">
+            <svg width="24" height="24"><use href="#li-messaging"/></svg>
+            @if (unread > 0)
+            {
+                <span class="li-badge">@unread</span>
+            }
+        </a>
+    </div>
+</header>
+<nav class="li-tabbar" aria-label="Primary">
+    <a href="/" class="@(active == "home" ? "li-tabbar--active" : "")"><svg width="24" height="24"><use href="#li-home"/></svg><span>Home</span></a>
+    <a href="#" class="li-inert"><svg width="24" height="24"><use href="#li-network"/></svg><span>My Network</span></a>
+    <a href="/#li-composer"><svg width="24" height="24"><use href="#li-plus"/></svg><span>Post</span></a>
+    <a href="#" class="li-inert"><svg width="24" height="24"><use href="#li-bell"/></svg><span>Notifications</span></a>
+    <a href="#" class="li-inert"><svg width="24" height="24"><use href="#li-jobs"/></svg><span>Jobs</span></a>
+</nav>

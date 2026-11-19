@@ -14,6 +14,7 @@ public interface IUserService
     Task<bool> DeleteUserAsync(string username, string theme = null);
     Task<bool> UsernameExistsAsync(string username, string theme = null);
     Task<List<User>> SearchUsersAsync(string searchTerm, string theme = null, int limit = 20);
+    Task<List<User>> GetUsersByThemeAsync(string theme, int limit = 20);
 }
 
 public class UserService(DataContext context) : IUserService
@@ -167,6 +168,17 @@ public class UserService(DataContext context) : IUserService
             .Where(u => u.Username.ToLower().Contains(normalizedTerm))
             .Where(u => string.IsNullOrWhiteSpace(normalizedTheme) ||
                         u.Theme.ToLower() == normalizedTheme)
+            .Take(limit)
+            .ToListAsync();
+    }
+
+    /// <summary>The most recently active users of a theme, for "who to follow" and member lists.</summary>
+    public async Task<List<User>> GetUsersByThemeAsync(string theme, int limit = 20)
+    {
+        var normalizedTheme = NormalizeThemeKey(theme);
+        return await context.Users
+            .Where(u => normalizedTheme == null || u.Theme.ToLower() == normalizedTheme)
+            .OrderByDescending(u => u.LastActiveUtc)
             .Take(limit)
             .ToListAsync();
     }

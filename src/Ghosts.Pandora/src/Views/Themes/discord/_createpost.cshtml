@@ -1,0 +1,84 @@
+@* The Discord composer, replacing the discord case of Views/Shared/_CreatePost.cshtml for this theme. *@
+@{
+    var username = ViewBag.Username as string ?? "User";
+}
+<div class="message-input-container">
+    <div class="dc-reply-bar" hidden>
+        <span>Replying to <strong class="dc-reply-name"></strong></span>
+        <button type="button" class="dc-icon-btn" data-reply-cancel data-tip="Cancel Reply"><svg class="ic" width="16" height="16"><use href="#i-close"/></svg></button>
+    </div>
+    <form method="post">
+        <input type="hidden" name="theme" value="discord">
+        <input type="hidden" name="user" value="@username">
+        @* discord.js names this "file" once an image is picked, so an empty picker adds nothing to the post *@
+        <input type="file" accept="image/png,image/jpeg" class="dc-file" hidden>
+        <div class="dc-attachments" hidden>
+            <div class="dc-attachment">
+                <svg class="ic" width="40" height="40"><use href="#i-upload"/></svg>
+                <span class="dc-attachment-name"></span>
+                <button type="button" class="dc-icon-btn" data-attachment-remove data-tip="Remove Attachment"><svg class="ic" width="16" height="16"><use href="#i-close"/></svg></button>
+            </div>
+        </div>
+        <div class="message-input-wrapper">
+            <button type="button" class="attachment-btn" data-popover="dc-upload-menu" data-tip="Upload a File or Use Apps"><svg class="ic" width="24" height="24"><use href="#i-plus-circle"/></svg></button>
+            <div class="dc-popover dc-menu dc-upload-menu" id="dc-upload-menu" hidden>
+                <button type="button" class="dc-menu-item" data-upload><svg class="ic" width="20" height="20"><use href="#i-upload"/></svg> Upload a File</button>
+                <button type="button" class="dc-menu-item" data-inert><svg class="ic" width="20" height="20"><use href="#i-threads"/></svg> Create Thread</button>
+                <button type="button" class="dc-menu-item" data-inert><svg class="ic" width="20" height="20"><use href="#i-apps"/></svg> Use Apps</button>
+            </div>
+            <div class="input-area">
+                <input type="text" name="message" placeholder="Message #general" class="message-input" required autocomplete="off" />
+                <div class="input-actions">
+                    <button type="button" class="input-action" data-popover="dc-gift" data-tip="Upgrade your friends! Gift them awesome chat perks with Discord Nitro"><svg class="ic" width="24" height="24"><use href="#i-gift"/></svg></button>
+                    <button type="button" class="input-action" data-picker="gif" data-tip="Open GIF picker"><svg class="ic" width="24" height="24"><use href="#i-gif"/></svg></button>
+                    <button type="button" class="input-action" data-picker="sticker" data-tip="Open sticker picker"><svg class="ic" width="24" height="24"><use href="#i-sticker"/></svg></button>
+                    <button type="button" class="input-action" data-picker="emoji" data-tip="Select emoji"><svg class="ic" width="24" height="24"><use href="#i-emoji"/></svg></button>
+                    <button type="submit" class="send-btn" data-tip="Send"><svg class="ic" width="20" height="20"><use href="#i-forward"/></svg></button>
+                </div>
+            </div>
+        </div>
+    </form>
+    <div class="dc-popover dc-gift" id="dc-gift" hidden>
+        <strong>Gift Nitro</strong>
+        <p>Gifting is not available for your account right now.</p>
+    </div>
+    <div class="dc-typing"></div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.querySelector('.message-input-container form');
+            const input = form.querySelector('.message-input');
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault(); // stop normal form POST
+
+                const data = new FormData(form);
+
+                fetch(form.action || window.location.href, {
+                    method: "POST",
+                    body: data
+                })
+                .then(res => {
+                    if (res.status === 204 || res.ok) {
+                        window.location.reload();   // success → refresh
+                    } else {
+                        console.log("Unexpected response:", res.status);
+                    }
+                })
+                .catch(err => console.error("POST failed:", err));
+            });
+
+            input.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    if (!input.value.trim()) return;
+                    form.requestSubmit();  // triggers the custom handler above
+                }
+            });
+
+            // social.js clears the input on a .send-btn click before the form submits; let the button just submit
+            form.querySelector('.send-btn').addEventListener('click', function (e) {
+                e.stopImmediatePropagation();
+            }, true);
+        });
+    </script>
+</div>

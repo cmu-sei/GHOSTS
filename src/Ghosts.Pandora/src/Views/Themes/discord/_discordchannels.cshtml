@@ -1,0 +1,107 @@
+@model List<Ghosts.Pandora.Infrastructure.Models.Post>
+@inject Ghosts.Pandora.Infrastructure.Services.IUserService Users
+@*
+    The organization server's channel list. Model: the threads to nest under #general (posts that have
+    replies); ViewData["dc.thread"] is the id of the open thread on the thread page, else #general is open.
+*@
+@{
+    var world = Present.World;
+    var me = ViewBag.Username as string;
+    var presence = (Func<string, string>)Context.Items["dc.presence"];
+    var openThread = ViewData["dc.thread"] as Guid?;
+    var threadName = (Func<Ghosts.Pandora.Infrastructure.Models.Post, string>)Context.Items["dc.threadname"];
+    var project = world.Projects.Count > 0 ? world.Projects[0] : "Network Modernization";
+    var projectSlug = project.ToLowerInvariant().Replace(" and ", "-").Replace(' ', '-');
+    var everyone = await Users.GetUsersByThemeAsync("discord", 60);
+    var inVoice = everyone
+        .Where(u => !string.Equals(u.Username, me, StringComparison.OrdinalIgnoreCase) && presence(u.Username) == "online")
+        .OrderBy(u => Ghosts.Pandora.Infrastructure.Content.ContentRequest.StableHash(u.Username + ":voice"))
+        .Take(2)
+        .ToList();
+    var channels = new[]
+    {
+        (Key: "announcements", Icon: "i-announce", Unread: true, Topic: $"Official news and updates from {world.OrganizationName}. Only admins can post here."),
+        (Key: "general", Icon: "i-hash", Unread: false, Topic: $"Company-wide chat for {world.ShortName} staff. Keep it friendly, and take IT problems to #it-help."),
+        (Key: "it-help", Icon: "i-hash", Unread: true, Topic: "Can't log in? VPN acting up? Ask here. For outages call the help desk."),
+        (Key: projectSlug, Icon: "i-hash", Unread: false, Topic: $"Status, questions and decisions for the {project} project."),
+        (Key: "shoutouts", Icon: "i-hash", Unread: false, Topic: "Thank a coworker who went above and beyond."),
+        (Key: "random", Icon: "i-hash", Unread: false, Topic: "Off-topic: pets, lunch plans, weekend stuff.")
+    };
+}
+<aside class="dc-sidebar" aria-label="Channels">
+    <button type="button" class="dc-server-header" data-popover="dc-server-menu">
+        <span>@world.ShortName Staff</span>
+        <svg class="ic" width="18" height="18"><use href="#i-chevron"/></svg>
+    </button>
+    <div class="dc-popover dc-menu" id="dc-server-menu" hidden>
+        <button type="button" class="dc-menu-item accent" data-inert>Invite People <svg class="ic" width="18" height="18"><use href="#i-user-add"/></svg></button>
+        <button type="button" class="dc-menu-item" data-inert>Server Settings <svg class="ic" width="18" height="18"><use href="#i-gear"/></svg></button>
+        <button type="button" class="dc-menu-item" data-inert>Create Channel <svg class="ic" width="18" height="18"><use href="#i-plus-circle"/></svg></button>
+        <button type="button" class="dc-menu-item" data-inert>Create Event <svg class="ic" width="18" height="18"><use href="#i-calendar"/></svg></button>
+        <div class="dc-menu-sep"></div>
+        <button type="button" class="dc-menu-item" data-inert>Notification Settings <svg class="ic" width="18" height="18"><use href="#i-bell"/></svg></button>
+        <button type="button" class="dc-menu-item" data-inert>Edit Per-server Profile <svg class="ic" width="18" height="18"><use href="#i-friends"/></svg></button>
+    </div>
+    <div class="dc-sidebar-scroll">
+        <div class="dc-nav-item" data-inert><svg class="ic" width="20" height="20"><use href="#i-calendar"/></svg> Events</div>
+        <div class="dc-nav-item" data-inert><svg class="ic" width="20" height="20"><use href="#i-list"/></svg> Channels &amp; Roles</div>
+        <div class="dc-sidebar-sep"></div>
+
+        <div class="dc-category">
+            <button type="button" class="dc-category-head">
+                <span>Text Channels</span>
+                <svg class="ic" width="12" height="12"><use href="#i-chevron"/></svg>
+                <span class="dc-category-add" data-tip="Create Channel"><svg class="ic" width="16" height="16"><use href="#i-plus"/></svg></span>
+            </button>
+            <div class="dc-category-body">
+                @foreach (var c in channels)
+                {
+                    var selected = c.Key == "general" && openThread == null;
+                    <a href="@(c.Key == "general" ? "/" : $"/#{c.Key}")" class="dc-channel@(selected ? " selected" : "")@(c.Unread ? " unread" : "")" data-channel="@c.Key" data-topic="@c.Topic" data-icon="@c.Icon">
+                        <svg class="ic" width="20" height="20"><use href="#@c.Icon"/></svg>
+                        <span class="dc-channel-name">@c.Key</span>
+                    </a>
+                    @if (c.Key == "general")
+                    {
+                        foreach (var thread in Model ?? new List<Ghosts.Pandora.Infrastructure.Models.Post>())
+                        {
+                            <a href="/posts/@thread.Id" class="dc-channel dc-thread-link@(thread.Id == openThread ? " selected" : "")">
+                                <span class="dc-thread-spine"></span>
+                                <span class="dc-channel-name">@threadName(thread)</span>
+                            </a>
+                        }
+                    }
+                }
+            </div>
+        </div>
+
+        <div class="dc-category">
+            <button type="button" class="dc-category-head">
+                <span>Voice Channels</span>
+                <svg class="ic" width="12" height="12"><use href="#i-chevron"/></svg>
+                <span class="dc-category-add" data-tip="Create Channel"><svg class="ic" width="16" height="16"><use href="#i-plus"/></svg></span>
+            </button>
+            <div class="dc-category-body">
+                <div class="dc-channel voice" data-inert>
+                    <svg class="ic" width="20" height="20"><use href="#i-speaker"/></svg>
+                    <span class="dc-channel-name">Lounge</span>
+                </div>
+                @foreach (var u in inVoice)
+                {
+                    <a href="/u/@u.Username" class="dc-voice-user">
+                        <span class="dc-avatar s24"><img src="/u/@u.Username/avatar" alt=""></span>
+                        <span>@Present.DisplayName(u.Username)</span>
+                    </a>
+                }
+                <div class="dc-channel voice" data-inert>
+                    <svg class="ic" width="20" height="20"><use href="#i-speaker"/></svg>
+                    <span class="dc-channel-name">Daily Standup</span>
+                </div>
+                <div class="dc-channel voice" data-inert>
+                    <svg class="ic" width="20" height="20"><use href="#i-speaker"/></svg>
+                    <span class="dc-channel-name">Focus Room</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</aside>

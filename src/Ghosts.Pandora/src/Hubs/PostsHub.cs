@@ -1,3 +1,4 @@
+using Ghosts.Pandora.Infrastructure;
 using Microsoft.AspNetCore.SignalR;
 using Ghosts.Pandora.Infrastructure.Services;
 
@@ -10,6 +11,6 @@ public class PostsHub(IPostService postService, IUserService userService) : Hub
         // Get or create user
         var user = await userService.GetOrCreateUserAsync(username, theme);
         var post = await postService.CreatePost(user.Id, user.Username, user.Theme, message);
-        await Clients.All.SendAsync("SendMessage", post.Id, user.Username, user.Theme, message, post.CreatedUtc);
+        await Clients.All.SendAsync("SendMessage", post.Id, user.Username, user.Theme, MessageHtml.ToHtml(message), post.CreatedUtc);
     }
 }

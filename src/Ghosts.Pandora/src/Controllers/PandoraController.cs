@@ -1,4 +1,6 @@
+using System.Text;
 using Ghosts.Pandora.Infrastructure;
+using Ghosts.Pandora.Infrastructure.Content;
 using Ghosts.Pandora.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -18,6 +20,9 @@ public class PandoraController : BaseController
     private readonly IVideoGenerationService _videoService;
     private readonly IAudioGenerationService _audioService;
     private readonly IBinaryGenerationService _binaryService;
+    private readonly ContentManager _contentManager;
+    private readonly World _world;
+    private readonly DocumentComposer _composer;
 
     public PandoraController(
         ILogger<PandoraController> logger,
@@ -29,7 +34,10 @@ public class PandoraController : BaseController
         IArchiveGenerationService archiveService,
         IVideoGenerationService videoService,
         IAudioGenerationService audioService,
-        IBinaryGenerationService binaryService) : base(logger)
+        IBinaryGenerationService binaryService,
+        ContentManager contentManager,
+        World world,
+        DocumentComposer composer) : base(logger)
     {
         _configuration = configuration;
         _pdfService = pdfService;
@@ -40,7 +48,36 @@ public class PandoraController : BaseController
         _videoService = videoService;
         _audioService = audioService;
         _binaryService = binaryService;
+        _contentManager = contentManager;
+        _world = world;
+        _composer = composer;
     }
+
+    /// <summary>
+    /// Serves the content for a request path: the stored copy if there is one, else newly generated
+    /// content, which is stored for next time. <paramref name="download"/> names the file with its
+    /// real extension, so "memo.doc" downloads as "memo.docx", the format it actually is.
+    /// </summary>
+    private IActionResult Serve(string category, string path, string defaultName, string extension, string mimeType,
+        bool download, Func<ContentRequest, byte[]> generate)
+    {
+        if (!_configuration.Pandora.Enabled)
+            return NotFound("Pandora is not enabled");
+
+        var requestPath = string.IsNullOrEmpty(path) ? $"{defaultName}.{extension}" : path;
+        Logger.LogTrace("{Category} request: {Path}", category, ForLog(requestPath));
+
+        var content = _contentManager.GetOrCreate(category, requestPath, extension,
+            () => generate(ContentRequest.Parse(requestPath, _world)));
+
+        if (!download)
+            return File(content, mimeType);
+
+        var stem = Path.GetFileNameWithoutExtension(Path.GetFileName(requestPath));
+        return File(content, mimeType, $"{(string.IsNullOrEmpty(stem) ? defaultName : stem)}.{extension}");
+    }
+
+    private const string Utf8 = "; charset=utf-8";
 
     #region PDF Endpoints
 
@@ -51,16 +88,8 @@ public class PandoraController : BaseController
     [SwaggerOperation(Summary = "Generate a random PDF document", Tags = new[] { "Documents" })]
     public IActionResult GeneratePdf(string path = null)
     {
-        if (!_configuration.Pandora.Enabled)
-            return NotFound("Pandora is not enabled");
-
-        Logger.LogTrace("PDF request: {Path}", path ?? "index.pdf");
-
-        var content = _pdfService.GeneratePdf();
-        var fileName = string.IsNullOrEmpty(path) ? "index.pdf" : Path.GetFileName(path);
-        if (!fileName.EndsWith(".pdf")) fileName += ".pdf";
-
-        return File(content, "application/pdf", fileName);
+        return Serve("pdf", path, "index", "pdf", "application/pdf", true,
+            r => _pdfService.GeneratePdf(_composer.Compose(r)));
     }
 
     #endregion
@@ -86,16 +115,8 @@ public class PandoraController : BaseController
     [SwaggerOperation(Summary = "Generate a random Word document", Tags = new[] { "Documents" })]
     public IActionResult GenerateWordDocument(string path = null)
     {
-        if (!_configuration.Pandora.Enabled)
-            return NotFound("Pandora is not enabled");
-
-        Logger.LogTrace("Word document request: {Path}", path ?? "index.docx");
-
-        var content = _officeService.GenerateWordDocument();
-        var fileName = string.IsNullOrEmpty(path) ? "index.docx" : Path.GetFileName(path);
-        if (!fileName.EndsWith(".docx") && !fileName.EndsWith(".doc")) fileName += ".docx";
-
-        return File(content, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", fileName);
+        return Serve("docx", path, "index", "docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", true,
+            r => _officeService.GenerateWordDocument(_composer.Compose(r)));
     }
 
     [HttpGet("/xlsx")]
@@ -109,16 +130,8 @@ public class PandoraController : BaseController
     [SwaggerOperation(Summary = "Generate a random Excel spreadsheet", Tags = new[] { "Spreadsheets" })]
     public IActionResult GenerateExcelDocument(string path = null)
     {
-        if (!_configuration.Pandora.Enabled)
-            return NotFound("Pandora is not enabled");
-
-        Logger.LogTrace("Excel document request: {Path}", path ?? "index.xlsx");
-
-        var content = _officeService.GenerateExcelDocument();
-        var fileName = string.IsNullOrEmpty(path) ? "index.xlsx" : Path.GetFileName(path);
-        if (!fileName.EndsWith(".xlsx") && !fileName.EndsWith(".xls")) fileName += ".xlsx";
-
-        return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+        return Serve("xlsx", path, "index", "xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", true,
+            r => _officeService.GenerateExcelDocument(_composer.Compose(r), _composer.ComposeTable(r)));
     }
 
     [HttpGet("/ppt")]
@@ -136,16 +149,8 @@ public class PandoraController : BaseController
     [SwaggerOperation(Summary = "Generate a random PowerPoint presentation", Tags = new[] { "Presentations" })]
     public IActionResult GeneratePowerPointDocument(string path = null)
     {
-        if (!_configuration.Pandora.Enabled)
-            return NotFound("Pandora is not enabled");
-
-        Logger.LogTrace("PowerPoint document request: {Path}", path ?? "index.pptx");
-
-        var content = _officeService.GeneratePowerPointDocument();
-        var fileName = string.IsNullOrEmpty(path) ? "index.pptx" : Path.GetFileName(path);
-        if (!fileName.EndsWith(".pptx") && !fileName.EndsWith(".ppt")) fileName += ".pptx";
-
-        return File(content, "application/vnd.openxmlformats-officedocument.presentationml.presentation", fileName);
+        return Serve("pptx", path, "index", "pptx", "application/vnd.openxmlformats-officedocument.presentationml.presentation", true,
+            r => _officeService.GeneratePowerPointDocument(_composer.Compose(r)));
     }
 
     #endregion
@@ -167,9 +172,6 @@ public class PandoraController : BaseController
     [SwaggerOperation(Summary = "Generate a random image", Tags = new[] { "Image" })]
     public IActionResult GenerateImage(string path = null)
     {
-        if (!_configuration.Pandora.Enabled)
-            return NotFound("Pandora is not enabled");
-
         var format = "png";
         if (!string.IsNullOrEmpty(path))
         {
@@ -180,10 +182,6 @@ public class PandoraController : BaseController
             }
         }
 
-        Logger.LogTrace("Image request: {Path} (format: {Format})", path ?? "random", format);
-
-        var content = _imageService.GenerateImage(format);
-
         var mimeType = format switch
         {
             "jpg" or "jpeg" => "image/jpeg",
@@ -193,7 +191,7 @@ public class PandoraController : BaseController
         };
 
         // Return without filename to display inline instead of forcing download
-        return File(content, mimeType);
+        return Serve("img", path, "index", format, mimeType, false, _ => _imageService.GenerateImage(format));
     }
 
     #endregion
@@ -211,13 +209,8 @@ public class PandoraController : BaseController
     [SwaggerOperation(Summary = "Generate random JSON data", Tags = new[] { "Data Structures" })]
     public IActionResult GenerateJson(string path = null)
     {
-        if (!_configuration.Pandora.Enabled)
-            return NotFound("Pandora is not enabled");
-
-        Logger.LogTrace("JSON request: {Path}", path ?? "index.json");
-
-        var content = _dataFormatService.GenerateJson();
-        return Content(content, "application/json");
+        return Serve("json", path, "index", "json", "application/json", false,
+            r => Encoding.UTF8.GetBytes(_dataFormatService.GenerateJson(_composer.Compose(r), _composer.ComposeTable(r))));
     }
 
     [HttpGet("/csv")]
@@ -227,16 +220,8 @@ public class PandoraController : BaseController
     [SwaggerOperation(Summary = "Generate random CSV data", Tags = new[] { "Data Structures" })]
     public IActionResult GenerateCsv(string path = null)
     {
-        if (!_configuration.Pandora.Enabled)
-            return NotFound("Pandora is not enabled");
-
-        Logger.LogTrace("CSV request: {Path}", path ?? "index.csv");
-
-        var content = _dataFormatService.GenerateCsv();
-        var fileName = string.IsNullOrEmpty(path) ? "index.csv" : Path.GetFileName(path);
-        if (!fileName.EndsWith(".csv")) fileName += ".csv";
-
-        return File(content, "text/csv", fileName);
+        return Serve("csv", path, "index", "csv", "text/csv", true,
+            r => _dataFormatService.GenerateCsv(_composer.ComposeTable(r)));
     }
 
     [HttpGet("/text")]
@@ -250,13 +235,8 @@ public class PandoraController : BaseController
     [SwaggerOperation(Summary = "Generate random text", Tags = new[] { "Data Structures" })]
     public IActionResult GenerateText(string path = null)
     {
-        if (!_configuration.Pandora.Enabled)
-            return NotFound("Pandora is not enabled");
-
-        Logger.LogTrace("Text request: {Path}", path ?? "index.txt");
-
-        var content = _dataFormatService.GenerateText();
-        return Content(content, "text/plain");
+        return Serve("txt", path, "index", "txt", "text/plain" + Utf8, false,
+            r => Encoding.UTF8.GetBytes(_dataFormatService.GenerateText(_composer.Compose(r))));
     }
 
     [HttpGet("/html")]
@@ -269,8 +249,6 @@ public class PandoraController : BaseController
         if (!_configuration.Pandora.Enabled)
             return NotFound("Pandora is not enabled");
 
-        Logger.LogTrace("HTML request: {Path}", path ?? "index.html");
-
         // If in social mode, return the themed Index view
         if (_configuration.Mode.Type.Equals("social", StringComparison.OrdinalIgnoreCase))
         {
@@ -279,8 +257,8 @@ public class PandoraController : BaseController
         }
 
         // Website mode - return standalone HTML
-        var content = _dataFormatService.GenerateHtml();
-        return Content(content, "text/html");
+        return Serve("html", path, "index", "html", "text/html" + Utf8, false,
+            _ => Encoding.UTF8.GetBytes(_dataFormatService.GenerateHtml()));
     }
 
     [HttpGet("/js")]
@@ -294,13 +272,8 @@ public class PandoraController : BaseController
     [SwaggerOperation(Summary = "Generate random JavaScript", Tags = new[] { "Web" })]
     public IActionResult GenerateScript(string path = null)
     {
-        if (!_configuration.Pandora.Enabled)
-            return NotFound("Pandora is not enabled");
-
-        Logger.LogTrace("JavaScript request: {Path}", path ?? "script.js");
-
-        var content = _dataFormatService.GenerateScript();
-        return Content(content, "application/javascript");
+        return Serve("js", path, "script", "js", "application/javascript" + Utf8, false,
+            _ => Encoding.UTF8.GetBytes(_dataFormatService.GenerateScript()));
     }
 
     [HttpGet("/css")]
@@ -314,13 +287,8 @@ public class PandoraController : BaseController
     [SwaggerOperation(Summary = "Generate random CSS", Tags = new[] { "Web" })]
     public IActionResult GenerateStylesheet(string path = null)
     {
-        if (!_configuration.Pandora.Enabled)
-            return NotFound("Pandora is not enabled");
-
-        Logger.LogTrace("CSS request: {Path}", path ?? "styles.css");
-
-        var content = _dataFormatService.GenerateStylesheet();
-        return Content(content, "text/css");
+        return Serve("css", path, "styles", "css", "text/css" + Utf8, false,
+            _ => Encoding.UTF8.GetBytes(_dataFormatService.GenerateStylesheet()));
     }
 
     #endregion
@@ -334,16 +302,7 @@ public class PandoraController : BaseController
     [SwaggerOperation(Summary = "Generate a random ZIP archive", Tags = new[] { "Archives" })]
     public IActionResult GenerateZip(string path = null)
     {
-        if (!_configuration.Pandora.Enabled)
-            return NotFound("Pandora is not enabled");
-
-        Logger.LogTrace("ZIP request: {Path}", path ?? "archive.zip");
-
-        var content = _archiveService.GenerateZip();
-        var fileName = string.IsNullOrEmpty(path) ? "archive.zip" : Path.GetFileName(path);
-        if (!fileName.EndsWith(".zip")) fileName += ".zip";
-
-        return File(content, "application/zip", fileName);
+        return Serve("zip", path, "archive", "zip", "application/zip", true, _ => _archiveService.GenerateZip());
     }
 
     [HttpGet("/tar")]
@@ -353,16 +312,7 @@ public class PandoraController : BaseController
     [SwaggerOperation(Summary = "Generate a random TAR archive", Tags = new[] { "Archives" })]
     public IActionResult GenerateTar(string path = null)
     {
-        if (!_configuration.Pandora.Enabled)
-            return NotFound("Pandora is not enabled");
-
-        Logger.LogTrace("TAR request: {Path}", path ?? "archive.tar");
-
-        var content = _archiveService.GenerateTar();
-        var fileName = string.IsNullOrEmpty(path) ? "archive.tar" : Path.GetFileName(path);
-        if (!fileName.EndsWith(".tar")) fileName += ".tar";
-
-        return File(content, "application/x-tar", fileName);
+        return Serve("tar", path, "archive", "tar", "application/x-tar", true, _ => _archiveService.GenerateTar());
     }
 
     #endregion
@@ -380,13 +330,10 @@ public class PandoraController : BaseController
     [SwaggerOperation(Summary = "Generate a random video file", Tags = new[] { "Video" })]
     public IActionResult GenerateVideo(string path = null)
     {
-        if (!_configuration.Pandora.Enabled)
-            return NotFound("Pandora is not enabled");
-
         var format = "mp4";
         if (!string.IsNullOrEmpty(path))
         {
-            // map onto a literal, so no part of the request path reaches the generator or the log
+            // map onto a literal, so no part of the request path reaches the generator
             format = Path.GetExtension(path).TrimStart('.').ToLower() switch
             {
                 "avi" => "avi",
@@ -397,12 +344,8 @@ public class PandoraController : BaseController
             };
         }
 
-        Logger.LogTrace("Video request: {Path} (format: {Format})", ForLog(path) ?? "video.mp4", format);
-
-        var content = _videoService.GenerateVideo(format);
-
         // Return without filename to allow inline playback
-        return File(content, "video/mp4");
+        return Serve("video", path, "video", format, "video/mp4", false, _ => _videoService.GenerateVideo(format));
     }
 
     #endregion
@@ -428,9 +371,6 @@ public class PandoraController : BaseController
     [SwaggerOperation(Summary = "Generate a random audio file", Tags = new[] { "Audio" })]
     public IActionResult GenerateAudio(string path = null)
     {
-        if (!_configuration.Pandora.Enabled)
-            return NotFound("Pandora is not enabled");
-
         var format = "wav";
         if (!string.IsNullOrEmpty(path))
         {
@@ -440,10 +380,6 @@ public class PandoraController : BaseController
                 format = ext;
             }
         }
-
-        Logger.LogTrace("Audio request: {Path} (format: {Format})", path ?? "audio.wav", format);
-
-        var content = _audioService.GenerateAudio(format);
 
         var mimeType = format switch
         {
@@ -455,7 +391,7 @@ public class PandoraController : BaseController
         };
 
         // Return without filename to allow inline playback
-        return File(content, mimeType);
+        return Serve("audio", path, "audio", format, mimeType, false, _ => _audioService.GenerateAudio(format));
     }
 
     #endregion
@@ -477,16 +413,7 @@ public class PandoraController : BaseController
     [SwaggerOperation(Summary = "Generate a random binary file", Tags = new[] { "Binary" })]
     public IActionResult GenerateBinary(string path = null)
     {
-        if (!_configuration.Pandora.Enabled)
-            return NotFound("Pandora is not enabled");
-
-        Logger.LogTrace("Binary file request: {Path}", path ?? "file.bin");
-
-        var content = _binaryService.GenerateBinary();
-        var fileName = string.IsNullOrEmpty(path) ? "file.bin" : Path.GetFileName(path);
-        if (!fileName.EndsWith(".bin")) fileName += ".bin";
-
-        return File(content, "application/octet-stream", fileName);
+        return Serve("bin", path, "file", "bin", "application/octet-stream", true, _ => _binaryService.GenerateBinary());
     }
 
     [HttpGet("/onenote")]
@@ -496,16 +423,7 @@ public class PandoraController : BaseController
     [SwaggerOperation(Summary = "Generate a random OneNote file", Tags = new[] { "Documents" })]
     public IActionResult GenerateOneNote(string path = null)
     {
-        if (!_configuration.Pandora.Enabled)
-            return NotFound("Pandora is not enabled");
-
-        Logger.LogTrace("OneNote file request: {Path}", path ?? "notebook.one");
-
-        var content = _binaryService.GenerateOneNote();
-        var fileName = string.IsNullOrEmpty(path) ? "notebook.one" : Path.GetFileName(path);
-        if (!fileName.EndsWith(".one")) fileName += ".one";
-
-        return File(content, "application/onenote", fileName);
+        return Serve("one", path, "notebook", "one", "application/onenote", true, _ => _binaryService.GenerateOneNote());
     }
 
     [HttpGet("/exe")]
@@ -515,16 +433,7 @@ public class PandoraController : BaseController
     [SwaggerOperation(Summary = "Generate a fake executable file", Tags = new[] { "Executables" })]
     public IActionResult GenerateExe(string path = null)
     {
-        if (!_configuration.Pandora.Enabled)
-            return NotFound("Pandora is not enabled");
-
-        Logger.LogTrace("EXE file request: {Path}", path ?? "program.exe");
-
-        var content = _binaryService.GenerateExecutable("exe");
-        var fileName = string.IsNullOrEmpty(path) ? "program.exe" : Path.GetFileName(path);
-        if (!fileName.EndsWith(".exe")) fileName += ".exe";
-
-        return File(content, "application/octet-stream", fileName);
+        return Serve("exe", path, "program", "exe", "application/octet-stream", true, _ => _binaryService.GenerateExecutable("exe"));
     }
 
     [HttpGet("/msi")]
@@ -534,16 +443,7 @@ public class PandoraController : BaseController
     [SwaggerOperation(Summary = "Generate a fake MSI installer file", Tags = new[] { "Executables" })]
     public IActionResult GenerateMsi(string path = null)
     {
-        if (!_configuration.Pandora.Enabled)
-            return NotFound("Pandora is not enabled");
-
-        Logger.LogTrace("MSI file request: {Path}", path ?? "installer.msi");
-
-        var content = _binaryService.GenerateExecutable("msi");
-        var fileName = string.IsNullOrEmpty(path) ? "installer.msi" : Path.GetFileName(path);
-        if (!fileName.EndsWith(".msi")) fileName += ".msi";
-
-        return File(content, "application/x-msdownload", fileName);
+        return Serve("msi", path, "installer", "msi", "application/x-msdownload", true, _ => _binaryService.GenerateExecutable("msi"));
     }
 
     [HttpGet("/iso")]
@@ -553,16 +453,7 @@ public class PandoraController : BaseController
     [SwaggerOperation(Summary = "Generate a fake ISO disk image", Tags = new[] { "Disk Images" })]
     public IActionResult GenerateIso(string path = null)
     {
-        if (!_configuration.Pandora.Enabled)
-            return NotFound("Pandora is not enabled");
-
-        Logger.LogTrace("ISO file request: {Path}", path ?? "disk.iso");
-
-        var content = _binaryService.GenerateIso();
-        var fileName = string.IsNullOrEmpty(path) ? "disk.iso" : Path.GetFileName(path);
-        if (!fileName.EndsWith(".iso")) fileName += ".iso";
-
-        return File(content, "application/octet-stream", fileName);
+        return Serve("iso", path, "disk", "iso", "application/octet-stream", true, _ => _binaryService.GenerateIso());
     }
 
     #endregion

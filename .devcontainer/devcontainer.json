@@ -59,6 +59,23 @@
     "initializeCommand": [".devcontainer/scripts/init"],
     "postCreateCommand": "bash -l .devcontainer/scripts/postcreate.sh",
     "postStartCommand": "bash -l .devcontainer/scripts/poststart.sh",
+    // The Aspire host's Pandora sites (src/apphost/AppHost.cs), forwarded up front so a browser on the
+    // host reaches them even before VS Code notices each port
+    "forwardPorts": [6360, 6361, 6362, 6363, 6364, 6365, 6366, 6367, 6368, 6369, 6370, 6371],
+    "portsAttributes": {
+        "6360": { "label": "Pandora facebook", "onAutoForward": "silent" },
+        "6361": { "label": "Pandora instagram", "onAutoForward": "silent" },
+        "6362": { "label": "Pandora discord", "onAutoForward": "silent" },
+        "6363": { "label": "Pandora x", "onAutoForward": "silent" },
+        "6364": { "label": "Pandora linkedin", "onAutoForward": "silent" },
+        "6365": { "label": "Pandora reddit", "onAutoForward": "silent" },
+        "6366": { "label": "Pandora youtube", "onAutoForward": "silent" },
+        "6367": { "label": "Pandora pandora-default", "onAutoForward": "silent" },
+        "6368": { "label": "Pandora news-site", "onAutoForward": "silent" },
+        "6369": { "label": "Pandora shopping-site", "onAutoForward": "silent" },
+        "6370": { "label": "Pandora sports-site", "onAutoForward": "silent" },
+        "6371": { "label": "Pandora entertainment-site", "onAutoForward": "silent" }
+    },
     "customizations": {
         "vscode": {
             "extensions": [

@@ -1,311 +1,144 @@
+@model List<Ghosts.Pandora.Infrastructure.Models.Post>
+@inject Ghosts.Pandora.Infrastructure.Services.IUserService Users
 @{
     Layout = null;
-}
-
-@{
     ViewBag.Theme = "discord";
-}
+    await Html.RenderPartialAsync("~/Views/Themes/discord/_discordhelpers.cshtml");
+    var day = (Func<DateTime, string>)Context.Items["dc.day"];
+    var iso = (Func<DateTime, string>)Context.Items["dc.iso"];
+    var threadName = (Func<Ghosts.Pandora.Infrastructure.Models.Post, string>)Context.Items["dc.threadname"];
+    var world = Present.World;
+    var me = ViewBag.Username as string ?? "user";
+    var server = $"{world.ShortName} Staff";
+    var topic = $"Company-wide chat for {world.ShortName} staff. Keep it friendly, and take IT problems to #it-help.";
 
-@model List<Ghosts.Pandora.Infrastructure.Models.Post>
+    // Discord groups a message under the previous one when the same person sent both within a few minutes
+    var posts = (Model ?? new List<Ghosts.Pandora.Infrastructure.Models.Post>()).OrderBy(p => p.CreatedUtc).ToList();
+    var rows = new List<(Ghosts.Pandora.Infrastructure.Models.Post Post, bool Grouped, bool NewDay)>();
+    Ghosts.Pandora.Infrastructure.Models.Post previous = null;
+    foreach (var post in posts)
+    {
+        var newDay = previous == null || previous.CreatedUtc.Date != post.CreatedUtc.Date;
+        var grouped = !newDay && string.Equals(previous.Username, post.Username, StringComparison.OrdinalIgnoreCase)
+                      && post.CreatedUtc - previous.CreatedUtc < TimeSpan.FromMinutes(7);
+        rows.Add((post, grouped, newDay));
+        previous = post;
+    }
+    // the list is column-reverse, so the newest message comes first in the markup and shows at the bottom
+    rows.Reverse();
+
+    var threads = posts.Where(p => p.Comments?.Count > 0).OrderByDescending(p => p.Comments.Max(c => c.CreatedUtc)).ToList();
+    var members = (await Users.GetUsersByThemeAsync("discord", 60)).Select(u => u.Username)
+        .Append(me).Concat(posts.Select(p => p.Username)).Where(u => !string.IsNullOrWhiteSpace(u)).ToList();
+}
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Discord | Your Place to Talk and Hang Out</title>
+    <title>Discord | #general | @server</title>
     <link rel="stylesheet" href="/themes/discord/css/feed.css">
     <link rel="icon" href="/themes/discord/images/discord-icon.png">
+    <meta name="current-user" content="@me">
 </head>
-<body>
-    <div class="app">
-        <!-- Left Sidebar -->
-        <div class="server-sidebar">
-            <div class="home-button">
-                <div class="server-icon home">
-                    <img src="/themes/discord/images/discord-icon.png" alt="Discord Home" class="discord-logo">
-                </div>
+<body data-theme="discord" data-me="@me" data-me-name="@Present.DisplayName(me)" data-server="@server">
+    @await Html.PartialAsync("~/Views/Themes/discord/_discordicons.cshtml")
+    <div class="dc-app">
+        <header class="dc-titlebar">
+            <div class="dc-titlebar-title"><span class="dc-titlebar-icon org">@world.ShortName[..1]</span>@server</div>
+            <div class="dc-titlebar-actions">
+                <button type="button" class="dc-icon-btn" data-popover="dc-inbox" data-tip="Inbox"><svg class="ic" width="20" height="20"><use href="#i-inbox"/></svg></button>
+                <button type="button" class="dc-icon-btn" data-tip="Help" data-inert><svg class="ic" width="20" height="20"><use href="#i-help"/></svg></button>
             </div>
-            <div class="server-separator"></div>
+            <div class="dc-popover dc-panel dc-inbox" id="dc-inbox" hidden>
+                <div class="dc-panel-head">
+                    <svg class="ic" width="20" height="20"><use href="#i-inbox"/></svg><strong>Inbox</strong>
+                    <div class="dc-tabs small"><button type="button" class="dc-tab selected">For You</button><button type="button" class="dc-tab">Unreads</button><button type="button" class="dc-tab">Mentions</button></div>
+                </div>
+                <div class="dc-empty"><strong>You're all caught up!</strong><span>Check back here for mentions, friend requests and more.</span></div>
+            </div>
+        </header>
 
-            <!-- Servers -->
-            <div class="server-list">
-                <div class="server-item active">
-                    <div class="server-icon">
-                        <img src="/u/gaming-server/avatar" alt="Gaming Server" class="server-avatar">
-                    </div>
-                    <div class="notification-badge">3</div>
-                </div>
-                <div class="server-item">
-                    <div class="server-icon">
-                        <img src="/u/tech-server/avatar" alt="Tech Server" class="server-avatar">
-                    </div>
-                </div>
-                <div class="server-item">
-                    <div class="server-icon">
-                        <img src="/u/art-server/avatar" alt="Art Server" class="server-avatar">
-                    </div>
-                    <div class="notification-badge">1</div>
-                </div>
-                <div class="server-item">
-                    <div class="server-icon">
-                        <img src="/u/music-server/avatar" alt="Music Server" class="server-avatar">
-                    </div>
-                </div>
-                <div class="server-item">
-                    <div class="server-icon">
-                        <img src="/u/study-server/avatar" alt="Study Server" class="server-avatar">
-                    </div>
-                </div>
-            </div>
+        <div class="dc-base">
+            @await Html.PartialAsync("~/Views/Themes/discord/_discordrail.cshtml", "staff")
+            @await Html.PartialAsync("~/Views/Themes/discord/_discordchannels.cshtml", threads.Take(2).ToList())
 
-            <div class="add-server">
-                <div class="server-icon add">+</div>
-            </div>
+            <main class="dc-chat" data-channel="general">
+                <div class="dc-chat-header">
+                    <button type="button" class="dc-icon-btn dc-mobile-only" data-drawer="nav" data-tip="Channels"><svg class="ic" width="22" height="22"><use href="#i-menu"/></svg></button>
+                    <svg class="ic dc-chat-icon" width="24" height="24"><use href="#i-hash"/></svg>
+                    <h1 class="dc-chat-title">general</h1>
+                    <div class="dc-chat-divider"></div>
+                    <div class="dc-chat-topic" data-default-topic="@topic">@topic</div>
+                    <div class="dc-chat-tools">
+                        <button type="button" class="dc-icon-btn dc-desktop-only" data-popover="dc-threads" data-tip="Threads"><svg class="ic" width="22" height="22"><use href="#i-threads"/></svg></button>
+                        <button type="button" class="dc-icon-btn dc-desktop-only" data-popover="dc-notify" data-tip="Notification Settings"><svg class="ic" width="22" height="22"><use href="#i-bell"/></svg></button>
+                        <button type="button" class="dc-icon-btn dc-desktop-only" data-popover="dc-pins" data-tip="Pinned Messages"><svg class="ic" width="22" height="22"><use href="#i-pin"/></svg></button>
+                        <button type="button" class="dc-icon-btn selected" data-toggle-members data-tip="Hide Member List"><svg class="ic" width="22" height="22"><use href="#i-members"/></svg></button>
+                        <label class="dc-search dc-desktop-only">
+                            <input type="text" class="dc-search-input" placeholder="Search @server" aria-label="Search">
+                            <svg class="ic" width="16" height="16"><use href="#i-search"/></svg>
+                        </label>
+                    </div>
+                    <div class="dc-popover dc-panel dc-threads" id="dc-threads" hidden>
+                        <div class="dc-panel-head"><svg class="ic" width="20" height="20"><use href="#i-threads"/></svg><strong>Threads</strong></div>
+                        @if (threads.Count == 0)
+                        {
+                            <div class="dc-empty"><strong>There are no threads.</strong><span>Stay focused on a conversation with a thread, a temporary text channel.</span></div>
+                        }
+                        @foreach (var thread in threads)
+                        {
+                            var latest = thread.Comments.OrderBy(c => c.CreatedUtc).Last();
+                            <a href="/posts/@thread.Id" class="dc-thread-row">
+                                <strong>@threadName(thread)</strong>
+                                <span><img src="/u/@latest.Username/avatar" alt="" class="dc-thread-embed-avatar"><b>@Present.DisplayName(latest.Username)</b> @MessageHtml.Render(latest.Message)</span>
+                                <small>@thread.Comments.Count @(thread.Comments.Count == 1 ? "Message" : "Messages") · <time datetime="@iso(latest.CreatedUtc)" data-f="ago">@SocialPresentation.ShortAgo(latest.CreatedUtc)</time></small>
+                            </a>
+                        }
+                    </div>
+                    <div class="dc-popover dc-menu dc-notify" id="dc-notify" hidden>
+                        <button type="button" class="dc-menu-item dc-radio selected" data-radio>Use Category Default <small>All Messages</small></button>
+                        <button type="button" class="dc-menu-item dc-radio" data-radio>All Messages</button>
+                        <button type="button" class="dc-menu-item dc-radio" data-radio>Only @@mentions</button>
+                        <button type="button" class="dc-menu-item dc-radio" data-radio>Nothing</button>
+                    </div>
+                    <div class="dc-popover dc-panel dc-pins" id="dc-pins" hidden>
+                        <div class="dc-panel-head"><svg class="ic" width="20" height="20"><use href="#i-pin"/></svg><strong>Pinned Messages</strong></div>
+                        <div class="dc-empty"><strong>This channel doesn't have any pinned messages... yet.</strong><span>Pin important messages here so people can find them later.</span></div>
+                    </div>
+                </div>
 
-            <div class="explore-server">
-                <div class="server-icon explore">🧭</div>
-            </div>
+                <div class="dc-chat-body">
+                    <div class="dc-chat-main">
+                        <div class="messages-list" id="newsfeed-items-grid">
+                            @foreach (var row in rows)
+                            {
+                                await Html.RenderPartialAsync("_PostCard", row.Post, new ViewDataDictionary(ViewData) { ["grouped"] = row.Grouped });
+                                if (row.NewDay)
+                                {
+                                    <div class="dc-divider" role="separator"><time datetime="@iso(row.Post.CreatedUtc)" data-f="day">@day(row.Post.CreatedUtc)</time></div>
+                                }
+                            }
+                            <div class="dc-channel-start">
+                                <div class="dc-channel-start-icon"><svg class="ic" width="42" height="42"><use href="#i-hash"/></svg></div>
+                                <h2>Welcome to #<span class="dc-channel-start-name">general</span>!</h2>
+                                <p>This is the start of the #<span class="dc-channel-start-name">general</span> channel.</p>
+                            </div>
+                        </div>
+                        @await Html.PartialAsync("_CreatePost")
+                    </div>
+                    @await Html.PartialAsync("~/Views/Themes/discord/_discordmembers.cshtml", members)
+                </div>
+            </main>
         </div>
-
-        <!-- Channel Sidebar -->
-        <div class="channel-sidebar">
-            <div class="server-header">
-                <h2 class="server-name">Gaming Hub</h2>
-                <button class="dropdown-btn">▼</button>
-            </div>
-
-            <div class="channels-container">
-                <!-- Text Channels -->
-                <div class="channel-category">
-                    <div class="category-header">
-                        <span class="category-arrow">▼</span>
-                        <span class="category-name">TEXT CHANNELS</span>
-                        <button class="add-channel">+</button>
-                    </div>
-                    <div class="channel-list">
-                        <div class="channel-item active">
-                            <span class="channel-icon">#</span>
-                            <span class="channel-name">general</span>
-                            <div class="unread-indicator"></div>
-                        </div>
-                        <div class="channel-item">
-                            <span class="channel-icon">#</span>
-                            <span class="channel-name">gaming-discussion</span>
-                        </div>
-                        <div class="channel-item">
-                            <span class="channel-icon">#</span>
-                            <span class="channel-name">tech-talk</span>
-                            <div class="unread-indicator">2</div>
-                        </div>
-                        <div class="channel-item">
-                            <span class="channel-icon">#</span>
-                            <span class="channel-name">memes</span>
-                        </div>
-                        <div class="channel-item">
-                            <span class="channel-icon">#</span>
-                            <span class="channel-name">off-topic</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Direct Messages -->
-                <div class="channel-category">
-                    <div class="category-header">
-                        <span class="category-arrow">▼</span>
-                        <span class="category-name">DIRECT MESSAGES</span>
-                        <button class="add-channel">+</button>
-                    </div>
-                    <div class="channel-list">
-                        <a href="/messages" class="channel-item" style="text-decoration: none; color: inherit;">
-                            <span class="channel-icon">📩</span>
-                            <span class="channel-name">Direct Messages</span>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Voice Channels -->
-                <div class="channel-category">
-                    <div class="category-header">
-                        <span class="category-arrow">▼</span>
-                        <span class="category-name">VOICE CHANNELS</span>
-                        <button class="add-channel">+</button>
-                    </div>
-                    <div class="channel-list">
-                        <div class="channel-item">
-                            <span class="channel-icon">🔊</span>
-                            <span class="channel-name">General Voice</span>
-                            <div class="voice-users">
-                                <img src="/u/@Faker.Internet.UserName()/avatar" alt="User" class="voice-avatar">
-                                <img src="/u/@Faker.Internet.UserName()/avatar" alt="User" class="voice-avatar">
-                                <span class="voice-count">+2</span>
-                            </div>
-                        </div>
-                        <div class="channel-item">
-                            <span class="channel-icon">🔊</span>
-                            <span class="channel-name">Gaming Room</span>
-                        </div>
-                        <div class="channel-item">
-                            <span class="channel-icon">🔊</span>
-                            <span class="channel-name">Study Room</span>
-                            <div class="voice-users">
-                                <img src="/u/@Faker.Internet.UserName()/avatar" alt="User" class="voice-avatar">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- User Panel -->
-            <div class="user-panel">
-                <div class="user-info">
-                    <img src="/u/@Faker.Internet.UserName()/avatar" alt="User" class="voice-avatar">
-                    <div class="user-details">
-                        <div class="user-name">JohnDoe</div>
-                        <div class="user-status">#1234</div>
-                    </div>
-                </div>
-                <div class="user-controls">
-                    <button class="control-btn" title="Mute">🎤</button>
-                    <button class="control-btn" title="Deafen">🎧</button>
-                    <button class="control-btn" title="Settings">⚙️</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Channel Header -->
-            <div class="channel-header">
-                <div class="channel-info">
-                    <span class="channel-hashtag">#</span>
-                    <h3 class="channel-title">general</h3>
-                    <span class="channel-topic">Welcome to the Gaming Hub! Feel free to chat about anything here.</span>
-                </div>
-                <div class="channel-controls">
-                    <button class="header-btn" title="Start Voice Call">📞</button>
-                    <button class="header-btn" title="Start Video Call">📹</button>
-                    <button class="header-btn" title="Pin Message">📌</button>
-                    <button class="header-btn" title="Member List">👥</button>
-                    <div class="search-bar">
-                        <input type="text" placeholder="Search" class="search-input">
-                        <button class="search-btn">🔍</button>
-                    </div>
-                    <button class="header-btn" title="Inbox">📥</button>
-                    <button class="header-btn" title="Help">❓</button>
-                </div>
-            </div>
-
-            <!-- Messages Container -->
-            <div class="messages-container">
-                <div class="messages-list">
-                    @foreach (var post in Model)
-                    {
-                        await Html.RenderPartialAsync("_PostCard", post);
-                    }
-                </div>
-            </div>
-
-            @await Html.PartialAsync("_CreatePost")
-        </div>
-
-        <!-- Member List -->
-        <div class="member-list">
-            <div class="members-header">
-                <h3>Members — @Faker.RandomNumber.Next(25, 345)</h3>
-            </div>
-
-            @{
-                var user1 = Faker.Internet.UserName();
-                var user2 = Faker.Internet.UserName();
-                var user3 = Faker.Internet.UserName();
-                var user4 = Faker.Internet.UserName();
-                var user5 = Faker.Internet.UserName();
-                var user6 = Faker.Internet.UserName();
-                var user7 = Faker.Internet.UserName();
-                var user8 = Faker.Internet.UserName();
-            }
-
-            <div class="members-container">
-                <!-- Online Members -->
-                <div class="member-category">
-                    <h4 class="member-role">ONLINE — 23</h4>
-                    <div class="member-list-items">
-                        <div class="member-item">
-                            <img src="/u/@user1/avatar" alt="User" class="member-avatar">
-                            <div class="member-info">
-                                <div class="member-name">@user1</div>
-                                <div class="member-activity">Playing @Faker.Company.Name()</div>
-                            </div>
-                            <div class="member-status online"></div>
-                        </div>
-                        <div class="member-item">
-                            <img src="/u/@user2/avatar" alt="User" class="member-avatar">
-                            <div class="member-info">
-                                <div class="member-name">@user2</div>
-                                <div class="member-activity">Listening to @Faker.Company.CatchPhrase()</div>
-                            </div>
-                            <div class="member-status online"></div>
-                        </div>
-                        <div class="member-item">
-                            <img src="/u/@user3/avatar" alt="User" class="member-avatar">
-                            <div class="member-info">
-                                <div class="member-name">@user3</div>
-                                <div class="member-activity">@Faker.Name.First()</div>
-                            </div>
-                            <div class="member-status online"></div>
-                        </div>
-                        <div class="member-item">
-                            <img src="/u/@user4/avatar" alt="User" class="member-avatar">
-                            <div class="member-info">
-                                <div class="member-name">@user4</div>
-                                <div class="member-activity">@Faker.Name.First()</div>
-                            </div>
-                            <div class="member-status online"></div>
-                        </div>
-                        <div class="member-item">
-                            <img src="/u/@user5/avatar" alt="User" class="member-avatar">
-                            <div class="member-info">
-                                <div class="member-name">@user5</div>
-                            </div>
-                            <div class="member-status online"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Offline Members -->
-                <div class="member-category">
-                    <h4 class="member-role">OFFLINE — 104</h4>
-                    <div class="member-list-items">
-                        <div class="member-item">
-                            <img src="/u/@user6/avatar" alt="User" class="member-avatar offline">
-                            <div class="member-info">
-                                <div class="member-name offline">@user6</div>
-                            </div>
-                            <div class="member-status offline"></div>
-                        </div>
-                        <div class="member-item">
-                            <img src="/u/@user7/avatar" alt="User" class="member-avatar offline">
-                            <div class="member-info">
-                                <div class="member-name offline">@user7</div>
-                            </div>
-                            <div class="member-status offline"></div>
-                        </div>
-                        <div class="member-item">
-                            <img src="/u/@user8/avatar" alt="User" class="member-avatar offline">
-                            <div class="member-info">
-                                <div class="member-name offline">@user8</div>
-                            </div>
-                            <div class="member-status offline"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        @await Html.PartialAsync("~/Views/Themes/discord/_discorduserpanel.cshtml")
+        <div class="dc-scrim" data-drawer-close></div>
     </div>
 
     <script src="/lib/jquery/dist/jquery.min.js"></script>
     <script src="/js/signalr.min.js"></script>
     <script src="/js/social.js"></script>
+    <script src="/themes/discord/js/discord.js"></script>
 </body>
 </html>

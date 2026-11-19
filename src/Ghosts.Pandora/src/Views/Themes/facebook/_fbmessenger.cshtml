@@ -1,0 +1,227 @@
+@* Messenger: the chat list and one conversation. ViewBag.FbActivePartner picks the conversation (else the latest one);
+   ViewBag.FbNewMessage shows the "New message" pane. Messages are sent with the same form as before: POST /messages/send
+   with toUsername and message. *@
+@inject Ghosts.Pandora.Infrastructure.Services.IUserService Users
+@inject Ghosts.Pandora.Infrastructure.Services.IDirectMessageService Dms
+@{
+    var me = ViewBag.Username as string ?? string.Empty;
+    var today = DateTime.UtcNow;
+    var meUser = await Users.GetUserByUsernameAsync(me, "facebook");
+    var all = new List<DirectMessage>();
+    if (meUser != null)
+    {
+        all.AddRange(await Dms.GetReceivedMessagesAsync(meUser.Id));
+        all.AddRange(await Dms.GetSentMessagesAsync(meUser.Id));
+    }
+    bool Mine(DirectMessage m) => meUser != null && m.FromUserId == meUser.Id;
+    string PartnerOf(DirectMessage m) => Mine(m) ? m.ToUsername : m.FromUsername;
+
+    var chats = all
+        .GroupBy(m => PartnerOf(m).ToLowerInvariant())
+        .Select(g => (
+            Partner: PartnerOf(g.First()),
+            Last: g.OrderByDescending(m => m.CreatedUtc).First(),
+            Unread: g.Count(m => !Mine(m) && m.ReadUtc == null)))
+        .OrderByDescending(c => c.Last.CreatedUtc)
+        .ToList();
+
+    var newMessage = ViewBag.FbNewMessage as bool? ?? false;
+    var active = ViewBag.FbActivePartner as string;
+    if (string.IsNullOrEmpty(active) && !newMessage)
+    {
+        active = chats.Count > 0 ? chats[0].Partner : null;
+    }
+    if (string.IsNullOrEmpty(active))
+    {
+        newMessage = true;
+    }
+
+    var partnerUser = active == null ? null : await Users.GetUserByUsernameAsync(active, "facebook");
+    var thread = new List<DirectMessage>();
+    if (ViewBag.Conversation is IEnumerable<DirectMessage> conversation)
+    {
+        thread.AddRange(conversation);
+    }
+    else if (meUser != null && partnerUser != null)
+    {
+        thread.AddRange(await Dms.GetConversationAsync(meUser.Id, partnerUser.Id));
+    }
+
+    var people = (await Users.GetUsersByThemeAsync("facebook", 80))
+        .Where(u => !string.Equals(u.Username, me, StringComparison.OrdinalIgnoreCase))
+        .ToList();
+
+    int Stable(string key) => Math.Abs((key ?? string.Empty).Aggregate(17, (h, c) => unchecked(h * 31 + c)) % 1000);
+    bool Online(string username, DateTime? lastActive) =>
+        (lastActive.HasValue && today - lastActive.Value < TimeSpan.FromMinutes(15)) || Stable(username + today.Hour) % 3 != 0;
+    var lastActiveByUser = people.GroupBy(u => u.Username.ToLowerInvariant()).ToDictionary(g => g.Key, g => (DateTime?)g.First().LastActiveUtc);
+    DateTime? LastActive(string username) => lastActiveByUser.GetValueOrDefault((username ?? string.Empty).ToLowerInvariant());
+
+    string Stamp(DateTime utc) =>
+        utc.Date == today.Date ? utc.ToString("h:mm tt", System.Globalization.CultureInfo.InvariantCulture)
+        : today - utc < TimeSpan.FromDays(7) ? utc.ToString("ddd h:mm tt", System.Globalization.CultureInfo.InvariantCulture)
+        : utc.ToString("MMM d, yyyy, h:mm tt", System.Globalization.CultureInfo.InvariantCulture);
+
+    var chatLink = $"/messages/chat?fromUsername={Uri.EscapeDataString(me)}&toUsername={Uri.EscapeDataString(active ?? string.Empty)}&theme=facebook"
+                   + (ViewBag.WorkflowId is string workflow && !string.IsNullOrEmpty(workflow) ? $"&workflowId={Uri.EscapeDataString(workflow)}" : string.Empty);
+    var partnerOnline = active != null && Online(active, partnerUser?.LastActiveUtc);
+}
+<div class="fb-messenger@(newMessage || ViewBag.FbActivePartner != null ? " has-thread" : string.Empty)">
+    <aside class="fb-chats">
+        <div class="fb-chats-head">
+            <h1>Chats</h1>
+            <div class="fb-chats-tools">
+                <button type="button" class="fb-round-sm" aria-label="Settings, help and more"><svg><use href="#fb-dots"></use></svg></button>
+                <a href="/messages?new=1" class="fb-round-sm" aria-label="New message" title="New message"><svg><use href="#fb-compose"></use></svg></a>
+            </div>
+        </div>
+        <label class="fb-chats-search"><svg><use href="#fb-search"></use></svg><input type="search" placeholder="Search Messenger" aria-label="Search Messenger"></label>
+        <div class="fb-chats-filter">
+            <button type="button" class="fb-chip active" data-fb-chat-filter="all">All</button>
+            <button type="button" class="fb-chip" data-fb-chat-filter="unread">Unread</button>
+        </div>
+        <nav class="fb-chat-list">
+            @if (chats.Count == 0)
+            {
+                <div class="fb-chats-empty">No messages yet</div>
+            }
+            @foreach (var chat in chats)
+            {
+                var isActive = !newMessage && string.Equals(chat.Partner, active, StringComparison.OrdinalIgnoreCase);
+                var preview = SocialPresentation.PlainText(new Post { Message = chat.Last.Message });
+                <a href="/messages/conversation/@chat.Partner" class="fb-chat-item@(isActive ? " active" : string.Empty)@(chat.Unread > 0 ? " unread" : string.Empty)">
+                    <span class="fb-chat-avatar">
+                        <img src="/u/@chat.Partner/avatar" alt="">
+                        @if (Online(chat.Partner, LastActive(chat.Partner)))
+                        {
+                            <span class="fb-online"></span>
+                        }
+                    </span>
+                    <span class="fb-chat-text">
+                        <span class="fb-chat-name">@Present.DisplayName(chat.Partner)</span>
+                        <span class="fb-chat-preview">
+                            <span class="fb-chat-preview-text">@(Mine(chat.Last) ? "You: " : string.Empty)@preview</span>
+                            <span aria-hidden="true">·</span>
+                            <span>@SocialPresentation.ShortAgo(chat.Last.CreatedUtc).Replace("now", "1m")</span>
+                        </span>
+                    </span>
+                    @if (chat.Unread > 0)
+                    {
+                        <span class="fb-unread-dot"></span>
+                    }
+                </a>
+            }
+        </nav>
+    </aside>
+
+    <section class="fb-thread">
+        @if (newMessage)
+        {
+            <div class="fb-thread-head">
+                <a href="/messages" class="fb-thread-back" aria-label="Back to chats"><svg><use href="#fb-back"></use></svg></a>
+                <span class="fb-thread-title">New message</span>
+            </div>
+            <div class="fb-to-row">
+                <label for="fb-to">To:</label>
+                <input type="text" id="fb-to" name="toUsername" form="fb-thread-form" list="fb-people" autocomplete="off" required autofocus>
+                <datalist id="fb-people">
+                    @foreach (var person in people)
+                    {
+                        <option value="@person.Username">@Present.DisplayName(person.Username)</option>
+                    }
+                </datalist>
+            </div>
+            <div class="fb-thread-body"></div>
+        }
+        else
+        {
+            <div class="fb-thread-head">
+                <a href="/messages" class="fb-thread-back" aria-label="Back to chats"><svg><use href="#fb-back"></use></svg></a>
+                <a href="/u/@active" class="fb-thread-who">
+                    <span class="fb-thread-avatar">
+                        <img src="/u/@active/avatar" alt="">
+                        @if (partnerOnline)
+                        {
+                            <span class="fb-online"></span>
+                        }
+                    </span>
+                    <span>
+                        <span class="fb-thread-name">@Present.DisplayName(active)</span>
+                        <span class="fb-thread-status">@(partnerOnline ? "Active now" : partnerUser != null ? $"Active {SocialPresentation.ShortAgo(partnerUser.LastActiveUtc)} ago" : "Messenger")</span>
+                    </span>
+                </a>
+                <div class="fb-thread-tools">
+                    <button type="button" aria-label="Start a voice call" title="Start a voice call"><svg><use href="#fb-phone"></use></svg></button>
+                    <button type="button" aria-label="Start a video call" title="Start a video call"><svg><use href="#fb-videocam"></use></svg></button>
+                    <a href="@chatLink" target="chat" aria-label="Open in a chat window" title="Open in a chat window"><svg><use href="#fb-popout"></use></svg></a>
+                    <a href="/u/@active" aria-label="Conversation information" title="Conversation information"><svg><use href="#fb-info"></use></svg></a>
+                </div>
+            </div>
+            <div class="fb-thread-body">
+                <div class="fb-thread-intro">
+                    <img src="/u/@active/avatar" alt="">
+                    <strong>@Present.DisplayName(active)</strong>
+                    <span>Facebook</span>
+                    <span>You're friends on Facebook</span>
+                    <span>@Present.Headline(active)</span>
+                    <a href="/u/@active" class="fb-btn fb-btn-secondary">View profile</a>
+                </div>
+                @for (var i = 0; i < thread.Count; i++)
+                {
+                    var message = thread[i];
+                    var mine = Mine(message);
+                    var newBlock = i == 0 || message.CreatedUtc - thread[i - 1].CreatedUtc > TimeSpan.FromHours(1);
+                    var nextBlock = i == thread.Count - 1 || thread[i + 1].CreatedUtc - message.CreatedUtc > TimeSpan.FromHours(1);
+                    var startsGroup = newBlock || Mine(thread[i - 1]) != mine;
+                    var endsGroup = nextBlock || Mine(thread[i + 1]) != mine;
+                    var group = startsGroup && endsGroup ? "grp-single" : startsGroup ? "grp-first" : endsGroup ? "grp-last" : "grp-mid";
+                    if (newBlock)
+                    {
+                        <div class="fb-time-sep">@Stamp(message.CreatedUtc)</div>
+                    }
+                    <div class="fb-msg-row @(mine ? "out" : "in") @group">
+                        @if (!mine)
+                        {
+                            <span class="fb-msg-av">
+                                @if (endsGroup)
+                                {
+                                    <img src="/u/@active/avatar" alt="">
+                                }
+                            </span>
+                        }
+                        <div class="fb-bubble" title="@Stamp(message.CreatedUtc)">@MessageHtml.Render(message.Message)</div>
+                    </div>
+                }
+                @if (thread.Count > 0 && Mine(thread[^1]))
+                {
+                    if (thread[^1].ReadUtc != null)
+                    {
+                        <div class="fb-seen" title="Seen by @Present.DisplayName(active)"><img src="/u/@active/avatar" alt=""></div>
+                    }
+                    else
+                    {
+                        <div class="fb-delivered">Sent</div>
+                    }
+                }
+            </div>
+        }
+        <form method="post" action="/messages/send" class="fb-thread-form" id="fb-thread-form">
+            @if (!newMessage)
+            {
+                <input type="hidden" name="toUsername" value="@active">
+            }
+            <button type="button" class="fb-compose-icon fb-extra" aria-label="Open more actions"><svg><use href="#fb-plus-circle"></use></svg></button>
+            <button type="button" class="fb-compose-icon fb-extra" aria-label="Attach a file"><svg><use href="#fb-image"></use></svg></button>
+            <button type="button" class="fb-compose-icon fb-extra" aria-label="Choose a sticker"><svg><use href="#fb-sticker-fill"></use></svg></button>
+            <button type="button" class="fb-compose-icon fb-extra" aria-label="Choose a GIF"><svg><use href="#fb-gif-fill"></use></svg></button>
+            <div class="fb-compose-box">
+                <input type="text" name="message" placeholder="Aa" aria-label="Message" autocomplete="off" required autofocus="@(newMessage ? null : "autofocus")">
+                <svg aria-hidden="true"><use href="#fb-emoji"></use></svg>
+            </div>
+            <button type="submit" class="fb-compose-icon fb-send-btn" aria-label="Send">
+                <svg class="fb-send-thumb"><use href="#fb-like-fill"></use></svg>
+                <svg class="fb-send-arrow"><use href="#fb-send"></use></svg>
+            </button>
+        </form>
+    </section>
+</div>

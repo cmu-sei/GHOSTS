@@ -1,307 +1,198 @@
 @model Ghosts.Pandora.Infrastructure.Models.User
+@inject Ghosts.Pandora.Infrastructure.Services.IFollowService Follows
 @{
     Layout = null;
-    var posts = ViewBag.Posts as List<Ghosts.Pandora.Infrastructure.Models.Post>;
-    var profileUsername = (ViewContext.RouteData.Values["username"] as string)?.Trim();
-    if (string.IsNullOrWhiteSpace(profileUsername))
-    {
-        profileUsername = Context.Request.Cookies["username"];
-    }
+    ViewBag.Theme = "instagram";
+    var posts = ViewBag.Posts as List<Ghosts.Pandora.Infrastructure.Models.Post> ?? new List<Ghosts.Pandora.Infrastructure.Models.Post>();
+    var username = Model?.Username ?? ViewBag.ProfileUsername as string ?? "user";
+    var isSelf = ViewBag.IsSelf as bool? ?? false;
+    var isFollowing = ViewBag.IsFollowing as bool? ?? false;
+    ViewData["IgActive"] = isSelf ? "profile" : string.Empty;
+    ViewData["IgMobileTitle"] = username;
 
-    if (string.IsNullOrWhiteSpace(profileUsername))
-    {
-        profileUsername = Model?.Username ?? "user";
-    }
+    var followers = Model == null ? 0 : await Follows.GetFollowerCountAsync(Model.Id);
+    var following = Model == null ? 0 : await Follows.GetFollowingCountAsync(Model.Id);
+
+    // Seeded accounts carry a placeholder bio ("User name"); Instagram would show nothing there
+    var bio = Model?.Bio;
+    if (string.IsNullOrWhiteSpace(bio) || bio.Trim() == $"User {username}") bio = null;
+
+    var highlights = Present.Trending(posts, 4).Select(t => t.Topic).ToList();
+    var covers = Enumerable.Range(11, 40).Select(v => Present.PhotoUrl(Model?.Id ?? Guid.Empty, v)).Distinct().Take(highlights.Count).ToList();
+    var us = System.Globalization.CultureInfo.GetCultureInfo("en-US");
 }
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>(@profileUsername) • Instagram</title>
-    <link rel="stylesheet" href="css/profile.css">
-    <link rel="icon" href="images/instagram-icon.png">
-    <style>
-        .follow-action-form {
-            margin-left: 12px;
-        }
-
-        .follow-action-button {
-            background: #0095f6;
-            border: none;
-            color: #fff;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .connections-columns {
-            display: grid;
-            gap: 16px;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            margin-top: 16px;
-        }
-
-        .connections-column {
-            background: #fafafa;
-            border: 1px solid #dbdbdb;
-            border-radius: 12px;
-            padding: 16px;
-        }
-
-        .connections-column h3 {
-            margin: 0 0 12px;
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-        }
-
-        .connections-scroll {
-            max-height: 220px;
-            overflow-y: auto;
-        }
-    </style>
+    <meta name="current-user" content="@ViewBag.Username">
+    <title>@Present.DisplayName(username) (@@@username) • Instagram photos and videos</title>
+    <link rel="stylesheet" href="/themes/instagram/css/feed.css?@System.Guid.NewGuid()">
+    <link rel="icon" href="/themes/instagram/images/favicon.svg" type="image/svg+xml">
 </head>
-<body>
-    <div class="app">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-container">
-                <div class="logo">
-                    <img src="images/instagram-logo.png" alt="Instagram" class="instagram-logo">
-                </div>
-                <div class="search-container">
-                    <div class="search-box">
-                        <span class="search-icon">🔍</span>
-                        <input type="text" placeholder="Search" class="search-input">
-                    </div>
-                </div>
-                <div class="header-actions">
-                    <button class="action-btn">🏠</button>
-                    <button class="action-btn">💬</button>
-                    <button class="action-btn">➕</button>
-                    <button class="action-btn">🧭</button>
-                    <button class="action-btn">❤️</button>
-                    <div class="profile-menu">
-                        <img src="/u/@profileUsername/avatar" alt="@profileUsername" class="header-avatar">
-                    </div>
-                </div>
+<body data-theme="instagram" class="ig ig-profile-view">
+@await Html.PartialAsync("~/Views/Themes/instagram/_igsprite.cshtml")
+@await Html.PartialAsync("~/Views/Themes/instagram/_ignav.cshtml")
+
+<main class="ig-main">
+    <div class="ig-profile">
+        <header class="ig-profile-top">
+            <div class="ig-profile-pic">
+                <img src="/u/@username/avatar" alt="@username's profile picture">
             </div>
+            <section class="ig-profile-info">
+                <div class="ig-profile-row">
+                    <h2 class="ig-profile-name">@username</h2>
+                    @if (isSelf)
+                    {
+                        <a href="#" class="ig-btn" data-ig-inert>Edit profile</a>
+                        <a href="#" class="ig-btn" data-ig-inert>View archive</a>
+                        <a href="#" class="ig-icon-btn" aria-label="Options" data-ig-inert><svg class="ig-i"><use href="#ig-gear"/></svg></a>
+                    }
+                    else
+                    {
+                        <button type="button" class="ig-btn ig-follow-btn@(isFollowing ? " is-following" : " ig-btn-blue")" data-username="@username">@(isFollowing ? "Following" : "Follow")</button>
+                        <a href="/messages/conversation/@username" class="ig-btn">Message</a>
+                        <a href="#" class="ig-btn" aria-label="Similar accounts" data-ig-inert style="padding:0 8px"><svg class="ig-i ig-i-16"><use href="#ig-person-plus"/></svg></a>
+                        <a href="#" class="ig-icon-btn" aria-label="Options" data-ig-inert><svg class="ig-i"><use href="#ig-dots"/></svg></a>
+                    }
+                </div>
+                <ul class="ig-profile-stats">
+                    <li><b>@posts.Count.ToString("N0", us)</b> @(posts.Count == 1 ? "post" : "posts")</li>
+                    <li><button type="button" data-ig-connections="followers" data-username="@username"><b data-followers-count>@followers.ToString("N0", us)</b> followers</button></li>
+                    <li><button type="button" data-ig-connections="following" data-username="@username"><b data-following-count>@following.ToString("N0", us)</b> following</button></li>
+                </ul>
+                <div class="ig-profile-about">
+                    <div class="ig-profile-full">@Present.DisplayName(username)</div>
+                    <div class="ig-profile-bio">@Present.Headline(username)</div>
+                    @if (bio != null)
+                    {
+                        <div class="ig-profile-bio">@bio</div>
+                    }
+                    <div class="ig-profile-bio">@Present.World.City</div>
+                </div>
+                <div class="ig-profile-mobile-actions">
+                    @if (isSelf)
+                    {
+                        <a href="#" class="ig-btn" data-ig-inert>Edit profile</a>
+                        <a href="#" class="ig-btn" data-ig-inert>View archive</a>
+                    }
+                    else
+                    {
+                        <button type="button" class="ig-btn ig-follow-btn@(isFollowing ? " is-following" : " ig-btn-blue")" data-username="@username">@(isFollowing ? "Following" : "Follow")</button>
+                        <a href="/messages/conversation/@username" class="ig-btn">Message</a>
+                    }
+                </div>
+            </section>
         </header>
 
-        <!-- Profile Content -->
-        <div class="profile-container">
-            <!-- Profile Header -->
-            <div class="profile-header">
-                <div class="profile-image">
-                    <img src="/u/@profileUsername/avatar" alt="@profileUsername" class="profile-avatar">
+        <div class="ig-highlights">
+            @for (var i = 0; i < highlights.Count; i++)
+            {
+                <div class="ig-highlight">
+                    <span class="ig-highlight-ring"><img src="@covers[i]" alt=""></span>
+                    <span class="ig-highlight-title">@highlights[i]</span>
                 </div>
-                <div class="profile-info">
-                    <div class="profile-top">
-                        <h1 class="username">@profileUsername</h1>
-                        <div class="profile-actions">
-                            <button class="edit-profile-btn">Edit profile</button>
-                            <button class="view-archive-btn">View archive</button>
-                            <button class="settings-btn">⚙️</button>
-                            @await Html.PartialAsync("~/Views/Shared/_FollowActions.cshtml")
-                        </div>
-                    </div>
-                    <div class="profile-stats" data-profile-connections data-username="@profileUsername">
-                        <div class="stat">
-                            <span class="stat-number">@(posts?.Count ?? 0)</span>
-                            <span class="stat-label">posts</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-number" data-followers-count>0</span>
-                            <span class="stat-label">followers</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-number" data-following-count>0</span>
-                            <span class="stat-label">following</span>
-                        </div>
-                    </div>
-                    <div class="connections-columns">
-                        <div class="connections-column">
-                            <h3>Following (<span data-following-count>0</span>)</h3>
-                            <div class="connections-scroll" data-following-list></div>
-                        </div>
-                        <div class="connections-column">
-                            <h3>Followers (<span data-followers-count>0</span>)</h3>
-                            <div class="connections-scroll" data-followers-list></div>
-                        </div>
-                    </div>
-                    <div class="profile-bio">
-                        <div class="display-name">@profileUsername</div>
-                        <div class="bio-text">@(string.IsNullOrWhiteSpace(Model.Bio) ? "No bio available." : Model.Bio)</div>
-                    </div>
+            }
+            @if (isSelf)
+            {
+                <div class="ig-highlight">
+                    <span class="ig-highlight-ring is-new"><svg class="ig-i"><use href="#ig-plus"/></svg></span>
+                    <span class="ig-highlight-title">New</span>
+                </div>
+            }
+        </div>
+
+        <div class="ig-tabs" role="tablist">
+            <button type="button" class="ig-tab is-active" data-tab="posts"><svg class="ig-i"><use href="#ig-grid"/></svg><span>Posts</span></button>
+            <button type="button" class="ig-tab" data-tab="reels"><svg class="ig-i"><use href="#ig-reels"/></svg><span>Reels</span></button>
+            @if (isSelf)
+            {
+                <button type="button" class="ig-tab" data-tab="saved"><svg class="ig-i"><use href="#ig-save"/></svg><span>Saved</span></button>
+            }
+            <button type="button" class="ig-tab" data-tab="tagged"><svg class="ig-i"><use href="#ig-tagged"/></svg><span>Tagged</span></button>
+        </div>
+
+        <div class="ig-tab-panel" data-panel="posts">
+            @if (posts.Count == 0)
+            {
+                <div class="ig-empty">
+                    <svg class="ig-i ig-i-62"><use href="#ig-camera-big"/></svg>
+                    @if (isSelf)
+                    {
+                        <div class="ig-empty-title">Share Photos</div>
+                        <div class="ig-empty-text">When you share photos, they will appear on your profile.</div>
+                        <a href="/#create" class="ig-link-blue" data-ig-create>Share your first photo</a>
+                    }
+                    else
+                    {
+                        <div class="ig-empty-title">No Posts Yet</div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="ig-grid">
+                    @foreach (var p in posts)
+                    {
+                        <a href="/posts/@p.Id" class="ig-tile">
+                            <img src="@Present.PhotoUrl(p)" alt="@SocialPresentation.PlainText(p)" loading="lazy">
+                            @if (p.Id.ToByteArray()[5] % 4 == 0)
+                            {
+                                <svg class="ig-tile-badge" aria-label="Carousel"><use href="#ig-carousel"/></svg>
+                            }
+                            <span class="ig-tile-overlay">
+                                <span><svg class="ig-i"><use href="#ig-heart-fill"/></svg>@SocialPresentation.Compact(Present.Score(p))</span>
+                                <span><svg class="ig-i" style="transform:scaleX(-1)"><use href="#ig-comment"/></svg>@Present.CommentCount(p)</span>
+                            </span>
+                        </a>
+                    }
+                </div>
+            }
+        </div>
+        <div class="ig-tab-panel" data-panel="reels" hidden>
+            <div class="ig-empty">
+                <svg class="ig-i ig-i-62"><use href="#ig-camera-big"/></svg>
+                @if (isSelf)
+                {
+                    <div class="ig-empty-title">Share a moment with the world</div>
+                    <a href="/#create" class="ig-link-blue" data-ig-create>Create your first reel</a>
+                }
+                else
+                {
+                    <div class="ig-empty-title">No Reels Yet</div>
+                }
+            </div>
+        </div>
+        @if (isSelf)
+        {
+            <div class="ig-tab-panel" data-panel="saved" hidden>
+                <div class="ig-empty">
+                    <svg class="ig-i ig-i-62"><use href="#ig-save"/></svg>
+                    <div class="ig-empty-title">Save</div>
+                    <div class="ig-empty-text">Save photos and videos that you want to see again. No one is notified, and only you can see what you've saved.</div>
                 </div>
             </div>
-
-            <!-- Highlights -->
-            <div class="highlights-section">
-                <div class="highlight-item">
-                    <div class="highlight-avatar">
-                        <img src="images/highlight1.jpg" alt="Highlight" class="highlight-image">
-                    </div>
-                    <span class="highlight-title">Travel</span>
-                </div>
-                <div class="highlight-item">
-                    <div class="highlight-avatar">
-                        <img src="images/highlight2.jpg" alt="Highlight" class="highlight-image">
-                    </div>
-                    <span class="highlight-title">Food</span>
-                </div>
-                <div class="highlight-item">
-                    <div class="highlight-avatar">
-                        <img src="images/highlight3.jpg" alt="Highlight" class="highlight-image">
-                    </div>
-                    <span class="highlight-title">Work</span>
-                </div>
-                <div class="highlight-item">
-                    <div class="highlight-avatar">
-                        <img src="images/highlight4.jpg" alt="Highlight" class="highlight-image">
-                    </div>
-                    <span class="highlight-title">Nature</span>
-                </div>
-            </div>
-
-            <!-- Profile Tabs -->
-            <div class="profile-tabs">
-                <button class="tab-btn active">
-                    <span class="tab-icon">⊞</span>
-                    <span class="tab-text">POSTS</span>
-                </button>
-                <button class="tab-btn">
-                    <span class="tab-icon">⧇</span>
-                    <span class="tab-text">REELS</span>
-                </button>
-                <button class="tab-btn">
-                    <span class="tab-icon">⚏</span>
-                    <span class="tab-text">SAVED</span>
-                </button>
-                <button class="tab-btn">
-                    <span class="tab-icon">🏷️</span>
-                    <span class="tab-text">TAGGED</span>
-                </button>
-            </div>
-
-            <!-- Posts Grid -->
-            <div class="posts-grid">
-                <div class="post-item">
-                    <img src="images/grid-post1.jpg" alt="Post" class="grid-image">
-                    <div class="post-overlay">
-                        <div class="post-stats">
-                            <span class="stat">❤️ 234</span>
-                            <span class="stat">💬 12</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="post-item">
-                    <img src="images/grid-post2.jpg" alt="Post" class="grid-image">
-                    <div class="post-overlay">
-                        <div class="post-stats">
-                            <span class="stat">❤️ 189</span>
-                            <span class="stat">💬 8</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="post-item">
-                    <img src="images/grid-post3.jpg" alt="Post" class="grid-image">
-                    <div class="post-overlay">
-                        <div class="post-stats">
-                            <span class="stat">❤️ 456</span>
-                            <span class="stat">💬 23</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="post-item">
-                    <img src="images/grid-post4.jpg" alt="Post" class="grid-image">
-                    <div class="post-overlay">
-                        <div class="post-stats">
-                            <span class="stat">❤️ 312</span>
-                            <span class="stat">💬 15</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="post-item">
-                    <img src="images/grid-post5.jpg" alt="Post" class="grid-image">
-                    <div class="post-overlay">
-                        <div class="post-stats">
-                            <span class="stat">❤️ 567</span>
-                            <span class="stat">💬 34</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="post-item">
-                    <img src="images/grid-post6.jpg" alt="Post" class="grid-image">
-                    <div class="post-overlay">
-                        <div class="post-stats">
-                            <span class="stat">❤️ 123</span>
-                            <span class="stat">💬 7</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="post-item">
-                    <img src="images/grid-post7.jpg" alt="Post" class="grid-image">
-                    <div class="post-overlay">
-                        <div class="post-stats">
-                            <span class="stat">❤️ 891</span>
-                            <span class="stat">💬 45</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="post-item">
-                    <img src="images/grid-post8.jpg" alt="Post" class="grid-image">
-                    <div class="post-overlay">
-                        <div class="post-stats">
-                            <span class="stat">❤️ 267</span>
-                            <span class="stat">💬 18</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="post-item">
-                    <img src="images/grid-post9.jpg" alt="Post" class="grid-image">
-                    <div class="post-overlay">
-                        <div class="post-stats">
-                            <span class="stat">❤️ 445</span>
-                            <span class="stat">💬 29</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="post-item">
-                    <img src="images/grid-post10.jpg" alt="Post" class="grid-image">
-                    <div class="post-overlay">
-                        <div class="post-stats">
-                            <span class="stat">❤️ 678</span>
-                            <span class="stat">💬 52</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="post-item">
-                    <img src="images/grid-post11.jpg" alt="Post" class="grid-image">
-                    <div class="post-overlay">
-                        <div class="post-stats">
-                            <span class="stat">❤️ 234</span>
-                            <span class="stat">💬 14</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="post-item">
-                    <img src="images/grid-post12.jpg" alt="Post" class="grid-image">
-                    <div class="post-overlay">
-                        <div class="post-stats">
-                            <span class="stat">❤️ 356</span>
-                            <span class="stat">💬 21</span>
-                        </div>
-                    </div>
-                </div>
+        }
+        <div class="ig-tab-panel" data-panel="tagged" hidden>
+            <div class="ig-empty">
+                <svg class="ig-i ig-i-62"><use href="#ig-tagged"/></svg>
+                <div class="ig-empty-title">@(isSelf ? "Photos of you" : "No Photos")</div>
+                @if (isSelf)
+                {
+                    <div class="ig-empty-text">When people tag you in photos, they'll appear here.</div>
+                }
             </div>
         </div>
     </div>
 
-    <script src="js/profile.js"></script>
-    <script src="/js/connections.js"></script>
+    <footer class="ig-profile-footer">
+        <nav><a href="#" data-ig-inert>Meta</a><a href="#" data-ig-inert>About</a><a href="#" data-ig-inert>Blog</a><a href="#" data-ig-inert>Jobs</a><a href="#" data-ig-inert>Help</a><a href="#" data-ig-inert>API</a><a href="#" data-ig-inert>Privacy</a><a href="#" data-ig-inert>Terms</a><a href="#" data-ig-inert>Locations</a><a href="#" data-ig-inert>Instagram Lite</a><a href="#" data-ig-inert>Threads</a><a href="#" data-ig-inert>Meta Verified</a></nav>
+        <div>English &nbsp; © @DateTime.UtcNow.Year Instagram from Meta</div>
+    </footer>
+</main>
+
+<script src="/themes/instagram/js/instagram.js?@System.Guid.NewGuid()"></script>
 </body>
 </html>

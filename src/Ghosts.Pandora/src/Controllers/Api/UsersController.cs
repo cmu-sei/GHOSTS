@@ -37,8 +37,7 @@ public class UsersController(ILogger logger, IUserService service, IPostService 
     public async Task<User> UpdateUser(string username, [FromForm] string bio, [FromForm] string status)
     {
         var theme = Request.Query["theme"].ToString();
-        if (string.IsNullOrWhiteSpace(theme))
-            theme = ThemeRead();
+        theme = string.IsNullOrWhiteSpace(theme) ? ThemeRead() : KnownTheme(theme);
 
         await service.GetOrCreateUserAsync(username, theme);
         return await service.UpdateUserAsync(username, theme, bio, status);

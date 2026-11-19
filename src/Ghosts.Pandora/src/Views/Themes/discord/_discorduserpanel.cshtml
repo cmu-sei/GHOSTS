@@ -1,0 +1,17 @@
+@* The signed-in user's panel at the bottom left: avatar, display name, status and the voice controls. *@
+@{
+    var me = ViewBag.Username as string ?? "user";
+    var activity = ((Func<string, string>)Context.Items["dc.activity"])(me);
+}
+<section class="dc-userpanel" aria-label="User area">
+    <a href="/u/@me" class="dc-userpanel-me">
+        <span class="dc-avatar s32"><img src="/u/@me/avatar" alt=""><i class="dc-status online"></i></span>
+        <span class="dc-userpanel-text">
+            <span class="dc-userpanel-name">@Present.DisplayName(me)</span>
+            <span class="dc-userpanel-sub"><span class="dc-userpanel-status">@(activity ?? "Online")</span><span class="dc-userpanel-handle">@me</span></span>
+        </span>
+    </a>
+    <button type="button" class="dc-icon-btn" data-toggle-pressed data-tip="Mute"><svg class="ic" width="20" height="20"><use href="#i-mic"/></svg></button>
+    <button type="button" class="dc-icon-btn" data-toggle-pressed data-tip="Deafen"><svg class="ic" width="20" height="20"><use href="#i-headset"/></svg></button>
+    <button type="button" class="dc-icon-btn" data-tip="User Settings" data-inert><svg class="ic" width="20" height="20"><use href="#i-gear"/></svg></button>
+</section>

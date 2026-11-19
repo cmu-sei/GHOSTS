@@ -14,7 +14,7 @@ DB_USER = "ghosts"
 DB_PASS = "Scotty@@1!"
 
 # Configure these
-API_URL = "http://localhost:8800"
+API_URL = "http://localhost:6360"
 OLLAMA_MODEL = "mistral:7b"
 POST_DELAY = 0  # seconds between posts
 

@@ -2,6 +2,53 @@
     Layout = null;
 }
 @model List<Ghosts.Pandora.Infrastructure.Models.Post>
+@inject Ghosts.Pandora.Infrastructure.Services.IUserService Users
+@{
+    ViewBag.Theme = "facebook";
+    ViewBag.FbTab = "home";
+    var me = ViewBag.Username as string ?? string.Empty;
+    var myName = Present.DisplayName(me);
+    var world = Present.World;
+    var today = DateTime.UtcNow;
+
+    var worldUsers = new HashSet<string>(world.People.Select(p => p.Username ?? string.Empty), StringComparer.OrdinalIgnoreCase);
+    var friends = (await Users.GetUsersByThemeAsync("facebook", 80))
+        .Where(u => !string.Equals(u.Username, me, StringComparison.OrdinalIgnoreCase))
+        .OrderBy(u => worldUsers.Contains(u.Username) ? 0 : 1)
+        .ThenByDescending(u => u.LastActiveUtc)
+        .ToList();
+
+    int Stable(string key) => Math.Abs((key ?? string.Empty).Aggregate(17, (h, c) => unchecked(h * 31 + c)) % 1000);
+    bool Online(Ghosts.Pandora.Infrastructure.Models.User u) =>
+        DateTime.UtcNow - u.LastActiveUtc < TimeSpan.FromMinutes(15) || Stable(u.Username + today.Hour) % 3 != 0;
+
+    // stories: people who posted recently, then other friends
+    var stories = (Model ?? new List<Post>())
+        .Where(p => !string.Equals(p.Username, me, StringComparison.OrdinalIgnoreCase))
+        .Select(p => (p.Username, Id: p.UserId))
+        .Concat(friends.Select(u => (u.Username, u.Id)))
+        .DistinctBy(s => s.Username.ToLowerInvariant())
+        .Take(6)
+        .ToList();
+
+    var birthdayPeople = world.People.Where(p => !string.Equals(p.Username, me, StringComparison.OrdinalIgnoreCase)).ToList();
+    var birthday = birthdayPeople.Count > 0 ? birthdayPeople[today.DayOfYear % birthdayPeople.Count] : null;
+    var birthdayOthers = today.DayOfYear % 3;
+
+    var ads = world.Vendors.Count == 0
+        ? new List<string>()
+        : new List<string> { world.Vendors[today.DayOfYear % world.Vendors.Count], world.Vendors[(today.DayOfYear + 1) % world.Vendors.Count] }.Distinct().ToList();
+    var adImages = new[] { "/img/photo-item11.jpg", "/img/post3.jpg" };
+    string Domain(string name) => System.Text.RegularExpressions.Regex.Replace(name.ToLowerInvariant(), "[^a-z0-9]", "") + ".com";
+
+    var shortcuts = new[]
+    {
+        (Name: $"{world.City} Community Board", Image: "/img/post-photo2.jpg"),
+        (Name: $"{world.OrganizationName} Employees", Image: "/img/photo-item11.jpg"),
+        (Name: $"{world.City} Buy, Sell & Trade", Image: "/img/last-photo8-large.jpg"),
+        (Name: $"{world.City} Runners", Image: "/img/post6.jpg")
+    };
+}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -10,129 +57,145 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Facebook</title>
     <link rel="stylesheet" href="/themes/facebook/css/facebook.css">
-    <link rel="icon" href="/themes/facebook/images/facebook-icon.png" type="image/png">
+    <link rel="icon" href="/themes/facebook/images/favicon.svg" type="image/svg+xml">
 </head>
-<body data-theme="facebook">
-    <!-- Header -->
-    <header class="header">
-        <div class="header-left">
-            <a href="/" class="logo">facebook</a>
-            <form action="/search">
-                <input type="text" name="q" class="search-bar" placeholder="Search Facebook">
-            </form>
-        </div>
+<body data-theme="facebook" class="fb-page-home">
+    @await Html.PartialAsync("~/Views/Themes/facebook/_fbheader.cshtml")
 
-        <div class="header-center">
-            <a href="/" class="nav-item active">🏠</a>
-            <a href="#" class="nav-item">📺</a>
-            <a href="#" class="nav-item">🛍️</a>
-            <a href="#" class="nav-item">👥</a>
-            <a href="#" class="nav-item">🎮</a>
-        </div>
-
-        <div class="header-right">
-            <a href="#"><button class="icon-btn">⊕</button></a>
-            <a href="/messages" class="icon-btn" style="text-decoration: none;">💬</a>
-            <a href="#"><button class="icon-btn">🔔</button></a>
-            <a href="/profile"><img src="/u/@ViewBag.Username/avatar" alt="Profile" class="profile-pic"></a>
-        </div>
-    </header>
-
-    <!-- Main Container -->
-    <div class="main-container">
-        <!-- Left Sidebar -->
-        <aside class="left-sidebar">
-            <a href="/profile" class="sidebar-item">
-                <img src="/u/@ViewBag.Username/avatar" alt="Profile" class="profile-pic">
-                <span> &nbsp; @ViewBag.Username</span>
-            </a>
-            <a href="#" class="sidebar-item">
-                <div class="sidebar-icon"></div>
-                <span>Friends</span>
-            </a>
-            <a href="#" class="sidebar-item">
-                <div class="sidebar-icon"></div>
-                <span>Groups</span>
-            </a>
-            <a href="#" class="sidebar-item">
-                <div class="sidebar-icon"></div>
-                <span>Marketplace</span>
-            </a>
-            <a href="#" class="sidebar-item">
-                <div class="sidebar-icon"></div>
-                <span>Watch</span>
-            </a>
-            <a href="#" class="sidebar-item">
-                <div class="sidebar-icon"></div>
-                <span>Memories</span>
-            </a>
-            <a href="#" class="sidebar-item">
-                <div class="sidebar-icon"></div>
-                <span>Saved</span>
-            </a>
-            <a href="#" class="sidebar-item">
-                <div class="sidebar-icon"></div>
-                <span>Pages</span>
-            </a>
-            <a href="#" class="sidebar-item">
-                <div class="sidebar-icon"></div>
-                <span>Events</span>
-            </a>
-            <a href="#" class="sidebar-item">
-                <div class="sidebar-icon"></div>
-                <span>Ad Manager</span>
-            </a>
+    <div class="fb-home">
+        <!-- Left rail -->
+        <aside class="fb-left" aria-label="Shortcuts">
+            <nav class="fb-left-nav">
+                <a href="/u/@me" class="fb-nav-item"><img src="/u/@me/avatar" alt="" class="fb-nav-avatar"><span>@myName</span></a>
+                <a href="#" class="fb-nav-item"><svg class="fb-nav-icon"><use href="#fb-nav-metaai"></use></svg><span>Meta AI</span></a>
+                <a href="#" class="fb-nav-item"><svg class="fb-nav-icon"><use href="#fb-nav-friends"></use></svg><span>Friends</span></a>
+                <a href="#" class="fb-nav-item"><svg class="fb-nav-icon"><use href="#fb-nav-memories"></use></svg><span>Memories</span></a>
+                <a href="#" class="fb-nav-item"><svg class="fb-nav-icon"><use href="#fb-nav-saved"></use></svg><span>Saved</span></a>
+                <a href="#" class="fb-nav-item"><svg class="fb-nav-icon"><use href="#fb-nav-groups"></use></svg><span>Groups</span></a>
+                <a href="#" class="fb-nav-item"><svg class="fb-nav-icon"><use href="#fb-nav-video"></use></svg><span>Video</span></a>
+                <a href="#" class="fb-nav-item"><svg class="fb-nav-icon"><use href="#fb-nav-market"></use></svg><span>Marketplace</span></a>
+                <a href="#" class="fb-nav-item"><svg class="fb-nav-icon"><use href="#fb-nav-feeds"></use></svg><span>Feeds</span></a>
+                <a href="#" class="fb-nav-item"><svg class="fb-nav-icon"><use href="#fb-nav-events"></use></svg><span>Events</span></a>
+                <a href="#" class="fb-nav-item"><svg class="fb-nav-icon"><use href="#fb-nav-ads"></use></svg><span>Ads Manager</span></a>
+                <a href="#" class="fb-nav-item"><svg class="fb-nav-icon"><use href="#fb-nav-fundraisers"></use></svg><span>Fundraisers</span></a>
+                <a href="#" class="fb-nav-item"><span class="fb-nav-more"><svg><use href="#fb-chev-down"></use></svg></span><span>See more</span></a>
+            </nav>
+            <div class="fb-rail-divider"></div>
+            <div class="fb-rail-heading">Your shortcuts</div>
+            <nav class="fb-left-nav">
+                @foreach (var shortcut in shortcuts)
+                {
+                    <a href="#" class="fb-nav-item"><img src="@shortcut.Image" alt="" class="fb-nav-square"><span>@shortcut.Name</span></a>
+                }
+            </nav>
+            <footer class="fb-legal">Privacy · Terms · Advertising · Ad Choices · Cookies · More · Meta © @today.Year</footer>
         </aside>
 
         <!-- Feed -->
-        <main class="feed-container">
+        <main class="fb-feed" role="feed">
+            <div class="fb-feed-inner">
+                <section class="fb-stories" aria-label="Stories">
+                    <a href="/u/@me" class="fb-story fb-story-create">
+                        <span class="fb-story-create-photo" style="background-image:url('/u/@me/avatar')"></span>
+                        <span class="fb-story-create-plus"><svg><use href="#fb-plus"></use></svg></span>
+                        <span class="fb-story-create-label">Create story</span>
+                    </a>
+                    @foreach (var story in stories)
+                    {
+                        <a href="/u/@story.Username" class="fb-story" style="background-image:url('@Present.PhotoUrl(story.Id, 3)')">
+                            <img src="/u/@story.Username/avatar" alt="" class="fb-story-avatar">
+                            <span class="fb-story-name">@Present.DisplayName(story.Username)</span>
+                        </a>
+                    }
+                    @if (stories.Count > 4)
+                    {
+                        <button type="button" class="fb-stories-next" aria-label="See all stories" data-fb-stories-next><svg><use href="#fb-chev-right"></use></svg></button>
+                    }
+                </section>
 
-            <!-- Stories -->
-            <div class="post stories-container">
-                <h3 class="stories-title">Stories</h3>
-                <div class="stories-list">
-                    <div class="story-card">
-                        <img src="/u/@ViewBag.Username/avatar" alt="Your story" class="story-image">
-                        <div class="story-label">Your Story</div>
-                    </div>
-                </div>
-            </div>
+                @await Html.PartialAsync("_CreatePost")
 
-            @{
-                ViewBag.Theme = "facebook";
-            }
-
-            @await Html.PartialAsync("_CreatePost")
-
-            <div id="newsfeed-items-grid">
-                <button class="btn btn-primary btn-md-2" style="display: none" type="submit" name="submit" id="sendButton">Post Status</button>
-                @{
-                    if (Model != null)
+                <div id="newsfeed-items-grid">
+                    <button class="btn btn-primary btn-md-2" style="display: none" type="submit" name="submit" id="sendButton">Post Status</button>
+                    @if (Model != null)
                     {
                         foreach (var post in Model)
                         {
                             await Html.RenderPartialAsync("_PostCard", post);
                         }
                     }
+                </div>
+                @if (Model == null || Model.Count == 0)
+                {
+                    <div class="fb-card fb-feed-empty">
+                        <strong>No more posts</strong>
+                        <span>Add more friends to see more posts in your Feed.</span>
+                    </div>
                 }
             </div>
         </main>
 
-        <!-- Right Sidebar -->
-        <aside class="right-sidebar">
-            <div class="sponsored-section">
-                <h3 class="sidebar-title">Sponsored</h3>
-                <div class="sponsored-ad">
-                    <img src="/themes/facebook/images/ad-placeholder.jpg" alt="Ad" class="ad-image">
-                    <div class="ad-content">
-                        <div class="ad-title">Learn Web Development</div>
-                        <div class="ad-url">codecademy.com</div>
-                    </div>
-                </div>
+        <!-- Right rail -->
+        <aside class="fb-right" aria-label="Sponsored and contacts">
+            @if (ads.Count > 0)
+            {
+                <div class="fb-rail-heading">Sponsored</div>
+                @for (var i = 0; i < ads.Count; i++)
+                {
+                    <a href="#" class="fb-ad">
+                        <img src="@adImages[i % adImages.Length]" alt="">
+                        <span class="fb-ad-text">
+                            <span class="fb-ad-title">@ads[i]</span>
+                            <span class="fb-ad-domain">@Domain(ads[i])</span>
+                        </span>
+                    </a>
+                }
+                <div class="fb-rail-divider"></div>
+            }
+            @if (birthday != null)
+            {
+                <div class="fb-rail-heading">Birthdays</div>
+                <a href="/u/@birthday.Username" class="fb-birthday">
+                    <svg class="fb-birthday-icon"><use href="#fb-gift"></use></svg>
+                    @if (birthdayOthers == 0)
+                    {
+                        <span><strong>@birthday.FullName</strong>'s birthday is today.</span>
+                    }
+                    else
+                    {
+                        <span><strong>@birthday.FullName</strong> and <strong>@birthdayOthers @(birthdayOthers == 1 ? "other" : "others")</strong> have birthdays today.</span>
+                    }
+                </a>
+                <div class="fb-rail-divider"></div>
+            }
+            <div class="fb-rail-heading fb-contacts-heading">
+                <span>Contacts</span>
+                <span class="fb-contacts-tools">
+                    <button type="button" aria-label="Search by name or group"><svg><use href="#fb-search"></use></svg></button>
+                    <button type="button" aria-label="Options"><svg><use href="#fb-dots"></use></svg></button>
+                </span>
             </div>
+            <nav class="fb-contacts">
+                @foreach (var friend in friends.Take(16))
+                {
+                    <a href="/messages/conversation/@friend.Username" class="fb-contact">
+                        <span class="fb-contact-avatar">
+                            <img src="/u/@friend.Username/avatar" alt="">
+                            @if (Online(friend))
+                            {
+                                <span class="fb-online"></span>
+                            }
+                        </span>
+                        <span>@Present.DisplayName(friend.Username)</span>
+                    </a>
+                }
+            </nav>
         </aside>
     </div>
 
+    <a href="/messages?new=1" class="fb-new-message" aria-label="New message" title="New message"><svg><use href="#fb-compose"></use></svg></a>
+
     @await Html.PartialAsync("_Scripts")
+    <script src="/themes/facebook/js/facebook.js"></script>
 </body>
 </html>

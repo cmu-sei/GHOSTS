@@ -23,7 +23,7 @@
                 <button class="post-menu">⋯</button>
             </div>
             <div class="post-content">
-                <div class="post-text">@Html.Raw(Model.Message)</div>
+                <div class="post-text">@MessageHtml.Render(Model.Message)</div>
             </div>
             <div class="post-stats">
                 @{
@@ -70,7 +70,7 @@
             <div class="post-info">
                 <div class="caption">
                     <span class="username">@Model.Username</span>
-                    <span class="caption-text">@Html.Raw(Model.Message)</span>
+                    <span class="caption-text">@MessageHtml.Render(Model.Message)</span>
                 </div>
                 <div class="post-time">@Model.CreatedUtc.ToString("MMM d, yyyy")</div>
             </div>
@@ -87,7 +87,7 @@
                     <span class="tweet-time">· @Model.CreatedUtc.ToString("MMM d")</span>
                     <span class="tweet-more">⋯</span>
                 </div>
-                <div class="tweet-text">@Html.Raw(Model.Message)</div>
+                <div class="tweet-text">@MessageHtml.Render(Model.Message)</div>
                 <div class="tweet-actions">
                     <a href="/posts/@Model.Id"><button class="action-btn">
                         <span class="action-icon">💬</span>
@@ -127,7 +127,7 @@
                 <button class="post-menu">⋯</button>
             </div>
             <div class="post-content">
-                <div class="post-text">@Html.Raw(Model.Message)</div>
+                <div class="post-text">@MessageHtml.Render(Model.Message)</div>
             </div>
             <div class="post-actions">
                 <button class="action-btn like-btn like-it@(likedClass)" data-id="@Model.Id">
@@ -162,7 +162,7 @@
                         <span class="post-time">@Model.CreatedUtc.ToString("MMM d")</span>
                     </span>
                 </div>
-                <div class="post-text">@Html.Raw(Model.Message)</div>
+                <div class="post-text">@MessageHtml.Render(Model.Message)</div>
                 <div class="post-actions">
                     <a href="/posts/@Model.Id"><button class="action-btn">
                         <span class="action-icon">💬</span>
@@ -191,7 +191,7 @@
             <div class="video-info">
                 <img src="/u/@Model.Username/avatar" alt="@Model.Username" class="channel-avatar">
                 <div class="video-details">
-                    <div class="video-title">@Html.Raw(Model.Message)</div>
+                    <div class="video-title">@MessageHtml.Render(Model.Message)</div>
                     <div class="video-meta">
                         <span class="channel-name">@Model.Username</span>
                         <div class="video-stats">
@@ -221,7 +221,7 @@
                     <span class="message-timestamp">@Model.CreatedUtc.ToString("MM/dd/yyyy")</span>
                 </div>
                 <div class="message-text">
-                    @Html.Raw(Model.Message)
+                    @MessageHtml.Render(Model.Message)
                 </div>
                 <div class="message-reactions">
                     @if ((Model.Likes?.Count ?? 0) > 0)
@@ -262,7 +262,7 @@
                     </div>
                 </div>
 
-                @Html.Raw(Model.Message)
+                @MessageHtml.Render(Model.Message)
 
                 <div class="post-additional-info inline-items">
                     <a href="#" class="post-add-icon inline-items like-it@(likedClass)" data-id="@Model.Id">

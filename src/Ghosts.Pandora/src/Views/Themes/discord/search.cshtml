@@ -115,7 +115,7 @@
                         <div class="result-card">
                             <a href="/posts/@post.Id">
                                 <strong>@post.Username</strong><br />
-                                <span>@Html.Raw(post.Message)</span>
+                                <span>@MessageHtml.Render(post.Message)</span>
                             </a>
                         </div>
                     }

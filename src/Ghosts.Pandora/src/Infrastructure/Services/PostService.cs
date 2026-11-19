@@ -67,6 +67,10 @@ public class PostService(DataContext context, ApplicationConfiguration applicati
 
     public async Task LikePost(Guid postId, Guid userId)
     {
+        // a user likes a post once; liking it again changes nothing, as on the real platforms
+        if (await context.Likes.AnyAsync(l => l.PostId == postId && l.UserId == userId))
+            return;
+
         var like = new Like
         {
             PostId = postId,

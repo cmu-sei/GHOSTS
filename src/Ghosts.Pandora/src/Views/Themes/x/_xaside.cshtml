@@ -1,0 +1,98 @@
+@* X's right column. ViewData["XAside"]: "home" (default), "post", "profile", "search" or "explore"; ViewData["XPerson"]: the post author or profile owner. *@
+@inject Ghosts.Pandora.Infrastructure.Services.IUserService Users
+@inject Ghosts.Pandora.Infrastructure.Services.IPostService Posts
+@inject Ghosts.Pandora.Infrastructure.Services.IFollowService Follows
+@{
+    var kind = ViewData["XAside"] as string ?? "home";
+    var person = ViewData["XPerson"] as string;
+    var me = ViewBag.Username as string ?? "";
+    var same = StringComparer.OrdinalIgnoreCase;
+
+    var trends = Present.Trending(await Posts.GetLatestPostsByTheme("x", 100), 5);
+    var trendLabels = new[] { "Trending in United States", "Trending in United States", "Trending", $"Trending in {Present.World.City}", "Trending in United States" };
+
+    var meUser = await Users.GetUserByUsernameAsync(me, "x");
+    var following = meUser == null
+        ? new HashSet<string>(same)
+        : (await Follows.GetFollowingAsync(meUser.Id, 500)).Select(u => u.Username).ToHashSet(same);
+
+    // people in the world first, so suggestions are real names rather than generated accounts
+    var worldNames = Present.World.People.Select(p => p.Username).ToHashSet(same);
+    var suggestions = (await Users.GetUsersByThemeAsync("x", 50))
+        .Where(u => !same.Equals(u.Username, me) && !same.Equals(u.Username, person) && !following.Contains(u.Username))
+        .OrderByDescending(u => worldNames.Contains(u.Username))
+        .Take(3)
+        .Select(u => u.Username)
+        .ToList();
+}
+<aside class="x-aside" aria-label="Trending">
+    @if (kind != "search" && kind != "explore")
+    {
+        <div class="x-search-bar">
+            <form class="x-search" action="/search" method="get" role="search">
+                <svg><use href="#x-explore"/></svg>
+                <input type="text" name="q" placeholder="Search" autocomplete="off" aria-label="Search query">
+            </form>
+        </div>
+    }
+
+    @if (kind == "post" && !string.IsNullOrEmpty(person))
+    {
+        <section class="x-card">
+            <h2 class="x-card-title">Relevant people</h2>
+            @await Html.PartialAsync("/Views/Themes/x/_xperson.cshtml", person, new ViewDataDictionary(ViewData) { ["XFollowing"] = following })
+        </section>
+    }
+
+    @if (kind == "home")
+    {
+        <section class="x-card x-premium">
+            <h2 class="x-card-title">Subscribe to Premium</h2>
+            <p>Subscribe to unlock new features and if eligible, receive a share of revenue.</p>
+            <a href="/premium" class="x-btn-dark">Subscribe</a>
+        </section>
+    }
+
+    @if (kind == "profile" && suggestions.Count > 0)
+    {
+        @await Html.PartialAsync("/Views/Themes/x/_xwho.cshtml", suggestions, new ViewDataDictionary(ViewData) { ["Title"] = "You might like" })
+    }
+
+    @if (kind != "explore")
+    {
+        <section class="x-card">
+            <h2 class="x-card-title">What’s happening</h2>
+            @for (var i = 0; i < trends.Count; i++)
+            {
+                var (topic, count) = trends[i];
+                <div class="x-trend" data-href="/search?q=@Uri.EscapeDataString(topic)">
+                    <div class="x-trend-meta">@trendLabels[i % trendLabels.Length]</div>
+                    <div class="x-trend-topic">@topic</div>
+                    <div class="x-trend-meta">@SocialPresentation.Compact(count) posts</div>
+                    <button type="button" class="x-icon-btn x-trend-more" aria-label="More" data-x-menu="trend"><svg><use href="#x-dots"/></svg></button>
+                </div>
+            }
+            <a href="/search" class="x-card-more">Show more</a>
+        </section>
+    }
+
+    @if (kind != "profile" && suggestions.Count > 0)
+    {
+        @await Html.PartialAsync("/Views/Themes/x/_xwho.cshtml", suggestions, new ViewDataDictionary(ViewData) { ["Title"] = "Who to follow" })
+    }
+
+    <nav class="x-footer" aria-label="Footer">
+        <a href="#">Terms of Service</a>
+        <span>|</span>
+        <a href="#">Privacy Policy</a>
+        <span>|</span>
+        <a href="#">Cookie Policy</a>
+        <span>|</span>
+        <a href="#">Accessibility</a>
+        <span>|</span>
+        <a href="#">Ads info</a>
+        <span>|</span>
+        <button type="button" data-x-menu="footer">More <svg><use href="#x-dots"/></svg></button>
+        <span>© @DateTime.UtcNow.Year X Corp.</span>
+    </nav>
+</aside>
