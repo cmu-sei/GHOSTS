@@ -164,6 +164,9 @@ See the official [Sol](https://developers.openai.com/api/docs/models/gpt-6-sol),
 [Luna](https://developers.openai.com/api/docs/models/gpt-6-luna), and
 [pricing](https://developers.openai.com/api/docs/pricing) documentation.
 
+Codex's `/model` list also offers **GPT-6.2 Sol** and **GPT-6.2 Astra** (`us.openai.gpt-6.2-sol`,
+`us.openai.gpt-6.2-astra`), which replace the GPT-6.1 models there.
+
 Rebuild the container to regenerate the agent configurations and chat model list.
 This update applies to `aws`; GovCloud keeps its separately verified models below.
 

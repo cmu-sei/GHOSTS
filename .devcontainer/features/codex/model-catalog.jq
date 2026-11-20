@@ -33,5 +33,9 @@ else
         | .models |= map(select(
             .slug | test("(^|\\.)openai\\.gpt-5\\.6-(sol|luna)$") | not
         ))
+        # GPT-6.2 Sol and Astra (native entries since Codex 0.171) replace the 6.1 models.
+        | .models |= map(select(
+            .slug | test("(^|\\.)openai\\.gpt-6\\.1-") | not
+        ))
       else . end
 end
