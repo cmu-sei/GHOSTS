@@ -1,0 +1,882 @@
+{
+  "name": "Network 3 - Run Simulation",
+  "id": "networkRunSimulation",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Network 3 - Run Simulation\nSimulates one queued run from start to finish: every tick, every agent reads its inbox and decides whom to message (25 model calls at once; failed calls are asked again twice), then the interviews, then the blind judge.\n\n- Picks the oldest `queued` run in sim_runs and locks it. Runs go one at a time per provider; a run whose execution died is started again after 30 minutes.\n- The loop **Build prompts → Ask → Apply replies** runs once per phase (a tick, a belief checkpoint, an interview round, the judge). The sim_runs row shows the phase it is in.\n- Nothing is written until the run is over: then its messages, turns and ties go to sim_messages, sim_turns and sim_ties, and the run is set to `done`.\n\nPress **Execute workflow** for one run, or **activate** it: the schedule starts the next queued run every minute.\n\nCredentials: Baserow Token on every Baserow node; AWS on Ask Bedrock. The Bedrock region (us-east-1) and the Ollama URL (http://host.docker.internal:11434) are set at the top of this workflow's definition.",
+        "width": 600,
+        "height": 460,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "name": "About",
+      "position": [
+        -700,
+        -420
+      ],
+      "id": "about"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "name": "Manual Trigger",
+      "position": [
+        0,
+        -100
+      ],
+      "id": "manual-trigger"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "* * * * *"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "name": "Every minute",
+      "position": [
+        0,
+        100
+      ],
+      "id": "every-minute"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "getAll",
+        "databaseId": "",
+        "tableId": "",
+        "returnAll": true,
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Read: sim_runs",
+      "position": [
+        240,
+        0
+      ],
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "id": "read-sim-runs"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pick the run this execution simulates. Runs go one at a time per provider (a local Ollama run and a\n// Bedrock run can go side by side): a provider with a freshly locked run is busy. A run whose lock went stale (its execution died) is started again from scratch;\n// rows carry the execution id, so whatever the dead attempt wrote is ignored by the analysis.\n// Output: the lock update body for sim_runs plus the run under `run`; no item when there is nothing to do.\nconst LOCK_MINUTES = 30;\nconst runs = $input.all().map((i) => i.json).filter((r) => r && r.run_id);\nconst now = new Date();\nconst fresh = (r) => r.locked_at && now.getTime() - Date.parse(r.locked_at) < LOCK_MINUTES * 60 * 1000;\nconst running = runs.filter((r) => r.status === 'running');\nconst busy = new Set(running.filter(fresh).map((r) => r.provider));\nconst run = running.find((r) => !fresh(r)) || runs.filter((r) => r.status === 'queued' && !busy.has(r.provider)).sort((a, b) => a.id - b.id)[0];\nif (!run) return [];\nfor (const k of ['provider', 'judge_provider']) if (!['ollama', 'bedrock'].includes(run[k])) throw new Error(`run ${run.run_id}: ${k} must be ollama or bedrock, got \"${run[k]}\"`);\n\nconst iso = now.toISOString().replace(/\\.\\d{3}Z$/, '+00:00');\nreturn [{\n  json: {\n    run: { ...run, repeat: Number(run.repeat), ticks: Number(run.ticks), temperature: run.temperature === null || run.temperature === '' ? null : Number(run.temperature) },\n    status: 'running', progress: 'starting', locked_at: iso, locked_by: $execution.id, started_at: iso,\n  },\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "Pick run",
+      "position": [
+        480,
+        0
+      ],
+      "id": "pick-run"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "update",
+        "databaseId": "={{ $('Read: sim_runs').params.databaseId }}",
+        "tableId": "={{ $('Read: sim_runs').params.tableId }}",
+        "rowId": "={{ $json.run.id }}",
+        "dataToSend": "autoMapInputData",
+        "inputsToIgnore": "run"
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Update: sim_runs (lock)",
+      "position": [
+        720,
+        0
+      ],
+      "id": "update-sim-runs-lock"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "getAll",
+        "databaseId": "",
+        "tableId": "",
+        "returnAll": true,
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Read: sim_cast",
+      "position": [
+        960,
+        0
+      ],
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "id": "read-sim-cast"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "getAll",
+        "databaseId": "",
+        "tableId": "",
+        "returnAll": true,
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Read: participants",
+      "position": [
+        1200,
+        0
+      ],
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "id": "read-participants"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "getAll",
+        "databaseId": "",
+        "tableId": "",
+        "returnAll": true,
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Read: sim_networks",
+      "position": [
+        1440,
+        0
+      ],
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "id": "read-sim-networks"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build the starting state of the run: the cast with their personas, the saved network, the seeded notes.\n// ---- lib/graph.js ----\n// Graph helpers for the network experiments (spliced into Code nodes via `// @include lib/graph.js`).\n// A graph is n nodes (0..n-1) and a list of undirected edges [a, b] with a < b.\n\n// Seeded random numbers (mulberry32): the same seed always gives the same sequence.\nfunction rng(seed) {\n  let a = seed >>> 0;\n  return () => {\n    a = (a + 0x6D2B79F5) >>> 0;\n    let t = a;\n    t = Math.imul(t ^ (t >>> 15), t | 1);\n    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);\n    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;\n  };\n}\nconst pick = (list, rand) => list[Math.floor(rand() * list.length)];\nconst edgeKey = (a, b) => (a < b ? `${a}-${b}` : `${b}-${a}`);\n\nfunction adjacency(n, edges) {\n  const adj = Array.from({ length: n }, () => new Set());\n  for (const [a, b] of edges) { adj[a].add(b); adj[b].add(a); }\n  return adj;\n}\n\n// Hop distance from `start` to every node (Infinity when unreachable).\nfunction distances(n, edges, start) {\n  const adj = adjacency(n, edges);\n  const dist = Array(n).fill(Infinity);\n  dist[start] = 0;\n  const queue = [start];\n  for (let q = 0; q < queue.length; q++) for (const nb of adj[queue[q]]) if (dist[nb] === Infinity) { dist[nb] = dist[queue[q]] + 1; queue.push(nb); }\n  return dist;\n}\nconst isConnected = (n, edges) => distances(n, edges, 0).every((d) => d < Infinity);\n\n// Watts-Strogatz small world: a ring where everyone knows k nearest neighbours (k even), each edge\n// rewired with probability beta. Redrawn until connected.\nfunction smallWorld(n, k, beta, rand) {\n  for (;;) {\n    const keys = new Set();\n    for (let i = 0; i < n; i++) for (let j = 1; j <= k / 2; j++) keys.add(edgeKey(i, (i + j) % n));\n    for (let i = 0; i < n; i++) {\n      for (let j = 1; j <= k / 2; j++) {\n        if (rand() >= beta) continue;\n        const free = [];\n        for (let c = 0; c < n; c++) if (c !== i && !keys.has(edgeKey(i, c))) free.push(c);\n        if (!free.length) continue;\n        keys.delete(edgeKey(i, (i + j) % n));\n        keys.add(edgeKey(i, pick(free, rand)));\n      }\n    }\n    const edges = [...keys].map((s) => s.split('-').map(Number)).sort((x, y) => x[0] - y[0] || x[1] - y[1]);\n    if (isConnected(n, edges)) return edges;\n  }\n}\n\n// Barabasi-Albert preferential attachment: each new node links to m existing nodes, favouring the\n// well connected. Gives a few hubs and many peripheral nodes.\nfunction prefAttach(n, m, rand) {\n  const edges = [];\n  const ends = [];\n  for (let i = 0; i <= m; i++) for (let j = i + 1; j <= m; j++) { edges.push([i, j]); ends.push(i, j); }\n  for (let v = m + 1; v < n; v++) {\n    const targets = new Set();\n    while (targets.size < m) targets.add(pick(ends, rand));\n    for (const t of targets) { edges.push([t, v]); ends.push(t, v); }\n  }\n  return edges.sort((x, y) => x[0] - y[0] || x[1] - y[1]);\n}\n\nconst density = (n, edges) => (2 * edges.length) / (n * (n - 1));\n\n// Share of connected triples that are closed (global clustering coefficient).\nfunction clustering(n, edges) {\n  const adj = adjacency(n, edges);\n  let triples = 0;\n  let closed = 0;\n  for (let v = 0; v < n; v++) {\n    const nb = [...adj[v]];\n    for (let i = 0; i < nb.length; i++) for (let j = i + 1; j < nb.length; j++) { triples++; if (adj[nb[i]].has(nb[j])) closed++; }\n  }\n  return triples ? closed / triples : 0;\n}\n\nfunction degreeSd(n, edges) {\n  const deg = adjacency(n, edges).map((s) => s.size);\n  const m = deg.reduce((a, b) => a + b, 0) / n;\n  return Math.sqrt(deg.reduce((a, d) => a + (d - m) ** 2, 0) / n);\n}\n// ---- end lib/graph.js ----\n// ---- lib/sim.js ----\n// Simulation engine for the three network experiments (spliced into Code nodes via `// @include lib/sim.js`;\n// needs lib/graph.js). One run is a list of phases. Each phase is one round of model calls:\n//   simStart(run, cast, network) -> state\n//   simPrompts(state)            -> the calls of the current phase (and remembers what each call is for)\n//   simApply(state, replies)     -> folds the replies into the state and moves to the next phase\n//   simRows(state, execution)    -> the Baserow rows of the finished run\n// Ticks are synchronous: at tick t every agent sees the messages sent before t; what it sends arrives at t+1.\nconst SIM_SLOTS = ['8 am', '10 am', 'noon', '2 pm', '4 pm', '6 pm', '8 pm', '10 pm'];\nconst SIM_FAKE_NAMES = ['Marlow', 'Tatum', 'Lennox', 'Shiloh', 'Arden'];\nconst SIM_OUTSIDER = 'Riley'; // the host in the dynamics experiment; not in the network, so nobody can ask them\nconst SIM_VENUE = 'Saturday at 7 pm at the Rosewood Park pavilion';\nconst SIM_JUDGE_CHUNK = 20;\n\nconst simTime = (tick) => `Day ${Math.floor((tick - 1) / SIM_SLOTS.length) + 1}, ${SIM_SLOTS[(tick - 1) % SIM_SLOTS.length]}`;\n\nfunction simPhases(experiment, ticks) {\n  const phases = [];\n  if (experiment === 'structure') phases.push({ kind: 'names', tick: 0 });\n  if (experiment === 'dynamics') phases.push({ kind: 'belief', tick: 0 });\n  for (let t = 1; t <= ticks; t++) {\n    phases.push({ kind: 'act', tick: t });\n    if (experiment === 'dynamics') phases.push({ kind: 'belief', tick: t });\n  }\n  if (experiment === 'propagation') phases.push({ kind: 'interview', tick: ticks });\n  if (experiment === 'structure') phases.push({ kind: 'names', tick: ticks });\n  if (experiment !== 'structure') phases.push({ kind: 'judge', tick: ticks });\n  return phases;\n}\n\n// cast: [{ agent (1..n), name, participant_id, persona }] ordered by agent; node i of the network is agent i+1.\nfunction simStart(run, cast, network) {\n  const roles = network.roles;\n  const agents = cast.map((c) => ({ agent: c.agent, name: c.name, participant_id: c.participant_id, persona: c.persona, notes: [], heard: [] }));\n  const state = {\n    run, agents, roles,\n    edges: network.edges.map((e) => [...e]),\n    phases: simPhases(run.experiment, run.ticks), phase: 0,\n    messages: [], turns: [], ties: [], requests: [], meta: [], calls: 0, failures: 0,\n  };\n  if (run.experiment === 'dynamics') {\n    for (const a of agents) a.notes.push(`${SIM_OUTSIDER} mentioned maybe having a birthday party this Saturday, but it wasn't settled.`);\n    const [on, off] = run.condition === 'on_at_hub' ? [roles.hub, roles.peripheral] : [roles.peripheral, roles.hub];\n    agents[on].notes.push(`I just talked to ${SIM_OUTSIDER}: the birthday party this Saturday is definitely on.`);\n    agents[off].notes.push(`I just heard from ${SIM_OUTSIDER}: the birthday party this Saturday is cancelled.`);\n    state.event = `${SIM_OUTSIDER}'s birthday party this Saturday`;\n  } else {\n    const host = agents[roles.seed];\n    if (run.arm !== 'control') host.notes.push(`I'm throwing my birthday party this ${SIM_VENUE}. I want everyone to come, so I should invite people and ask them to pass it on.`);\n    state.event = `${host.name}'s birthday party (this ${SIM_VENUE})`;\n  }\n  return state;\n}\n\nconst simNeighbors = (state, i) => state.edges.filter((e) => e.includes(i)).map((e) => (e[0] === i ? e[1] : e[0])).sort((a, b) => a - b);\n\nconst simIdentity = (a) => `You are ${a.name}. Stay in character as the person described below.\n\nAbout you. These are your own answers to a personality questionnaire, where 1 = disagree strongly and 5 = agree strongly:\n${a.persona}`;\n\n// What agent i remembers: its notes, inbox and outbox up to and including tick `upto`.\nfunction simMemory(state, i, upto) {\n  const a = state.agents[i];\n  const inbox = state.messages.filter((m) => m.to === i && m.tick <= upto).map((m) => `[${simTime(m.tick)}] From ${state.agents[m.from].name}: ${m.text}`);\n  const outbox = state.messages.filter((m) => m.from === i && m.tick <= upto).map((m) => `[${simTime(m.tick)}] To ${state.agents[m.to].name}: ${m.text}`);\n  return `${a.notes.length ? `Your notes:\\n${a.notes.map((n) => `- ${n}`).join('\\n')}\\n\\n` : ''}Messages you received (oldest first):\n${inbox.join('\\n') || '(none)'}\n\nMessages you sent (oldest first):\n${outbox.join('\\n') || '(none)'}`;\n}\n\nfunction simActPrompt(state, i, tick) {\n  const a = state.agents[i];\n  const names = (list) => list.map((j) => state.agents[j].name).join(', ') || '(nobody)';\n  const structure = state.run.experiment === 'structure';\n  const waiting = state.requests.filter((r) => r.to === i).map((r) => r.from);\n  return `${simIdentity(a)}\n\nIt is ${simTime(tick)}. You use a direct-messaging app.\nYour connections: ${names(simNeighbors(state, i))}.${structure ? `\nPeople you have heard of but are not connected with: ${names(a.heard)}.\nConnection requests waiting for your answer: ${names(waiting)}.` : ''}\n\n${simMemory(state, i, tick - 1)}\n\nDecide what to do right now. You can send direct messages to one or more of your connections, or stay quiet.${structure ? ' You can also ask to connect with someone you have heard of, and accept or decline each waiting request.' : ''}\n\nReply with only a JSON object and nothing else:\n{\"messages\": [{\"to\": \"<name of a connection>\", \"text\": \"<your message>\"}]${structure ? ', \"connect\": [\"<name>\"], \"accept\": [\"<name>\"], \"decline\": [\"<name>\"]' : ''}}\nUse an empty list for anything you do not do.`;\n}\n\nconst simInterviewPrompt = (state, i, question) => `${simIdentity(state.agents[i])}\n\nThis is everything you remember:\n\n${simMemory(state, i, state.run.ticks)}\n\n${question}`;\n\nfunction simJudgePrompt(state, units) {\n  const list = units.map((u, n) => `${n + 1}. ${JSON.stringify(u.text)}`).join('\\n');\n  if (state.run.experiment === 'dynamics') {\n    return `You are labelling short texts for a study. The topic: ${state.event}.\nFor each numbered text, give its stance on whether the party will happen:\n- \"on\": says or implies the party is happening\n- \"off\": says or implies the party is cancelled or not happening\n- \"unsure\": mentions the party without taking a side, or asks about it\n- \"none\": does not mention the party\n\nTexts:\n${list}\n\nReply with only a JSON array, one entry per text, in order: [{\"n\": 1, \"stance\": \"on\"}]`;\n  }\n  return `You are labelling short texts for a study. The event of interest: ${state.event}.\nFor each numbered text, decide whether it tells the reader about this event: that the party is happening, an invitation to it, or any of its details. A text that mentions the host without the party does not count.\n\nTexts:\n${list}\n\nReply with only a JSON array, one entry per text, in order: [{\"n\": 1, \"carries\": true}]`;\n}\n\n// The model calls of the current phase: [{ prompt, provider, model, temperature }]. Remembers in\n// state.meta what each call is for, so simApply only needs the reply texts in the same order.\nfunction simPrompts(state) {\n  const { run, agents } = state;\n  const ph = state.phases[state.phase];\n  const all = agents.map((_, i) => i);\n  const subject = { provider: run.provider, model: run.model, temperature: run.temperature };\n  let calls = [];\n  if (ph.kind === 'act') {\n    calls = all.map((i) => ({ meta: { i }, prompt: simActPrompt(state, i, ph.tick) }));\n  } else if (ph.kind === 'belief') {\n    calls = all.map((i) => ({\n      meta: { i },\n      prompt: `${simIdentity(agents[i])}\n\nIt is ${ph.tick ? simTime(ph.tick) : 'Day 1, before 8 am'}. This is everything you know:\n\n${simMemory(state, i, ph.tick)}\n\nHow likely is it that ${state.event} will happen? Reply with a single whole number from 0 (certainly not happening) to 100 (certainly happening), and nothing else.`,\n    }));\n  } else if (ph.kind === 'names') {\n    calls = all.map((i) => {\n      const list = [...agents.filter((_, j) => j !== i).map((a) => a.name), ...SIM_FAKE_NAMES].sort();\n      return { meta: { i }, prompt: simInterviewPrompt(state, i, `An interviewer asks: \"Which of these people do you know?\"\\n${list.join(', ')}\\n\\nReply with only a JSON array of the names you know, and nothing else. Use [] if you know none of them.`) };\n    });\n  } else if (ph.kind === 'interview') {\n    const host = agents[state.roles.seed].name;\n    const decoy = agents[state.roles.decoy].name;\n    const yesNo = (what) => `An interviewer asks: \"Have you heard about ${what}?\"\\n\\nStart your reply with YES or NO, then say in one sentence what you know about it.`;\n    for (const i of all) {\n      calls.push({ meta: { i, question: 'open' }, prompt: simInterviewPrompt(state, i, 'An interviewer asks: \"Is there anything coming up that you know about, any events or plans?\"\\n\\nAnswer in one or two sentences.') });\n      calls.push({ meta: { i, question: 'cued' }, prompt: simInterviewPrompt(state, i, yesNo(`${host}'s birthday party`)) });\n      calls.push({ meta: { i, question: 'decoy' }, prompt: simInterviewPrompt(state, i, yesNo(`${decoy}'s housewarming`)) });\n    }\n  } else if (ph.kind === 'judge') {\n    // The judge sees only texts: no arm, no sender, no run. Messages first, then the open-recall answers.\n    const units = [\n      ...state.messages.map((m, n) => ({ message: n, text: m.text })),\n      ...state.turns.map((t, n) => ({ turn: n, text: t.raw_output, t })).filter((u) => u.t.question === 'open' && u.t.ok).map(({ t, ...u }) => u),\n    ];\n    for (let c = 0; c < units.length; c += SIM_JUDGE_CHUNK) {\n      const chunk = units.slice(c, c + SIM_JUDGE_CHUNK);\n      calls.push({ meta: { units: chunk.map(({ text, ...u }) => u) }, prompt: simJudgePrompt(state, chunk), provider: run.judge_provider, model: run.judge_model, temperature: 0 });\n    }\n  }\n  state.meta = calls.map((c) => c.meta);\n  return calls.map(({ meta, ...c }) => ({ ...subject, ...c }));\n}\n\n// The first {...} or [...] in a reply, parsed; null when there is none.\nfunction simJson(text, open) {\n  const close = open === '{' ? '}' : ']';\n  const start = text.indexOf(open);\n  const end = text.lastIndexOf(close);\n  if (start < 0 || end <= start) return null;\n  try { return JSON.parse(text.slice(start, end + 1)); } catch (e) { return null; }\n}\n\n// replies: one entry per call of simPrompts, in order: the reply text, or '' when the call failed.\nfunction simApply(state, replies) {\n  const { run, agents } = state;\n  const ph = state.phases[state.phase];\n  const byName = new Map(agents.map((a, i) => [a.name.toLowerCase(), i]));\n  const idx = (name) => byName.get(String(name ?? '').trim().toLowerCase());\n  const nameList = (v) => (Array.isArray(v) ? v.map(idx).filter((j) => j !== undefined) : []);\n  const turn = (i, text, fields) => {\n    const t = { tick: ph.tick, phase: ph.kind, agent: i, raw_output: String(text).slice(0, 4000), ok: true, error: '', ...fields };\n    if (!t.ok) state.failures++;\n    state.turns.push(t);\n    return t;\n  };\n  state.calls += replies.length;\n\n  if (ph.kind === 'act') {\n    const sent = [];\n    const asked = [];\n    const accepted = [];\n    replies.forEach((text, n) => {\n      const { i } = state.meta[n];\n      const reply = text ? simJson(text, '{') : null;\n      if (!reply) { turn(i, text, { ok: false, error: text ? 'no JSON object in the reply' : 'empty reply', sent: 0 }); return; }\n      const nbrs = new Set(simNeighbors(state, i));\n      let invalid = 0;\n      let count = 0;\n      for (const m of Array.isArray(reply.messages) ? reply.messages : []) {\n        const to = idx(m && m.to);\n        const body = String((m && m.text) ?? '').trim().slice(0, 1000);\n        if (to === undefined || !nbrs.has(to) || !body) { invalid++; continue; }\n        sent.push({ tick: ph.tick, from: i, to, text: body });\n        count++;\n      }\n      const fields = { sent: count, invalid };\n      if (run.experiment === 'structure') {\n        const want = nameList(reply.connect).filter((j) => j !== i && !nbrs.has(j) && agents[i].heard.includes(j));\n        for (const j of want) asked.push({ from: i, to: j });\n        const waiting = new Set(state.requests.filter((r) => r.to === i).map((r) => r.from));\n        const yes = nameList(reply.accept).filter((j) => waiting.has(j));\n        for (const j of yes) accepted.push({ from: j, to: i });\n        fields.detail = JSON.stringify({ connect: want.map((j) => agents[j].name), accept: yes.map((j) => agents[j].name), decline: nameList(reply.decline).filter((j) => waiting.has(j)).map((j) => agents[j].name) });\n      }\n      turn(i, text, fields);\n    });\n    // Deliver. A tie is written only when both sides agreed: an accepted request, or two agents asking each other.\n    for (const m of sent) state.messages.push({ seq: state.messages.length + 1, ...m });\n    const have = new Set(state.edges.map(([a, b]) => edgeKey(a, b)));\n    const tie = (from, to) => {\n      if (have.has(edgeKey(from, to))) return;\n      have.add(edgeKey(from, to));\n      state.edges.push(from < to ? [from, to] : [to, from]);\n      state.ties.push({ tick: ph.tick, from, to });\n    };\n    for (const r of accepted) tie(r.from, r.to);\n    for (const r of asked) if (asked.some((o) => o.from === r.to && o.to === r.from)) tie(r.from, r.to);\n    // Requests live for one tick: the ones just made are shown to their targets on the next tick.\n    state.requests = asked.filter((r) => !have.has(edgeKey(r.from, r.to)));\n    if (run.experiment === 'structure') {\n      // An agent can only meet someone whose name appeared in its inbox (or who asked to connect).\n      const hear = (i, j) => { if (j !== i && !agents[i].heard.includes(j)) agents[i].heard.push(j); };\n      for (const m of sent) agents.forEach((a, j) => { if (new RegExp(`\\\\b${a.name}\\\\b`).test(m.text)) hear(m.to, j); });\n      for (const r of state.requests) hear(r.to, r.from);\n      for (const a of agents) a.heard = a.heard.filter((j) => !have.has(edgeKey(a.agent - 1, j))).sort((x, y) => x - y);\n    }\n  } else if (ph.kind === 'belief') {\n    replies.forEach((text, n) => {\n      const m = String(text).match(/\\b(100|\\d{1,2})\\b/);\n      turn(state.meta[n].i, text, m ? { belief: Number(m[1]) } : { ok: false, error: text ? 'no number 0-100 in the reply' : 'empty reply' });\n    });\n  } else if (ph.kind === 'names') {\n    replies.forEach((text, n) => {\n      const list = text ? simJson(text, '[') : null;\n      const question = ph.tick === 0 ? 'names_start' : 'names_end';\n      if (!Array.isArray(list)) { turn(state.meta[n].i, text, { question, ok: false, error: text ? 'no JSON array in the reply' : 'empty reply' }); return; }\n      const said = list.map((s) => String(s).trim().toLowerCase());\n      turn(state.meta[n].i, text, {\n        question,\n        names: JSON.stringify(agents.filter((a) => said.includes(a.name.toLowerCase())).map((a) => a.name)),\n        fakes: SIM_FAKE_NAMES.filter((f) => said.includes(f.toLowerCase())).length,\n      });\n    });\n  } else if (ph.kind === 'interview') {\n    replies.forEach((text, n) => {\n      const { i, question } = state.meta[n];\n      if (!text) { turn(i, text, { question, ok: false, error: 'empty reply' }); return; }\n      if (question === 'open') { turn(i, text, { question }); return; }\n      const m = String(text).match(/^\\W*(yes|no)\\b/i);\n      turn(i, text, m ? { question, answer: m[1].toLowerCase() } : { question, ok: false, error: 'reply does not start with YES or NO' });\n    });\n  } else if (ph.kind === 'judge') {\n    replies.forEach((text, n) => {\n      const { units } = state.meta[n];\n      const list = text ? simJson(text, '[') : null;\n      const ok = Array.isArray(list) && list.length === units.length;\n      turn(null, text, ok ? {} : { ok: false, error: text ? `expected ${units.length} labels` : 'empty reply' });\n      if (!ok) return;\n      units.forEach((u, k) => {\n        const label = list[k] || {};\n        if (run.experiment === 'dynamics') {\n          if (['on', 'off', 'unsure', 'none'].includes(label.stance)) state.messages[u.message].stance = label.stance;\n        } else if (typeof label.carries === 'boolean') {\n          const value = label.carries ? 'yes' : 'no';\n          if (u.message !== undefined) state.messages[u.message].carries_event = value; else state.turns[u.turn].judge = value;\n        }\n      });\n    });\n  }\n  state.meta = [];\n  state.phase++;\n  return state;\n}\n\nconst simDone = (state) => state.phase >= state.phases.length;\nconst simProgress = (state) => {\n  if (simDone(state)) return 'done';\n  const ph = state.phases[state.phase];\n  return `${ph.kind} ${ph.tick}/${state.run.ticks}`;\n};\n\n// Baserow rows of a finished run. `execution` marks the attempt, so rows of an abandoned attempt can be told apart.\nfunction simRows(state, execution) {\n  const { run, agents } = state;\n  const name = (i) => (i === null || i === undefined ? '' : agents[i].name);\n  const num = (i) => (i === null || i === undefined ? null : agents[i].agent);\n  return {\n    sim_messages: state.messages.map((m) => ({\n      key: `${run.run_id}:m${m.seq}`, run_id: run.run_id, execution, seq: m.seq, tick: m.tick,\n      sender: name(m.from), sender_agent: num(m.from), recipient: name(m.to), recipient_agent: num(m.to),\n      text: m.text, carries_event: m.carries_event || '', stance: m.stance || '',\n    })),\n    sim_turns: state.turns.map((t, n) => ({\n      key: `${run.run_id}:t${n + 1}`, run_id: run.run_id, execution, tick: t.tick, phase: t.phase, question: t.question || '',\n      agent: name(t.agent), agent_number: num(t.agent), participant_id: t.agent === null ? null : agents[t.agent].participant_id,\n      ok: t.ok, error: t.error, raw_output: t.raw_output, sent: t.sent ?? null, invalid: t.invalid ?? null, detail: t.detail || '',\n      belief: t.belief ?? null, answer: t.answer || '', judge: t.judge || '', names: t.names || '', fakes: t.fakes ?? null,\n    })),\n    sim_ties: state.ties.map((t) => ({\n      key: `${run.run_id}:${edgeKey(num(t.from), num(t.to))}`, run_id: run.run_id, execution, tick: t.tick,\n      requester: name(t.from), requester_agent: num(t.from), accepter: name(t.to), accepter_agent: num(t.to),\n    })),\n  };\n}\n// ---- end lib/sim.js ----\nconst run = $('Pick run').first().json.run;\nconst rows = (node) => $(node).all().map((i) => i.json).filter((r) => r && r.id !== undefined);\nconst persona = new Map(rows('Read: participants').map((p) => [Number(p.participant_id), p.persona]));\nconst cast = rows('Read: sim_cast').map((c) => ({ agent: Number(c.agent), name: c.name, participant_id: Number(c.participant_id), persona: persona.get(Number(c.participant_id)) }))\n  .sort((a, b) => a.agent - b.agent);\nconst saved = rows('Read: sim_networks').find((w) => w.key === run.experiment);\nif (!cast.length || !saved) throw new Error(`No cast or no \"${run.experiment}\" network; run \"Network 1 - Set Up Study\" first`);\nif (cast.some((c) => !c.persona)) throw new Error('A cast member has no persona in the participants table');\nreturn [{ json: { state: simStart(run, cast, { edges: JSON.parse(saved.edges), roles: JSON.parse(saved.roles) }) } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "Start run",
+      "position": [
+        1680,
+        0
+      ],
+      "id": "start-run"
+    },
+    {
+      "parameters": {
+        "jsCode": "// One item per model call of the current phase. The first item also carries the state, for Apply replies.\n// Calls that failed are asked again (Apply replies sends the state back with state.pending set), so only\n// the ones still without a reply go out. `body` is the request for the provider's API: Bedrock Converse or Ollama chat.\n// ---- lib/graph.js ----\n// Graph helpers for the network experiments (spliced into Code nodes via `// @include lib/graph.js`).\n// A graph is n nodes (0..n-1) and a list of undirected edges [a, b] with a < b.\n\n// Seeded random numbers (mulberry32): the same seed always gives the same sequence.\nfunction rng(seed) {\n  let a = seed >>> 0;\n  return () => {\n    a = (a + 0x6D2B79F5) >>> 0;\n    let t = a;\n    t = Math.imul(t ^ (t >>> 15), t | 1);\n    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);\n    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;\n  };\n}\nconst pick = (list, rand) => list[Math.floor(rand() * list.length)];\nconst edgeKey = (a, b) => (a < b ? `${a}-${b}` : `${b}-${a}`);\n\nfunction adjacency(n, edges) {\n  const adj = Array.from({ length: n }, () => new Set());\n  for (const [a, b] of edges) { adj[a].add(b); adj[b].add(a); }\n  return adj;\n}\n\n// Hop distance from `start` to every node (Infinity when unreachable).\nfunction distances(n, edges, start) {\n  const adj = adjacency(n, edges);\n  const dist = Array(n).fill(Infinity);\n  dist[start] = 0;\n  const queue = [start];\n  for (let q = 0; q < queue.length; q++) for (const nb of adj[queue[q]]) if (dist[nb] === Infinity) { dist[nb] = dist[queue[q]] + 1; queue.push(nb); }\n  return dist;\n}\nconst isConnected = (n, edges) => distances(n, edges, 0).every((d) => d < Infinity);\n\n// Watts-Strogatz small world: a ring where everyone knows k nearest neighbours (k even), each edge\n// rewired with probability beta. Redrawn until connected.\nfunction smallWorld(n, k, beta, rand) {\n  for (;;) {\n    const keys = new Set();\n    for (let i = 0; i < n; i++) for (let j = 1; j <= k / 2; j++) keys.add(edgeKey(i, (i + j) % n));\n    for (let i = 0; i < n; i++) {\n      for (let j = 1; j <= k / 2; j++) {\n        if (rand() >= beta) continue;\n        const free = [];\n        for (let c = 0; c < n; c++) if (c !== i && !keys.has(edgeKey(i, c))) free.push(c);\n        if (!free.length) continue;\n        keys.delete(edgeKey(i, (i + j) % n));\n        keys.add(edgeKey(i, pick(free, rand)));\n      }\n    }\n    const edges = [...keys].map((s) => s.split('-').map(Number)).sort((x, y) => x[0] - y[0] || x[1] - y[1]);\n    if (isConnected(n, edges)) return edges;\n  }\n}\n\n// Barabasi-Albert preferential attachment: each new node links to m existing nodes, favouring the\n// well connected. Gives a few hubs and many peripheral nodes.\nfunction prefAttach(n, m, rand) {\n  const edges = [];\n  const ends = [];\n  for (let i = 0; i <= m; i++) for (let j = i + 1; j <= m; j++) { edges.push([i, j]); ends.push(i, j); }\n  for (let v = m + 1; v < n; v++) {\n    const targets = new Set();\n    while (targets.size < m) targets.add(pick(ends, rand));\n    for (const t of targets) { edges.push([t, v]); ends.push(t, v); }\n  }\n  return edges.sort((x, y) => x[0] - y[0] || x[1] - y[1]);\n}\n\nconst density = (n, edges) => (2 * edges.length) / (n * (n - 1));\n\n// Share of connected triples that are closed (global clustering coefficient).\nfunction clustering(n, edges) {\n  const adj = adjacency(n, edges);\n  let triples = 0;\n  let closed = 0;\n  for (let v = 0; v < n; v++) {\n    const nb = [...adj[v]];\n    for (let i = 0; i < nb.length; i++) for (let j = i + 1; j < nb.length; j++) { triples++; if (adj[nb[i]].has(nb[j])) closed++; }\n  }\n  return triples ? closed / triples : 0;\n}\n\nfunction degreeSd(n, edges) {\n  const deg = adjacency(n, edges).map((s) => s.size);\n  const m = deg.reduce((a, b) => a + b, 0) / n;\n  return Math.sqrt(deg.reduce((a, d) => a + (d - m) ** 2, 0) / n);\n}\n// ---- end lib/graph.js ----\n// ---- lib/sim.js ----\n// Simulation engine for the three network experiments (spliced into Code nodes via `// @include lib/sim.js`;\n// needs lib/graph.js). One run is a list of phases. Each phase is one round of model calls:\n//   simStart(run, cast, network) -> state\n//   simPrompts(state)            -> the calls of the current phase (and remembers what each call is for)\n//   simApply(state, replies)     -> folds the replies into the state and moves to the next phase\n//   simRows(state, execution)    -> the Baserow rows of the finished run\n// Ticks are synchronous: at tick t every agent sees the messages sent before t; what it sends arrives at t+1.\nconst SIM_SLOTS = ['8 am', '10 am', 'noon', '2 pm', '4 pm', '6 pm', '8 pm', '10 pm'];\nconst SIM_FAKE_NAMES = ['Marlow', 'Tatum', 'Lennox', 'Shiloh', 'Arden'];\nconst SIM_OUTSIDER = 'Riley'; // the host in the dynamics experiment; not in the network, so nobody can ask them\nconst SIM_VENUE = 'Saturday at 7 pm at the Rosewood Park pavilion';\nconst SIM_JUDGE_CHUNK = 20;\n\nconst simTime = (tick) => `Day ${Math.floor((tick - 1) / SIM_SLOTS.length) + 1}, ${SIM_SLOTS[(tick - 1) % SIM_SLOTS.length]}`;\n\nfunction simPhases(experiment, ticks) {\n  const phases = [];\n  if (experiment === 'structure') phases.push({ kind: 'names', tick: 0 });\n  if (experiment === 'dynamics') phases.push({ kind: 'belief', tick: 0 });\n  for (let t = 1; t <= ticks; t++) {\n    phases.push({ kind: 'act', tick: t });\n    if (experiment === 'dynamics') phases.push({ kind: 'belief', tick: t });\n  }\n  if (experiment === 'propagation') phases.push({ kind: 'interview', tick: ticks });\n  if (experiment === 'structure') phases.push({ kind: 'names', tick: ticks });\n  if (experiment !== 'structure') phases.push({ kind: 'judge', tick: ticks });\n  return phases;\n}\n\n// cast: [{ agent (1..n), name, participant_id, persona }] ordered by agent; node i of the network is agent i+1.\nfunction simStart(run, cast, network) {\n  const roles = network.roles;\n  const agents = cast.map((c) => ({ agent: c.agent, name: c.name, participant_id: c.participant_id, persona: c.persona, notes: [], heard: [] }));\n  const state = {\n    run, agents, roles,\n    edges: network.edges.map((e) => [...e]),\n    phases: simPhases(run.experiment, run.ticks), phase: 0,\n    messages: [], turns: [], ties: [], requests: [], meta: [], calls: 0, failures: 0,\n  };\n  if (run.experiment === 'dynamics') {\n    for (const a of agents) a.notes.push(`${SIM_OUTSIDER} mentioned maybe having a birthday party this Saturday, but it wasn't settled.`);\n    const [on, off] = run.condition === 'on_at_hub' ? [roles.hub, roles.peripheral] : [roles.peripheral, roles.hub];\n    agents[on].notes.push(`I just talked to ${SIM_OUTSIDER}: the birthday party this Saturday is definitely on.`);\n    agents[off].notes.push(`I just heard from ${SIM_OUTSIDER}: the birthday party this Saturday is cancelled.`);\n    state.event = `${SIM_OUTSIDER}'s birthday party this Saturday`;\n  } else {\n    const host = agents[roles.seed];\n    if (run.arm !== 'control') host.notes.push(`I'm throwing my birthday party this ${SIM_VENUE}. I want everyone to come, so I should invite people and ask them to pass it on.`);\n    state.event = `${host.name}'s birthday party (this ${SIM_VENUE})`;\n  }\n  return state;\n}\n\nconst simNeighbors = (state, i) => state.edges.filter((e) => e.includes(i)).map((e) => (e[0] === i ? e[1] : e[0])).sort((a, b) => a - b);\n\nconst simIdentity = (a) => `You are ${a.name}. Stay in character as the person described below.\n\nAbout you. These are your own answers to a personality questionnaire, where 1 = disagree strongly and 5 = agree strongly:\n${a.persona}`;\n\n// What agent i remembers: its notes, inbox and outbox up to and including tick `upto`.\nfunction simMemory(state, i, upto) {\n  const a = state.agents[i];\n  const inbox = state.messages.filter((m) => m.to === i && m.tick <= upto).map((m) => `[${simTime(m.tick)}] From ${state.agents[m.from].name}: ${m.text}`);\n  const outbox = state.messages.filter((m) => m.from === i && m.tick <= upto).map((m) => `[${simTime(m.tick)}] To ${state.agents[m.to].name}: ${m.text}`);\n  return `${a.notes.length ? `Your notes:\\n${a.notes.map((n) => `- ${n}`).join('\\n')}\\n\\n` : ''}Messages you received (oldest first):\n${inbox.join('\\n') || '(none)'}\n\nMessages you sent (oldest first):\n${outbox.join('\\n') || '(none)'}`;\n}\n\nfunction simActPrompt(state, i, tick) {\n  const a = state.agents[i];\n  const names = (list) => list.map((j) => state.agents[j].name).join(', ') || '(nobody)';\n  const structure = state.run.experiment === 'structure';\n  const waiting = state.requests.filter((r) => r.to === i).map((r) => r.from);\n  return `${simIdentity(a)}\n\nIt is ${simTime(tick)}. You use a direct-messaging app.\nYour connections: ${names(simNeighbors(state, i))}.${structure ? `\nPeople you have heard of but are not connected with: ${names(a.heard)}.\nConnection requests waiting for your answer: ${names(waiting)}.` : ''}\n\n${simMemory(state, i, tick - 1)}\n\nDecide what to do right now. You can send direct messages to one or more of your connections, or stay quiet.${structure ? ' You can also ask to connect with someone you have heard of, and accept or decline each waiting request.' : ''}\n\nReply with only a JSON object and nothing else:\n{\"messages\": [{\"to\": \"<name of a connection>\", \"text\": \"<your message>\"}]${structure ? ', \"connect\": [\"<name>\"], \"accept\": [\"<name>\"], \"decline\": [\"<name>\"]' : ''}}\nUse an empty list for anything you do not do.`;\n}\n\nconst simInterviewPrompt = (state, i, question) => `${simIdentity(state.agents[i])}\n\nThis is everything you remember:\n\n${simMemory(state, i, state.run.ticks)}\n\n${question}`;\n\nfunction simJudgePrompt(state, units) {\n  const list = units.map((u, n) => `${n + 1}. ${JSON.stringify(u.text)}`).join('\\n');\n  if (state.run.experiment === 'dynamics') {\n    return `You are labelling short texts for a study. The topic: ${state.event}.\nFor each numbered text, give its stance on whether the party will happen:\n- \"on\": says or implies the party is happening\n- \"off\": says or implies the party is cancelled or not happening\n- \"unsure\": mentions the party without taking a side, or asks about it\n- \"none\": does not mention the party\n\nTexts:\n${list}\n\nReply with only a JSON array, one entry per text, in order: [{\"n\": 1, \"stance\": \"on\"}]`;\n  }\n  return `You are labelling short texts for a study. The event of interest: ${state.event}.\nFor each numbered text, decide whether it tells the reader about this event: that the party is happening, an invitation to it, or any of its details. A text that mentions the host without the party does not count.\n\nTexts:\n${list}\n\nReply with only a JSON array, one entry per text, in order: [{\"n\": 1, \"carries\": true}]`;\n}\n\n// The model calls of the current phase: [{ prompt, provider, model, temperature }]. Remembers in\n// state.meta what each call is for, so simApply only needs the reply texts in the same order.\nfunction simPrompts(state) {\n  const { run, agents } = state;\n  const ph = state.phases[state.phase];\n  const all = agents.map((_, i) => i);\n  const subject = { provider: run.provider, model: run.model, temperature: run.temperature };\n  let calls = [];\n  if (ph.kind === 'act') {\n    calls = all.map((i) => ({ meta: { i }, prompt: simActPrompt(state, i, ph.tick) }));\n  } else if (ph.kind === 'belief') {\n    calls = all.map((i) => ({\n      meta: { i },\n      prompt: `${simIdentity(agents[i])}\n\nIt is ${ph.tick ? simTime(ph.tick) : 'Day 1, before 8 am'}. This is everything you know:\n\n${simMemory(state, i, ph.tick)}\n\nHow likely is it that ${state.event} will happen? Reply with a single whole number from 0 (certainly not happening) to 100 (certainly happening), and nothing else.`,\n    }));\n  } else if (ph.kind === 'names') {\n    calls = all.map((i) => {\n      const list = [...agents.filter((_, j) => j !== i).map((a) => a.name), ...SIM_FAKE_NAMES].sort();\n      return { meta: { i }, prompt: simInterviewPrompt(state, i, `An interviewer asks: \"Which of these people do you know?\"\\n${list.join(', ')}\\n\\nReply with only a JSON array of the names you know, and nothing else. Use [] if you know none of them.`) };\n    });\n  } else if (ph.kind === 'interview') {\n    const host = agents[state.roles.seed].name;\n    const decoy = agents[state.roles.decoy].name;\n    const yesNo = (what) => `An interviewer asks: \"Have you heard about ${what}?\"\\n\\nStart your reply with YES or NO, then say in one sentence what you know about it.`;\n    for (const i of all) {\n      calls.push({ meta: { i, question: 'open' }, prompt: simInterviewPrompt(state, i, 'An interviewer asks: \"Is there anything coming up that you know about, any events or plans?\"\\n\\nAnswer in one or two sentences.') });\n      calls.push({ meta: { i, question: 'cued' }, prompt: simInterviewPrompt(state, i, yesNo(`${host}'s birthday party`)) });\n      calls.push({ meta: { i, question: 'decoy' }, prompt: simInterviewPrompt(state, i, yesNo(`${decoy}'s housewarming`)) });\n    }\n  } else if (ph.kind === 'judge') {\n    // The judge sees only texts: no arm, no sender, no run. Messages first, then the open-recall answers.\n    const units = [\n      ...state.messages.map((m, n) => ({ message: n, text: m.text })),\n      ...state.turns.map((t, n) => ({ turn: n, text: t.raw_output, t })).filter((u) => u.t.question === 'open' && u.t.ok).map(({ t, ...u }) => u),\n    ];\n    for (let c = 0; c < units.length; c += SIM_JUDGE_CHUNK) {\n      const chunk = units.slice(c, c + SIM_JUDGE_CHUNK);\n      calls.push({ meta: { units: chunk.map(({ text, ...u }) => u) }, prompt: simJudgePrompt(state, chunk), provider: run.judge_provider, model: run.judge_model, temperature: 0 });\n    }\n  }\n  state.meta = calls.map((c) => c.meta);\n  return calls.map(({ meta, ...c }) => ({ ...subject, ...c }));\n}\n\n// The first {...} or [...] in a reply, parsed; null when there is none.\nfunction simJson(text, open) {\n  const close = open === '{' ? '}' : ']';\n  const start = text.indexOf(open);\n  const end = text.lastIndexOf(close);\n  if (start < 0 || end <= start) return null;\n  try { return JSON.parse(text.slice(start, end + 1)); } catch (e) { return null; }\n}\n\n// replies: one entry per call of simPrompts, in order: the reply text, or '' when the call failed.\nfunction simApply(state, replies) {\n  const { run, agents } = state;\n  const ph = state.phases[state.phase];\n  const byName = new Map(agents.map((a, i) => [a.name.toLowerCase(), i]));\n  const idx = (name) => byName.get(String(name ?? '').trim().toLowerCase());\n  const nameList = (v) => (Array.isArray(v) ? v.map(idx).filter((j) => j !== undefined) : []);\n  const turn = (i, text, fields) => {\n    const t = { tick: ph.tick, phase: ph.kind, agent: i, raw_output: String(text).slice(0, 4000), ok: true, error: '', ...fields };\n    if (!t.ok) state.failures++;\n    state.turns.push(t);\n    return t;\n  };\n  state.calls += replies.length;\n\n  if (ph.kind === 'act') {\n    const sent = [];\n    const asked = [];\n    const accepted = [];\n    replies.forEach((text, n) => {\n      const { i } = state.meta[n];\n      const reply = text ? simJson(text, '{') : null;\n      if (!reply) { turn(i, text, { ok: false, error: text ? 'no JSON object in the reply' : 'empty reply', sent: 0 }); return; }\n      const nbrs = new Set(simNeighbors(state, i));\n      let invalid = 0;\n      let count = 0;\n      for (const m of Array.isArray(reply.messages) ? reply.messages : []) {\n        const to = idx(m && m.to);\n        const body = String((m && m.text) ?? '').trim().slice(0, 1000);\n        if (to === undefined || !nbrs.has(to) || !body) { invalid++; continue; }\n        sent.push({ tick: ph.tick, from: i, to, text: body });\n        count++;\n      }\n      const fields = { sent: count, invalid };\n      if (run.experiment === 'structure') {\n        const want = nameList(reply.connect).filter((j) => j !== i && !nbrs.has(j) && agents[i].heard.includes(j));\n        for (const j of want) asked.push({ from: i, to: j });\n        const waiting = new Set(state.requests.filter((r) => r.to === i).map((r) => r.from));\n        const yes = nameList(reply.accept).filter((j) => waiting.has(j));\n        for (const j of yes) accepted.push({ from: j, to: i });\n        fields.detail = JSON.stringify({ connect: want.map((j) => agents[j].name), accept: yes.map((j) => agents[j].name), decline: nameList(reply.decline).filter((j) => waiting.has(j)).map((j) => agents[j].name) });\n      }\n      turn(i, text, fields);\n    });\n    // Deliver. A tie is written only when both sides agreed: an accepted request, or two agents asking each other.\n    for (const m of sent) state.messages.push({ seq: state.messages.length + 1, ...m });\n    const have = new Set(state.edges.map(([a, b]) => edgeKey(a, b)));\n    const tie = (from, to) => {\n      if (have.has(edgeKey(from, to))) return;\n      have.add(edgeKey(from, to));\n      state.edges.push(from < to ? [from, to] : [to, from]);\n      state.ties.push({ tick: ph.tick, from, to });\n    };\n    for (const r of accepted) tie(r.from, r.to);\n    for (const r of asked) if (asked.some((o) => o.from === r.to && o.to === r.from)) tie(r.from, r.to);\n    // Requests live for one tick: the ones just made are shown to their targets on the next tick.\n    state.requests = asked.filter((r) => !have.has(edgeKey(r.from, r.to)));\n    if (run.experiment === 'structure') {\n      // An agent can only meet someone whose name appeared in its inbox (or who asked to connect).\n      const hear = (i, j) => { if (j !== i && !agents[i].heard.includes(j)) agents[i].heard.push(j); };\n      for (const m of sent) agents.forEach((a, j) => { if (new RegExp(`\\\\b${a.name}\\\\b`).test(m.text)) hear(m.to, j); });\n      for (const r of state.requests) hear(r.to, r.from);\n      for (const a of agents) a.heard = a.heard.filter((j) => !have.has(edgeKey(a.agent - 1, j))).sort((x, y) => x - y);\n    }\n  } else if (ph.kind === 'belief') {\n    replies.forEach((text, n) => {\n      const m = String(text).match(/\\b(100|\\d{1,2})\\b/);\n      turn(state.meta[n].i, text, m ? { belief: Number(m[1]) } : { ok: false, error: text ? 'no number 0-100 in the reply' : 'empty reply' });\n    });\n  } else if (ph.kind === 'names') {\n    replies.forEach((text, n) => {\n      const list = text ? simJson(text, '[') : null;\n      const question = ph.tick === 0 ? 'names_start' : 'names_end';\n      if (!Array.isArray(list)) { turn(state.meta[n].i, text, { question, ok: false, error: text ? 'no JSON array in the reply' : 'empty reply' }); return; }\n      const said = list.map((s) => String(s).trim().toLowerCase());\n      turn(state.meta[n].i, text, {\n        question,\n        names: JSON.stringify(agents.filter((a) => said.includes(a.name.toLowerCase())).map((a) => a.name)),\n        fakes: SIM_FAKE_NAMES.filter((f) => said.includes(f.toLowerCase())).length,\n      });\n    });\n  } else if (ph.kind === 'interview') {\n    replies.forEach((text, n) => {\n      const { i, question } = state.meta[n];\n      if (!text) { turn(i, text, { question, ok: false, error: 'empty reply' }); return; }\n      if (question === 'open') { turn(i, text, { question }); return; }\n      const m = String(text).match(/^\\W*(yes|no)\\b/i);\n      turn(i, text, m ? { question, answer: m[1].toLowerCase() } : { question, ok: false, error: 'reply does not start with YES or NO' });\n    });\n  } else if (ph.kind === 'judge') {\n    replies.forEach((text, n) => {\n      const { units } = state.meta[n];\n      const list = text ? simJson(text, '[') : null;\n      const ok = Array.isArray(list) && list.length === units.length;\n      turn(null, text, ok ? {} : { ok: false, error: text ? `expected ${units.length} labels` : 'empty reply' });\n      if (!ok) return;\n      units.forEach((u, k) => {\n        const label = list[k] || {};\n        if (run.experiment === 'dynamics') {\n          if (['on', 'off', 'unsure', 'none'].includes(label.stance)) state.messages[u.message].stance = label.stance;\n        } else if (typeof label.carries === 'boolean') {\n          const value = label.carries ? 'yes' : 'no';\n          if (u.message !== undefined) state.messages[u.message].carries_event = value; else state.turns[u.turn].judge = value;\n        }\n      });\n    });\n  }\n  state.meta = [];\n  state.phase++;\n  return state;\n}\n\nconst simDone = (state) => state.phase >= state.phases.length;\nconst simProgress = (state) => {\n  if (simDone(state)) return 'done';\n  const ph = state.phases[state.phase];\n  return `${ph.kind} ${ph.tick}/${state.run.ticks}`;\n};\n\n// Baserow rows of a finished run. `execution` marks the attempt, so rows of an abandoned attempt can be told apart.\nfunction simRows(state, execution) {\n  const { run, agents } = state;\n  const name = (i) => (i === null || i === undefined ? '' : agents[i].name);\n  const num = (i) => (i === null || i === undefined ? null : agents[i].agent);\n  return {\n    sim_messages: state.messages.map((m) => ({\n      key: `${run.run_id}:m${m.seq}`, run_id: run.run_id, execution, seq: m.seq, tick: m.tick,\n      sender: name(m.from), sender_agent: num(m.from), recipient: name(m.to), recipient_agent: num(m.to),\n      text: m.text, carries_event: m.carries_event || '', stance: m.stance || '',\n    })),\n    sim_turns: state.turns.map((t, n) => ({\n      key: `${run.run_id}:t${n + 1}`, run_id: run.run_id, execution, tick: t.tick, phase: t.phase, question: t.question || '',\n      agent: name(t.agent), agent_number: num(t.agent), participant_id: t.agent === null ? null : agents[t.agent].participant_id,\n      ok: t.ok, error: t.error, raw_output: t.raw_output, sent: t.sent ?? null, invalid: t.invalid ?? null, detail: t.detail || '',\n      belief: t.belief ?? null, answer: t.answer || '', judge: t.judge || '', names: t.names || '', fakes: t.fakes ?? null,\n    })),\n    sim_ties: state.ties.map((t) => ({\n      key: `${run.run_id}:${edgeKey(num(t.from), num(t.to))}`, run_id: run.run_id, execution, tick: t.tick,\n      requester: name(t.from), requester_agent: num(t.from), accepter: name(t.to), accepter_agent: num(t.to),\n    })),\n  };\n}\n// ---- end lib/sim.js ----\nconst state = $input.first().json.state;\nconst calls = simPrompts(state);\nif (!state.pending) state.pending = { replies: calls.map(() => ''), tries: 0 };\n// No temperature on the run = the model's own default.\nconst temperature = (c) => (c.temperature === null || c.temperature === undefined ? {} : { temperature: c.temperature });\nconst open = calls.map((c, n) => ({ ...c, n })).filter((c) => !state.pending.replies[c.n]);\nreturn open.map((c, k) => ({\n  json: {\n    ...c,\n    body: c.provider === 'ollama'\n      ? { model: c.model, stream: false, think: false, messages: [{ role: 'user', content: c.prompt }], options: temperature(c) }\n      : { messages: [{ role: 'user', content: [{ text: c.prompt }] }], inferenceConfig: { maxTokens: 4000, ...temperature(c) } },\n    ...(k === 0 ? { state } : {}),\n  },\n}));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "Build prompts",
+      "position": [
+        1920,
+        0
+      ],
+      "id": "build-prompts"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "Bedrock?-cond",
+              "leftValue": "={{ $json.provider === 'bedrock' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "name": "Bedrock?",
+      "position": [
+        2160,
+        0
+      ],
+      "id": "bedrock"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://bedrock-runtime.us-east-1.amazonaws.com/model/{{ encodeURIComponent($json.model) }}/converse",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "aws",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.body) }}",
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 25,
+              "batchInterval": 1000
+            }
+          },
+          "timeout": 180000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "name": "Ask Bedrock",
+      "position": [
+        2400,
+        -100
+      ],
+      "onError": "continueRegularOutput",
+      "id": "ask-bedrock"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:11434/api/chat",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.body) }}",
+        "options": {
+          "timeout": 1800000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "name": "Ask Ollama",
+      "position": [
+        2400,
+        140
+      ],
+      "onError": "continueRegularOutput",
+      "id": "ask-ollama"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Fold the replies of this phase into the state and move on. Failed calls get two more tries before they\n// count as an agent staying quiet. A phase with nothing to ask (a judge with no messages) is skipped here.\n// Output: the state, plus the progress fields for the sim_runs row.\n// ---- lib/graph.js ----\n// Graph helpers for the network experiments (spliced into Code nodes via `// @include lib/graph.js`).\n// A graph is n nodes (0..n-1) and a list of undirected edges [a, b] with a < b.\n\n// Seeded random numbers (mulberry32): the same seed always gives the same sequence.\nfunction rng(seed) {\n  let a = seed >>> 0;\n  return () => {\n    a = (a + 0x6D2B79F5) >>> 0;\n    let t = a;\n    t = Math.imul(t ^ (t >>> 15), t | 1);\n    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);\n    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;\n  };\n}\nconst pick = (list, rand) => list[Math.floor(rand() * list.length)];\nconst edgeKey = (a, b) => (a < b ? `${a}-${b}` : `${b}-${a}`);\n\nfunction adjacency(n, edges) {\n  const adj = Array.from({ length: n }, () => new Set());\n  for (const [a, b] of edges) { adj[a].add(b); adj[b].add(a); }\n  return adj;\n}\n\n// Hop distance from `start` to every node (Infinity when unreachable).\nfunction distances(n, edges, start) {\n  const adj = adjacency(n, edges);\n  const dist = Array(n).fill(Infinity);\n  dist[start] = 0;\n  const queue = [start];\n  for (let q = 0; q < queue.length; q++) for (const nb of adj[queue[q]]) if (dist[nb] === Infinity) { dist[nb] = dist[queue[q]] + 1; queue.push(nb); }\n  return dist;\n}\nconst isConnected = (n, edges) => distances(n, edges, 0).every((d) => d < Infinity);\n\n// Watts-Strogatz small world: a ring where everyone knows k nearest neighbours (k even), each edge\n// rewired with probability beta. Redrawn until connected.\nfunction smallWorld(n, k, beta, rand) {\n  for (;;) {\n    const keys = new Set();\n    for (let i = 0; i < n; i++) for (let j = 1; j <= k / 2; j++) keys.add(edgeKey(i, (i + j) % n));\n    for (let i = 0; i < n; i++) {\n      for (let j = 1; j <= k / 2; j++) {\n        if (rand() >= beta) continue;\n        const free = [];\n        for (let c = 0; c < n; c++) if (c !== i && !keys.has(edgeKey(i, c))) free.push(c);\n        if (!free.length) continue;\n        keys.delete(edgeKey(i, (i + j) % n));\n        keys.add(edgeKey(i, pick(free, rand)));\n      }\n    }\n    const edges = [...keys].map((s) => s.split('-').map(Number)).sort((x, y) => x[0] - y[0] || x[1] - y[1]);\n    if (isConnected(n, edges)) return edges;\n  }\n}\n\n// Barabasi-Albert preferential attachment: each new node links to m existing nodes, favouring the\n// well connected. Gives a few hubs and many peripheral nodes.\nfunction prefAttach(n, m, rand) {\n  const edges = [];\n  const ends = [];\n  for (let i = 0; i <= m; i++) for (let j = i + 1; j <= m; j++) { edges.push([i, j]); ends.push(i, j); }\n  for (let v = m + 1; v < n; v++) {\n    const targets = new Set();\n    while (targets.size < m) targets.add(pick(ends, rand));\n    for (const t of targets) { edges.push([t, v]); ends.push(t, v); }\n  }\n  return edges.sort((x, y) => x[0] - y[0] || x[1] - y[1]);\n}\n\nconst density = (n, edges) => (2 * edges.length) / (n * (n - 1));\n\n// Share of connected triples that are closed (global clustering coefficient).\nfunction clustering(n, edges) {\n  const adj = adjacency(n, edges);\n  let triples = 0;\n  let closed = 0;\n  for (let v = 0; v < n; v++) {\n    const nb = [...adj[v]];\n    for (let i = 0; i < nb.length; i++) for (let j = i + 1; j < nb.length; j++) { triples++; if (adj[nb[i]].has(nb[j])) closed++; }\n  }\n  return triples ? closed / triples : 0;\n}\n\nfunction degreeSd(n, edges) {\n  const deg = adjacency(n, edges).map((s) => s.size);\n  const m = deg.reduce((a, b) => a + b, 0) / n;\n  return Math.sqrt(deg.reduce((a, d) => a + (d - m) ** 2, 0) / n);\n}\n// ---- end lib/graph.js ----\n// ---- lib/sim.js ----\n// Simulation engine for the three network experiments (spliced into Code nodes via `// @include lib/sim.js`;\n// needs lib/graph.js). One run is a list of phases. Each phase is one round of model calls:\n//   simStart(run, cast, network) -> state\n//   simPrompts(state)            -> the calls of the current phase (and remembers what each call is for)\n//   simApply(state, replies)     -> folds the replies into the state and moves to the next phase\n//   simRows(state, execution)    -> the Baserow rows of the finished run\n// Ticks are synchronous: at tick t every agent sees the messages sent before t; what it sends arrives at t+1.\nconst SIM_SLOTS = ['8 am', '10 am', 'noon', '2 pm', '4 pm', '6 pm', '8 pm', '10 pm'];\nconst SIM_FAKE_NAMES = ['Marlow', 'Tatum', 'Lennox', 'Shiloh', 'Arden'];\nconst SIM_OUTSIDER = 'Riley'; // the host in the dynamics experiment; not in the network, so nobody can ask them\nconst SIM_VENUE = 'Saturday at 7 pm at the Rosewood Park pavilion';\nconst SIM_JUDGE_CHUNK = 20;\n\nconst simTime = (tick) => `Day ${Math.floor((tick - 1) / SIM_SLOTS.length) + 1}, ${SIM_SLOTS[(tick - 1) % SIM_SLOTS.length]}`;\n\nfunction simPhases(experiment, ticks) {\n  const phases = [];\n  if (experiment === 'structure') phases.push({ kind: 'names', tick: 0 });\n  if (experiment === 'dynamics') phases.push({ kind: 'belief', tick: 0 });\n  for (let t = 1; t <= ticks; t++) {\n    phases.push({ kind: 'act', tick: t });\n    if (experiment === 'dynamics') phases.push({ kind: 'belief', tick: t });\n  }\n  if (experiment === 'propagation') phases.push({ kind: 'interview', tick: ticks });\n  if (experiment === 'structure') phases.push({ kind: 'names', tick: ticks });\n  if (experiment !== 'structure') phases.push({ kind: 'judge', tick: ticks });\n  return phases;\n}\n\n// cast: [{ agent (1..n), name, participant_id, persona }] ordered by agent; node i of the network is agent i+1.\nfunction simStart(run, cast, network) {\n  const roles = network.roles;\n  const agents = cast.map((c) => ({ agent: c.agent, name: c.name, participant_id: c.participant_id, persona: c.persona, notes: [], heard: [] }));\n  const state = {\n    run, agents, roles,\n    edges: network.edges.map((e) => [...e]),\n    phases: simPhases(run.experiment, run.ticks), phase: 0,\n    messages: [], turns: [], ties: [], requests: [], meta: [], calls: 0, failures: 0,\n  };\n  if (run.experiment === 'dynamics') {\n    for (const a of agents) a.notes.push(`${SIM_OUTSIDER} mentioned maybe having a birthday party this Saturday, but it wasn't settled.`);\n    const [on, off] = run.condition === 'on_at_hub' ? [roles.hub, roles.peripheral] : [roles.peripheral, roles.hub];\n    agents[on].notes.push(`I just talked to ${SIM_OUTSIDER}: the birthday party this Saturday is definitely on.`);\n    agents[off].notes.push(`I just heard from ${SIM_OUTSIDER}: the birthday party this Saturday is cancelled.`);\n    state.event = `${SIM_OUTSIDER}'s birthday party this Saturday`;\n  } else {\n    const host = agents[roles.seed];\n    if (run.arm !== 'control') host.notes.push(`I'm throwing my birthday party this ${SIM_VENUE}. I want everyone to come, so I should invite people and ask them to pass it on.`);\n    state.event = `${host.name}'s birthday party (this ${SIM_VENUE})`;\n  }\n  return state;\n}\n\nconst simNeighbors = (state, i) => state.edges.filter((e) => e.includes(i)).map((e) => (e[0] === i ? e[1] : e[0])).sort((a, b) => a - b);\n\nconst simIdentity = (a) => `You are ${a.name}. Stay in character as the person described below.\n\nAbout you. These are your own answers to a personality questionnaire, where 1 = disagree strongly and 5 = agree strongly:\n${a.persona}`;\n\n// What agent i remembers: its notes, inbox and outbox up to and including tick `upto`.\nfunction simMemory(state, i, upto) {\n  const a = state.agents[i];\n  const inbox = state.messages.filter((m) => m.to === i && m.tick <= upto).map((m) => `[${simTime(m.tick)}] From ${state.agents[m.from].name}: ${m.text}`);\n  const outbox = state.messages.filter((m) => m.from === i && m.tick <= upto).map((m) => `[${simTime(m.tick)}] To ${state.agents[m.to].name}: ${m.text}`);\n  return `${a.notes.length ? `Your notes:\\n${a.notes.map((n) => `- ${n}`).join('\\n')}\\n\\n` : ''}Messages you received (oldest first):\n${inbox.join('\\n') || '(none)'}\n\nMessages you sent (oldest first):\n${outbox.join('\\n') || '(none)'}`;\n}\n\nfunction simActPrompt(state, i, tick) {\n  const a = state.agents[i];\n  const names = (list) => list.map((j) => state.agents[j].name).join(', ') || '(nobody)';\n  const structure = state.run.experiment === 'structure';\n  const waiting = state.requests.filter((r) => r.to === i).map((r) => r.from);\n  return `${simIdentity(a)}\n\nIt is ${simTime(tick)}. You use a direct-messaging app.\nYour connections: ${names(simNeighbors(state, i))}.${structure ? `\nPeople you have heard of but are not connected with: ${names(a.heard)}.\nConnection requests waiting for your answer: ${names(waiting)}.` : ''}\n\n${simMemory(state, i, tick - 1)}\n\nDecide what to do right now. You can send direct messages to one or more of your connections, or stay quiet.${structure ? ' You can also ask to connect with someone you have heard of, and accept or decline each waiting request.' : ''}\n\nReply with only a JSON object and nothing else:\n{\"messages\": [{\"to\": \"<name of a connection>\", \"text\": \"<your message>\"}]${structure ? ', \"connect\": [\"<name>\"], \"accept\": [\"<name>\"], \"decline\": [\"<name>\"]' : ''}}\nUse an empty list for anything you do not do.`;\n}\n\nconst simInterviewPrompt = (state, i, question) => `${simIdentity(state.agents[i])}\n\nThis is everything you remember:\n\n${simMemory(state, i, state.run.ticks)}\n\n${question}`;\n\nfunction simJudgePrompt(state, units) {\n  const list = units.map((u, n) => `${n + 1}. ${JSON.stringify(u.text)}`).join('\\n');\n  if (state.run.experiment === 'dynamics') {\n    return `You are labelling short texts for a study. The topic: ${state.event}.\nFor each numbered text, give its stance on whether the party will happen:\n- \"on\": says or implies the party is happening\n- \"off\": says or implies the party is cancelled or not happening\n- \"unsure\": mentions the party without taking a side, or asks about it\n- \"none\": does not mention the party\n\nTexts:\n${list}\n\nReply with only a JSON array, one entry per text, in order: [{\"n\": 1, \"stance\": \"on\"}]`;\n  }\n  return `You are labelling short texts for a study. The event of interest: ${state.event}.\nFor each numbered text, decide whether it tells the reader about this event: that the party is happening, an invitation to it, or any of its details. A text that mentions the host without the party does not count.\n\nTexts:\n${list}\n\nReply with only a JSON array, one entry per text, in order: [{\"n\": 1, \"carries\": true}]`;\n}\n\n// The model calls of the current phase: [{ prompt, provider, model, temperature }]. Remembers in\n// state.meta what each call is for, so simApply only needs the reply texts in the same order.\nfunction simPrompts(state) {\n  const { run, agents } = state;\n  const ph = state.phases[state.phase];\n  const all = agents.map((_, i) => i);\n  const subject = { provider: run.provider, model: run.model, temperature: run.temperature };\n  let calls = [];\n  if (ph.kind === 'act') {\n    calls = all.map((i) => ({ meta: { i }, prompt: simActPrompt(state, i, ph.tick) }));\n  } else if (ph.kind === 'belief') {\n    calls = all.map((i) => ({\n      meta: { i },\n      prompt: `${simIdentity(agents[i])}\n\nIt is ${ph.tick ? simTime(ph.tick) : 'Day 1, before 8 am'}. This is everything you know:\n\n${simMemory(state, i, ph.tick)}\n\nHow likely is it that ${state.event} will happen? Reply with a single whole number from 0 (certainly not happening) to 100 (certainly happening), and nothing else.`,\n    }));\n  } else if (ph.kind === 'names') {\n    calls = all.map((i) => {\n      const list = [...agents.filter((_, j) => j !== i).map((a) => a.name), ...SIM_FAKE_NAMES].sort();\n      return { meta: { i }, prompt: simInterviewPrompt(state, i, `An interviewer asks: \"Which of these people do you know?\"\\n${list.join(', ')}\\n\\nReply with only a JSON array of the names you know, and nothing else. Use [] if you know none of them.`) };\n    });\n  } else if (ph.kind === 'interview') {\n    const host = agents[state.roles.seed].name;\n    const decoy = agents[state.roles.decoy].name;\n    const yesNo = (what) => `An interviewer asks: \"Have you heard about ${what}?\"\\n\\nStart your reply with YES or NO, then say in one sentence what you know about it.`;\n    for (const i of all) {\n      calls.push({ meta: { i, question: 'open' }, prompt: simInterviewPrompt(state, i, 'An interviewer asks: \"Is there anything coming up that you know about, any events or plans?\"\\n\\nAnswer in one or two sentences.') });\n      calls.push({ meta: { i, question: 'cued' }, prompt: simInterviewPrompt(state, i, yesNo(`${host}'s birthday party`)) });\n      calls.push({ meta: { i, question: 'decoy' }, prompt: simInterviewPrompt(state, i, yesNo(`${decoy}'s housewarming`)) });\n    }\n  } else if (ph.kind === 'judge') {\n    // The judge sees only texts: no arm, no sender, no run. Messages first, then the open-recall answers.\n    const units = [\n      ...state.messages.map((m, n) => ({ message: n, text: m.text })),\n      ...state.turns.map((t, n) => ({ turn: n, text: t.raw_output, t })).filter((u) => u.t.question === 'open' && u.t.ok).map(({ t, ...u }) => u),\n    ];\n    for (let c = 0; c < units.length; c += SIM_JUDGE_CHUNK) {\n      const chunk = units.slice(c, c + SIM_JUDGE_CHUNK);\n      calls.push({ meta: { units: chunk.map(({ text, ...u }) => u) }, prompt: simJudgePrompt(state, chunk), provider: run.judge_provider, model: run.judge_model, temperature: 0 });\n    }\n  }\n  state.meta = calls.map((c) => c.meta);\n  return calls.map(({ meta, ...c }) => ({ ...subject, ...c }));\n}\n\n// The first {...} or [...] in a reply, parsed; null when there is none.\nfunction simJson(text, open) {\n  const close = open === '{' ? '}' : ']';\n  const start = text.indexOf(open);\n  const end = text.lastIndexOf(close);\n  if (start < 0 || end <= start) return null;\n  try { return JSON.parse(text.slice(start, end + 1)); } catch (e) { return null; }\n}\n\n// replies: one entry per call of simPrompts, in order: the reply text, or '' when the call failed.\nfunction simApply(state, replies) {\n  const { run, agents } = state;\n  const ph = state.phases[state.phase];\n  const byName = new Map(agents.map((a, i) => [a.name.toLowerCase(), i]));\n  const idx = (name) => byName.get(String(name ?? '').trim().toLowerCase());\n  const nameList = (v) => (Array.isArray(v) ? v.map(idx).filter((j) => j !== undefined) : []);\n  const turn = (i, text, fields) => {\n    const t = { tick: ph.tick, phase: ph.kind, agent: i, raw_output: String(text).slice(0, 4000), ok: true, error: '', ...fields };\n    if (!t.ok) state.failures++;\n    state.turns.push(t);\n    return t;\n  };\n  state.calls += replies.length;\n\n  if (ph.kind === 'act') {\n    const sent = [];\n    const asked = [];\n    const accepted = [];\n    replies.forEach((text, n) => {\n      const { i } = state.meta[n];\n      const reply = text ? simJson(text, '{') : null;\n      if (!reply) { turn(i, text, { ok: false, error: text ? 'no JSON object in the reply' : 'empty reply', sent: 0 }); return; }\n      const nbrs = new Set(simNeighbors(state, i));\n      let invalid = 0;\n      let count = 0;\n      for (const m of Array.isArray(reply.messages) ? reply.messages : []) {\n        const to = idx(m && m.to);\n        const body = String((m && m.text) ?? '').trim().slice(0, 1000);\n        if (to === undefined || !nbrs.has(to) || !body) { invalid++; continue; }\n        sent.push({ tick: ph.tick, from: i, to, text: body });\n        count++;\n      }\n      const fields = { sent: count, invalid };\n      if (run.experiment === 'structure') {\n        const want = nameList(reply.connect).filter((j) => j !== i && !nbrs.has(j) && agents[i].heard.includes(j));\n        for (const j of want) asked.push({ from: i, to: j });\n        const waiting = new Set(state.requests.filter((r) => r.to === i).map((r) => r.from));\n        const yes = nameList(reply.accept).filter((j) => waiting.has(j));\n        for (const j of yes) accepted.push({ from: j, to: i });\n        fields.detail = JSON.stringify({ connect: want.map((j) => agents[j].name), accept: yes.map((j) => agents[j].name), decline: nameList(reply.decline).filter((j) => waiting.has(j)).map((j) => agents[j].name) });\n      }\n      turn(i, text, fields);\n    });\n    // Deliver. A tie is written only when both sides agreed: an accepted request, or two agents asking each other.\n    for (const m of sent) state.messages.push({ seq: state.messages.length + 1, ...m });\n    const have = new Set(state.edges.map(([a, b]) => edgeKey(a, b)));\n    const tie = (from, to) => {\n      if (have.has(edgeKey(from, to))) return;\n      have.add(edgeKey(from, to));\n      state.edges.push(from < to ? [from, to] : [to, from]);\n      state.ties.push({ tick: ph.tick, from, to });\n    };\n    for (const r of accepted) tie(r.from, r.to);\n    for (const r of asked) if (asked.some((o) => o.from === r.to && o.to === r.from)) tie(r.from, r.to);\n    // Requests live for one tick: the ones just made are shown to their targets on the next tick.\n    state.requests = asked.filter((r) => !have.has(edgeKey(r.from, r.to)));\n    if (run.experiment === 'structure') {\n      // An agent can only meet someone whose name appeared in its inbox (or who asked to connect).\n      const hear = (i, j) => { if (j !== i && !agents[i].heard.includes(j)) agents[i].heard.push(j); };\n      for (const m of sent) agents.forEach((a, j) => { if (new RegExp(`\\\\b${a.name}\\\\b`).test(m.text)) hear(m.to, j); });\n      for (const r of state.requests) hear(r.to, r.from);\n      for (const a of agents) a.heard = a.heard.filter((j) => !have.has(edgeKey(a.agent - 1, j))).sort((x, y) => x - y);\n    }\n  } else if (ph.kind === 'belief') {\n    replies.forEach((text, n) => {\n      const m = String(text).match(/\\b(100|\\d{1,2})\\b/);\n      turn(state.meta[n].i, text, m ? { belief: Number(m[1]) } : { ok: false, error: text ? 'no number 0-100 in the reply' : 'empty reply' });\n    });\n  } else if (ph.kind === 'names') {\n    replies.forEach((text, n) => {\n      const list = text ? simJson(text, '[') : null;\n      const question = ph.tick === 0 ? 'names_start' : 'names_end';\n      if (!Array.isArray(list)) { turn(state.meta[n].i, text, { question, ok: false, error: text ? 'no JSON array in the reply' : 'empty reply' }); return; }\n      const said = list.map((s) => String(s).trim().toLowerCase());\n      turn(state.meta[n].i, text, {\n        question,\n        names: JSON.stringify(agents.filter((a) => said.includes(a.name.toLowerCase())).map((a) => a.name)),\n        fakes: SIM_FAKE_NAMES.filter((f) => said.includes(f.toLowerCase())).length,\n      });\n    });\n  } else if (ph.kind === 'interview') {\n    replies.forEach((text, n) => {\n      const { i, question } = state.meta[n];\n      if (!text) { turn(i, text, { question, ok: false, error: 'empty reply' }); return; }\n      if (question === 'open') { turn(i, text, { question }); return; }\n      const m = String(text).match(/^\\W*(yes|no)\\b/i);\n      turn(i, text, m ? { question, answer: m[1].toLowerCase() } : { question, ok: false, error: 'reply does not start with YES or NO' });\n    });\n  } else if (ph.kind === 'judge') {\n    replies.forEach((text, n) => {\n      const { units } = state.meta[n];\n      const list = text ? simJson(text, '[') : null;\n      const ok = Array.isArray(list) && list.length === units.length;\n      turn(null, text, ok ? {} : { ok: false, error: text ? `expected ${units.length} labels` : 'empty reply' });\n      if (!ok) return;\n      units.forEach((u, k) => {\n        const label = list[k] || {};\n        if (run.experiment === 'dynamics') {\n          if (['on', 'off', 'unsure', 'none'].includes(label.stance)) state.messages[u.message].stance = label.stance;\n        } else if (typeof label.carries === 'boolean') {\n          const value = label.carries ? 'yes' : 'no';\n          if (u.message !== undefined) state.messages[u.message].carries_event = value; else state.turns[u.turn].judge = value;\n        }\n      });\n    });\n  }\n  state.meta = [];\n  state.phase++;\n  return state;\n}\n\nconst simDone = (state) => state.phase >= state.phases.length;\nconst simProgress = (state) => {\n  if (simDone(state)) return 'done';\n  const ph = state.phases[state.phase];\n  return `${ph.kind} ${ph.tick}/${state.run.ticks}`;\n};\n\n// Baserow rows of a finished run. `execution` marks the attempt, so rows of an abandoned attempt can be told apart.\nfunction simRows(state, execution) {\n  const { run, agents } = state;\n  const name = (i) => (i === null || i === undefined ? '' : agents[i].name);\n  const num = (i) => (i === null || i === undefined ? null : agents[i].agent);\n  return {\n    sim_messages: state.messages.map((m) => ({\n      key: `${run.run_id}:m${m.seq}`, run_id: run.run_id, execution, seq: m.seq, tick: m.tick,\n      sender: name(m.from), sender_agent: num(m.from), recipient: name(m.to), recipient_agent: num(m.to),\n      text: m.text, carries_event: m.carries_event || '', stance: m.stance || '',\n    })),\n    sim_turns: state.turns.map((t, n) => ({\n      key: `${run.run_id}:t${n + 1}`, run_id: run.run_id, execution, tick: t.tick, phase: t.phase, question: t.question || '',\n      agent: name(t.agent), agent_number: num(t.agent), participant_id: t.agent === null ? null : agents[t.agent].participant_id,\n      ok: t.ok, error: t.error, raw_output: t.raw_output, sent: t.sent ?? null, invalid: t.invalid ?? null, detail: t.detail || '',\n      belief: t.belief ?? null, answer: t.answer || '', judge: t.judge || '', names: t.names || '', fakes: t.fakes ?? null,\n    })),\n    sim_ties: state.ties.map((t) => ({\n      key: `${run.run_id}:${edgeKey(num(t.from), num(t.to))}`, run_id: run.run_id, execution, tick: t.tick,\n      requester: name(t.from), requester_agent: num(t.from), accepter: name(t.to), accepter_agent: num(t.to),\n    })),\n  };\n}\n// ---- end lib/sim.js ----\nconst built = $('Build prompts').all();\nconst state = built[0].json.state;\nconst answers = $input.all().map((i) => i.json);\nif (answers.length !== built.length) throw new Error(`${built.length} calls went out, ${answers.length} replies came back`);\n// Ollama replies in message.content; Bedrock Converse in output.message.content, where only the text parts count.\nconst textOf = (a) => (a.message && typeof a.message.content === 'string' ? a.message.content : ((a.output && a.output.message && a.output.message.content) || []).map((part) => part.text || '').join(''));\nanswers.forEach((a, k) => { state.pending.replies[built[k].json.n] = textOf(a).trim(); });\nconst { replies, tries } = state.pending;\nconst failed = replies.filter((r) => !r).length;\n// Every call failing is a broken model or credential, not agents staying quiet: stop instead of recording an empty run.\nif (failed === replies.length) throw new Error(`Every model call of this phase failed: ${JSON.stringify(answers[0].error || answers[0]).slice(0, 400)}`);\nif (failed && tries < 2) {\n  state.pending.tries++;\n} else {\n  delete state.pending;\n  simApply(state, replies);\n  while (!simDone(state) && simPrompts(state).length === 0) simApply(state, []);\n}\nreturn [{\n  json: {\n    state, done: simDone(state), id: state.run.id, progress: simProgress(state), calls: state.calls, failures: state.failures, messages: state.messages.length,\n    locked_at: new Date().toISOString().replace(/\\.\\d{3}Z$/, '+00:00'), locked_by: $execution.id,\n  },\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "Apply replies",
+      "position": [
+        2740,
+        0
+      ],
+      "id": "apply-replies"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "update",
+        "databaseId": "={{ $('Read: sim_runs').params.databaseId }}",
+        "tableId": "={{ $('Read: sim_runs').params.tableId }}",
+        "rowId": "={{ $json.id }}",
+        "dataToSend": "autoMapInputData",
+        "inputsToIgnore": "id,state,done"
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Update: sim_runs (progress)",
+      "position": [
+        2980,
+        -200
+      ],
+      "id": "update-sim-runs-progress"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "Done?-cond",
+              "leftValue": "={{ $json.done }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "name": "Done?",
+      "position": [
+        2980,
+        0
+      ],
+      "id": "done"
+    },
+    {
+      "parameters": {
+        "jsCode": "// The run is over: turn the state into rows for sim_messages, sim_turns and sim_ties, and the final sim_runs update.\n// ---- lib/graph.js ----\n// Graph helpers for the network experiments (spliced into Code nodes via `// @include lib/graph.js`).\n// A graph is n nodes (0..n-1) and a list of undirected edges [a, b] with a < b.\n\n// Seeded random numbers (mulberry32): the same seed always gives the same sequence.\nfunction rng(seed) {\n  let a = seed >>> 0;\n  return () => {\n    a = (a + 0x6D2B79F5) >>> 0;\n    let t = a;\n    t = Math.imul(t ^ (t >>> 15), t | 1);\n    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);\n    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;\n  };\n}\nconst pick = (list, rand) => list[Math.floor(rand() * list.length)];\nconst edgeKey = (a, b) => (a < b ? `${a}-${b}` : `${b}-${a}`);\n\nfunction adjacency(n, edges) {\n  const adj = Array.from({ length: n }, () => new Set());\n  for (const [a, b] of edges) { adj[a].add(b); adj[b].add(a); }\n  return adj;\n}\n\n// Hop distance from `start` to every node (Infinity when unreachable).\nfunction distances(n, edges, start) {\n  const adj = adjacency(n, edges);\n  const dist = Array(n).fill(Infinity);\n  dist[start] = 0;\n  const queue = [start];\n  for (let q = 0; q < queue.length; q++) for (const nb of adj[queue[q]]) if (dist[nb] === Infinity) { dist[nb] = dist[queue[q]] + 1; queue.push(nb); }\n  return dist;\n}\nconst isConnected = (n, edges) => distances(n, edges, 0).every((d) => d < Infinity);\n\n// Watts-Strogatz small world: a ring where everyone knows k nearest neighbours (k even), each edge\n// rewired with probability beta. Redrawn until connected.\nfunction smallWorld(n, k, beta, rand) {\n  for (;;) {\n    const keys = new Set();\n    for (let i = 0; i < n; i++) for (let j = 1; j <= k / 2; j++) keys.add(edgeKey(i, (i + j) % n));\n    for (let i = 0; i < n; i++) {\n      for (let j = 1; j <= k / 2; j++) {\n        if (rand() >= beta) continue;\n        const free = [];\n        for (let c = 0; c < n; c++) if (c !== i && !keys.has(edgeKey(i, c))) free.push(c);\n        if (!free.length) continue;\n        keys.delete(edgeKey(i, (i + j) % n));\n        keys.add(edgeKey(i, pick(free, rand)));\n      }\n    }\n    const edges = [...keys].map((s) => s.split('-').map(Number)).sort((x, y) => x[0] - y[0] || x[1] - y[1]);\n    if (isConnected(n, edges)) return edges;\n  }\n}\n\n// Barabasi-Albert preferential attachment: each new node links to m existing nodes, favouring the\n// well connected. Gives a few hubs and many peripheral nodes.\nfunction prefAttach(n, m, rand) {\n  const edges = [];\n  const ends = [];\n  for (let i = 0; i <= m; i++) for (let j = i + 1; j <= m; j++) { edges.push([i, j]); ends.push(i, j); }\n  for (let v = m + 1; v < n; v++) {\n    const targets = new Set();\n    while (targets.size < m) targets.add(pick(ends, rand));\n    for (const t of targets) { edges.push([t, v]); ends.push(t, v); }\n  }\n  return edges.sort((x, y) => x[0] - y[0] || x[1] - y[1]);\n}\n\nconst density = (n, edges) => (2 * edges.length) / (n * (n - 1));\n\n// Share of connected triples that are closed (global clustering coefficient).\nfunction clustering(n, edges) {\n  const adj = adjacency(n, edges);\n  let triples = 0;\n  let closed = 0;\n  for (let v = 0; v < n; v++) {\n    const nb = [...adj[v]];\n    for (let i = 0; i < nb.length; i++) for (let j = i + 1; j < nb.length; j++) { triples++; if (adj[nb[i]].has(nb[j])) closed++; }\n  }\n  return triples ? closed / triples : 0;\n}\n\nfunction degreeSd(n, edges) {\n  const deg = adjacency(n, edges).map((s) => s.size);\n  const m = deg.reduce((a, b) => a + b, 0) / n;\n  return Math.sqrt(deg.reduce((a, d) => a + (d - m) ** 2, 0) / n);\n}\n// ---- end lib/graph.js ----\n// ---- lib/sim.js ----\n// Simulation engine for the three network experiments (spliced into Code nodes via `// @include lib/sim.js`;\n// needs lib/graph.js). One run is a list of phases. Each phase is one round of model calls:\n//   simStart(run, cast, network) -> state\n//   simPrompts(state)            -> the calls of the current phase (and remembers what each call is for)\n//   simApply(state, replies)     -> folds the replies into the state and moves to the next phase\n//   simRows(state, execution)    -> the Baserow rows of the finished run\n// Ticks are synchronous: at tick t every agent sees the messages sent before t; what it sends arrives at t+1.\nconst SIM_SLOTS = ['8 am', '10 am', 'noon', '2 pm', '4 pm', '6 pm', '8 pm', '10 pm'];\nconst SIM_FAKE_NAMES = ['Marlow', 'Tatum', 'Lennox', 'Shiloh', 'Arden'];\nconst SIM_OUTSIDER = 'Riley'; // the host in the dynamics experiment; not in the network, so nobody can ask them\nconst SIM_VENUE = 'Saturday at 7 pm at the Rosewood Park pavilion';\nconst SIM_JUDGE_CHUNK = 20;\n\nconst simTime = (tick) => `Day ${Math.floor((tick - 1) / SIM_SLOTS.length) + 1}, ${SIM_SLOTS[(tick - 1) % SIM_SLOTS.length]}`;\n\nfunction simPhases(experiment, ticks) {\n  const phases = [];\n  if (experiment === 'structure') phases.push({ kind: 'names', tick: 0 });\n  if (experiment === 'dynamics') phases.push({ kind: 'belief', tick: 0 });\n  for (let t = 1; t <= ticks; t++) {\n    phases.push({ kind: 'act', tick: t });\n    if (experiment === 'dynamics') phases.push({ kind: 'belief', tick: t });\n  }\n  if (experiment === 'propagation') phases.push({ kind: 'interview', tick: ticks });\n  if (experiment === 'structure') phases.push({ kind: 'names', tick: ticks });\n  if (experiment !== 'structure') phases.push({ kind: 'judge', tick: ticks });\n  return phases;\n}\n\n// cast: [{ agent (1..n), name, participant_id, persona }] ordered by agent; node i of the network is agent i+1.\nfunction simStart(run, cast, network) {\n  const roles = network.roles;\n  const agents = cast.map((c) => ({ agent: c.agent, name: c.name, participant_id: c.participant_id, persona: c.persona, notes: [], heard: [] }));\n  const state = {\n    run, agents, roles,\n    edges: network.edges.map((e) => [...e]),\n    phases: simPhases(run.experiment, run.ticks), phase: 0,\n    messages: [], turns: [], ties: [], requests: [], meta: [], calls: 0, failures: 0,\n  };\n  if (run.experiment === 'dynamics') {\n    for (const a of agents) a.notes.push(`${SIM_OUTSIDER} mentioned maybe having a birthday party this Saturday, but it wasn't settled.`);\n    const [on, off] = run.condition === 'on_at_hub' ? [roles.hub, roles.peripheral] : [roles.peripheral, roles.hub];\n    agents[on].notes.push(`I just talked to ${SIM_OUTSIDER}: the birthday party this Saturday is definitely on.`);\n    agents[off].notes.push(`I just heard from ${SIM_OUTSIDER}: the birthday party this Saturday is cancelled.`);\n    state.event = `${SIM_OUTSIDER}'s birthday party this Saturday`;\n  } else {\n    const host = agents[roles.seed];\n    if (run.arm !== 'control') host.notes.push(`I'm throwing my birthday party this ${SIM_VENUE}. I want everyone to come, so I should invite people and ask them to pass it on.`);\n    state.event = `${host.name}'s birthday party (this ${SIM_VENUE})`;\n  }\n  return state;\n}\n\nconst simNeighbors = (state, i) => state.edges.filter((e) => e.includes(i)).map((e) => (e[0] === i ? e[1] : e[0])).sort((a, b) => a - b);\n\nconst simIdentity = (a) => `You are ${a.name}. Stay in character as the person described below.\n\nAbout you. These are your own answers to a personality questionnaire, where 1 = disagree strongly and 5 = agree strongly:\n${a.persona}`;\n\n// What agent i remembers: its notes, inbox and outbox up to and including tick `upto`.\nfunction simMemory(state, i, upto) {\n  const a = state.agents[i];\n  const inbox = state.messages.filter((m) => m.to === i && m.tick <= upto).map((m) => `[${simTime(m.tick)}] From ${state.agents[m.from].name}: ${m.text}`);\n  const outbox = state.messages.filter((m) => m.from === i && m.tick <= upto).map((m) => `[${simTime(m.tick)}] To ${state.agents[m.to].name}: ${m.text}`);\n  return `${a.notes.length ? `Your notes:\\n${a.notes.map((n) => `- ${n}`).join('\\n')}\\n\\n` : ''}Messages you received (oldest first):\n${inbox.join('\\n') || '(none)'}\n\nMessages you sent (oldest first):\n${outbox.join('\\n') || '(none)'}`;\n}\n\nfunction simActPrompt(state, i, tick) {\n  const a = state.agents[i];\n  const names = (list) => list.map((j) => state.agents[j].name).join(', ') || '(nobody)';\n  const structure = state.run.experiment === 'structure';\n  const waiting = state.requests.filter((r) => r.to === i).map((r) => r.from);\n  return `${simIdentity(a)}\n\nIt is ${simTime(tick)}. You use a direct-messaging app.\nYour connections: ${names(simNeighbors(state, i))}.${structure ? `\nPeople you have heard of but are not connected with: ${names(a.heard)}.\nConnection requests waiting for your answer: ${names(waiting)}.` : ''}\n\n${simMemory(state, i, tick - 1)}\n\nDecide what to do right now. You can send direct messages to one or more of your connections, or stay quiet.${structure ? ' You can also ask to connect with someone you have heard of, and accept or decline each waiting request.' : ''}\n\nReply with only a JSON object and nothing else:\n{\"messages\": [{\"to\": \"<name of a connection>\", \"text\": \"<your message>\"}]${structure ? ', \"connect\": [\"<name>\"], \"accept\": [\"<name>\"], \"decline\": [\"<name>\"]' : ''}}\nUse an empty list for anything you do not do.`;\n}\n\nconst simInterviewPrompt = (state, i, question) => `${simIdentity(state.agents[i])}\n\nThis is everything you remember:\n\n${simMemory(state, i, state.run.ticks)}\n\n${question}`;\n\nfunction simJudgePrompt(state, units) {\n  const list = units.map((u, n) => `${n + 1}. ${JSON.stringify(u.text)}`).join('\\n');\n  if (state.run.experiment === 'dynamics') {\n    return `You are labelling short texts for a study. The topic: ${state.event}.\nFor each numbered text, give its stance on whether the party will happen:\n- \"on\": says or implies the party is happening\n- \"off\": says or implies the party is cancelled or not happening\n- \"unsure\": mentions the party without taking a side, or asks about it\n- \"none\": does not mention the party\n\nTexts:\n${list}\n\nReply with only a JSON array, one entry per text, in order: [{\"n\": 1, \"stance\": \"on\"}]`;\n  }\n  return `You are labelling short texts for a study. The event of interest: ${state.event}.\nFor each numbered text, decide whether it tells the reader about this event: that the party is happening, an invitation to it, or any of its details. A text that mentions the host without the party does not count.\n\nTexts:\n${list}\n\nReply with only a JSON array, one entry per text, in order: [{\"n\": 1, \"carries\": true}]`;\n}\n\n// The model calls of the current phase: [{ prompt, provider, model, temperature }]. Remembers in\n// state.meta what each call is for, so simApply only needs the reply texts in the same order.\nfunction simPrompts(state) {\n  const { run, agents } = state;\n  const ph = state.phases[state.phase];\n  const all = agents.map((_, i) => i);\n  const subject = { provider: run.provider, model: run.model, temperature: run.temperature };\n  let calls = [];\n  if (ph.kind === 'act') {\n    calls = all.map((i) => ({ meta: { i }, prompt: simActPrompt(state, i, ph.tick) }));\n  } else if (ph.kind === 'belief') {\n    calls = all.map((i) => ({\n      meta: { i },\n      prompt: `${simIdentity(agents[i])}\n\nIt is ${ph.tick ? simTime(ph.tick) : 'Day 1, before 8 am'}. This is everything you know:\n\n${simMemory(state, i, ph.tick)}\n\nHow likely is it that ${state.event} will happen? Reply with a single whole number from 0 (certainly not happening) to 100 (certainly happening), and nothing else.`,\n    }));\n  } else if (ph.kind === 'names') {\n    calls = all.map((i) => {\n      const list = [...agents.filter((_, j) => j !== i).map((a) => a.name), ...SIM_FAKE_NAMES].sort();\n      return { meta: { i }, prompt: simInterviewPrompt(state, i, `An interviewer asks: \"Which of these people do you know?\"\\n${list.join(', ')}\\n\\nReply with only a JSON array of the names you know, and nothing else. Use [] if you know none of them.`) };\n    });\n  } else if (ph.kind === 'interview') {\n    const host = agents[state.roles.seed].name;\n    const decoy = agents[state.roles.decoy].name;\n    const yesNo = (what) => `An interviewer asks: \"Have you heard about ${what}?\"\\n\\nStart your reply with YES or NO, then say in one sentence what you know about it.`;\n    for (const i of all) {\n      calls.push({ meta: { i, question: 'open' }, prompt: simInterviewPrompt(state, i, 'An interviewer asks: \"Is there anything coming up that you know about, any events or plans?\"\\n\\nAnswer in one or two sentences.') });\n      calls.push({ meta: { i, question: 'cued' }, prompt: simInterviewPrompt(state, i, yesNo(`${host}'s birthday party`)) });\n      calls.push({ meta: { i, question: 'decoy' }, prompt: simInterviewPrompt(state, i, yesNo(`${decoy}'s housewarming`)) });\n    }\n  } else if (ph.kind === 'judge') {\n    // The judge sees only texts: no arm, no sender, no run. Messages first, then the open-recall answers.\n    const units = [\n      ...state.messages.map((m, n) => ({ message: n, text: m.text })),\n      ...state.turns.map((t, n) => ({ turn: n, text: t.raw_output, t })).filter((u) => u.t.question === 'open' && u.t.ok).map(({ t, ...u }) => u),\n    ];\n    for (let c = 0; c < units.length; c += SIM_JUDGE_CHUNK) {\n      const chunk = units.slice(c, c + SIM_JUDGE_CHUNK);\n      calls.push({ meta: { units: chunk.map(({ text, ...u }) => u) }, prompt: simJudgePrompt(state, chunk), provider: run.judge_provider, model: run.judge_model, temperature: 0 });\n    }\n  }\n  state.meta = calls.map((c) => c.meta);\n  return calls.map(({ meta, ...c }) => ({ ...subject, ...c }));\n}\n\n// The first {...} or [...] in a reply, parsed; null when there is none.\nfunction simJson(text, open) {\n  const close = open === '{' ? '}' : ']';\n  const start = text.indexOf(open);\n  const end = text.lastIndexOf(close);\n  if (start < 0 || end <= start) return null;\n  try { return JSON.parse(text.slice(start, end + 1)); } catch (e) { return null; }\n}\n\n// replies: one entry per call of simPrompts, in order: the reply text, or '' when the call failed.\nfunction simApply(state, replies) {\n  const { run, agents } = state;\n  const ph = state.phases[state.phase];\n  const byName = new Map(agents.map((a, i) => [a.name.toLowerCase(), i]));\n  const idx = (name) => byName.get(String(name ?? '').trim().toLowerCase());\n  const nameList = (v) => (Array.isArray(v) ? v.map(idx).filter((j) => j !== undefined) : []);\n  const turn = (i, text, fields) => {\n    const t = { tick: ph.tick, phase: ph.kind, agent: i, raw_output: String(text).slice(0, 4000), ok: true, error: '', ...fields };\n    if (!t.ok) state.failures++;\n    state.turns.push(t);\n    return t;\n  };\n  state.calls += replies.length;\n\n  if (ph.kind === 'act') {\n    const sent = [];\n    const asked = [];\n    const accepted = [];\n    replies.forEach((text, n) => {\n      const { i } = state.meta[n];\n      const reply = text ? simJson(text, '{') : null;\n      if (!reply) { turn(i, text, { ok: false, error: text ? 'no JSON object in the reply' : 'empty reply', sent: 0 }); return; }\n      const nbrs = new Set(simNeighbors(state, i));\n      let invalid = 0;\n      let count = 0;\n      for (const m of Array.isArray(reply.messages) ? reply.messages : []) {\n        const to = idx(m && m.to);\n        const body = String((m && m.text) ?? '').trim().slice(0, 1000);\n        if (to === undefined || !nbrs.has(to) || !body) { invalid++; continue; }\n        sent.push({ tick: ph.tick, from: i, to, text: body });\n        count++;\n      }\n      const fields = { sent: count, invalid };\n      if (run.experiment === 'structure') {\n        const want = nameList(reply.connect).filter((j) => j !== i && !nbrs.has(j) && agents[i].heard.includes(j));\n        for (const j of want) asked.push({ from: i, to: j });\n        const waiting = new Set(state.requests.filter((r) => r.to === i).map((r) => r.from));\n        const yes = nameList(reply.accept).filter((j) => waiting.has(j));\n        for (const j of yes) accepted.push({ from: j, to: i });\n        fields.detail = JSON.stringify({ connect: want.map((j) => agents[j].name), accept: yes.map((j) => agents[j].name), decline: nameList(reply.decline).filter((j) => waiting.has(j)).map((j) => agents[j].name) });\n      }\n      turn(i, text, fields);\n    });\n    // Deliver. A tie is written only when both sides agreed: an accepted request, or two agents asking each other.\n    for (const m of sent) state.messages.push({ seq: state.messages.length + 1, ...m });\n    const have = new Set(state.edges.map(([a, b]) => edgeKey(a, b)));\n    const tie = (from, to) => {\n      if (have.has(edgeKey(from, to))) return;\n      have.add(edgeKey(from, to));\n      state.edges.push(from < to ? [from, to] : [to, from]);\n      state.ties.push({ tick: ph.tick, from, to });\n    };\n    for (const r of accepted) tie(r.from, r.to);\n    for (const r of asked) if (asked.some((o) => o.from === r.to && o.to === r.from)) tie(r.from, r.to);\n    // Requests live for one tick: the ones just made are shown to their targets on the next tick.\n    state.requests = asked.filter((r) => !have.has(edgeKey(r.from, r.to)));\n    if (run.experiment === 'structure') {\n      // An agent can only meet someone whose name appeared in its inbox (or who asked to connect).\n      const hear = (i, j) => { if (j !== i && !agents[i].heard.includes(j)) agents[i].heard.push(j); };\n      for (const m of sent) agents.forEach((a, j) => { if (new RegExp(`\\\\b${a.name}\\\\b`).test(m.text)) hear(m.to, j); });\n      for (const r of state.requests) hear(r.to, r.from);\n      for (const a of agents) a.heard = a.heard.filter((j) => !have.has(edgeKey(a.agent - 1, j))).sort((x, y) => x - y);\n    }\n  } else if (ph.kind === 'belief') {\n    replies.forEach((text, n) => {\n      const m = String(text).match(/\\b(100|\\d{1,2})\\b/);\n      turn(state.meta[n].i, text, m ? { belief: Number(m[1]) } : { ok: false, error: text ? 'no number 0-100 in the reply' : 'empty reply' });\n    });\n  } else if (ph.kind === 'names') {\n    replies.forEach((text, n) => {\n      const list = text ? simJson(text, '[') : null;\n      const question = ph.tick === 0 ? 'names_start' : 'names_end';\n      if (!Array.isArray(list)) { turn(state.meta[n].i, text, { question, ok: false, error: text ? 'no JSON array in the reply' : 'empty reply' }); return; }\n      const said = list.map((s) => String(s).trim().toLowerCase());\n      turn(state.meta[n].i, text, {\n        question,\n        names: JSON.stringify(agents.filter((a) => said.includes(a.name.toLowerCase())).map((a) => a.name)),\n        fakes: SIM_FAKE_NAMES.filter((f) => said.includes(f.toLowerCase())).length,\n      });\n    });\n  } else if (ph.kind === 'interview') {\n    replies.forEach((text, n) => {\n      const { i, question } = state.meta[n];\n      if (!text) { turn(i, text, { question, ok: false, error: 'empty reply' }); return; }\n      if (question === 'open') { turn(i, text, { question }); return; }\n      const m = String(text).match(/^\\W*(yes|no)\\b/i);\n      turn(i, text, m ? { question, answer: m[1].toLowerCase() } : { question, ok: false, error: 'reply does not start with YES or NO' });\n    });\n  } else if (ph.kind === 'judge') {\n    replies.forEach((text, n) => {\n      const { units } = state.meta[n];\n      const list = text ? simJson(text, '[') : null;\n      const ok = Array.isArray(list) && list.length === units.length;\n      turn(null, text, ok ? {} : { ok: false, error: text ? `expected ${units.length} labels` : 'empty reply' });\n      if (!ok) return;\n      units.forEach((u, k) => {\n        const label = list[k] || {};\n        if (run.experiment === 'dynamics') {\n          if (['on', 'off', 'unsure', 'none'].includes(label.stance)) state.messages[u.message].stance = label.stance;\n        } else if (typeof label.carries === 'boolean') {\n          const value = label.carries ? 'yes' : 'no';\n          if (u.message !== undefined) state.messages[u.message].carries_event = value; else state.turns[u.turn].judge = value;\n        }\n      });\n    });\n  }\n  state.meta = [];\n  state.phase++;\n  return state;\n}\n\nconst simDone = (state) => state.phase >= state.phases.length;\nconst simProgress = (state) => {\n  if (simDone(state)) return 'done';\n  const ph = state.phases[state.phase];\n  return `${ph.kind} ${ph.tick}/${state.run.ticks}`;\n};\n\n// Baserow rows of a finished run. `execution` marks the attempt, so rows of an abandoned attempt can be told apart.\nfunction simRows(state, execution) {\n  const { run, agents } = state;\n  const name = (i) => (i === null || i === undefined ? '' : agents[i].name);\n  const num = (i) => (i === null || i === undefined ? null : agents[i].agent);\n  return {\n    sim_messages: state.messages.map((m) => ({\n      key: `${run.run_id}:m${m.seq}`, run_id: run.run_id, execution, seq: m.seq, tick: m.tick,\n      sender: name(m.from), sender_agent: num(m.from), recipient: name(m.to), recipient_agent: num(m.to),\n      text: m.text, carries_event: m.carries_event || '', stance: m.stance || '',\n    })),\n    sim_turns: state.turns.map((t, n) => ({\n      key: `${run.run_id}:t${n + 1}`, run_id: run.run_id, execution, tick: t.tick, phase: t.phase, question: t.question || '',\n      agent: name(t.agent), agent_number: num(t.agent), participant_id: t.agent === null ? null : agents[t.agent].participant_id,\n      ok: t.ok, error: t.error, raw_output: t.raw_output, sent: t.sent ?? null, invalid: t.invalid ?? null, detail: t.detail || '',\n      belief: t.belief ?? null, answer: t.answer || '', judge: t.judge || '', names: t.names || '', fakes: t.fakes ?? null,\n    })),\n    sim_ties: state.ties.map((t) => ({\n      key: `${run.run_id}:${edgeKey(num(t.from), num(t.to))}`, run_id: run.run_id, execution, tick: t.tick,\n      requester: name(t.from), requester_agent: num(t.from), accepter: name(t.to), accepter_agent: num(t.to),\n    })),\n  };\n}\n// ---- end lib/sim.js ----\nconst { state } = $input.first().json;\nconst iso = new Date().toISOString().replace(/\\.\\d{3}Z$/, '+00:00');\nreturn [{\n  json: {\n    ...simRows(state, $execution.id),\n    run: { id: state.run.id, status: 'done', progress: 'done', execution: $execution.id, calls: state.calls, failures: state.failures, messages: state.messages.length, finished_at: iso, locked_at: null, locked_by: '' },\n  },\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "Finish run",
+      "position": [
+        3220,
+        -20
+      ],
+      "id": "finish-run"
+    },
+    {
+      "parameters": {
+        "jsCode": "// The sim_messages rows of the finished run, one item per row.\nconst rows = $('Finish run').first().json['sim_messages'];\nreturn (Array.isArray(rows) ? rows : [rows]).map((json) => ({ json }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "Rows: sim_messages",
+      "position": [
+        3460,
+        -20
+      ],
+      "id": "rows-sim-messages"
+    },
+    {
+      "parameters": {
+        "batchSize": 200,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "name": "200 at a time: sim_messages",
+      "position": [
+        3700,
+        -20
+      ],
+      "id": "200-at-a-time-sim-messages"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "batchCreate",
+        "databaseId": "",
+        "tableId": "",
+        "dataToSend": "autoMapInputData",
+        "inputsToIgnore": ""
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Batch Create: sim_messages",
+      "position": [
+        3940,
+        0
+      ],
+      "id": "batch-create-sim-messages"
+    },
+    {
+      "parameters": {
+        "jsCode": "// The sim_turns rows of the finished run, one item per row.\nconst rows = $('Finish run').first().json['sim_turns'];\nreturn (Array.isArray(rows) ? rows : [rows]).map((json) => ({ json }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "Rows: sim_turns",
+      "position": [
+        3460,
+        180
+      ],
+      "id": "rows-sim-turns"
+    },
+    {
+      "parameters": {
+        "batchSize": 200,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "name": "200 at a time: sim_turns",
+      "position": [
+        3700,
+        180
+      ],
+      "id": "200-at-a-time-sim-turns"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "batchCreate",
+        "databaseId": "",
+        "tableId": "",
+        "dataToSend": "autoMapInputData",
+        "inputsToIgnore": ""
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Batch Create: sim_turns",
+      "position": [
+        3940,
+        200
+      ],
+      "id": "batch-create-sim-turns"
+    },
+    {
+      "parameters": {
+        "jsCode": "// The sim_ties rows of the finished run, one item per row.\nconst rows = $('Finish run').first().json['sim_ties'];\nreturn (Array.isArray(rows) ? rows : [rows]).map((json) => ({ json }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "Rows: sim_ties",
+      "position": [
+        3460,
+        380
+      ],
+      "id": "rows-sim-ties"
+    },
+    {
+      "parameters": {
+        "batchSize": 200,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "name": "200 at a time: sim_ties",
+      "position": [
+        3700,
+        380
+      ],
+      "id": "200-at-a-time-sim-ties"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "batchCreate",
+        "databaseId": "",
+        "tableId": "",
+        "dataToSend": "autoMapInputData",
+        "inputsToIgnore": ""
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Batch Create: sim_ties",
+      "position": [
+        3940,
+        400
+      ],
+      "id": "batch-create-sim-ties"
+    },
+    {
+      "parameters": {
+        "jsCode": "// The run rows of the finished run, one item per row.\nconst rows = $('Finish run').first().json['run'];\nreturn (Array.isArray(rows) ? rows : [rows]).map((json) => ({ json }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "Rows: run",
+      "position": [
+        3460,
+        580
+      ],
+      "id": "rows-run"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "update",
+        "databaseId": "={{ $('Read: sim_runs').params.databaseId }}",
+        "tableId": "={{ $('Read: sim_runs').params.tableId }}",
+        "rowId": "={{ $json.id }}",
+        "dataToSend": "autoMapInputData",
+        "inputsToIgnore": "id"
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Update: sim_runs (done)",
+      "position": [
+        3700,
+        580
+      ],
+      "id": "update-sim-runs-done"
+    },
+    {
+      "parameters": {
+        "content": "## Baserow tables to pick\nAfter importing, open each node below and choose the Big Five database and the named table from the dropdowns (and the Baserow Token credential):\n\n- **Read: sim_runs** → table `sim_runs`\n- **Read: sim_cast** → table `sim_cast`\n- **Read: participants** → table `participants`\n- **Read: sim_networks** → table `sim_networks`\n- **Batch Create: sim_messages** → table `sim_messages`\n- **Batch Create: sim_turns** → table `sim_turns`\n- **Batch Create: sim_ties** → table `sim_ties`\n\nThese nodes follow the pick above for the same table by expression; nothing to choose, only the credential:\n- Update: sim_runs (lock)\n- Update: sim_runs (progress)\n- Update: sim_runs (done)",
+        "width": 520,
+        "height": 360,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "name": "Tables",
+      "position": [
+        -700,
+        80
+      ],
+      "id": "tables"
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Read: sim_runs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Every minute": {
+      "main": [
+        [
+          {
+            "node": "Read: sim_runs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read: sim_runs": {
+      "main": [
+        [
+          {
+            "node": "Pick run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pick run": {
+      "main": [
+        [
+          {
+            "node": "Update: sim_runs (lock)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update: sim_runs (lock)": {
+      "main": [
+        [
+          {
+            "node": "Read: sim_cast",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read: sim_cast": {
+      "main": [
+        [
+          {
+            "node": "Read: participants",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read: participants": {
+      "main": [
+        [
+          {
+            "node": "Read: sim_networks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read: sim_networks": {
+      "main": [
+        [
+          {
+            "node": "Start run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start run": {
+      "main": [
+        [
+          {
+            "node": "Build prompts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build prompts": {
+      "main": [
+        [
+          {
+            "node": "Bedrock?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bedrock?": {
+      "main": [
+        [
+          {
+            "node": "Ask Bedrock",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ask Ollama",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ask Bedrock": {
+      "main": [
+        [
+          {
+            "node": "Apply replies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ask Ollama": {
+      "main": [
+        [
+          {
+            "node": "Apply replies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apply replies": {
+      "main": [
+        [
+          {
+            "node": "Update: sim_runs (progress)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Done?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Done?": {
+      "main": [
+        [
+          {
+            "node": "Finish run",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Build prompts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Finish run": {
+      "main": [
+        [
+          {
+            "node": "Rows: sim_messages",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Rows: sim_turns",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Rows: sim_ties",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Rows: run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rows: sim_messages": {
+      "main": [
+        [
+          {
+            "node": "200 at a time: sim_messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "200 at a time: sim_messages": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Batch Create: sim_messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Batch Create: sim_messages": {
+      "main": [
+        [
+          {
+            "node": "200 at a time: sim_messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rows: sim_turns": {
+      "main": [
+        [
+          {
+            "node": "200 at a time: sim_turns",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "200 at a time: sim_turns": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Batch Create: sim_turns",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Batch Create: sim_turns": {
+      "main": [
+        [
+          {
+            "node": "200 at a time: sim_turns",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rows: sim_ties": {
+      "main": [
+        [
+          {
+            "node": "200 at a time: sim_ties",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "200 at a time: sim_ties": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Batch Create: sim_ties",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Batch Create: sim_ties": {
+      "main": [
+        [
+          {
+            "node": "200 at a time: sim_ties",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rows: run": {
+      "main": [
+        [
+          {
+            "node": "Update: sim_runs (done)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true
+  },
+  "active": false,
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

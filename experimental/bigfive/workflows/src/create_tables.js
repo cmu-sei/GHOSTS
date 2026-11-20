@@ -50,6 +50,23 @@ const TABLES = {
     ...Object.fromEntries(FACETS.flatMap((f) => ['shift_p', 'shift_p_holm', 'steiger_p'].map((s) => [`${f}_${s}`, pval]))),
     analyzed_at: date,
   },
+  // Network experiments (Network 1-4 workflows).
+  sim_cast: { agent: int, name: text, participant_id: int, ...perFacet([''], num) },
+  sim_networks: { generator: text, nodes: int, seed: int, edges: long, roles: long },
+  sim_runs: {
+    run_id: text, label: text, experiment: text, arm: text, condition: text, repeat: int, provider: text, model: text, temperature: num,
+    judge_provider: text, judge_model: text, ticks: int, status: text, progress: text, calls: int, failures: int, messages: int,
+    execution: text, started_at: date, finished_at: date, locked_at: date, locked_by: text,
+  },
+  sim_messages: {
+    run_id: text, execution: text, seq: int, tick: int, sender: text, sender_agent: int, recipient: text, recipient_agent: int,
+    text: long, carries_event: text, stance: text,
+  },
+  sim_turns: {
+    run_id: text, execution: text, tick: int, phase: text, question: text, agent: text, agent_number: int, participant_id: int,
+    ok: bool, error: long, raw_output: long, sent: int, invalid: int, detail: long, belief: int, answer: text, judge: text, names: long, fakes: int,
+  },
+  sim_ties: { run_id: text, execution: text, tick: int, requester: text, requester_agent: int, accepter: text, accepter_agent: int },
 };
 
 const call = async (method, path, body, token) => this.helpers.httpRequest({

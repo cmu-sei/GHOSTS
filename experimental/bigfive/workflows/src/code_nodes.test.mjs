@@ -356,13 +356,13 @@ test('create_tables: signs in, creates missing tables and fields, reports mismat
   fields[7][1] = { id: 70, name: 'participant_id', type: 'number', number_decimal_places: 0, number_negative: false };
   calls.length = 0;
   const out = await run('create_tables.js', { input: [form], helpers });
-  assert.equal(out.length, 9);
+  assert.equal(out.length, 15);
   assert.equal(out[0].json.table, 'participants');
   assert.equal(out[0].json.created, false);
   assert.equal(out[0].json.fields_added, 4);
   assert.equal(out[0].json.fields_adjusted, 1); // age: 2 decimals -> 0
   assert.ok(calls.includes('PATCH /api/database/fields/71/'));
   assert.ok(out.slice(1).every((i) => i.json.created));
-  assert.ok(calls.filter((c) => c.startsWith('POST /api/database/tables/database/5/')).length === 8);
+  assert.ok(calls.filter((c) => c.startsWith('POST /api/database/tables/database/5/')).length === 14);
   assert.ok(calls.some((c) => c === 'POST /api/database/fields/table/7/'));
 });

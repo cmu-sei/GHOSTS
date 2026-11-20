@@ -361,3 +361,4 @@ site/
 reference/
 reference/*
 .devcontainer/features/sei-certs/*.crt
+experimental/bigfive/AID SCO/*

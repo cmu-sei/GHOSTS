@@ -1,0 +1,502 @@
+{
+  "name": "Network 1 - Set Up Study",
+  "id": "networkSetUpStudy",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Network 1 - Set Up Study\nPrepares the three network experiments (propagation, structure, social dynamics). Run it once, after \"Big Five 1 - Create Tables\" and \"Big Five 2 - Import Human Data\".\n\n- **sim_cast**: 25 participants chosen to span the Big Five trait range (from their own BFI-2 scores), each given a name and a network position. Every model, arm and repeat uses these same 25 agents in the same positions.\n- **sim_networks**: the three saved networks, generated from fixed parameters and the seed: a small world for propagation, a sparse small world for structure, a hub-and-periphery network for dynamics, plus who the seed agents are.\n\nThe same seed always gives the same cast and networks, so running it again changes nothing.",
+        "width": 560,
+        "height": 360,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "name": "About",
+      "position": [
+        -660,
+        -260
+      ],
+      "id": "about"
+    },
+    {
+      "parameters": {
+        "path": "network-set-up",
+        "formTitle": "Network · Set Up Study",
+        "formDescription": "Chooses the 25 agents and generates the three networks. The same seed always gives the same result.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Seed",
+              "fieldType": "number",
+              "placeholder": "1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "name": "Set up form",
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "network-set-up",
+      "id": "set-up-form"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "getAll",
+        "databaseId": "",
+        "tableId": "",
+        "returnAll": true,
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Read: participants",
+      "position": [
+        240,
+        0
+      ],
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "id": "read-participants"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "getAll",
+        "databaseId": "",
+        "tableId": "",
+        "returnAll": true,
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Read: scores",
+      "position": [
+        480,
+        0
+      ],
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "id": "read-scores"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "getAll",
+        "databaseId": "",
+        "tableId": "",
+        "returnAll": true,
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Read: sim_cast",
+      "position": [
+        720,
+        0
+      ],
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "id": "read-sim-cast"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "getAll",
+        "databaseId": "",
+        "tableId": "",
+        "returnAll": true,
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Read: sim_networks",
+      "position": [
+        960,
+        0
+      ],
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "id": "read-sim-networks"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Set Up Study: choose the 25 participants the agents are built from and generate the three networks.\n// Everything follows from the seed, so running this again with the same seed changes nothing.\n// Output: one item { summary, sim_cast: [...], sim_networks: [...] } for the upsert blocks.\n// ---- lib/scoring.js ----\n// Shared scoring (spliced into Code nodes by build.mjs via `// @include lib/scoring.js`).\n// facet = mean of its items; a reverse item is scale_max + 1 - value; BFI-2 negative emotionality is\n// reported as emotional_stability = 6 - NE. `items` are rows of the `items` table.\nconst FACETS = ['extraversion', 'agreeableness', 'conscientiousness', 'emotional_stability', 'openness'];\nconst SCALE_MAX = { bfi2: 5, mini_markers: 9 };\n\nfunction toNumber(v) {\n  if (v === null || v === undefined || v === '') return null;\n  const n = Number(v);\n  return Number.isFinite(n) ? n : null;\n}\n\nfunction isTrue(v) {\n  return v === true || v === 'true' || v === 1 || v === '1';\n}\n\n// answers: { item_key: value }. Returns { facet: mean } with null for a facet that has no answers.\nfunction facetScores(items, instrument, answers) {\n  const max = SCALE_MAX[instrument];\n  const sums = {};\n  for (const it of items) {\n    if (it.instrument !== instrument) continue;\n    const v = toNumber(answers[it.item_key]);\n    if (v === null) continue;\n    const scored = isTrue(it.reverse) ? max + 1 - v : v;\n    (sums[it.facet] = sums[it.facet] || []).push(scored);\n  }\n  const out = {};\n  for (const f of FACETS) out[f] = null;\n  for (const [facet, vals] of Object.entries(sums)) {\n    const mean = vals.reduce((a, b) => a + b, 0) / vals.length;\n    if (facet === 'negative_emotionality') out.emotional_stability = 6 - mean;\n    else if (FACETS.includes(facet)) out[facet] = mean;\n  }\n  return out;\n}\n\nfunction hasAllFacets(scores) {\n  return FACETS.every((f) => scores[f] !== null && scores[f] !== undefined);\n}\n\nfunction round3(x) {\n  return x === null || x === undefined ? null : Math.round(x * 1000) / 1000;\n}\n// ---- end lib/scoring.js ----\n// ---- lib/graph.js ----\n// Graph helpers for the network experiments (spliced into Code nodes via `// @include lib/graph.js`).\n// A graph is n nodes (0..n-1) and a list of undirected edges [a, b] with a < b.\n\n// Seeded random numbers (mulberry32): the same seed always gives the same sequence.\nfunction rng(seed) {\n  let a = seed >>> 0;\n  return () => {\n    a = (a + 0x6D2B79F5) >>> 0;\n    let t = a;\n    t = Math.imul(t ^ (t >>> 15), t | 1);\n    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);\n    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;\n  };\n}\nconst pick = (list, rand) => list[Math.floor(rand() * list.length)];\nconst edgeKey = (a, b) => (a < b ? `${a}-${b}` : `${b}-${a}`);\n\nfunction adjacency(n, edges) {\n  const adj = Array.from({ length: n }, () => new Set());\n  for (const [a, b] of edges) { adj[a].add(b); adj[b].add(a); }\n  return adj;\n}\n\n// Hop distance from `start` to every node (Infinity when unreachable).\nfunction distances(n, edges, start) {\n  const adj = adjacency(n, edges);\n  const dist = Array(n).fill(Infinity);\n  dist[start] = 0;\n  const queue = [start];\n  for (let q = 0; q < queue.length; q++) for (const nb of adj[queue[q]]) if (dist[nb] === Infinity) { dist[nb] = dist[queue[q]] + 1; queue.push(nb); }\n  return dist;\n}\nconst isConnected = (n, edges) => distances(n, edges, 0).every((d) => d < Infinity);\n\n// Watts-Strogatz small world: a ring where everyone knows k nearest neighbours (k even), each edge\n// rewired with probability beta. Redrawn until connected.\nfunction smallWorld(n, k, beta, rand) {\n  for (;;) {\n    const keys = new Set();\n    for (let i = 0; i < n; i++) for (let j = 1; j <= k / 2; j++) keys.add(edgeKey(i, (i + j) % n));\n    for (let i = 0; i < n; i++) {\n      for (let j = 1; j <= k / 2; j++) {\n        if (rand() >= beta) continue;\n        const free = [];\n        for (let c = 0; c < n; c++) if (c !== i && !keys.has(edgeKey(i, c))) free.push(c);\n        if (!free.length) continue;\n        keys.delete(edgeKey(i, (i + j) % n));\n        keys.add(edgeKey(i, pick(free, rand)));\n      }\n    }\n    const edges = [...keys].map((s) => s.split('-').map(Number)).sort((x, y) => x[0] - y[0] || x[1] - y[1]);\n    if (isConnected(n, edges)) return edges;\n  }\n}\n\n// Barabasi-Albert preferential attachment: each new node links to m existing nodes, favouring the\n// well connected. Gives a few hubs and many peripheral nodes.\nfunction prefAttach(n, m, rand) {\n  const edges = [];\n  const ends = [];\n  for (let i = 0; i <= m; i++) for (let j = i + 1; j <= m; j++) { edges.push([i, j]); ends.push(i, j); }\n  for (let v = m + 1; v < n; v++) {\n    const targets = new Set();\n    while (targets.size < m) targets.add(pick(ends, rand));\n    for (const t of targets) { edges.push([t, v]); ends.push(t, v); }\n  }\n  return edges.sort((x, y) => x[0] - y[0] || x[1] - y[1]);\n}\n\nconst density = (n, edges) => (2 * edges.length) / (n * (n - 1));\n\n// Share of connected triples that are closed (global clustering coefficient).\nfunction clustering(n, edges) {\n  const adj = adjacency(n, edges);\n  let triples = 0;\n  let closed = 0;\n  for (let v = 0; v < n; v++) {\n    const nb = [...adj[v]];\n    for (let i = 0; i < nb.length; i++) for (let j = i + 1; j < nb.length; j++) { triples++; if (adj[nb[i]].has(nb[j])) closed++; }\n  }\n  return triples ? closed / triples : 0;\n}\n\nfunction degreeSd(n, edges) {\n  const deg = adjacency(n, edges).map((s) => s.size);\n  const m = deg.reduce((a, b) => a + b, 0) / n;\n  return Math.sqrt(deg.reduce((a, d) => a + (d - m) ** 2, 0) / n);\n}\n// ---- end lib/graph.js ----\nconst N = 25;\nconst NAMES = ['Alex', 'Avery', 'Blake', 'Casey', 'Charlie', 'Dakota', 'Devin', 'Elliot', 'Emerson', 'Finley', 'Harper', 'Hayden', 'Jamie',\n  'Jordan', 'Kai', 'Logan', 'Morgan', 'Parker', 'Quinn', 'Reese', 'Robin', 'Rowan', 'Shay', 'Skyler', 'Taylor'];\nconst seed = Math.floor(Number($('Set up form').first().json.Seed)) || 1;\n\nconst eligible = new Set($('Read: participants').all().map((i) => i.json).filter((p) => p && p.persona && isTrue(p.has_mini_markers)).map((p) => Number(p.participant_id)));\nconst people = $('Read: scores').all().map((i) => i.json)\n  .filter((s) => s && s.subject === 'human_bfi2' && eligible.has(Number(s.participant_id)) && FACETS.every((f) => toNumber(s[f]) !== null))\n  .map((s) => ({ participant_id: Number(s.participant_id), ...Object.fromEntries(FACETS.map((f) => [f, toNumber(s[f])])) }))\n  .sort((a, b) => a.participant_id - b.participant_id);\nif (people.length < N) throw new Error(`Need ${N} participants with a persona, Mini-Markers and BFI-2 scores; found ${people.length}. Run \"Big Five 2 - Import Human Data\" first.`);\n\n// Span the trait range: start from the most average person, then keep adding whoever is farthest\n// (in standardized trait space) from everyone already chosen.\nconst z = FACETS.map((f) => {\n  const xs = people.map((p) => p[f]);\n  const m = xs.reduce((a, b) => a + b, 0) / xs.length;\n  const s = Math.sqrt(xs.reduce((a, x) => a + (x - m) ** 2, 0) / xs.length) || 1;\n  return xs.map((x) => (x - m) / s);\n});\nconst dist = (a, b) => Math.sqrt(FACETS.reduce((acc, _, k) => acc + (z[k][a] - z[k][b]) ** 2, 0));\nconst norm = (a) => Math.sqrt(FACETS.reduce((acc, _, k) => acc + z[k][a] ** 2, 0));\nconst chosen = [people.map((_, i) => i).reduce((best, i) => (norm(i) < norm(best) ? i : best), 0)];\nwhile (chosen.length < N) {\n  let best = -1;\n  let bestD = -1;\n  for (let i = 0; i < people.length; i++) {\n    if (chosen.includes(i)) continue;\n    const d = Math.min(...chosen.map((c) => dist(i, c)));\n    if (d > bestD) { best = i; bestD = d; }\n  }\n  chosen.push(best);\n}\n// Shuffle, so network position does not follow the order people were picked in.\nconst rand = rng(seed);\nfor (let i = chosen.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [chosen[i], chosen[j]] = [chosen[j], chosen[i]]; }\nconst sim_cast = chosen.map((c, i) => ({ key: `a${String(i + 1).padStart(2, '0')}`, agent: i + 1, name: NAMES[i], ...people[c] }));\n\nconst degrees = (edges) => adjacency(N, edges).map((s) => s.size);\nconst farthest = (edges, from, among) => { const d = distances(N, edges, from); return among.reduce((best, i) => (d[i] > d[best] ? i : best), among[0]); };\nconst everyone = Array.from({ length: N }, (_, i) => i);\nconst network = (key, generator, edges, roles, seedNo) => ({ key, generator, nodes: N, seed: seedNo, edges: JSON.stringify(edges), roles: JSON.stringify(roles) });\n\nconst spread = smallWorld(N, 4, 0.1, rng(seed + 1));\nconst host = Math.floor(rng(seed + 11)() * N);\nconst sparse = smallWorld(N, 2, 0.1, rng(seed + 2));\nconst sparseHost = Math.floor(rng(seed + 12)() * N);\nconst hubby = prefAttach(N, 2, rng(seed + 3));\nconst deg = degrees(hubby);\nconst hub = deg.indexOf(Math.max(...deg));\nconst leaves = everyone.filter((i) => deg[i] === Math.min(...deg));\nconst sim_networks = [\n  network('propagation', 'small world: 25 nodes, 4 neighbours, 10% rewired', spread, { seed: host, decoy: farthest(spread, host, everyone) }, seed + 1),\n  network('structure', 'sparse small world: 25 nodes, 2 neighbours, 10% rewired', sparse, { seed: sparseHost }, seed + 2),\n  network('dynamics', 'preferential attachment: 25 nodes, 2 links per new node', hubby, { hub, peripheral: farthest(hubby, hub, leaves) }, seed + 3),\n];\nreturn [{ json: { summary: `${sim_cast.length} agents, ${sim_networks.map((w) => `${w.key}: ${JSON.parse(w.edges).length} ties`).join(', ')}`, sim_cast, sim_networks } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "Set up",
+      "position": [
+        1200,
+        0
+      ],
+      "id": "set-up"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Upsert helper, one node per table and mode. build.mjs replaces Set up (the node whose single\n// output item holds the staged rows under sim_cast), sim_cast (table name, also the \"Read: <table>\"\n// node that fetched the existing rows) and new (\"new\" or \"changed\").\n//  new:     staged rows whose key is not in the table yet  -> Batch Create\n//  changed: existing rows whose staged values differ, as { id, ...staged } -> Update\n// Values are compared loosely (Baserow returns numbers as strings; '' and null are the same).\nconst staged = $('Set up').first().json['sim_cast'] || [];\nconst existing = $('Read: sim_cast').all().map((i) => i.json).filter((r) => r && r.id !== undefined && r.key !== undefined);\nconst byKey = new Map(existing.map((r) => [String(r.key), r]));\n\nconst norm = (v) => {\n  if (v === null || v === undefined || v === '') return '';\n  if (typeof v === 'boolean') return v ? 'true' : 'false';\n  if (v === 'true' || v === 'false') return v;\n  const n = Number(v);\n  if (typeof v === 'number' || (typeof v === 'string' && v.trim() !== '' && Number.isFinite(n))) return String(Number(n.toFixed(6)));\n  return String(v).trim();\n};\nconst differs = (row, cur) => Object.keys(row).some((k) => norm(row[k]) !== norm(cur[k]));\n\nconst out = [];\nfor (const row of staged) {\n  const cur = byKey.get(String(row.key));\n  if ('new' === 'new' && !cur) out.push({ json: row });\n  if ('new' === 'changed' && cur && differs(row, cur)) out.push({ json: { id: cur.id, ...row } });\n}\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "New rows: sim_cast",
+      "position": [
+        1420,
+        240
+      ],
+      "id": "new-rows-sim-cast"
+    },
+    {
+      "parameters": {
+        "batchSize": 200,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "name": "200 at a time: sim_cast",
+      "position": [
+        1640,
+        240
+      ],
+      "id": "200-at-a-time-sim-cast"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "batchCreate",
+        "databaseId": "={{ $('Read: sim_cast').params.databaseId }}",
+        "tableId": "={{ $('Read: sim_cast').params.tableId }}",
+        "dataToSend": "autoMapInputData",
+        "inputsToIgnore": ""
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Batch Create: sim_cast",
+      "position": [
+        1860,
+        260
+      ],
+      "id": "batch-create-sim-cast"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Upsert helper, one node per table and mode. build.mjs replaces Set up (the node whose single\n// output item holds the staged rows under sim_cast), sim_cast (table name, also the \"Read: <table>\"\n// node that fetched the existing rows) and changed (\"new\" or \"changed\").\n//  new:     staged rows whose key is not in the table yet  -> Batch Create\n//  changed: existing rows whose staged values differ, as { id, ...staged } -> Update\n// Values are compared loosely (Baserow returns numbers as strings; '' and null are the same).\nconst staged = $('Set up').first().json['sim_cast'] || [];\nconst existing = $('Read: sim_cast').all().map((i) => i.json).filter((r) => r && r.id !== undefined && r.key !== undefined);\nconst byKey = new Map(existing.map((r) => [String(r.key), r]));\n\nconst norm = (v) => {\n  if (v === null || v === undefined || v === '') return '';\n  if (typeof v === 'boolean') return v ? 'true' : 'false';\n  if (v === 'true' || v === 'false') return v;\n  const n = Number(v);\n  if (typeof v === 'number' || (typeof v === 'string' && v.trim() !== '' && Number.isFinite(n))) return String(Number(n.toFixed(6)));\n  return String(v).trim();\n};\nconst differs = (row, cur) => Object.keys(row).some((k) => norm(row[k]) !== norm(cur[k]));\n\nconst out = [];\nfor (const row of staged) {\n  const cur = byKey.get(String(row.key));\n  if ('changed' === 'new' && !cur) out.push({ json: row });\n  if ('changed' === 'changed' && cur && differs(row, cur)) out.push({ json: { id: cur.id, ...row } });\n}\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "Changed rows: sim_cast",
+      "position": [
+        1420,
+        400
+      ],
+      "id": "changed-rows-sim-cast"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "update",
+        "databaseId": "={{ $('Read: sim_cast').params.databaseId }}",
+        "tableId": "={{ $('Read: sim_cast').params.tableId }}",
+        "rowId": "={{ $json.id }}",
+        "dataToSend": "autoMapInputData",
+        "inputsToIgnore": "id"
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Update: sim_cast",
+      "position": [
+        1640,
+        400
+      ],
+      "id": "update-sim-cast"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Upsert helper, one node per table and mode. build.mjs replaces Set up (the node whose single\n// output item holds the staged rows under sim_networks), sim_networks (table name, also the \"Read: <table>\"\n// node that fetched the existing rows) and new (\"new\" or \"changed\").\n//  new:     staged rows whose key is not in the table yet  -> Batch Create\n//  changed: existing rows whose staged values differ, as { id, ...staged } -> Update\n// Values are compared loosely (Baserow returns numbers as strings; '' and null are the same).\nconst staged = $('Set up').first().json['sim_networks'] || [];\nconst existing = $('Read: sim_networks').all().map((i) => i.json).filter((r) => r && r.id !== undefined && r.key !== undefined);\nconst byKey = new Map(existing.map((r) => [String(r.key), r]));\n\nconst norm = (v) => {\n  if (v === null || v === undefined || v === '') return '';\n  if (typeof v === 'boolean') return v ? 'true' : 'false';\n  if (v === 'true' || v === 'false') return v;\n  const n = Number(v);\n  if (typeof v === 'number' || (typeof v === 'string' && v.trim() !== '' && Number.isFinite(n))) return String(Number(n.toFixed(6)));\n  return String(v).trim();\n};\nconst differs = (row, cur) => Object.keys(row).some((k) => norm(row[k]) !== norm(cur[k]));\n\nconst out = [];\nfor (const row of staged) {\n  const cur = byKey.get(String(row.key));\n  if ('new' === 'new' && !cur) out.push({ json: row });\n  if ('new' === 'changed' && cur && differs(row, cur)) out.push({ json: { id: cur.id, ...row } });\n}\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "New rows: sim_networks",
+      "position": [
+        1420,
+        560
+      ],
+      "id": "new-rows-sim-networks"
+    },
+    {
+      "parameters": {
+        "batchSize": 200,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "name": "200 at a time: sim_networks",
+      "position": [
+        1640,
+        560
+      ],
+      "id": "200-at-a-time-sim-networks"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "batchCreate",
+        "databaseId": "={{ $('Read: sim_networks').params.databaseId }}",
+        "tableId": "={{ $('Read: sim_networks').params.tableId }}",
+        "dataToSend": "autoMapInputData",
+        "inputsToIgnore": ""
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Batch Create: sim_networks",
+      "position": [
+        1860,
+        580
+      ],
+      "id": "batch-create-sim-networks"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Upsert helper, one node per table and mode. build.mjs replaces Set up (the node whose single\n// output item holds the staged rows under sim_networks), sim_networks (table name, also the \"Read: <table>\"\n// node that fetched the existing rows) and changed (\"new\" or \"changed\").\n//  new:     staged rows whose key is not in the table yet  -> Batch Create\n//  changed: existing rows whose staged values differ, as { id, ...staged } -> Update\n// Values are compared loosely (Baserow returns numbers as strings; '' and null are the same).\nconst staged = $('Set up').first().json['sim_networks'] || [];\nconst existing = $('Read: sim_networks').all().map((i) => i.json).filter((r) => r && r.id !== undefined && r.key !== undefined);\nconst byKey = new Map(existing.map((r) => [String(r.key), r]));\n\nconst norm = (v) => {\n  if (v === null || v === undefined || v === '') return '';\n  if (typeof v === 'boolean') return v ? 'true' : 'false';\n  if (v === 'true' || v === 'false') return v;\n  const n = Number(v);\n  if (typeof v === 'number' || (typeof v === 'string' && v.trim() !== '' && Number.isFinite(n))) return String(Number(n.toFixed(6)));\n  return String(v).trim();\n};\nconst differs = (row, cur) => Object.keys(row).some((k) => norm(row[k]) !== norm(cur[k]));\n\nconst out = [];\nfor (const row of staged) {\n  const cur = byKey.get(String(row.key));\n  if ('changed' === 'new' && !cur) out.push({ json: row });\n  if ('changed' === 'changed' && cur && differs(row, cur)) out.push({ json: { id: cur.id, ...row } });\n}\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "Changed rows: sim_networks",
+      "position": [
+        1420,
+        720
+      ],
+      "id": "changed-rows-sim-networks"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "update",
+        "databaseId": "={{ $('Read: sim_networks').params.databaseId }}",
+        "tableId": "={{ $('Read: sim_networks').params.tableId }}",
+        "rowId": "={{ $json.id }}",
+        "dataToSend": "autoMapInputData",
+        "inputsToIgnore": "id"
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Update: sim_networks",
+      "position": [
+        1640,
+        720
+      ],
+      "id": "update-sim-networks"
+    },
+    {
+      "parameters": {
+        "content": "## Baserow tables to pick\nAfter importing, open each node below and choose the Big Five database and the named table from the dropdowns (and the Baserow Token credential):\n\n- **Read: participants** → table `participants`\n- **Read: scores** → table `scores`\n- **Read: sim_cast** → table `sim_cast`\n- **Read: sim_networks** → table `sim_networks`\n\nThese nodes follow the pick above for the same table by expression; nothing to choose, only the credential:\n- Batch Create: sim_cast\n- Update: sim_cast\n- Batch Create: sim_networks\n- Update: sim_networks",
+        "width": 520,
+        "height": 312,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "name": "Tables",
+      "position": [
+        -660,
+        140
+      ],
+      "id": "tables"
+    }
+  ],
+  "connections": {
+    "Set up form": {
+      "main": [
+        [
+          {
+            "node": "Read: participants",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read: participants": {
+      "main": [
+        [
+          {
+            "node": "Read: scores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read: scores": {
+      "main": [
+        [
+          {
+            "node": "Read: sim_cast",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read: sim_cast": {
+      "main": [
+        [
+          {
+            "node": "Read: sim_networks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read: sim_networks": {
+      "main": [
+        [
+          {
+            "node": "Set up",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set up": {
+      "main": [
+        [
+          {
+            "node": "New rows: sim_cast",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Changed rows: sim_cast",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "New rows: sim_networks",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Changed rows: sim_networks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New rows: sim_cast": {
+      "main": [
+        [
+          {
+            "node": "200 at a time: sim_cast",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "200 at a time: sim_cast": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Batch Create: sim_cast",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Batch Create: sim_cast": {
+      "main": [
+        [
+          {
+            "node": "200 at a time: sim_cast",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Changed rows: sim_cast": {
+      "main": [
+        [
+          {
+            "node": "Update: sim_cast",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New rows: sim_networks": {
+      "main": [
+        [
+          {
+            "node": "200 at a time: sim_networks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "200 at a time: sim_networks": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Batch Create: sim_networks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Batch Create: sim_networks": {
+      "main": [
+        [
+          {
+            "node": "200 at a time: sim_networks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Changed rows: sim_networks": {
+      "main": [
+        [
+          {
+            "node": "Update: sim_networks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true
+  },
+  "active": false,
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

@@ -1,0 +1,278 @@
+{
+  "name": "Network 2 - Queue Runs",
+  "id": "networkQueueRuns",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Network 2 - Queue Runs\nQueues the runs of one model for the network experiments. \"Network 3 - Run Simulation\" works through the queue.\n\n- **Label**: a short name for this model in the report, e.g. `haiku`. One label = one model under study.\n- **Experiment**: all three, or one of them.\n- **Repeats** (default 5): propagation gets that many LLM runs plus 2 no-seed control runs; structure that many; dynamics that many rounded up to an even number, alternating which claim starts at the hub.\n- **Days** (default 2): 8 ticks per day.\n- **Judge**: the model that labels messages. Use the same judge for every label so the models are measured the same way.\n\nThe rule arms (share with probability p, friend of a friend, random ties, Bayes, DeGroot) need no model and are computed by \"Network 4 - Analyze and Report\".",
+        "width": 560,
+        "height": 420,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "name": "About",
+      "position": [
+        -660,
+        -300
+      ],
+      "id": "about"
+    },
+    {
+      "parameters": {
+        "path": "network-queue-runs",
+        "formTitle": "Network · Queue Runs",
+        "formDescription": "Queues the simulation runs of one model. Use the same judge model for every label.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Label",
+              "fieldType": "text",
+              "requiredField": true,
+              "placeholder": "haiku"
+            },
+            {
+              "fieldLabel": "Experiment",
+              "fieldType": "dropdown",
+              "requiredField": true,
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "all"
+                  },
+                  {
+                    "option": "propagation"
+                  },
+                  {
+                    "option": "structure"
+                  },
+                  {
+                    "option": "dynamics"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Provider",
+              "fieldType": "dropdown",
+              "requiredField": true,
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "bedrock"
+                  },
+                  {
+                    "option": "ollama"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Model",
+              "fieldType": "text",
+              "requiredField": true,
+              "placeholder": "us.anthropic.claude-haiku-4-5-20251001-v1:0"
+            },
+            {
+              "fieldLabel": "Temperature",
+              "fieldType": "number",
+              "placeholder": "empty = the model default"
+            },
+            {
+              "fieldLabel": "Repeats",
+              "fieldType": "number",
+              "placeholder": "5"
+            },
+            {
+              "fieldLabel": "Days",
+              "fieldType": "number",
+              "placeholder": "2"
+            },
+            {
+              "fieldLabel": "Judge provider",
+              "fieldType": "dropdown",
+              "requiredField": true,
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "bedrock"
+                  },
+                  {
+                    "option": "ollama"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Judge model",
+              "fieldType": "text",
+              "requiredField": true,
+              "placeholder": "us.anthropic.claude-haiku-4-5-20251001-v1:0"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "name": "Queue runs form",
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "network-queue-runs",
+      "id": "queue-runs-form"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "getAll",
+        "databaseId": "",
+        "tableId": "",
+        "returnAll": true,
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Read: sim_runs",
+      "position": [
+        240,
+        0
+      ],
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "id": "read-sim-runs"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Queue Runs: validate the form and produce one sim_runs row per run. Input: the existing sim_runs rows.\n// Per label: propagation = `repeats` LLM runs + 2 no-seed control runs; structure = `repeats` LLM runs;\n// dynamics = `repeats` rounded up to an even number, alternating which claim starts at the hub.\nconst form = $('Queue runs form').first().json;\nconst existing = new Set($input.all().map((i) => i.json).filter((r) => r && r.run_id).map((r) => String(r.run_id)));\nconst text = (k) => String(form[k] ?? '').trim();\nconst label = text('Label');\nconst provider = text('Provider');\nconst model = text('Model');\n// No temperature = the model's own default; some models refuse the parameter.\nconst temperature = text('Temperature') === '' ? null : Number(text('Temperature'));\nconst repeats = Math.floor(Number(text('Repeats'))) || 5;\nconst days = Math.floor(Number(text('Days'))) || 2;\nconst judge_provider = text('Judge provider');\nconst judge_model = text('Judge model');\nif (!/^[A-Za-z0-9._-]+$/.test(label)) throw new Error(`Label \"${label}\" may only contain letters, digits, \".\", \"_\" and \"-\"`);\nif (!model || !judge_model) throw new Error('Model and Judge model are required');\nif (temperature !== null && !Number.isFinite(temperature)) throw new Error(`Temperature must be a number, got \"${text('Temperature')}\"`);\n\nconst wanted = text('Experiment') === 'all' ? ['propagation', 'structure', 'dynamics'] : [text('Experiment')];\nconst plan = [];\nfor (const experiment of wanted) {\n  if (experiment === 'propagation') {\n    for (let r = 1; r <= repeats; r++) plan.push({ experiment, arm: 'llm', condition: '', repeat: r });\n    for (let r = 1; r <= Math.min(2, repeats); r++) plan.push({ experiment, arm: 'control', condition: '', repeat: r });\n  } else if (experiment === 'structure') {\n    for (let r = 1; r <= repeats; r++) plan.push({ experiment, arm: 'llm', condition: '', repeat: r });\n  } else if (experiment === 'dynamics') {\n    for (let r = 1; r <= 2 * Math.ceil(repeats / 2); r++) plan.push({ experiment, arm: 'llm', condition: r % 2 ? 'on_at_hub' : 'off_at_hub', repeat: r });\n  }\n}\nconst rows = plan.map((p) => {\n  const run_id = `${label}-${p.experiment}-${p.arm}-${p.repeat}`;\n  if (existing.has(run_id)) throw new Error(`Run \"${run_id}\" already exists; use another Label`);\n  return {\n    key: run_id, run_id, label, ...p, provider, model, temperature, judge_provider, judge_model, ticks: days * 8,\n    // Date fields take an ISO timestamp or null; Baserow rejects ''.\n    status: 'queued', progress: '', calls: 0, failures: 0, messages: 0, execution: '', started_at: null, finished_at: null, locked_at: null, locked_by: '',\n  };\n});\nreturn rows.map((json) => ({ json }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "name": "Plan runs",
+      "position": [
+        480,
+        0
+      ],
+      "id": "plan-runs"
+    },
+    {
+      "parameters": {
+        "batchSize": 200,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "name": "200 at a time: sim_runs",
+      "position": [
+        720,
+        0
+      ],
+      "id": "200-at-a-time-sim-runs"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "resource": "row",
+        "operation": "batchCreate",
+        "databaseId": "={{ $('Read: sim_runs').params.databaseId }}",
+        "tableId": "={{ $('Read: sim_runs').params.tableId }}",
+        "dataToSend": "autoMapInputData",
+        "inputsToIgnore": ""
+      },
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "name": "Batch Create: sim_runs",
+      "position": [
+        960,
+        20
+      ],
+      "id": "batch-create-sim-runs"
+    },
+    {
+      "parameters": {
+        "content": "## Baserow tables to pick\nAfter importing, open each node below and choose the Big Five database and the named table from the dropdowns (and the Baserow Token credential):\n\n- **Read: sim_runs** → table `sim_runs`\n\nThese nodes follow the pick above for the same table by expression; nothing to choose, only the credential:\n- Batch Create: sim_runs",
+        "width": 520,
+        "height": 168,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "name": "Tables",
+      "position": [
+        -660,
+        160
+      ],
+      "id": "tables"
+    }
+  ],
+  "connections": {
+    "Queue runs form": {
+      "main": [
+        [
+          {
+            "node": "Read: sim_runs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read: sim_runs": {
+      "main": [
+        [
+          {
+            "node": "Plan runs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Plan runs": {
+      "main": [
+        [
+          {
+            "node": "200 at a time: sim_runs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "200 at a time: sim_runs": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Batch Create: sim_runs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Batch Create: sim_runs": {
+      "main": [
+        [
+          {
+            "node": "200 at a time: sim_runs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true
+  },
+  "active": false,
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

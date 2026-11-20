@@ -3,7 +3,7 @@ import { Workflow, formTrigger, code, sticky } from '../lib/n8n.mjs';
 export default function build() {
   const wf = new Workflow('Big Five 1 - Create Tables', 'bigFiveCreateTables');
   wf.add(sticky('About', `## Big Five 1 - Create Tables
-Creates the study tables in a Baserow database: participants, items, human_bfi2, human_mini_markers, runs, agent_turns, scores, comparisons, run_summaries. Every table gets a text primary field \`key\`.
+Creates the study tables in a Baserow database: participants, items, human_bfi2, human_mini_markers, runs, agent_turns, scores, comparisons, run_summaries, and the six sim_* tables of the network experiments. Every table gets a text primary field \`key\`.
 
 Open the form (Test workflow → Open form, or the production URL once active), enter the Baserow URL **as seen from the n8n container** (Aspire dev stack: \`http://baserow\`), your Baserow email and password, and the id of the database (from its URL, \`/database/<id>/\`).
 

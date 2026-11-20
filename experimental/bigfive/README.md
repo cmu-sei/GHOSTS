@@ -7,7 +7,7 @@ run by run. Everything an operator touches is an n8n workflow; Baserow is the st
 | part | job |
 |---|---|
 | **Baserow** | nine typed tables in one database (see [Tables](#tables)) |
-| **n8n** | five workflows in `workflows/`: Create Tables, Import Human Data, Add Run, Run Agents, Analyze and Report |
+| **n8n** | five workflows in `workflows/`: Create Tables, Import Human Data, Add Run, Run Agents, Analyze and Report; four more for the [network experiments](#network-experiments) |
 | **`out/`** | `<run_id>.html` + `.csv` per run and `all-runs.html` + `.csv` overall, written by the Analyze workflow |
 
 Design: `docs/superpowers/specs/2026-10-23-bigfive-n8n-only-design.md`.
@@ -104,6 +104,63 @@ Mini-Markers, one `run_summaries` row, and stamps `runs.analyzed_at`. Then it wr
 The two `all-runs` files are rewritten on every execution. Reports are self-contained HTML (inline SVG, no
 JavaScript); open them in a browser or print to PDF.
 
+## Network experiments
+
+Three experiments put 25 of the same persona agents in a network: **propagation** (does news spread), **structure**
+(do new ties form) and **social dynamics** (how belief moves when two claims compete). The model's agents are
+compared with simple rules, per model. Four more workflows, same database, same `out/` folder.
+
+1. **Big Five 1 - Create Tables** again: it adds the six `sim_*` tables. Import the four `Network N - *.json`
+   workflows and pick tables and credentials as in [Setup](#setup).
+2. **Network 1 - Set Up Study** (form `…/form/network-set-up`, once). Picks 25 participants that span the trait range
+   from their BFI-2 scores, names them, and saves the three networks. The same seed always gives the same result.
+3. **Network 2 - Queue Runs** (form `…/form/network-queue-runs`), once per model:
+
+   | field | meaning |
+   |---|---|
+   | Label | short name of the model in the report, e.g. `haiku` |
+   | Experiment | `all`, or one of the three |
+   | Provider, Model, Temperature | the model under study. Leave Temperature empty for the model's own default; some models (Haiku 5.5, Sonnet 5.5) refuse the parameter |
+   | Repeats | default 5. Propagation: that many runs plus 2 no-seed control runs. Structure: that many. Dynamics: rounded up to an even number, alternating which claim starts at the hub |
+   | Days | default 2; 8 ticks per day |
+   | Judge provider, Judge model | labels the messages. Use the same judge for every label |
+
+   With the defaults that is 18 runs and about 12,000 model calls per label.
+4. **Network 3 - Run Simulation**: press **Execute workflow** for one run, or activate it and the schedule starts the
+   next queued run every minute. A run makes 25 calls at once per tick and takes about a minute per simulated day on
+   Bedrock. `sim_runs.progress` shows where it is. Nothing is written until the run is over.
+5. **Network 4 - Analyze and Report**: press **Execute workflow** at any time. It covers every `done` run and writes
+   `out/network-study.html`, `out/network-runs.csv` and `out/network-agents.csv`. To leave runs out of the report, set
+   their `status` to anything else, e.g. `excluded`.
+
+What each arm is:
+
+| experiment | model arm | compared with (computed in Analyze, 1,000 simulations each, same saved network) |
+|---|---|---|
+| propagation | the host has a note about its party; agents message connections or stay quiet. `control` runs have no party | every tick an agent that knows tells one random connection with probability p; p is fitted on odd repeats and checked on even ones |
+| structure | agents may ask to connect with a name seen in their inbox; the other side accepts or declines | friend-of-a-friend ties and random ties, each tuned to add as many ties as the agents did |
+| dynamics | "it is on" and "cancelled" start at the hub and the edge (swapped across runs); belief 0–100 asked after every tick in a separate call | GHOSTS's Bayes update (keywords, likelihood 0.6) and DeGroot averaging, both over the agents' own messages |
+
+| table | key | holds |
+|---|---|---|
+| `sim_cast` | a01..a25 | agent number, name, participant_id, the participant's five BFI-2 scores |
+| `sim_networks` | experiment | generator, seed, edges and roles (host, decoy, hub, peripheral) as JSON |
+| `sim_runs` | run_id | label, experiment, arm, condition, repeat, model, judge, ticks, status, progress, calls, failures, execution |
+| `sim_messages` | run_id:mN | tick, sender, recipient, text, and the judge's `carries_event` (yes/no) or `stance` (on/off/unsure/none) |
+| `sim_turns` | run_id:tN | every model call: phase (act, belief, interview, names, judge), raw reply, and what was parsed from it |
+| `sim_ties` | run_id:a-b | ties formed during a structure run: tick, requester, accepter |
+
+Bedrock is called through its Converse API with the AWS credential on **Ask Bedrock**, and Ollama through its chat API
+with thinking off (a thinking local model takes about ten times as long per call). The Bedrock region and the Ollama
+URL are `BEDROCK_REGION` and `OLLAMA_URL` in `workflows/defs/08-network-run-simulation.mjs`. A failed call is asked again twice, then counts as the agent staying
+quiet (`sim_runs.failures`). If every call of a phase fails the run stops with the model's error.
+
+Rows carry the n8n `execution` that wrote them. A run whose execution died is started again after 30 minutes, and the
+analysis only reads rows of the execution recorded on the run, so a dead attempt never mixes in.
+
+The engine is `workflows/src/lib/sim.js`, the analysis `lib/netstats.js`, the report `lib/net_report.js`; tests are in
+`workflows/src/network.test.mjs` and drive the engine with a scripted stand-in for the model.
+
 ## Tables
 
 Every table has a text primary field `key`, unique by construction; workflows read the existing keys and create or
@@ -146,9 +203,9 @@ workflows/
 
 ```bash
 cd experimental/bigfive
-node workflows/build.mjs                        # regenerate the five JSON files
+node workflows/build.mjs                        # regenerate the nine JSON files
 node workflows/build.mjs --check                # CI-style staleness check
-node --test "workflows/src/*.test.mjs"          # 23 tests: scoring, statistics, every Code node, create_tables against a fake Baserow
+node --test "workflows/src/*.test.mjs"          # 34 tests: scoring, statistics, every Code node, create_tables against a fake Baserow, the network engine and report
 ```
 
 The scoring test also replays the shipped `out/run-001.csv` human facet scores when the normalized CSVs are present.
