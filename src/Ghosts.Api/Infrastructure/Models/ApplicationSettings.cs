@@ -32,6 +32,8 @@ public class ApplicationSettings
 
     public class GroupingOptions
     {
+        /// <summary>False stops machines being sorted into name-based groups when they check in.</summary>
+        public bool Enabled { get; set; } = true;
         public int GroupDepth { get; set; }
         public string GroupName { get; set; }
         public List<char> GroupDelimiters { get; set; }
