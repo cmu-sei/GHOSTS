@@ -24,7 +24,8 @@ public interface IMachineUpdateService
     Task<MachineUpdate> CreateAsync(MachineUpdate model, CancellationToken ct);
     Task<int> MarkAsDeletedAsync(int id, Guid machineId, CancellationToken ct);
 
-    Task UpdateGroupAsync(int groupId, MachineUpdateViewModel machineUpdate, CancellationToken ct);
+    /// <summary>Queues the update once for every machine in the group; false when the group does not exist.</summary>
+    Task<bool> UpdateGroupAsync(int groupId, MachineUpdateViewModel machineUpdate, CancellationToken ct);
 
     Task<MachineUpdate> GetById(int updateId, CancellationToken ct);
 
@@ -44,23 +45,24 @@ public class MachineUpdateService(
     IClientHubService clientHubService) : IMachineUpdateService {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
-    public async Task UpdateGroupAsync(int groupId, MachineUpdateViewModel machineUpdateViewModel,
+    public async Task<bool> UpdateGroupAsync(int groupId, MachineUpdateViewModel machineUpdateViewModel,
         CancellationToken ct)
     {
-        var machineUpdate = machineUpdateViewModel.ToMachineUpdate();
-
-        var group = context.Groups.Include(o => o.GroupMachines).FirstOrDefault(x => x.Id == groupId);
+        var group = await context.Groups.Include(o => o.GroupMachines).FirstOrDefaultAsync(x => x.Id == groupId, ct);
 
         if (group == null)
-            return;
+            return false;
 
+        // One row per machine: re-adding a single tracked entity would queue the update for the last machine only
         foreach (var machineMapping in group.GroupMachines)
         {
+            var machineUpdate = machineUpdateViewModel.ToMachineUpdate();
             machineUpdate.MachineId = machineMapping.MachineId;
             context.MachineUpdates.Add(machineUpdate);
         }
 
         await context.SaveChangesAsync(ct);
+        return true;
     }
 
     public async Task<MachineUpdate> GetAsync(Guid machineId, string currentUsername, CancellationToken ct)

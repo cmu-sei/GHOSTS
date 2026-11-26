@@ -350,7 +350,7 @@ export class MachinesListComponent implements OnInit {
   protected runTimeline(machine: Machine): void {
     const dialogRef = this.dialog.open(TimelineSelectorDialogComponent, {
       width: '500px',
-      data: { machine },
+      data: { targetName: machine.name },
       autoFocus: false,
       restoreFocus: false
     });
@@ -416,7 +416,7 @@ export class MachinesListComponent implements OnInit {
     this.dialog.open(ActivityViewerDialogComponent, {
       width: '1200px',
       maxWidth: '95vw',
-      data: { machine },
+      data: { targetName: machine.name, activity$: this.machineService.getMachineActivity(machine.id, 0, 50) },
       autoFocus: false,
       restoreFocus: false
     });

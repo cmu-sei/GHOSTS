@@ -5,14 +5,13 @@ import { MatListModule } from '@angular/material/list';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { SavedTimelineService } from '../../../core/services';
 import { SavedTimeline } from '../../../core/models';
-import { Machine } from '../../../core/models';
 
 @Component({
   selector: 'app-timeline-selector-dialog',
   standalone: true,
   imports: [MatDialogModule, MatButtonModule, MatListModule, MatProgressSpinnerModule],
   template: `
-    <h2 mat-dialog-title>Select Timeline for {{ machine.name }}</h2>
+    <h2 mat-dialog-title>Select Timeline for {{ targetName }}</h2>
     <mat-dialog-content>
       @if (loading()) {
         <div class="loading">
@@ -94,13 +93,14 @@ export class TimelineSelectorDialogComponent implements OnInit {
   protected readonly timelines = signal<SavedTimeline[]>([]);
   protected readonly loading = signal(true);
   protected readonly selectedTimeline = signal<SavedTimeline | null>(null);
-  protected readonly machine: Machine;
+  protected readonly targetName: string;
 
   private readonly savedTimelineService = inject(SavedTimelineService);
   private readonly dialogRef = inject(MatDialogRef<TimelineSelectorDialogComponent>);
 
-  constructor(@Inject(MAT_DIALOG_DATA) data: { machine: Machine }) {
-    this.machine = data.machine;
+  /** targetName: the machine or group the timeline will run on */
+  constructor(@Inject(MAT_DIALOG_DATA) data: { targetName: string }) {
+    this.targetName = data.targetName;
   }
 
   ngOnInit(): void {

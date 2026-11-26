@@ -77,7 +77,8 @@ namespace Ghosts.Api.Controllers.Api
 
             try
             {
-                await _updateService.UpdateGroupAsync(groupId, machineUpdate, ct);
+                if (!await _updateService.UpdateGroupAsync(groupId, machineUpdate, ct))
+                    return NotFound();
                 _log.Info($"Group update sent to group ID {groupId}");
                 return NoContent();
             }

@@ -8,6 +8,7 @@ import {
   AddMachineToGroupRequest,
   RemoveMachineFromGroupRequest
 } from '../models';
+import { PostTimelineRequest } from '../models';
 import { ConfigService } from './config.service';
 
 @Injectable({
@@ -43,15 +44,20 @@ export class MachineGroupService {
 
   addMachineToGroup(request: AddMachineToGroupRequest): Observable<void> {
     return this.http.post<void>(
-      `${this.apiUrl}/${request.groupId}/machines/${request.machineId}`,
+      `${this.apiUrl}/${request.groupId}/${request.machineId}`,
       {}
     );
   }
 
   removeMachineFromGroup(request: RemoveMachineFromGroupRequest): Observable<void> {
     return this.http.delete<void>(
-      `${this.apiUrl}/${request.groupId}/machines/${request.machineId}`
+      `${this.apiUrl}/${request.groupId}/${request.machineId}`
     );
+  }
+
+  /** Queues the timeline for every machine in the group; each client picks it up on its next check-in */
+  applyTimeline(id: string, request: Omit<PostTimelineRequest, 'machineId'>): Observable<void> {
+    return this.http.post<void>(`${this.configService.apiUrl}/machineupdates/group/${id}`, request);
   }
 
   getMachineGroupActivity(id: string, skip?: number, take?: number): Observable<any[]> {
