@@ -25,9 +25,10 @@ namespace Ghosts.Client.Universal.Handlers;
             BrowserType = HandlerType.BrowserEdge;
             try
             {
-                using (Driver = GetDriver(this.Handler))
+                using (Driver = GetDriver(this.Handler, out var processId))
                 {
                     base.Driver = Driver;
+                    ProcessId = processId;
 
                     if (this.Handler.HandlerArgs.ContainsKey("javascript-enable"))
                     {
@@ -108,7 +109,7 @@ namespace Ghosts.Client.Universal.Handlers;
         }
 
         
-        internal static IWebDriver GetDriver(TimelineHandler handler)
+        internal static IWebDriver GetDriver(TimelineHandler handler, out int? processId)
         {
             var options = new EdgeOptions();
             options.AddArguments("disable-infobars");
@@ -245,6 +246,7 @@ namespace Ghosts.Client.Universal.Handlers;
                     : EdgeDriverService.CreateDefaultService();
                 service.HideCommandPromptWindow = true;
                 driver = new EdgeDriver(service, options);
+                processId = GetBrowserProcessId(driver, service.ProcessId);
             }
             catch
             {

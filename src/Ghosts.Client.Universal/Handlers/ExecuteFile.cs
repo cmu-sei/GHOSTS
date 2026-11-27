@@ -102,7 +102,9 @@ public class ExecuteFile(Timeline entireTimeline, TimelineHandler timelineHandle
             {
                 FileInfo info = new FileInfo(fname);
                 _log.Trace($"Executing {info.Name}");
+                var started = DateTime.UtcNow;
                 var process = Process.Start(info.FullName);
+                var processId = process?.Id;
                 _log.Trace($"Waiting {execWaitTime} before stopping process {info.Name}");
                 if (Token.WaitHandle.WaitOne(execWaitTime)) Token.ThrowIfCancellationRequested();
                 if (process != null)
@@ -116,7 +118,9 @@ public class ExecuteFile(Timeline entireTimeline, TimelineHandler timelineHandle
                     {
                         Handler = handler.HandlerType.ToString(),
                         Command = info.FullName,
-                        Trackable = timelineEvent.TrackableId
+                        Trackable = timelineEvent.TrackableId,
+                        StartedUtc = started,
+                        ProcessId = processId
                     });
                 }
                 else

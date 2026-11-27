@@ -183,6 +183,9 @@ namespace Ghosts.Domain
         public string CommandArg { get; set; }
         public string TrackableId { get; set; }
         public string Result { get; set; }
+        public DateTime? StartedUtc { get; set; }
+        public DateTime? FinishedUtc { get; set; }
+        public int? ProcessId { get; set; }
     }
 
     public class DelayRandom

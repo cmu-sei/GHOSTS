@@ -71,6 +71,7 @@ public class Word(Timeline entireTimeline, TimelineHandler timelineHandler, Canc
                         }
                     }
 
+                    var started = DateTime.UtcNow;
                     if (OfficeHelpers.ShouldOpenExisting(handler))
                     {
                         document = officeApplication.Documents.Open(FileListing.GetRandomFile(handler.HandlerType),
@@ -224,12 +225,14 @@ public class Word(Timeline entireTimeline, TimelineHandler timelineHandler, Canc
                         Handler = handler.HandlerType.ToString(),
                         Command = timelineEvent.Command,
                         Arg = timelineEvent.CommandArgs[0].ToString(),
-                        Trackable = timelineEvent.TrackableId
+                        Trackable = timelineEvent.TrackableId,
+                        StartedUtc = started
                     });
 
 
                     if (timelineEvent.CommandArgs.Contains("pdf"))
                     {
+                        started = DateTime.UtcNow;
                         // Save document into PDF Format
                         object oMissing = System.Reflection.Missing.Value;
                         object outputFileName = timelineEvent.CommandArgs.Contains("pdf-vary-filenames")
@@ -246,7 +249,8 @@ public class Word(Timeline entireTimeline, TimelineHandler timelineHandler, Canc
                             Handler = handler.HandlerType.ToString(),
                             Command = timelineEvent.Command,
                             Arg = "pdf",
-                            Trackable = timelineEvent.TrackableId
+                            Trackable = timelineEvent.TrackableId,
+                            StartedUtc = started
                         });
                         //FileListing.Add(outputFileName.ToString(), handler.HandlerType);
                     }

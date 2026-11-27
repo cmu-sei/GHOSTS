@@ -117,6 +117,7 @@ public class ExcelHandler : BaseHandler
                             }
                         }
                         Excel.Workbook document = null;
+                        var started = DateTime.UtcNow;
                         if (OfficeHelpers.ShouldOpenExisting(handler))
                         {
                             document = excelApplication.Workbooks.Open(FileListing.GetRandomFile(handler.HandlerType));
@@ -244,10 +245,11 @@ public class ExcelHandler : BaseHandler
                             Log.Trace($"{handler.HandlerType} saving existing file: {document.FullName}");
                         }
 
-                        Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = timelineEvent.CommandArgs[0].ToString(), Trackable = timelineEvent.TrackableId });
+                        Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = timelineEvent.CommandArgs[0].ToString(), Trackable = timelineEvent.TrackableId, StartedUtc = started });
 
                         if (timelineEvent.CommandArgs.Contains("pdf"))
                         {
+                            started = DateTime.UtcNow;
                             var pdfFileName = timelineEvent.CommandArgs.Contains("pdf-vary-filenames")
                                 ? $"{defaultSaveDirectory}\\{RandomFilename.Generate()}.pdf"
                                 : path.Replace(".xlsx", ".pdf");
@@ -255,7 +257,7 @@ public class ExcelHandler : BaseHandler
                             document.ExportAsFixedFormat(NetOffice.ExcelApi.Enums.XlFixedFormatType.xlTypePDF,
                                 pdfFileName);
                             // end save as pdf
-                            Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = "pdf", Trackable = timelineEvent.TrackableId });
+                            Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = "pdf", Trackable = timelineEvent.TrackableId, StartedUtc = started });
                             FileListing.Add(pdfFileName, handler.HandlerType);
                         }
 

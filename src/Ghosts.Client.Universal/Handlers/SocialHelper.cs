@@ -1071,6 +1071,7 @@ public abstract partial class SocialHelper : BrowserHelper
                     {
                         LoginAsUser(handler);
                         var socialAction = GetNextAction();
+                        var started = DateTime.UtcNow;
                         if (socialAction == "post" || socialAction == "postWimage")
                         {
                             if (!DoPost(handler, socialAction))
@@ -1101,7 +1102,9 @@ public abstract partial class SocialHelper : BrowserHelper
                             Handler = $"Social{version}: {handler.HandlerType}",
                             Command = socialAction,
                             Arg = "",
-                            Trackable = timelineEvent.TrackableId
+                            Trackable = timelineEvent.TrackableId,
+                            StartedUtc = started,
+                            ProcessId = baseHandler.ProcessId
                         });
                     }
                     break;

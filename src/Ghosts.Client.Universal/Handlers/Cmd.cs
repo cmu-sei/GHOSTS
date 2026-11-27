@@ -74,17 +74,20 @@ public class Cmd(Timeline entireTimeline, TimelineHandler timelineHandler, Cance
 
     public void ProcessCommand(TimelineHandler handler, TimelineEvent timelineEvent, string command)
     {
-        var results = ProcessCommand(command, Token);
+        var started = DateTime.UtcNow;
+        var results = ProcessCommand(command, Token, out var processId);
         Report(new ReportItem
         {
             Handler = handler.HandlerType.ToString(),
             Command = command,
             Trackable = timelineEvent.TrackableId,
-            Result = results
+            Result = results,
+            StartedUtc = started,
+            ProcessId = processId
         });
     }
 
-    public static string ProcessCommand(string command, CancellationToken token)
+    public static string ProcessCommand(string command, CancellationToken token, out int? processId)
     {
         _log.Trace($"Spawning cmd.exe with command {command}");
 
@@ -96,6 +99,7 @@ public class Cmd(Timeline entireTimeline, TimelineHandler timelineHandler, Cance
         var process = new Process();
         process.StartInfo = processStartInfo;
         process.Start();
+        processId = process.Id;
 
         var output = process.StandardOutput.ReadToEnd();
         process.WaitForExit();

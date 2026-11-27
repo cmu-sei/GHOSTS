@@ -56,7 +56,8 @@ public class NpcSystem : BaseHandler
                         Handler = HandlerType.NpcSystem.ToString(),
                         Command = timelineEvent.Command,
                         Arg = string.Join(",", timelineEvent.CommandArgs),
-                        Result = handler.Initial
+                        Result = handler.Initial,
+                        StartedUtc = DateTime.UtcNow
                     });
                     break;
             }

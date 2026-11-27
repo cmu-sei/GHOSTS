@@ -36,6 +36,9 @@ namespace Ghosts.Api.Infrastructure.Data
             // Ensure the execution clock and item extras columns exist (server-side dispatch)
             await EnsureExecutionRunColumns(context, logger);
 
+            // Ensure the timeline and trackable history have the start/finish time and process id columns
+            await EnsureHistoryTimingColumns(context, logger);
+
             // Ensure scenarios have author and publishedat columns (drafts and publishing)
             await EnsureScenarioDraftColumns(context, logger);
 
@@ -274,6 +277,31 @@ namespace Ghosts.Api.Infrastructure.Data
             catch (Exception ex)
             {
                 logger.LogWarning(ex, "Could not verify/add the execution clock and item extras columns");
+            }
+        }
+
+        private static async Task EnsureHistoryTimingColumns(ApplicationDbContext context, ILogger<DbInitializer> logger)
+        {
+            try
+            {
+                var connection = context.Database.GetDbConnection();
+                if (connection.State != System.Data.ConnectionState.Open)
+                    await connection.OpenAsync();
+
+                using var cmd = connection.CreateCommand();
+                cmd.CommandText = @"
+                    ALTER TABLE history_timeline ADD COLUMN IF NOT EXISTS startedutc TIMESTAMP WITHOUT TIME ZONE;
+                    ALTER TABLE history_timeline ADD COLUMN IF NOT EXISTS finishedutc TIMESTAMP WITHOUT TIME ZONE;
+                    ALTER TABLE history_timeline ADD COLUMN IF NOT EXISTS processid INTEGER;
+                    ALTER TABLE history_trackables ADD COLUMN IF NOT EXISTS startedutc TIMESTAMP WITHOUT TIME ZONE;
+                    ALTER TABLE history_trackables ADD COLUMN IF NOT EXISTS finishedutc TIMESTAMP WITHOUT TIME ZONE;
+                    ALTER TABLE history_trackables ADD COLUMN IF NOT EXISTS processid INTEGER;
+                ";
+                await cmd.ExecuteNonQueryAsync();
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Could not verify/add the history start/finish time and process id columns");
             }
         }
 

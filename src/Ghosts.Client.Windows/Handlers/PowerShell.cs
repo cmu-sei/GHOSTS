@@ -106,11 +106,12 @@ namespace Ghosts.Client.Handlers
                 }
             }
 
-            var results = Command(command);
-            Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = command, Trackable = timelineEvent.TrackableId, Result = results });
+            var started = DateTime.UtcNow;
+            var results = Command(command, out var processId);
+            Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = command, Trackable = timelineEvent.TrackableId, Result = results, StartedUtc = started, ProcessId = processId });
         }
 
-        public static string Command(string command)
+        public static string Command(string command, out int? processId)
         {
             Log.Trace($"Spawning powershell.exe with command {command}");
             var processStartInfo = new ProcessStartInfo("powershell.exe")
@@ -121,6 +122,7 @@ namespace Ghosts.Client.Handlers
             };
 
             using var process = Process.Start(processStartInfo);
+            processId = process?.Id;
             var outputString = string.Empty;
             Thread.Sleep(1000);
 

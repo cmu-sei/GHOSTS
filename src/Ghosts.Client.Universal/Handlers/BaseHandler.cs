@@ -89,7 +89,10 @@ public abstract class BaseHandler : IHandler
             Command = reportItem.Command,
             CommandArg = reportItem.Arg,
             Result = reportItem.Result,
-            TrackableId = reportItem.Trackable
+            TrackableId = reportItem.Trackable,
+            StartedUtc = reportItem.StartedUtc,
+            FinishedUtc = DateTime.UtcNow,
+            ProcessId = reportItem.ProcessId
         };
 
         var o = JsonConvert.SerializeObject(result,

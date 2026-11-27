@@ -94,17 +94,20 @@ public class PowerShell(Timeline entireTimeline, TimelineHandler timelineHandler
             }
         }
 
-        var results = ProcessCommand(command, Token);
+        var started = DateTime.UtcNow;
+        var results = ProcessCommand(command, Token, out var processId);
         Report(new ReportItem
         {
             Handler = handler.HandlerType.ToString(),
             Command = command,
             Trackable = timelineEvent.TrackableId,
-            Result = results
+            Result = results,
+            StartedUtc = started,
+            ProcessId = processId
         });
     }
 
-    public static string ProcessCommand(string command, CancellationToken token)
+    public static string ProcessCommand(string command, CancellationToken token, out int? processId)
     {
         var pshell = "powershell.exe";
         if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS()) {
@@ -117,6 +120,7 @@ public class PowerShell(Timeline entireTimeline, TimelineHandler timelineHandler
         };
 
         using var process = Process.Start(processStartInfo);
+        processId = process?.Id;
         var outputString = string.Empty;
          if (token.WaitHandle.WaitOne(1000)) token.ThrowIfCancellationRequested();
 

@@ -135,6 +135,7 @@ public class Curl(Timeline entireTimeline, TimelineHandler timelineHandler, Canc
                     CreateNoWindow = true
                 }
             };
+            var started = DateTime.UtcNow;
             p.Start();
 
             while (!p.StandardOutput.EndOfStream)
@@ -142,7 +143,7 @@ public class Curl(Timeline entireTimeline, TimelineHandler timelineHandler, Canc
                 Result += p.StandardOutput.ReadToEnd();
             }
 
-            Report(new ReportItem { Handler = HandlerType.Curl.ToString(), Command = escapedArgs, Result = Result });
+            Report(new ReportItem { Handler = HandlerType.Curl.ToString(), Command = escapedArgs, Result = Result, StartedUtc = started, ProcessId = p.Id });
             DeepBrowse();
         }
         catch (Exception e)

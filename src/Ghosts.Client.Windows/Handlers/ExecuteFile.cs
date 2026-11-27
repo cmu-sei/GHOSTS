@@ -116,7 +116,9 @@ namespace Ghosts.Client.Handlers
                 {
                     FileInfo info = new FileInfo(fname);
                     Log.Trace($"Executing {info.Name}");
+                    var started = DateTime.UtcNow;
                     var process = _process = Process.Start(info.FullName);
+                    var processId = process?.Id;
                     Log.Trace($"Waiting {execWaitTime} before stopping process {info.Name}");
                     Thread.Sleep(execWaitTime);
                     if (process != null)
@@ -127,7 +129,7 @@ namespace Ghosts.Client.Handlers
                         process.Close();
                         _process = null;
                         //this.Report(handler.HandlerType.ToString(), info.FullName, timelineEvent.TrackableId);
-                        Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = info.FullName, Trackable = timelineEvent.TrackableId});
+                        Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = info.FullName, Trackable = timelineEvent.TrackableId, StartedUtc = started, ProcessId = processId });
                     }
                     else
                         Log.Trace($"Failed to start {info.Name}");

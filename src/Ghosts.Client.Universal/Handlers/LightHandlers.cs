@@ -86,6 +86,7 @@ public class LightHandlers
             {
                 foreach (var timelineEvent in this.Handler.TimeLineEvents)
                 {
+                    var started = DateTime.UtcNow;
                     var path = GetSavePath(typeof(LightExcelHandler), this.Handler, timelineEvent, "docx", cancellationToken);
 
                     var list = RandomText.GetDictionary.GetDictionaryList();
@@ -105,7 +106,8 @@ public class LightHandlers
                         Handler = this.Handler.HandlerType.ToString(),
                         Command = timelineEvent.Command,
                         Arg = timelineEvent.CommandArgs[0].ToString(),
-                        Trackable = timelineEvent.TrackableId
+                        Trackable = timelineEvent.TrackableId,
+                        StartedUtc = started
                     });
                 }
             }
@@ -134,6 +136,7 @@ public class LightHandlers
             {
                 foreach (var timelineEvent in this.Handler.TimeLineEvents)
                 {
+                    var started = DateTime.UtcNow;
                     var path = GetSavePath(typeof(LightPowerPointHandler), this.Handler, timelineEvent, "pptx", cancellationToken);
 
                     var list = RandomText.GetDictionary.GetDictionaryList();
@@ -152,7 +155,8 @@ public class LightHandlers
                         Handler = this.Handler.HandlerType.ToString(),
                         Command = timelineEvent.Command,
                         Arg = timelineEvent.CommandArgs[0].ToString(),
-                        Trackable = timelineEvent.TrackableId
+                        Trackable = timelineEvent.TrackableId,
+                        StartedUtc = started
                     });
                 }
             }
@@ -299,6 +303,7 @@ public class LightHandlers
             {
                 foreach (var timelineEvent in this.Handler.TimeLineEvents)
                 {
+                    var started = DateTime.UtcNow;
                     var path = GetSavePath(typeof(LightExcelHandler), this.Handler, timelineEvent, "xlsx", cancellationToken);
 
                     var list = RandomText.GetDictionary.GetDictionaryList();
@@ -314,7 +319,8 @@ public class LightHandlers
                         Handler = this.Handler.HandlerType.ToString(),
                         Command = timelineEvent.Command,
                         Arg = timelineEvent.CommandArgs[0].ToString(),
-                        Trackable = timelineEvent.TrackableId
+                        Trackable = timelineEvent.TrackableId,
+                        StartedUtc = started
                     });
                 }
             }

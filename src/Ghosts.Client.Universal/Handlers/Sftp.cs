@@ -161,6 +161,7 @@ public class Sftp(Timeline timeline, TimelineHandler handler, CancellationToken 
         var username = _currentCreds.GetUsername(credKey);
         var password = _currentCreds.GetPassword(credKey);
         _log.Trace("Beginning Sftp to host:  " + hostIp + " with command: " + command);
+        var started = DateTime.UtcNow;
 
         if (username != null && password != null)
         {
@@ -205,7 +206,8 @@ public class Sftp(Timeline timeline, TimelineHandler handler, CancellationToken 
                     Handler = Handler.HandlerType.ToString(),
                     Command = hostIp,
                     Arg = cmdArgs[2],
-                    Trackable = timelineEvent.TrackableId
+                    Trackable = timelineEvent.TrackableId,
+                    StartedUtc = started
                 });
             }
         }

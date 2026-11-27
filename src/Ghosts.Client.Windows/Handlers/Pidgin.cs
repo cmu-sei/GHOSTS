@@ -335,9 +335,10 @@ namespace Ghosts.Client.Handlers
                     //need to respond to each one
                     while (true)
                     {
+                        var started = DateTime.UtcNow;
                         sendChatMessage(imWindowTitle, thisTarget);
                         Thread.Sleep(_random.Next(TimeBetweenMessagesMin, TimeBetweenMessagesMax));
-                        Report(new ReportItem { Handler = "Pidgin", Command = thisTarget, Arg = "chat", Trackable = timelineEvent.TrackableId });
+                        Report(new ReportItem { Handler = "Pidgin", Command = thisTarget, Arg = "chat", Trackable = timelineEvent.TrackableId, StartedUtc = started });
                         if (closeWindows(ErrorWindowTitles))
                         {
                             //an error window popped up. Mark this chat as bad, and close it

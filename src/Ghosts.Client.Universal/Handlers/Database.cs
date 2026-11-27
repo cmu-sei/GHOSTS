@@ -259,6 +259,7 @@ public class Database(Timeline entireTimeline, TimelineHandler timelineHandler, 
         }
 
          _log.Trace($"Database:: Beginning Database operation to host: {hostIp} with command: {command}");
+        var started = DateTime.UtcNow;
 
     
         try
@@ -314,7 +315,7 @@ public class Database(Timeline entireTimeline, TimelineHandler timelineHandler, 
         }
         
 
-        Report(new ReportItem { Handler = Handler.HandlerType.ToString(), Command = hostIp, Arg = dbCmd, Trackable = timelineEvent.TrackableId });
+        Report(new ReportItem { Handler = Handler.HandlerType.ToString(), Command = hostIp, Arg = dbCmd, Trackable = timelineEvent.TrackableId, StartedUtc = started });
     }
 
     /// <summary>

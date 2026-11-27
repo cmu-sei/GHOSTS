@@ -11,6 +11,7 @@ using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
 using OpenQA.Selenium;
+using OpenQA.Selenium.Chromium;
 using OpenQA.Selenium.Interactions;
 
 namespace Ghosts.Client.Universal.Handlers;
@@ -30,6 +31,7 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
     private LinkManager _linkManager;
     private int _actionsCount;
     public string BrowserProcessTag { get; set; } //used for killing Linux browser processes
+    public int? ProcessId { get; set; } //the browser's process id, or its driver's when the browser's is unavailable
 
     public int BrowseProbability = 100;
     public bool SharePointAbort { get; set; } //will be set to True if unable to proceed with Handler execution
@@ -79,6 +81,7 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
 
                 IWebElement element;
                 Actions actions;
+                var started = DateTime.UtcNow;
 
                 switch (timelineEvent.Command)
                 {
@@ -222,7 +225,9 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
                                 Handler = handler.HandlerType.ToString(),
                                 Command = timelineEvent.Command,
                                 Arg = config.ToString(),
-                                Trackable = timelineEvent.TrackableId
+                                Trackable = timelineEvent.TrackableId,
+                                StartedUtc = started,
+                                ProcessId = ProcessId
                             });
                         }
 
@@ -237,7 +242,9 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
                                 Handler = handler.HandlerType.ToString(),
                                 Command = timelineEvent.Command,
                                 Arg = string.Join(",", timelineEvent.CommandArgs),
-                                Trackable = timelineEvent.TrackableId
+                                Trackable = timelineEvent.TrackableId,
+                                StartedUtc = started,
+                                ProcessId = ProcessId
                             });
                             if (Token.WaitHandle.WaitOne(1000)) Token.ThrowIfCancellationRequested();
                         }
@@ -247,41 +254,49 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
                         element = Driver.FindElement(By.Name(timelineEvent.CommandArgs[0].ToString()));
                         actions = new Actions(Driver);
                         actions.SendKeys(element, timelineEvent.CommandArgs[1].ToString()).Build().Perform();
+                        ReportEvent(handler, timelineEvent, timelineEvent.CommandArgs[0].ToString(), started);
                         break;
                     case "typebyid":
                         element = Driver.FindElement(By.Id(timelineEvent.CommandArgs[0].ToString()));
                         actions = new Actions(Driver);
                         actions.SendKeys(element, timelineEvent.CommandArgs[1].ToString()).Build().Perform();
+                        ReportEvent(handler, timelineEvent, timelineEvent.CommandArgs[0].ToString(), started);
                         break;
                     case "click":
                     case "click.by.name":
                         element = Driver.FindElement(By.Name(timelineEvent.CommandArgs[0].ToString()));
                         actions = new Actions(Driver);
                         actions.MoveToElement(element).Click().Perform();
+                        ReportEvent(handler, timelineEvent, timelineEvent.CommandArgs[0].ToString(), started);
                         break;
                     case "clickbyid":
                     case "click.by.id":
                         element = Driver.FindElement(By.Id(timelineEvent.CommandArgs[0].ToString()));
                         actions = new Actions(Driver);
                         actions.MoveToElement(element).Click().Perform();
+                        ReportEvent(handler, timelineEvent, timelineEvent.CommandArgs[0].ToString(), started);
                         break;
                     case "click.by.linktext":
                         element = Driver.FindElement(By.LinkText(timelineEvent.CommandArgs[0].ToString()));
                         actions = new Actions(Driver);
                         actions.MoveToElement(element).Click().Perform();
+                        ReportEvent(handler, timelineEvent, timelineEvent.CommandArgs[0].ToString(), started);
                         break;
                     case "click.by.cssselector":
                         element = Driver.FindElement(By.CssSelector(timelineEvent.CommandArgs[0].ToString()));
                         actions = new Actions(Driver);
                         actions.MoveToElement(element).Click().Perform();
+                        ReportEvent(handler, timelineEvent, timelineEvent.CommandArgs[0].ToString(), started);
                         break;
                     case "js.executescript":
                         JS.ExecuteScript(timelineEvent.CommandArgs[0].ToString());
+                        ReportEvent(handler, timelineEvent, timelineEvent.CommandArgs[0].ToString(), started);
                         break;
                     case "manage.window.size":
                         Driver.Manage().Window.Size = new System.Drawing.Size(
                             Convert.ToInt32(timelineEvent.CommandArgs[0]),
                             Convert.ToInt32(timelineEvent.CommandArgs[1]));
+                        ReportEvent(handler, timelineEvent, string.Join(",", timelineEvent.CommandArgs), started);
                         break;
                 }
                 Token.ThrowIfCancellationRequested();
@@ -415,13 +430,16 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
             if (config.Uri != null && config.Uri.IsWellFormedOriginalString())
             {
                 _linkManager.SetCurrent(config.Uri);
+                var started = DateTime.UtcNow;
                 MakeRequest(config);
                 Report(new ReportItem
                 {
                     Handler = handler.HandlerType.ToString(),
                     Command = timelineEvent.Command,
                     Arg = config.ToString(),
-                    Trackable = timelineEvent.TrackableId
+                    Trackable = timelineEvent.TrackableId,
+                    StartedUtc = started,
+                    ProcessId = ProcessId
                 });
 
                 if (_stickiness > 0)
@@ -447,13 +465,16 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
                                 config.Uri = link.Url;
 
                                 _log.Trace($"Making request #{loopNumber + 1}/{loops} to {config.Uri}");
+                                started = DateTime.UtcNow;
                                 MakeRequest(config);
                                 Report(new ReportItem
                                 {
                                     Handler = handler.HandlerType.ToString(),
                                     Command = timelineEvent.Command,
                                     Arg = config.ToString(),
-                                    Trackable = timelineEvent.TrackableId
+                                    Trackable = timelineEvent.TrackableId,
+                                    StartedUtc = started,
+                                    ProcessId = ProcessId
                                 });
                             }
                             catch (Exception e)
@@ -542,13 +563,16 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
             {
                 var urlDict = new Dictionary<string, int>();
                 var urlQueue = new LifoQueue<Uri>(_visitedRemember);
+                var started = DateTime.UtcNow;
                 MakeRequest(config);
                 Report(new ReportItem
                 {
                     Handler = handler.HandlerType.ToString(),
                     Command = timelineEvent.Command,
                     Arg = config.ToString(),
-                    Trackable = timelineEvent.TrackableId
+                    Trackable = timelineEvent.TrackableId,
+                    StartedUtc = started,
+                    ProcessId = ProcessId
                 });
                 if (Token.WaitHandle.WaitOne(timelineEvent.DelayAfterActual)) Token.ThrowIfCancellationRequested();
                 if (_stickiness > 0)
@@ -564,6 +588,7 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
                             {
                                 if (BrowseProbability > _random.Next(0, 100))
                                 {
+                                    started = DateTime.UtcNow;
                                     if (!ClickRandomLink(config, urlDict, urlQueue))
                                         break; //break if no links found, reset to next choice
                                     _log.Trace($"Making request #{loopNumber + 1}/{loops} to {config.Uri}");
@@ -572,7 +597,9 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
                                         Handler = handler.HandlerType.ToString(),
                                         Command = timelineEvent.Command,
                                         Arg = config.ToString(),
-                                        Trackable = timelineEvent.TrackableId
+                                        Trackable = timelineEvent.TrackableId,
+                                        StartedUtc = started,
+                                        ProcessId = ProcessId
                                     });
                                 }
                                 else
@@ -883,17 +910,61 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
     }
 
     /// <summary>
+    /// Reports a browser action that has no result of its own (typing, clicking, running script, resizing)
+    /// </summary>
+    private void ReportEvent(TimelineHandler handler, TimelineEvent timelineEvent, string arg, DateTime started)
+    {
+        Report(new ReportItem
+        {
+            Handler = handler.HandlerType.ToString(),
+            Command = timelineEvent.Command,
+            Arg = arg,
+            Trackable = timelineEvent.TrackableId,
+            StartedUtc = started,
+            ProcessId = ProcessId
+        });
+    }
+
+    /// <summary>
+    /// The browser's own process id where the driver will give it (Chromium over DevTools, Firefox in its capabilities),
+    /// otherwise the id of the driver process that launched the browser
+    /// </summary>
+    internal static int? GetBrowserProcessId(IWebDriver driver, int driverProcessId)
+    {
+        try
+        {
+            if (driver is ChromiumDriver chromium)
+            {
+                var result = (Dictionary<string, object>)chromium.ExecuteCdpCommand("SystemInfo.getProcessInfo", new Dictionary<string, object>());
+                foreach (Dictionary<string, object> process in (IEnumerable<object>)result["processInfo"])
+                {
+                    if ((string)process["type"] == "browser") return Convert.ToInt32(process["id"]);
+                }
+            }
+
+            var firefoxProcessId = ((IHasCapabilities)driver).Capabilities.GetCapability("moz:processID");
+            if (firefoxProcessId != null) return Convert.ToInt32(firefoxProcessId);
+        }
+        catch (Exception e)
+        {
+            _log.Trace($"Browser process id unavailable, using the driver's: {e.Message}");
+        }
+
+        return driverProcessId;
+    }
+
+    /// <summary>
     /// Close browser
     /// </summary>
     public void Close()
     {
-        Report(new ReportItem { Handler = BrowserType.ToString(), Command = "Close" });
+        Report(new ReportItem { Handler = BrowserType.ToString(), Command = "Close", StartedUtc = DateTime.UtcNow, ProcessId = ProcessId });
         Driver.Close();
     }
 
     public void Stop()
     {
-        Report(new ReportItem { Handler = BrowserType.ToString(), Command = "Stop" });
+        Report(new ReportItem { Handler = BrowserType.ToString(), Command = "Stop", StartedUtc = DateTime.UtcNow, ProcessId = ProcessId });
         Close();
     }
 }

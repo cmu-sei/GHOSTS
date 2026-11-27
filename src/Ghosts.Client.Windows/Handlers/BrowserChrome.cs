@@ -47,9 +47,10 @@ namespace Ghosts.Client.Handlers
         {
             try
             {
-                using (Driver = GetDriver(handler))
+                using (Driver = GetDriver(handler, out var processId))
                 {
                     base.Driver = Driver;
+                    ProcessId = processId;
 
                     if (handler.HandlerArgs.ContainsKey("javascript-enable"))
                     {
@@ -160,7 +161,7 @@ namespace Ghosts.Client.Handlers
             _ = new BrowserChrome(handler);
         }
 
-        internal static IWebDriver GetDriver(TimelineHandler handler)
+        internal static IWebDriver GetDriver(TimelineHandler handler, out int? processId)
         {
             var options = new ChromeOptions();
             options.AddArguments("disable-infobars");
@@ -305,6 +306,7 @@ namespace Ghosts.Client.Handlers
                 : ChromeDriverService.CreateDefaultService();
             service.HideCommandPromptWindow = true;
             var driver = new ChromeDriver(service, options);
+            processId = GetBrowserProcessId(driver, service.ProcessId);
 
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
             return driver;

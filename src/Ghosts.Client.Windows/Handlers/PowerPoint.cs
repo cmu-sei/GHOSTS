@@ -139,6 +139,7 @@ public class PowerPointHandler : BaseHandler
                         Thread.Sleep(writeSleep);
 
                         PowerPoint.Presentation document = null;
+                        var started = DateTime.UtcNow;
                         if (OfficeHelpers.ShouldOpenExisting(handler))
                         {
                             document = powerApplication.Presentations.Open(FileListing.GetRandomFile(handler.HandlerType));
@@ -232,10 +233,11 @@ public class PowerPointHandler : BaseHandler
                             Log.Trace($"{handler.HandlerType} saving existing file: {document.FullName}");
                         }
 
-                        Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = timelineEvent.CommandArgs[0].ToString(), Trackable = timelineEvent.TrackableId });
+                        Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = timelineEvent.CommandArgs[0].ToString(), Trackable = timelineEvent.TrackableId, StartedUtc = started });
 
                         if (timelineEvent.CommandArgs.Contains("pdf"))
                         {
+                            started = DateTime.UtcNow;
                             // Save document into PDF Format
                             var outputFileName = timelineEvent.CommandArgs.Contains("pdf-vary-filenames")
                                 ? $"{defaultSaveDirectory}\\{RandomFilename.Generate()}.pdf"
@@ -244,7 +246,7 @@ public class PowerPointHandler : BaseHandler
 
                             document.SaveAs(outputFileName, fileFormat, MsoTriState.msoCTrue);
                             // end save as pdf
-                            Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = "pdf", Trackable = timelineEvent.TrackableId });
+                            Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = "pdf", Trackable = timelineEvent.TrackableId, StartedUtc = started });
                             FileListing.Add(outputFileName, handler.HandlerType);
                         }
 

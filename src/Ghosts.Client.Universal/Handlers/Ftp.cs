@@ -188,6 +188,7 @@ namespace Ghosts.Client.Universal.Handlers
                 try
                 {
                     var netcred = new NetworkCredential(username, password);
+                    var started = DateTime.UtcNow;
 
                     try
                     {
@@ -202,7 +203,7 @@ namespace Ghosts.Client.Universal.Handlers
                         _log.Error(e);
                     }
 
-                    Report(new ReportItem { Handler = Handler.HandlerType.ToString(), Command = hostIp, Arg = action, Trackable = timelineEvent.TrackableId });
+                    Report(new ReportItem { Handler = Handler.HandlerType.ToString(), Command = hostIp, Arg = action, Trackable = timelineEvent.TrackableId, StartedUtc = started });
                 }
                 catch (OperationCanceledException)
                 {

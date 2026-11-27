@@ -84,6 +84,7 @@ namespace Ghosts.Client.Handlers
                         CreateNoWindow = true
                     }
                 };
+                var started = DateTime.UtcNow;
                 p.Start();
 
                 while (!p.StandardOutput.EndOfStream)
@@ -101,7 +102,7 @@ namespace Ghosts.Client.Handlers
                     Log.Error($"{err} on {command}");
                 }
                 
-                Report(new ReportItem {Handler = HandlerType.Azure.ToString(), Command = command, Result = this.Result});
+                Report(new ReportItem {Handler = HandlerType.Azure.ToString(), Command = command, Result = this.Result, StartedUtc = started, ProcessId = p.Id});
             }
             catch (Exception exc)
             {

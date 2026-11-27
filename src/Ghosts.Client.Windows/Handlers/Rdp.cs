@@ -323,6 +323,7 @@ namespace Ghosts.Client.Handlers
                 int totalTime = 0;
                 while (totalTime < ExecutionTime)
                 {
+                    var started = DateTime.UtcNow;
                     var sleepTime = Jitter.JitterFactorDelay(MouseSleep, JitterFactor);
                     Thread.Sleep(sleepTime);
                     totalTime += sleepTime;
@@ -333,7 +334,7 @@ namespace Ghosts.Client.Handlers
                     au.MouseMove(rc.Left, rc.Top, 30);
                     au.MouseMove(_random.Next(rc.Left, rc.Right), _random.Next(rc.Top, rc.Bottom), 30);
                     Winuser.SetForegroundWindow(winHandle);
-                    Report(new ReportItem { Handler = "RDP", Command = CurrentTarget, Arg = "mouseloop", Trackable = timelineEvent.TrackableId });
+                    Report(new ReportItem { Handler = "RDP", Command = CurrentTarget, Arg = "mouseloop", Trackable = timelineEvent.TrackableId, StartedUtc = started });
                 }
                 //close the window
                 Log.Trace($"RDP:: Finished activity loop for {target}.");

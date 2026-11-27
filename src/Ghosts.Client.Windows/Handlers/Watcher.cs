@@ -409,6 +409,7 @@ internal class FileWatcher : BaseHandler
         if (lastWriteTime > _lastRead.AddSeconds(1))
         {
             _lastRead = lastWriteTime;
+            var started = DateTime.UtcNow;
             Log.Trace("File: " + e.FullPath + " " + e.ChangeType);
                 
             try
@@ -422,7 +423,7 @@ internal class FileWatcher : BaseHandler
                     }
                 }
                     
-                Report(new ReportItem { Handler = _handler.HandlerType.ToString(), Command = _command, Arg = _filePath, Trackable = _timelineEvent.TrackableId, Result = fileContents});
+                Report(new ReportItem { Handler = _handler.HandlerType.ToString(), Command = _command, Arg = _filePath, Trackable = _timelineEvent.TrackableId, Result = fileContents, StartedUtc = started });
 
                 if (Program.IsDebug)
                     Console.WriteLine($"File: {e.FullPath} : {e.ChangeType} : {fileContents}");

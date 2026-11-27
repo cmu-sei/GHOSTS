@@ -56,7 +56,8 @@ public class NpcSystem(Timeline entireTimeline, TimelineHandler timelineHandler,
                         Handler = HandlerType.NpcSystem.ToString(),
                         Command = timelineEvent.Command,
                         Arg = string.Join(",", timelineEvent.CommandArgs),
-                        Result = this.Handler.Initial
+                        Result = this.Handler.Initial,
+                        StartedUtc = DateTime.UtcNow
                     });
                     break;
             }

@@ -106,6 +106,7 @@ public class Outlook(Timeline timeline, TimelineHandler handler, CancellationTok
     private async Task HandleSend(string smtpHost, int smtpPort, bool smtpUseSsl,
         string username, string password, TimelineEvent timelineEvent)
     {
+        var started = DateTime.UtcNow;
         var emailConfig = new EmailConfiguration(timelineEvent.CommandArgs);
         _log.Trace($"Outlook sending email: {emailConfig}");
 
@@ -124,7 +125,8 @@ public class Outlook(Timeline timeline, TimelineHandler handler, CancellationTok
             Handler = Handler.HandlerType.ToString(),
             Command = timelineEvent.Command,
             Arg = emailConfig.ToString(),
-            Trackable = timelineEvent.TrackableId
+            Trackable = timelineEvent.TrackableId,
+            StartedUtc = started
         });
     }
 
@@ -132,6 +134,7 @@ public class Outlook(Timeline timeline, TimelineHandler handler, CancellationTok
         string imapHost, int imapPort, bool imapUseSsl,
         string username, string password, TimelineEvent timelineEvent)
     {
+        var started = DateTime.UtcNow;
         using var imap = new ImapClient();
         await imap.ConnectAsync(imapHost, imapPort, imapUseSsl, Token);
         await imap.AuthenticateAsync(username, password, Token);
@@ -195,13 +198,15 @@ public class Outlook(Timeline timeline, TimelineHandler handler, CancellationTok
             Handler = Handler.HandlerType.ToString(),
             Command = timelineEvent.Command,
             Arg = $"Reply to {original.From} RE: {original.Subject}",
-            Trackable = timelineEvent.TrackableId
+            Trackable = timelineEvent.TrackableId,
+            StartedUtc = started
         });
     }
 
     private async Task HandleRead(string imapHost, int imapPort, bool imapUseSsl,
         string username, string password, TimelineEvent timelineEvent)
     {
+        var started = DateTime.UtcNow;
         using var imap = new ImapClient();
         await imap.ConnectAsync(imapHost, imapPort, imapUseSsl, Token);
         await imap.AuthenticateAsync(username, password, Token);
@@ -230,7 +235,8 @@ public class Outlook(Timeline timeline, TimelineHandler handler, CancellationTok
             Handler = Handler.HandlerType.ToString(),
             Command = timelineEvent.Command,
             Arg = $"Read: {message.Subject} from {message.From}",
-            Trackable = timelineEvent.TrackableId
+            Trackable = timelineEvent.TrackableId,
+            StartedUtc = started
         });
     }
 

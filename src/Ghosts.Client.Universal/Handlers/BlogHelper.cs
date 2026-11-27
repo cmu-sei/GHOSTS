@@ -355,6 +355,7 @@ public abstract partial class BlogHelper : BrowserHelper
 
                 //determine what to do
                 var blogAction = GetNextAction();
+                var started = DateTime.UtcNow;
 
 
                 if (blogAction == null)
@@ -418,7 +419,9 @@ public abstract partial class BlogHelper : BrowserHelper
                     Handler = $"Blog: {handler.HandlerType}",
                     Command = blogAction,
                     Arg = "",
-                    Trackable = timelineEvent.TrackableId
+                    Trackable = timelineEvent.TrackableId,
+                    StartedUtc = started,
+                    ProcessId = baseHandler.ProcessId
                 });
 
                 break;

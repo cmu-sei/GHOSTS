@@ -266,6 +266,7 @@ public class Database : BaseHandler
          
 
     
+        var started = DateTime.UtcNow;
         try
         {
 
@@ -319,7 +320,7 @@ public class Database : BaseHandler
         }
         
 
-        Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = hostIp, Arg = dbCmd, Trackable = timelineEvent.TrackableId });
+        Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = hostIp, Arg = dbCmd, Trackable = timelineEvent.TrackableId, StartedUtc = started });
     }
 
     /// <summary>

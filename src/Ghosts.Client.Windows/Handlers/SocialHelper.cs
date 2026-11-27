@@ -1051,6 +1051,7 @@ namespace Ghosts.Client.Handlers
                         LoginAsUser(handler);
 
                         string socialAction = GetNextAction();
+                        var started = DateTime.UtcNow;
 
                         if (socialAction == "post" || socialAction == "postWimage"){
                             if (!DoPost(handler,socialAction))
@@ -1075,7 +1076,7 @@ namespace Ghosts.Client.Handlers
                         }
 
 
-                        this.baseHandler.Report(new ReportItem {Handler = $"Social{version}: {handler.HandlerType.ToString()}", Command = socialAction, Arg = "", Trackable = timelineEvent.TrackableId});
+                        this.baseHandler.Report(new ReportItem {Handler = $"Social{version}: {handler.HandlerType.ToString()}", Command = socialAction, Arg = "", Trackable = timelineEvent.TrackableId, StartedUtc = started, ProcessId = this.baseHandler.ProcessId });
                         //throw new Exception($"Social:: Simulated error to test restart logic, site {site}, action {socialAction}.");
                         break;
 

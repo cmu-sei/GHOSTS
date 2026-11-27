@@ -212,6 +212,7 @@ public class Rdp(Timeline entireTimeline, TimelineHandler timelineHandler, Cance
         }
 
         Process process = null;
+        var started = DateTime.UtcNow;
         try
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -247,7 +248,7 @@ public class Rdp(Timeline entireTimeline, TimelineHandler timelineHandler, Cance
                 totalTime += sleepTime;
             }
 
-            Report(new ReportItem { Handler = Handler.HandlerType.ToString(), Command = target, Arg = credKey, Trackable = timelineEvent.TrackableId });
+            Report(new ReportItem { Handler = Handler.HandlerType.ToString(), Command = target, Arg = credKey, Trackable = timelineEvent.TrackableId, StartedUtc = started, ProcessId = process.Id });
         }
         catch (OperationCanceledException)
         {
@@ -377,6 +378,7 @@ public class Rdp(Timeline entireTimeline, TimelineHandler timelineHandler, Cance
             int totalTime = 0;
             while (totalTime <  _executionTime)
             {
+                var started = DateTime.UtcNow;
                 var sleepTime = Jitter.JitterFactorDelay(_mouseSleepTime, JitterFactor);
                 if (Token.WaitHandle.WaitOne(sleepTime)) Token.ThrowIfCancellationRequested();  
                 totalTime += sleepTime;
@@ -387,7 +389,7 @@ public class Rdp(Timeline entireTimeline, TimelineHandler timelineHandler, Cance
                 au.MouseMove(rc.Left, rc.Top, 30);
                 au.MouseMove(_random.Next(rc.Left, rc.Right), _random.Next(rc.Top, rc.Bottom), 30);
                 Winuser.SetForegroundWindow(winHandle);
-                Report(new ReportItem { Handler = "RDP", Command = _currentTarget, Arg = "mouseloop", Trackable = timelineEvent.TrackableId });
+                Report(new ReportItem { Handler = "RDP", Command = _currentTarget, Arg = "mouseloop", Trackable = timelineEvent.TrackableId, StartedUtc = started });
             }
             //close the window
             _log.Trace($"RDP:: Finished activity loop for {target}.");

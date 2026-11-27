@@ -122,6 +122,7 @@ public class WordHandler : BaseHandler
                             }
                         }
                         Word.Document document = null;
+                        var started = DateTime.UtcNow;
                         if (OfficeHelpers.ShouldOpenExisting(handler))
                         {
                             document = wordApplication.Documents.Open(FileListing.GetRandomFile(handler.HandlerType));
@@ -245,11 +246,12 @@ public class WordHandler : BaseHandler
                             Log.Trace($"{handler.HandlerType} saving existing file: {document.FullName}");
                         }
 
-                        Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = timelineEvent.CommandArgs[0].ToString(), Trackable = timelineEvent.TrackableId });
+                        Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = timelineEvent.CommandArgs[0].ToString(), Trackable = timelineEvent.TrackableId, StartedUtc = started });
 
 
                         if (timelineEvent.CommandArgs.Contains("pdf"))
                         {
+                            started = DateTime.UtcNow;
                             // Save document into PDF Format
                             object oMissing = System.Reflection.Missing.Value;
                             object outputFileName = timelineEvent.CommandArgs.Contains("pdf-vary-filenames")
@@ -262,7 +264,7 @@ public class WordHandler : BaseHandler
                                 oMissing, oMissing, oMissing, oMissing,
                                 oMissing, oMissing, oMissing, oMissing);
                             // end save as pdf
-                            Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = "pdf", Trackable = timelineEvent.TrackableId });
+                            Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = "pdf", Trackable = timelineEvent.TrackableId, StartedUtc = started });
                             FileListing.Add(outputFileName.ToString(), handler.HandlerType);
                         }
 
