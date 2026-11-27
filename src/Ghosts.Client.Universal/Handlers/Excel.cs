@@ -72,6 +72,7 @@ public class Excel(Timeline entireTimeline, TimelineHandler timelineHandler, Can
                         }
                     }
 
+                    var started = DateTime.UtcNow;
                     if (OfficeHelpers.ShouldOpenExisting(handler))
                     {
                         document = officeApplication.Workbooks.Open(FileListing.GetRandomFile(handler.HandlerType));
@@ -220,11 +221,13 @@ public class Excel(Timeline entireTimeline, TimelineHandler timelineHandler, Can
                         Handler = handler.HandlerType.ToString(),
                         Command = timelineEvent.Command,
                         Arg = timelineEvent.CommandArgs[0].ToString(),
-                        Trackable = timelineEvent.TrackableId
+                        Trackable = timelineEvent.TrackableId,
+                        StartedUtc = started
                     });
 
                     if (timelineEvent.CommandArgs.Contains("pdf"))
                     {
+                        started = DateTime.UtcNow;
                         var pdfFileName = timelineEvent.CommandArgs.Contains("pdf-vary-filenames")
                             ? $"{defaultSaveDirectory}\\{RandomFilename.Generate()}.pdf"
                             : path.Replace(".xlsx", ".pdf");
@@ -238,7 +241,8 @@ public class Excel(Timeline entireTimeline, TimelineHandler timelineHandler, Can
                             Handler = handler.HandlerType.ToString(),
                             Command = timelineEvent.Command,
                             Arg = "pdf",
-                            Trackable = timelineEvent.TrackableId
+                            Trackable = timelineEvent.TrackableId,
+                            StartedUtc = started
                         });
                         //FileListing.Add(pdfFileName, handler.HandlerType);
                     }

@@ -65,6 +65,7 @@ public class Azure(Timeline timeline, TimelineHandler handler, CancellationToken
                     CreateNoWindow = true
                 }
             };
+            var started = DateTime.UtcNow;
             p.Start();
 
             while (!p.StandardOutput.EndOfStream)
@@ -83,7 +84,7 @@ public class Azure(Timeline timeline, TimelineHandler handler, CancellationToken
                 _log.Error($"{err} on {this.Command}");
             }
 
-            Report(new ReportItem { Handler = nameof(HandlerType.Azure), Command = this.Command, Result = this.Result });
+            Report(new ReportItem { Handler = nameof(HandlerType.Azure), Command = this.Command, Result = this.Result, StartedUtc = started, ProcessId = p.Id });
         }
         catch (Exception exc)
         {

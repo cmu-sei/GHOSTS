@@ -1804,6 +1804,7 @@ public abstract class OutlookHelper : BrowserHelper
                     }
 
                     var success = true;
+                    var started = DateTime.UtcNow;
 
                     Log.Trace($"WebOutlook:: Starting action: {action}.");
                     if (action == "create")
@@ -1844,7 +1845,9 @@ public abstract class OutlookHelper : BrowserHelper
                         Handler = $"WebOutlook: {handler.HandlerType}",
                         Command = action,
                         Arg = "",
-                        Trackable = timelineEvent.TrackableId
+                        Trackable = timelineEvent.TrackableId,
+                        StartedUtc = started,
+                        ProcessId = baseHandler.ProcessId
                     });
 
                     break;

@@ -124,9 +124,10 @@ namespace Ghosts.Client.Handlers
         {
             try
             {
-                using (Driver = GetDriver(handler))
+                using (Driver = GetDriver(handler, out var processId))
                 {
                     base.Driver = Driver;
+                    ProcessId = processId;
 
                     if (handler.HandlerArgs.ContainsKey("javascript-enable"))
                     {
@@ -238,13 +239,14 @@ namespace Ghosts.Client.Handlers
             _ = new BrowserFirefox(handler);
         }
 
-        internal static IWebDriver GetDriver(TimelineHandler handler)
+        internal static IWebDriver GetDriver(TimelineHandler handler, out int? processId)
         {
             var path = GetInstallLocation();
 
             if (!IsSufficientVersion(path))
             {
                 Log.Warn("Firefox version is not sufficient. Exiting");
+                processId = null;
                 return null;
             }
 
@@ -337,6 +339,7 @@ namespace Ghosts.Client.Handlers
                 : FirefoxDriverService.CreateDefaultService();
             service.HideCommandPromptWindow = true;
             var driver = new FirefoxDriver(service, options);
+            processId = GetBrowserProcessId(driver, service.ProcessId);
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
             return driver;
         }

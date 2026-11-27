@@ -1694,6 +1694,7 @@ namespace Ghosts.Client.Handlers
                         }
 
                         bool success = true;
+                        var started = DateTime.UtcNow;
 
                         Log.Trace($"WebOutlook:: Starting action: {action}.");
                         if (action == "create")
@@ -1726,7 +1727,7 @@ namespace Ghosts.Client.Handlers
                             errorCount = errorCount + 1;
                         }
 
-                        this.baseHandler.Report(new ReportItem { Handler = $"WebOutlook: {handler.HandlerType.ToString()}", Command = action, Arg = "" , Trackable = timelineEvent.TrackableId });
+                        this.baseHandler.Report(new ReportItem { Handler = $"WebOutlook: {handler.HandlerType.ToString()}", Command = action, Arg = "" , Trackable = timelineEvent.TrackableId, StartedUtc = started, ProcessId = this.baseHandler.ProcessId });
 
                         break;
 

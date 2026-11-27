@@ -192,6 +192,7 @@ public class Outlookv2(Timeline timeline, TimelineHandler handler, CancellationT
             }
 
             _log.Trace($"Outlookv2:: Performing action {action}.");
+            var started = DateTime.UtcNow;
             var success = false;
             EmailConfiguration emailConfig;
 
@@ -275,7 +276,8 @@ public class Outlookv2(Timeline timeline, TimelineHandler handler, CancellationT
                 Handler = Handler.HandlerType.ToString(),
                 Command = action,
                 Arg = string.Empty,
-                Trackable = timelineEvent.TrackableId
+                Trackable = timelineEvent.TrackableId,
+                StartedUtc = started
             });
 
             if (timelineEvent.DelayAfterActual > 0)
@@ -1261,8 +1263,9 @@ public class Outlookv2(Timeline timeline, TimelineHandler handler, CancellationT
                     try
                     {
                         _log.Trace($"Outlookv2:: Executing attachment {filePath}");
-                        System.Diagnostics.Process.Start(filePath);
-                        Report(new ReportItem { Handler = "Outlookv2", Command = "execute-attachment", Arg = filePath, Trackable = timelineEvent.TrackableId });
+                        var started = DateTime.UtcNow;
+                        var process = System.Diagnostics.Process.Start(filePath);
+                        Report(new ReportItem { Handler = "Outlookv2", Command = "execute-attachment", Arg = filePath, Trackable = timelineEvent.TrackableId, StartedUtc = started, ProcessId = process?.Id });
                     }
                     catch (System.Exception e)
                     {
@@ -1291,8 +1294,9 @@ public class Outlookv2(Timeline timeline, TimelineHandler handler, CancellationT
                     {
                         var url = list.PickRandom();
                         _log.Trace($"Outlookv2:: Clicking link {url}");
+                        var started = DateTime.UtcNow;
                         url.OpenUrl();
-                        Report(new ReportItem { Handler = "Outlookv2", Command = "click-link", Arg = url, Trackable = timelineEvent.TrackableId });
+                        Report(new ReportItem { Handler = "Outlookv2", Command = "click-link", Arg = url, Trackable = timelineEvent.TrackableId, StartedUtc = started });
                     }
                 }
             }

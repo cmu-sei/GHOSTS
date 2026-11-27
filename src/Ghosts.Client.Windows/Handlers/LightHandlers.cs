@@ -97,6 +97,7 @@ public class LightHandlers : BaseHandler
             {
                 foreach (var timelineEvent in handler.TimeLineEvents)
                 {
+                    var started = DateTime.UtcNow;
                     var path = GetSavePath(typeof(LightExcelHandler), handler, timelineEvent, "docx");
 
                     var list = RandomText.GetDictionary.GetDictionaryList();
@@ -111,7 +112,7 @@ public class LightHandlers : BaseHandler
                     }
                         
                     FileListing.Add(path, handler.HandlerType);
-                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = timelineEvent.CommandArgs[0].ToString(), Trackable = timelineEvent.TrackableId });
+                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = timelineEvent.CommandArgs[0].ToString(), Trackable = timelineEvent.TrackableId, StartedUtc = started });
                 }
             }
             catch (Exception e)
@@ -160,6 +161,7 @@ public class LightHandlers : BaseHandler
             {
                 foreach (var timelineEvent in handler.TimeLineEvents)
                 {
+                    var started = DateTime.UtcNow;
                     var path = GetSavePath(typeof(LightExcelHandler), handler, timelineEvent, "xlsx");
 
                     var list = RandomText.GetDictionary.GetDictionaryList();
@@ -170,7 +172,7 @@ public class LightHandlers : BaseHandler
                     }
 
                     FileListing.Add(path, handler.HandlerType);
-                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = timelineEvent.CommandArgs[0].ToString(), Trackable = timelineEvent.TrackableId });
+                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = timelineEvent.CommandArgs[0].ToString(), Trackable = timelineEvent.TrackableId, StartedUtc = started });
                 }
             }
             catch (Exception e)

@@ -143,6 +143,7 @@ namespace Ghosts.Client.Handlers
             var username = this.CurrentCreds.GetUsername(credKey);
             var password = this.CurrentCreds.GetPassword(credKey);
             Log.Trace("Beginning Wmi to host:  " + hostIp + " with command: " + command);
+            var started = DateTime.UtcNow;
             if (domain == null)
             {
                 domain = hostIp;
@@ -192,7 +193,7 @@ namespace Ghosts.Client.Handlers
                         }
                     }
                     client.Close();
-                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = hostIp, Arg= cmdArgs[2], Trackable = timelineEvent.TrackableId });
+                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = hostIp, Arg= cmdArgs[2], Trackable = timelineEvent.TrackableId, StartedUtc = started });
                 }
             }
         }

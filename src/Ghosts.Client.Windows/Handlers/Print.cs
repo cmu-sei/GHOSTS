@@ -74,7 +74,9 @@ public class Print : BaseHandler
 
                 var process = new Process();
                 process.StartInfo = info;
+                var started = DateTime.UtcNow;
                 process.Start();
+                var processId = process.Id;
 
                 try
                 {
@@ -90,7 +92,7 @@ public class Print : BaseHandler
                     //
                 }
 
-                Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = command, Trackable = timelineEvent.TrackableId });
+                Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = command, Trackable = timelineEvent.TrackableId, StartedUtc = started, ProcessId = processId });
             }
         }
         catch (Exception exception)

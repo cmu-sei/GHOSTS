@@ -178,6 +178,7 @@ namespace Ghosts.Client.Handlers
             var username = this.CurrentCreds.GetUsername(credKey);
             var password = this.CurrentCreds.GetPassword(credKey);
             Log.Trace("Beginning Sftp to host:  " + hostIp + " with command: " + command);
+            var started = DateTime.UtcNow;
 
             if (username != null && password != null)
             {
@@ -214,7 +215,7 @@ namespace Ghosts.Client.Handlers
                     }
                     client.Disconnect();
                     client.Dispose();
-                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = hostIp, Arg = cmdArgs[2], Trackable = timelineEvent.TrackableId });
+                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = hostIp, Arg = cmdArgs[2], Trackable = timelineEvent.TrackableId, StartedUtc = started });
                 }
             }
         }

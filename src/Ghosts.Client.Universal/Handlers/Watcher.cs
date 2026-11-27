@@ -167,6 +167,7 @@ internal class Watcher(Timeline entireTimeline, TimelineHandler timelineHandler,
 
                 try
                 {
+                    var started = DateTime.UtcNow;
                     var size = target.Length;
                     File.Delete(target.FullName);
                     currentSize -= size;
@@ -176,7 +177,8 @@ internal class Watcher(Timeline entireTimeline, TimelineHandler timelineHandler,
                     {
                         Handler = Handler.HandlerType.ToString(),
                         Command = "folder-delete",
-                        Arg = target.FullName
+                        Arg = target.FullName,
+                        StartedUtc = started
                     });
                 }
                 catch (Exception ex)
@@ -248,6 +250,7 @@ internal class Watcher(Timeline entireTimeline, TimelineHandler timelineHandler,
         var lastRead = DateTime.MinValue;
         watcher.Changed += (_, e) =>
         {
+            var started = DateTime.UtcNow;
             var lastWriteTime = File.GetLastWriteTime(e.FullPath);
             if (lastWriteTime <= lastRead.AddSeconds(1)) return;
             lastRead = lastWriteTime;
@@ -258,7 +261,8 @@ internal class Watcher(Timeline entireTimeline, TimelineHandler timelineHandler,
                 Handler = Handler.HandlerType.ToString(),
                 Command = "file-changed",
                 Arg = e.FullPath,
-                Trackable = capturedTrackable
+                Trackable = capturedTrackable,
+                StartedUtc = started
             });
         };
 

@@ -109,8 +109,9 @@ public class BrowserFirefox(Timeline timeline, TimelineHandler handler, Cancella
         BrowserType = HandlerType.BrowserFirefox;
         try
         {
-            Driver = GetDriver(this.Handler);
+            Driver = GetDriver(this.Handler, out var processId);
             base.Driver = Driver;
+            ProcessId = processId;
 
             if (this.Handler.HandlerArgs.ContainsKey("javascript-enable"))
             {
@@ -195,7 +196,7 @@ public class BrowserFirefox(Timeline timeline, TimelineHandler handler, Cancella
     }
 
    
-    internal static IWebDriver GetDriver(TimelineHandler handler)
+    internal static IWebDriver GetDriver(TimelineHandler handler, out int? processId)
     {
         var path = GetInstallLocation();
 
@@ -326,6 +327,7 @@ public class BrowserFirefox(Timeline timeline, TimelineHandler handler, Cancella
                 : FirefoxDriverService.CreateDefaultService();
             service.HideCommandPromptWindow = true;
             driver = new FirefoxDriver(service, options);
+            processId = GetBrowserProcessId(driver, service.ProcessId);
         }
         catch
         {

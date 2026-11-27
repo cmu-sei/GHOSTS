@@ -215,7 +215,10 @@ namespace Ghosts.Api.Infrastructure.Services
                                         MachineId = machine.Id,
                                         Handler = data.Handler,
                                         CommandArg = data.CommandArg,
-                                        CreatedUtc = time
+                                        CreatedUtc = time,
+                                        StartedUtc = (DateTime?)data.StartedUtc,
+                                        FinishedUtc = (DateTime?)data.FinishedUtc,
+                                        ProcessId = (int?)data.ProcessId
                                     };
 
                                     if (data.Tags != null)
@@ -254,7 +257,10 @@ namespace Ghosts.Api.Infrastructure.Services
                                             MachineId = machine.Id,
                                             Handler = data.Handler,
                                             CommandArg = data.CommandArg,
-                                            CreatedUtc = time
+                                            CreatedUtc = time,
+                                            StartedUtc = timeline.StartedUtc,
+                                            FinishedUtc = timeline.FinishedUtc,
+                                            ProcessId = timeline.ProcessId
                                         };
 
                                         if (data.Result != null)

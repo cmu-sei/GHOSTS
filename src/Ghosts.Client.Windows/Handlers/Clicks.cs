@@ -61,6 +61,7 @@ public class Clicks : BaseHandler
             switch (timelineEvent.Command)
             {
                 default:
+                    var started = DateTime.UtcNow;
                     //Call the imported function with the cursor's current position
                     var x = Cursor.Position.X;
                     var y = Cursor.Position.Y;
@@ -69,7 +70,7 @@ public class Clicks : BaseHandler
                     Log.Trace($"Click: {x}:{y}");
 
                     Thread.Sleep(Jitter.Randomize(timelineEvent.CommandArgs[0], timelineEvent.CommandArgs[1], timelineEvent.CommandArgs[2]));
-                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Trackable = timelineEvent.TrackableId, Result = $"{x}:{y}" });
+                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Trackable = timelineEvent.TrackableId, Result = $"{x}:{y}", StartedUtc = started });
                     break;
             }
 

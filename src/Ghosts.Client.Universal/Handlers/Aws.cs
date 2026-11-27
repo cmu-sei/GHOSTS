@@ -66,6 +66,7 @@ public class Aws(Timeline timeline, TimelineHandler handler, CancellationToken t
                     CreateNoWindow = true
                 }
             };
+            var started = DateTime.UtcNow;
             p.Start();
 
             while (!p.StandardOutput.EndOfStream)
@@ -85,7 +86,7 @@ public class Aws(Timeline timeline, TimelineHandler handler, CancellationToken t
                 _log.Error($"{err} on {this.Command}");
             }
 
-            Report(new ReportItem { Handler = nameof(HandlerType.Aws), Command = this.Command, Result = this.Result });
+            Report(new ReportItem { Handler = nameof(HandlerType.Aws), Command = this.Command, Result = this.Result, StartedUtc = started, ProcessId = p.Id });
 
         }
         catch (Exception exc)

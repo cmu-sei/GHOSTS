@@ -50,6 +50,10 @@ namespace Ghosts.Api.Infrastructure.Models
         public string CommandArg { get; set; }
         public string Result { get; set; }
 
+        public DateTime? StartedUtc { get; set; }
+        public DateTime? FinishedUtc { get; set; }
+        public int? ProcessId { get; set; }
+
         public string Tags { get; set; }
 
         public IEnumerable<string> GetTags()
@@ -110,5 +114,9 @@ namespace Ghosts.Api.Infrastructure.Models
         public string Command { get; set; }
         public string CommandArg { get; set; }
         public string Result { get; set; }
+
+        public DateTime? StartedUtc { get; set; }
+        public DateTime? FinishedUtc { get; set; }
+        public int? ProcessId { get; set; }
     }
 }

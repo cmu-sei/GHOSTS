@@ -734,6 +734,7 @@ public abstract partial class SharepointHelper : BrowserHelper
                     //determine what to do
 
                     var sharepointAction = GetNextAction();
+                    var started = DateTime.UtcNow;
 
 
                     if (sharepointAction == "download")
@@ -768,7 +769,9 @@ public abstract partial class SharepointHelper : BrowserHelper
                         Handler = $"Sharepoint{version}: {handler.HandlerType}",
                         Command = sharepointAction,
                         Arg = "",
-                        Trackable = timelineEvent.TrackableId
+                        Trackable = timelineEvent.TrackableId,
+                        StartedUtc = started,
+                        ProcessId = baseHandler.ProcessId
                     });
                     break;
             }

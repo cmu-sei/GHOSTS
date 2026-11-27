@@ -118,6 +118,7 @@ namespace Ghosts.Client.Handlers
                                 if (timelineEvent.DelayBeforeActual > 0)
                                     Thread.Sleep(timelineEvent.DelayBeforeActual);
 
+                                var started = DateTime.UtcNow;
                                 switch (action)
                                 {
                                     case "create":
@@ -147,7 +148,7 @@ namespace Ghosts.Client.Handlers
                                         break;
 
                                 }
-                                Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = action, Arg = "", Trackable = timelineEvent.TrackableId });
+                                Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = action, Arg = "", Trackable = timelineEvent.TrackableId, StartedUtc = started, ProcessId = this.NotepadProcess?.Id });
                             }
                             if (timelineEvent.DelayAfterActual > 0)
                                 Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, JitterFactor));

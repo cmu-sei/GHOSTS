@@ -108,6 +108,7 @@ public class Outlook : BaseHandler
                     Thread.Sleep(timelineEvent.DelayBeforeActual);
                 }
 
+                var started = DateTime.UtcNow;
                 switch (timelineEvent.Command.ToUpper())
                 {
                     default:
@@ -116,7 +117,7 @@ public class Outlook : BaseHandler
                             var emailConfig = new EmailConfiguration(timelineEvent.CommandArgs);
                             if (SendEmailViaOutlook(emailConfig))
                             {
-                                Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = emailConfig.ToString(), Trackable = timelineEvent.TrackableId });
+                                Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = emailConfig.ToString(), Trackable = timelineEvent.TrackableId, StartedUtc = started });
                             }
                         }
                         catch (Exception e)
@@ -131,7 +132,7 @@ public class Outlook : BaseHandler
                             var emailConfig = new EmailConfiguration(timelineEvent.CommandArgs);
                             if (ReplyViaOutlook(emailConfig))
                             {
-                                Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = emailConfig.ToString(), Trackable = timelineEvent.TrackableId });
+                                Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = emailConfig.ToString(), Trackable = timelineEvent.TrackableId, StartedUtc = started });
                             }
                         }
                         catch (Exception e)
@@ -144,7 +145,7 @@ public class Outlook : BaseHandler
                         {
                             if (Navigate(timelineEvent.CommandArgs))
                             {
-                                Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = string.Join(",", timelineEvent.CommandArgs), Trackable = timelineEvent.TrackableId });
+                                Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = string.Join(",", timelineEvent.CommandArgs), Trackable = timelineEvent.TrackableId, StartedUtc = started });
                             }
                         }
                         catch (Exception e)
@@ -157,7 +158,7 @@ public class Outlook : BaseHandler
                         {
                             if (ClickRandomLink(timelineEvent))
                             {
-                                Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = string.Join(",", timelineEvent.CommandArgs), Trackable = timelineEvent.TrackableId });
+                                Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = string.Join(",", timelineEvent.CommandArgs), Trackable = timelineEvent.TrackableId, StartedUtc = started });
                             }
                         }
                         catch (Exception e)

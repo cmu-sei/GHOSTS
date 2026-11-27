@@ -70,6 +70,7 @@ public class PowerPoint(Timeline entireTimeline, TimelineHandler timelineHandler
                         }
                     }
 
+                    var started = DateTime.UtcNow;
                     if (OfficeHelpers.ShouldOpenExisting(handler))
                     {
                         document = officeApplication.Presentations.Open(FileListing.GetRandomFile(handler.HandlerType),
@@ -212,11 +213,13 @@ public class PowerPoint(Timeline entireTimeline, TimelineHandler timelineHandler
                         Handler = handler.HandlerType.ToString(),
                         Command = timelineEvent.Command,
                         Arg = timelineEvent.CommandArgs[0].ToString(),
-                        Trackable = timelineEvent.TrackableId
+                        Trackable = timelineEvent.TrackableId,
+                        StartedUtc = started
                     });
 
                     if (timelineEvent.CommandArgs.Contains("pdf"))
                     {
+                        started = DateTime.UtcNow;
                         // Save document into PDF Format
                         var outputFileName = timelineEvent.CommandArgs.Contains("pdf-vary-filenames")
                             ? $"{defaultSaveDirectory}\\{RandomFilename.Generate()}.pdf"
@@ -231,7 +234,8 @@ public class PowerPoint(Timeline entireTimeline, TimelineHandler timelineHandler
                             Handler = handler.HandlerType.ToString(),
                             Command = timelineEvent.Command,
                             Arg = "pdf",
-                            Trackable = timelineEvent.TrackableId
+                            Trackable = timelineEvent.TrackableId,
+                            StartedUtc = started
                         });
                         //FileListing.Add(outputFileName, handler.HandlerType);
                     }

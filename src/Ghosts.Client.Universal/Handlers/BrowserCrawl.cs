@@ -22,6 +22,7 @@ public class BrowserCrawl(Timeline entireTimeline, TimelineHandler timelineHandl
     private string _proxyLocalUrl = string.Empty;
     private int _siteDepthMax = 1;
     private int _siteDepthCurrent;
+    private int? _processId;
 
     protected override Task RunOnce()
     {
@@ -67,10 +68,10 @@ public class BrowserCrawl(Timeline entireTimeline, TimelineHandler timelineHandl
         switch (handler.HandlerType)
         {
             case HandlerType.BrowserChrome:
-                Driver = BrowserChrome.GetDriver(handler);
+                Driver = BrowserChrome.GetDriver(handler, out _processId);
                 break;
             case HandlerType.BrowserFirefox:
-                Driver = BrowserFirefox.GetDriver(handler);
+                Driver = BrowserFirefox.GetDriver(handler, out _processId);
                 break;
         }
 
@@ -96,13 +97,16 @@ public class BrowserCrawl(Timeline entireTimeline, TimelineHandler timelineHandl
         _linkManager = new LinkManager(0);
         if (config.Uri.IsWellFormedOriginalString())
         {
+            var started = DateTime.UtcNow;
             MakeRequest(config);
             Report(new ReportItem
             {
                 Handler = handler.HandlerType.ToString(),
                 Command = timelineEvent.Command,
                 Arg = config.ToString(),
-                Trackable = timelineEvent.TrackableId
+                Trackable = timelineEvent.TrackableId,
+                StartedUtc = started,
+                ProcessId = _processId
             });
             _siteDepthCurrent += 1;
 
@@ -224,6 +228,7 @@ public class BrowserCrawl(Timeline entireTimeline, TimelineHandler timelineHandl
             config.Method = "GET";
             config.Uri = link.Url;
 
+            var started = DateTime.UtcNow;
             MakeRequest(config);
 
             foreach (var l in _linkManager.Links.Where(x => x.Url.ToString() == link.Url.ToString()))
@@ -244,7 +249,9 @@ public class BrowserCrawl(Timeline entireTimeline, TimelineHandler timelineHandl
                 Handler = handler.HandlerType.ToString(),
                 Command = timelineEvent.Command,
                 Arg = config.ToString(),
-                Trackable = timelineEvent.TrackableId
+                Trackable = timelineEvent.TrackableId,
+                StartedUtc = started,
+                ProcessId = _processId
             });
 
             // if this is the last step down, there is no reason to keep digging,

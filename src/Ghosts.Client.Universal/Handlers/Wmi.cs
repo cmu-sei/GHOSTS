@@ -161,6 +161,7 @@ public class Wmi(Timeline entireTimeline, TimelineHandler timelineHandler, Cance
         var password = _currentCreds.GetPassword(credKey);
 
         _log.Trace($"WMI:: Beginning WMI to host: {hostIp} with command: {command}");
+        var started = DateTime.UtcNow;
 
         if (domain == null)
         {
@@ -226,7 +227,7 @@ public class Wmi(Timeline entireTimeline, TimelineHandler timelineHandler, Cance
             }
         }
 
-        Report(new ReportItem { Handler = Handler.HandlerType.ToString(), Command = hostIp, Arg = cmdArgs[2], Trackable = timelineEvent.TrackableId });
+        Report(new ReportItem { Handler = Handler.HandlerType.ToString(), Command = hostIp, Arg = cmdArgs[2], Trackable = timelineEvent.TrackableId, StartedUtc = started });
     }
 
     private void RunWmicCommand(string host, string domain, string username, string password, string wmiQuery)

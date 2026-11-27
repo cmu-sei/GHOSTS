@@ -20,16 +20,17 @@ class BrowserCrawl : BaseHandler
     private string _proxyLocalUrl = string.Empty;
     private int _siteDepthMax = 1;
     private int _siteDepthCurrent;
+    private int? _processId;
 
     internal Task Crawl(TimelineHandler handler, TimelineEvent timelineEvent, string site)
     {
         switch (handler.HandlerType)
         {
             case HandlerType.BrowserChrome:
-                this.Driver = BrowserChrome.GetDriver(handler);
+                this.Driver = BrowserChrome.GetDriver(handler, out _processId);
                 break;
             case HandlerType.BrowserFirefox:
-                this.Driver = BrowserFirefox.GetDriver(handler);
+                this.Driver = BrowserFirefox.GetDriver(handler, out _processId);
                 break;
         }
 
@@ -55,8 +56,9 @@ class BrowserCrawl : BaseHandler
         this._linkManager = new LinkManager(0);
         if (config.Uri.IsWellFormedOriginalString())
         {
+            var started = DateTime.UtcNow;
             MakeRequest(config);
-            Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId });
+            Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId, StartedUtc = started, ProcessId = _processId });
             this._siteDepthCurrent += 1;
 
             if (this._siteDepthCurrent >= this._siteDepthMax)
@@ -166,6 +168,7 @@ class BrowserCrawl : BaseHandler
             config.Method = "GET";
             config.Uri = link.Url;
 
+            var started = DateTime.UtcNow;
             MakeRequest(config);
 
             foreach (var l in this._linkManager.Links.Where(x => x.Url.ToString() == link.Url.ToString()))
@@ -180,7 +183,7 @@ class BrowserCrawl : BaseHandler
                 return;
             }
 
-            Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId });
+            Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId, StartedUtc = started, ProcessId = _processId });
             
             // if this is the last step down, there is no reason to keep digging,
             // but we don't increase the current depth count so as to allow peer

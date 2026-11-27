@@ -27,6 +27,7 @@ public class Clicks(Timeline entireTimeline, TimelineHandler timelineHandler, Ca
                     if (Token.WaitHandle.WaitOne(timelineEvent.DelayBeforeActual)) Token.ThrowIfCancellationRequested();
                 }
 
+                var started = DateTime.UtcNow;
                 var pos = GetCursorPosition();
                 DoLeftMouseClick(pos.X, pos.Y);
 
@@ -41,7 +42,8 @@ public class Clicks(Timeline entireTimeline, TimelineHandler timelineHandler, Ca
                     Handler = handler.HandlerType.ToString(),
                     Command = timelineEvent.Command,
                     Trackable = timelineEvent.TrackableId,
-                    Result = $"{pos.X}:{pos.Y}"
+                    Result = $"{pos.X}:{pos.Y}",
+                    StartedUtc = started
                 });
 
                 if (timelineEvent.DelayAfterActual > 0) {

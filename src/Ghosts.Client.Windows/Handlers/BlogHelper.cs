@@ -336,6 +336,7 @@ namespace Ghosts.Client.Handlers
 
                     //determine what to do
                     string blogAction = GetNextAction();
+                    var started = DateTime.UtcNow;
 
                     
                     if (blogAction == null)
@@ -390,7 +391,7 @@ namespace Ghosts.Client.Handlers
                             return;
                         }
                     }
-                    this.baseHandler.Report(new ReportItem { Handler = $"Blog: {handler.HandlerType.ToString()}", Command = blogAction, Arg = "", Trackable = timelineEvent.TrackableId });
+                    this.baseHandler.Report(new ReportItem { Handler = $"Blog: {handler.HandlerType.ToString()}", Command = blogAction, Arg = "", Trackable = timelineEvent.TrackableId, StartedUtc = started, ProcessId = this.baseHandler.ProcessId });
 
                     break;
 

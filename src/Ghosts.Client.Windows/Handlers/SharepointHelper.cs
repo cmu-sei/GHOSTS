@@ -713,6 +713,7 @@ namespace Ghosts.Client.Handlers
                     //determine what to do
 
                     string sharepointAction = GetNextAction();
+                    var started = DateTime.UtcNow;
 
 
                     if (sharepointAction == "download")
@@ -742,7 +743,7 @@ namespace Ghosts.Client.Handlers
                         }
                     }
                     
-                    this.baseHandler.Report(new ReportItem { Handler = $"Sharepoint{version}: {handler.HandlerType.ToString()}", Command = sharepointAction, Arg = "", Trackable = timelineEvent.TrackableId });
+                    this.baseHandler.Report(new ReportItem { Handler = $"Sharepoint{version}: {handler.HandlerType.ToString()}", Command = sharepointAction, Arg = "", Trackable = timelineEvent.TrackableId, StartedUtc = started, ProcessId = this.baseHandler.ProcessId });
                     break;
 
 

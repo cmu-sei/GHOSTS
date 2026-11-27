@@ -176,6 +176,7 @@ namespace Ghosts.Client.Universal.Handlers;
             var username = _currentCreds.GetUsername(credKey);
             var password = _currentCreds.GetPassword(credKey);
             _log.Trace("Beginning SSH to host:  " + hostIp + " with command: " + command);
+            var started = DateTime.UtcNow;
 
             if (username != null && password != null)
             {
@@ -214,7 +215,7 @@ namespace Ghosts.Client.Universal.Handlers;
                     }
 
                     client.Disconnect();
-                    Report(new ReportItem { Handler = Handler.HandlerType.ToString(), Command = hostIp, Arg = cmdArgs[2], Trackable = timelineEvent.TrackableId });
+                    Report(new ReportItem { Handler = Handler.HandlerType.ToString(), Command = hostIp, Arg = cmdArgs[2], Trackable = timelineEvent.TrackableId, StartedUtc = started });
                 }
             }
         }

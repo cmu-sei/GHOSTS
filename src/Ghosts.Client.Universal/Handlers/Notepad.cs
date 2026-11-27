@@ -76,6 +76,7 @@ public class Notepad(Timeline entireTimeline, TimelineHandler timelineHandler, C
                 if (action == "delete" && GetRandomFile(_outputDirectory) == null)
                     action = "create";
 
+                var started = DateTime.UtcNow;
                 String filepath;
                 switch (action)
                 {
@@ -101,7 +102,9 @@ public class Notepad(Timeline entireTimeline, TimelineHandler timelineHandler, C
                     Handler = Handler.HandlerType.ToString(),
                     Command = action,
                     Arg = _outputDirectory,
-                    Trackable = timelineEvent.TrackableId
+                    Trackable = timelineEvent.TrackableId,
+                    StartedUtc = started,
+                    ProcessId = this.NotepadProcess?.Id
                 });
 
                 if (timelineEvent.DelayAfterActual > 0) {

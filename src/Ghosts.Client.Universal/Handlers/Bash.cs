@@ -96,7 +96,9 @@ public class Bash(Timeline timeline, TimelineHandler handler, CancellationToken 
         p.ErrorDataReceived += ErrorHandler;
         p.StartInfo.CreateNoWindow = true;
         _log.Trace($"Spawning {p.StartInfo.FileName} with command {this.Command}");
+        var started = DateTime.UtcNow;
         p.Start();
+        var processId = p.Id;
 
         while (!p.StandardOutput.EndOfStream)
         {
@@ -104,7 +106,7 @@ public class Bash(Timeline timeline, TimelineHandler handler, CancellationToken 
         }
 
         p.WaitForExit();
-        Report(new ReportItem { Handler = HandlerType.Command.ToString(), Command = this.Command, Result = Result });
+        Report(new ReportItem { Handler = HandlerType.Command.ToString(), Command = this.Command, Result = Result, StartedUtc = started, ProcessId = processId });
     }
 
     private void OutputHandler(object sendingProcess, DataReceivedEventArgs outLine)

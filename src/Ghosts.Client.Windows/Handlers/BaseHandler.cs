@@ -27,6 +27,9 @@ namespace Ghosts.Client.Handlers
             record.Command = report.Command;
             record.CommandArg = report.Arg;
             record.Result = report.Result.RemoveNonAscii(); //added this because some people using non-en OS'es have logged non-recoverable errors w/o this
+            record.StartedUtc = report.StartedUtc;
+            record.FinishedUtc = DateTime.UtcNow;
+            record.ProcessId = report.ProcessId;
 
             if (!string.IsNullOrEmpty(report.Trackable))
             {

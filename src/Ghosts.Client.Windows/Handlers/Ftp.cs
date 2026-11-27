@@ -197,6 +197,7 @@ namespace Ghosts.Client.Handlers
                 try
                 {
                     NetworkCredential netcred = new NetworkCredential(username, password);
+                    var started = DateTime.UtcNow;
                    
                     try
                     {
@@ -210,7 +211,7 @@ namespace Ghosts.Client.Handlers
                     {
                         Log.Error(e); //some error occurred during this command, try the next one
                     }
-                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = hostIp, Arg = action, Trackable = timelineEvent.TrackableId });
+                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = hostIp, Arg = action, Trackable = timelineEvent.TrackableId, StartedUtc = started });
 
                 }
                 catch (ThreadAbortException)

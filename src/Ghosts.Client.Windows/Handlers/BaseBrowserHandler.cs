@@ -9,6 +9,7 @@ using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
 using OpenQA.Selenium;
+using OpenQA.Selenium.Chromium;
 using Actions = OpenQA.Selenium.Interactions.Actions;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,6 +32,7 @@ namespace Ghosts.Client.Handlers
         public int ActionsCount = 0;
         public int BrowseProbability = 100;
         public int JitterFactor { get; set; } = 0;  //used with Jitter.JitterFactorDelay
+        public int? ProcessId { get; set; }  //the browser's process id, or its driver's when the browser's is unavailable
 
         public bool SharePointAbort { get; set; } = false;  //will be set to True if unable to proceed with Handler execution
         public bool OutlookAbort { get; set; } = false;  //will be set to True if unable to proceed with Handler execution
@@ -67,6 +69,7 @@ namespace Ghosts.Client.Handlers
 
                     IWebElement element;
                     Actions actions;
+                    var started = DateTime.UtcNow;
 
                     switch (timelineEvent.Command)
                     {
@@ -196,7 +199,7 @@ namespace Ghosts.Client.Handlers
                             if (config.Uri.IsWellFormedOriginalString())
                             {
                                 var r = FilterWebResponse(MakeRequest(config));
-                                Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId, Result = r});
+                                Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId, Result = r, StartedUtc = started, ProcessId = ProcessId });
                             }
                             break;
                         case "download":
@@ -204,7 +207,7 @@ namespace Ghosts.Client.Handlers
                             {
                                 element = Driver.FindElement(By.XPath(timelineEvent.CommandArgs[0].ToString()));
                                 element.Click();
-                                Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = string.Join(",", timelineEvent.CommandArgs), Trackable = timelineEvent.TrackableId });
+                                Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = string.Join(",", timelineEvent.CommandArgs), Trackable = timelineEvent.TrackableId, StartedUtc = started, ProcessId = ProcessId });
                                 Thread.Sleep(1000);
                             }
                             break;
@@ -216,39 +219,47 @@ namespace Ghosts.Client.Handlers
                             element = Driver.FindElement(By.Name(timelineEvent.CommandArgs[0].ToString()));
                             actions = new Actions(Driver);
                             actions.SendKeys(element, timelineEvent.CommandArgs[1].ToString()).Build().Perform();
+                            ReportEvent(handler, timelineEvent, timelineEvent.CommandArgs[0].ToString(), started);
                             break;
                         case "typebyid":
                             element = Driver.FindElement(By.Id(timelineEvent.CommandArgs[0].ToString()));
                             actions = new Actions(Driver);
                             actions.SendKeys(element, timelineEvent.CommandArgs[1].ToString()).Build().Perform();
+                            ReportEvent(handler, timelineEvent, timelineEvent.CommandArgs[0].ToString(), started);
                             break;
                         case "click":
                         case "click.by.name":
                             element = Driver.FindElement(By.Name(timelineEvent.CommandArgs[0].ToString()));
                             actions = new Actions(Driver);
                             actions.MoveToElement(element).Click().Perform();
+                            ReportEvent(handler, timelineEvent, timelineEvent.CommandArgs[0].ToString(), started);
                             break;
                         case "clickbyid":
                         case "click.by.id":
                             element = Driver.FindElement(By.Id(timelineEvent.CommandArgs[0].ToString()));
                             actions = new Actions(Driver);
                             actions.MoveToElement(element).Click().Perform();
+                            ReportEvent(handler, timelineEvent, timelineEvent.CommandArgs[0].ToString(), started);
                             break;
                         case "click.by.linktext":
                             element = Driver.FindElement(By.LinkText(timelineEvent.CommandArgs[0].ToString()));
                             actions = new Actions(Driver);
                             actions.MoveToElement(element).Click().Perform();
+                            ReportEvent(handler, timelineEvent, timelineEvent.CommandArgs[0].ToString(), started);
                             break;
                         case "click.by.cssselector":
                             element = Driver.FindElement(By.CssSelector(timelineEvent.CommandArgs[0].ToString()));
                             actions = new Actions(Driver);
                             actions.MoveToElement(element).Click().Perform();
+                            ReportEvent(handler, timelineEvent, timelineEvent.CommandArgs[0].ToString(), started);
                             break;
                         case "js.executescript":
                             JS.ExecuteScript(timelineEvent.CommandArgs[0].ToString());
+                            ReportEvent(handler, timelineEvent, timelineEvent.CommandArgs[0].ToString(), started);
                             break;
                         case "manage.window.size":
                             Driver.Manage().Window.Size = new System.Drawing.Size(Convert.ToInt32(timelineEvent.CommandArgs[0]), Convert.ToInt32(timelineEvent.CommandArgs[1]));
+                            ReportEvent(handler, timelineEvent, string.Join(",", timelineEvent.CommandArgs), started);
                             break;
                     }
 
@@ -326,8 +337,9 @@ namespace Ghosts.Client.Handlers
                 if (config.Uri != null && config.Uri.IsWellFormedOriginalString())
                 {
                     this.LinkManager.SetCurrent(config.Uri);
+                    var started = DateTime.UtcNow;
                     var r = FilterWebResponse(MakeRequest(config));
-                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId, Result = r});
+                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId, Result = r, StartedUtc = started, ProcessId = ProcessId });
                     Thread.Sleep(timelineEvent.DelayAfterActual);
 
                     if (this.Stickiness > 0)
@@ -353,8 +365,9 @@ namespace Ghosts.Client.Handlers
                                     config.Uri = link.Url;
 
                                     Log.Trace($"Making request #{loopNumber + 1}/{loops} to {config.Uri}");
+                                    started = DateTime.UtcNow;
                                     r = FilterWebResponse(MakeRequest(config));
-                                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId, Result = r});
+                                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId, Result = r, StartedUtc = started, ProcessId = ProcessId });
                                 }
                                 catch (Exception e)
                                 {
@@ -698,8 +711,9 @@ namespace Ghosts.Client.Handlers
                 {
                     var urlDict = new Dictionary<string, int>();
                     var urlQueue = new LifoQueue<Uri>(VisitedRemember);
+                    var started = DateTime.UtcNow;
                     var r = FilterWebResponse(MakeRequest(config));
-                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId, Result = r});
+                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId, Result = r, StartedUtc = started, ProcessId = ProcessId });
                     Thread.Sleep(timelineEvent.DelayAfterActual);
 
                     if (this.Stickiness > 0)
@@ -715,9 +729,10 @@ namespace Ghosts.Client.Handlers
                                 {
                                     if (BrowseProbability > _random.Next(0, 100))
                                     {
+                                        started = DateTime.UtcNow;
                                         if (!ClickRandomLink(config, urlDict, urlQueue)) break;  //break if no links found, reset to next choice
                                         Log.Trace($"Making request #{loopNumber + 1}/{loops} to {config.Uri}");
-                                        Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId });
+                                        Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId, StartedUtc = started, ProcessId = ProcessId });
                                     }
                                     else
                                     {
@@ -778,11 +793,47 @@ namespace Ghosts.Client.Handlers
         }
 
         /// <summary>
+        /// Reports a browser action that has no result of its own (typing, clicking, running script, resizing)
+        /// </summary>
+        private void ReportEvent(TimelineHandler handler, TimelineEvent timelineEvent, string arg, DateTime started)
+        {
+            Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = arg, Trackable = timelineEvent.TrackableId, StartedUtc = started, ProcessId = ProcessId });
+        }
+
+        /// <summary>
+        /// The browser's own process id where the driver will give it (Chromium over DevTools, Firefox in its capabilities),
+        /// otherwise the id of the driver process that launched the browser
+        /// </summary>
+        internal static int? GetBrowserProcessId(IWebDriver driver, int driverProcessId)
+        {
+            try
+            {
+                if (driver is ChromiumDriver chromium)
+                {
+                    var result = (Dictionary<string, object>)chromium.ExecuteCdpCommand("SystemInfo.getProcessInfo", new Dictionary<string, object>());
+                    foreach (Dictionary<string, object> process in (IEnumerable<object>)result["processInfo"])
+                    {
+                        if ((string)process["type"] == "browser") return Convert.ToInt32(process["id"]);
+                    }
+                }
+
+                var firefoxProcessId = ((IHasCapabilities)driver).Capabilities.GetCapability("moz:processID");
+                if (firefoxProcessId != null) return Convert.ToInt32(firefoxProcessId);
+            }
+            catch (Exception e)
+            {
+                Log.Trace($"Browser process id unavailable, using the driver's: {e.Message}");
+            }
+
+            return driverProcessId;
+        }
+
+        /// <summary>
         /// Close browser entirely
         /// </summary>
         public void Close()
         {
-            Report(new ReportItem { Handler = BrowserType.ToString(), Command = "Close" });
+            Report(new ReportItem { Handler = BrowserType.ToString(), Command = "Close", StartedUtc = DateTime.UtcNow, ProcessId = ProcessId });
             Driver.Close();
         }
 

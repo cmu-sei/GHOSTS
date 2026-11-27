@@ -137,11 +137,12 @@ public class Pidgin(Timeline timeline, TimelineHandler handler, CancellationToke
 
                     var messageBody = GenerateRandomMessage();
 
+                    var started = DateTime.UtcNow;
                     try
                     {
                         SendXmppMessage(xmppServer, xmppPort, xmppUsername, xmppPassword, xmppDomain, useTls, target, messageBody);
                         _log.Trace($"Pidgin:: Sent XMPP message to {target}.");
-                        Report(new ReportItem { Handler = "Pidgin", Command = target, Arg = "xmpp-message", Trackable = timelineEvent.TrackableId });
+                        Report(new ReportItem { Handler = "Pidgin", Command = target, Arg = "xmpp-message", Trackable = timelineEvent.TrackableId, StartedUtc = started });
                     }
                     catch (OperationCanceledException)
                     {
