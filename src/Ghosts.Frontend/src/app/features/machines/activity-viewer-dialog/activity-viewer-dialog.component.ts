@@ -1,11 +1,10 @@
-import { ChangeDetectionStrategy, Component, Inject, inject, signal, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject, signal, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTableModule } from '@angular/material/table';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DatePipe } from '@angular/common';
-import { MachineService } from '../../../core/services';
-import { Machine } from '../../../core/models';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-activity-viewer-dialog',
@@ -18,7 +17,7 @@ import { Machine } from '../../../core/models';
     DatePipe
   ],
   template: `
-    <h2 mat-dialog-title>Activity for {{ machine.name }}</h2>
+    <h2 mat-dialog-title>Activity for {{ targetName }}</h2>
     <mat-dialog-content>
       @if (loading()) {
         <div class="loading">
@@ -127,12 +126,13 @@ export class ActivityViewerDialogComponent implements OnInit {
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
   protected readonly displayedColumns = ['timestamp', 'type', 'details'];
-  protected readonly machine: Machine;
+  protected readonly targetName: string;
+  private readonly activity$: Observable<any[]>;
 
-  private readonly machineService = inject(MachineService);
-
-  constructor(@Inject(MAT_DIALOG_DATA) data: { machine: Machine }) {
-    this.machine = data.machine;
+  /** activity$: a cold HTTP observable, so Retry re-requests it (machine or group activity) */
+  constructor(@Inject(MAT_DIALOG_DATA) data: { targetName: string; activity$: Observable<any[]> }) {
+    this.targetName = data.targetName;
+    this.activity$ = data.activity$;
   }
 
   ngOnInit(): void {
@@ -143,7 +143,7 @@ export class ActivityViewerDialogComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
 
-    this.machineService.getMachineActivity(this.machine.id, 0, 50).subscribe({
+    this.activity$.subscribe({
       next: (activities) => {
         this.activities.set(activities);
         this.loading.set(false);

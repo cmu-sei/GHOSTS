@@ -33,6 +33,9 @@ namespace Ghosts.Api.Infrastructure.Services
 
     public class MachineService(ApplicationDbContext context, IHubContext<ActivityHub> activityHubContext, INpcService npcService) : IMachineService
     {
+        // Check-ins run concurrently; without this, two machines can both create the same group name
+        private static readonly SemaphoreSlim _groupLock = new(1, 1);
+
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         private readonly ApplicationDbContext _context = context;
         private readonly int _lookBack = Program.ApplicationSettings.LookbackRecords;
@@ -192,7 +195,7 @@ namespace Ghosts.Api.Infrastructure.Services
                 throw new InvalidOperationException("Could not create Machine");
             }
 
-            AddToGroups(model, ct);
+            await AddToGroups(model, ct);
 
             if (Program.ApplicationSettings.NpcPerMachine)
             {
@@ -248,7 +251,7 @@ namespace Ghosts.Api.Infrastructure.Services
                 _log.Error(e, "MachineService Update machine error");
             }
 
-            AddToGroups(model, ct);
+            await AddToGroups(model, ct);
 
             return model;
         }
@@ -321,28 +324,39 @@ namespace Ghosts.Api.Infrastructure.Services
         }
 
 
-        private void AddToGroups(Machine model, CancellationToken ct)
+        private async Task AddToGroups(Machine model, CancellationToken ct)
         {
-            var groups = GroupNames.GetGroupNames(model);
+            var groups = GroupNames.GetGroupNames(model).ToList();
+            if (groups.Count == 0) return;
 
-            foreach (var group in groups)
+            // shortcut: an in-process lock, enough for the single API instance; several instances would need a unique index on Name
+            await _groupLock.WaitAsync(ct);
+            try
             {
-                var existingGroup = _context.Groups.Include(o => o.GroupMachines).FirstOrDefaultAsync(o => o.Name.Equals(group), ct).Result;
-
-                if (existingGroup != null && existingGroup.Name == group)
+                foreach (var group in groups)
                 {
-                    if (existingGroup.GroupMachines.Any(o => o.MachineId.Equals(model.Id))) continue;
+                    // Oldest first, so groups duplicated by earlier races keep collecting into one
+                    var existingGroup = await _context.Groups.Include(o => o.GroupMachines)
+                        .Where(o => o.Name == group).OrderBy(o => o.Id).FirstOrDefaultAsync(ct);
 
-                    existingGroup.GroupMachines.Add(new GroupMachine { GroupId = existingGroup.Id, MachineId = model.Id });
-                    _context.SaveChanges();
+                    if (existingGroup != null)
+                    {
+                        if (existingGroup.GroupMachines.Any(o => o.MachineId.Equals(model.Id))) continue;
+                        existingGroup.GroupMachines.Add(new GroupMachine { GroupId = existingGroup.Id, MachineId = model.Id });
+                    }
+                    else
+                    {
+                        var newGroup = new Group { Name = group, Status = StatusType.Active };
+                        newGroup.GroupMachines.Add(new GroupMachine { MachineId = model.Id });
+                        _context.Groups.Add(newGroup);
+                    }
+
+                    await _context.SaveChangesAsync(ct);
                 }
-                else
-                {
-                    var newGroup = new Group { Name = @group, Status = StatusType.Active };
-                    newGroup.GroupMachines.Add(new GroupMachine { GroupId = newGroup.Id, MachineId = model.Id });
-                    _context.Groups.Add(newGroup);
-                    _context.SaveChanges();
-                }
+            }
+            finally
+            {
+                _groupLock.Release();
             }
         }
     }

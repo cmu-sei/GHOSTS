@@ -72,7 +72,7 @@ namespace Ghosts.Api.Controllers.Api
         /// <returns>The updated group</returns>
         [SwaggerOperation("MachineGroupsUpdate")]
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutMachineGroup(string id, [FromBody] Group model, CancellationToken ct)
+        public async Task<IActionResult> PutMachineGroup([FromRoute] int id, [FromBody] Group model, CancellationToken ct)
         {
             if (!ModelState.IsValid || model.ContainsInvalidUnicode())
             {
@@ -80,17 +80,22 @@ namespace Ghosts.Api.Controllers.Api
                 return BadRequest(ModelState);
             }
 
+            if (model.Id == 0)
+                model.Id = id;
+            else if (model.Id != id)
+                return BadRequest("Route id and body id differ");
+
             // if trying to update something that doesn't exist, create it instead
             if (await _service.GetAsync(model.Id, ct) == null)
             {
                 var createId = await _service.CreateAsync(model, ct);
-                return CreatedAtAction(nameof(GetMachineGroup), new { createId }, model);
+                return CreatedAtAction(nameof(GetMachineGroup), new { id = createId }, model);
             }
 
-            await _service.UpdateAsync(model, ct);
+            var updated = await _service.UpdateAsync(model, ct);
             _log.Info($"Group with id {model.Id} updated");
 
-            return Ok(model);
+            return Ok(updated);
         }
 
         /// <summary>

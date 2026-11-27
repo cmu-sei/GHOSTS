@@ -24,14 +24,18 @@ namespace Ghosts.Api.Infrastructure
             return o;
         }
 
-        public static IEnumerable<string> GetGroupNames(Machine machine)
+        public static IEnumerable<string> GetGroupNames(Machine machine) =>
+            GetGroupNames(machine, Program.ApplicationSettings.Grouping);
+
+        public static IEnumerable<string> GetGroupNames(Machine machine, ApplicationSettings.GroupingOptions grouping)
         {
             var list = new List<string>();
+            if (grouping is not { Enabled: true }) return list;
 
             try
             {
-                var groupNameFormat = Program.ApplicationSettings.Grouping.GroupName;
-                var delimeters = Program.ApplicationSettings.Grouping.GroupDelimiters;
+                var groupNameFormat = grouping.GroupName;
+                var delimeters = grouping.GroupDelimiters;
 
                 var host = machine.Host;
                 var domain = machine.Domain;
@@ -39,7 +43,7 @@ namespace Ghosts.Api.Infrastructure
                 var fqdn = machine.FQDN;
                 var name = machine.Name;
 
-                foreach (var d in Program.ApplicationSettings.Grouping.GroupingDefinition)
+                foreach (var d in grouping.GroupingDefinition)
                     switch (d.Value)
                     {
                         case "host":
@@ -65,7 +69,8 @@ namespace Ghosts.Api.Infrastructure
                 groupNameFormat = groupNameFormat.Replace("{name}", name);
                 groupNameFormat = groupNameFormat.Replace("{fqdn}", fqdn);
 
-                var nameParts = groupNameFormat.Split(delimeters.ToArray());
+                // Drop empty parts: a machine with no domain would otherwise get "-host-*" names and a catch-all "-*"
+                var nameParts = groupNameFormat.Split(delimeters.ToArray(), StringSplitOptions.RemoveEmptyEntries);
 
                 for (var i = nameParts.GetUpperBound(0); i > 0; i--)
                 {
@@ -75,7 +80,7 @@ namespace Ghosts.Api.Infrastructure
 
                     list.Add(g.Append('*').ToString().TrimEnd(Convert.ToChar(delimeters[0])));
 
-                    if (list.Count > Program.ApplicationSettings.Grouping.GroupDepth)
+                    if (list.Count > grouping.GroupDepth)
                     {
                         // groups deeper than 3 become a performance issue
                         break;
