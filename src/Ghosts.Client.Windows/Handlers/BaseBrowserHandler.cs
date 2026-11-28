@@ -178,6 +178,9 @@ namespace Ghosts.Client.Handlers
                                 if (_blogHelper != null) _blogHelper.Execute(handler, timelineEvent);
                             }
                             break;
+                        case "guacamole":
+                            new GuacamoleHelper(this, Driver).Execute(handler, timelineEvent);
+                            break;
                         case "random":
                             ParseRandomHandlerArgs(handler);
                             DoRandomCommand(handler, timelineEvent);

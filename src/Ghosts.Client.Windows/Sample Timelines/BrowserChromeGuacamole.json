@@ -1,0 +1,66 @@
+﻿/*
+  The 'guacamole' command for a browser handler logs into an Apache Guacamole web gateway, opens a connection,
+  types commands into it (ssh/telnet connections only) or holds it open for a while (e.g. RDP/VNC), then logs out.
+  Tested against Guacamole 1.6.0 and 1.5.5.
+  The handlerArgs for the guacamole command are
+    "guacamole-url": <Guacamole base URL>, required
+    "guacamole-credentials-file": <json credentials file path>, credentials file, see Ssh.json sample handler for format
+    "guacamole-credentials": <credentials>, credentials placed directly in the timeline, takes precedence over the file
+    "guacamole-credential-key": <credential key>, required, credential used to log into the Guacamole website
+    "guacamole-execution-time": <milliseconds>, how long to hold a connection that has no commands, default 20000
+
+  The CommandArgs are strings of the form "connectionName|credKey|cmd1;cmd2", one is picked at random per event:
+    connectionName -- the Guacamole connection name, must match exactly one connection the user can see
+    credKey        -- credential key typed at the terminal login prompt; empty if the connection stores its own credentials (a credKey there would be typed into the remote shell)
+    cmd1;cmd2      -- commands typed on ssh/telnet connections, ';' separates commands, '\;' types a literal ';'
+                      (in JSON write it as '\\;'). No commands: the connection is just held open.
+  Commands for a connection whose protocol is not ssh/telnet are refused and nothing is typed.
+*/
+{
+  "Status": "Run",
+  "TimeLineHandlers": [
+    {
+      "HandlerType": "BrowserChrome",
+      "HandlerArgs": {
+        "isheadless": "false",
+        "command-line-args": [ "--ignore-certificate-errors" ],
+        "guacamole-url": "https://guacamole.example.com/guacamole/",
+        // either guacamole-credentials-file or guacamole-credentials must be defined
+        // if both are present, then guacamole-credentials takes precedence.
+        "guacamole-credentials-file": "<path to credentials>", // file path to a JSON file containing the credentials
+        "guacamole-credentials": {
+          "Version": "1.0",
+          "Data": {
+            "guacuser": {
+              "username": "guacuser",
+              "password": "b64encodedpw"
+            },
+            "sshuser": {
+              "username": "sshuser",
+              "password": "b64encodedpw"
+            }
+          }
+        },
+        "guacamole-credential-key": "guacuser",
+        "guacamole-execution-time": 60000
+      },
+      "Initial": "about:blank",
+      "UtcTimeOn": "00:00:00",
+      "UtcTimeOff": "24:00:00",
+      "Loop": "True",
+      "TimeLineEvents": [
+        {
+          "Command": "guacamole",
+          "CommandArgs": [
+            "linux-ssh-server|sshuser|whoami;hostname",
+            "linux-ssh-stored||uptime",
+            "linux-ssh-server|sshuser|ps aux | grep sshd;echo 'first\\; second' > /tmp/ghosts.txt",
+            "windows-rdp-desktop|"
+          ],
+          "DelayAfter": 60000,
+          "DelayBefore": 0
+        }
+      ]
+    }
+  ]
+}

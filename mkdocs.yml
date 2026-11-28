@@ -116,6 +116,7 @@ nav:
           - Web Browsers (Firefox|Chrome): core/handlers/browser.md
           - Web Browser Helper Functions:
               - Blogs/Drupal: core/handlers/blog_helper.md
+              - Guacamole: core/handlers/guacamole_helper.md
               - Sharepoint: core/handlers/sharepoint_helper.md
           - Wmi: core/handlers/wmi.md
   - API:
