@@ -175,6 +175,7 @@
 	<Compile Include="Handlers\Database.cs" />
     <Compile Include="Handlers\ExecuteFile.cs" />
     <Compile Include="Handlers\Ftp.cs" />
+    <Compile Include="Handlers\GuacamoleHelper.cs" />
     <Compile Include="Handlers\OutlookHelper.cs" />
     <Compile Include="Handlers\Outlookv2.cs" />
     <Compile Include="Handlers\Pidgin.cs" />
@@ -304,6 +305,7 @@
     <None Include="Sample Timelines\Administrative Commands.json" />
     <None Include="Sample Timelines\BrowserChrome.json" />
     <None Include="Sample Timelines\BrowserChromeBlogDrupal.json" />
+    <None Include="Sample Timelines\BrowserChromeGuacamole.json" />
     <None Include="Sample Timelines\BrowserChromeSharepoint.json" />
     <None Include="Sample Timelines\BrowserFirefox.json" />
     <None Include="Sample Timelines\Ftp.json" />

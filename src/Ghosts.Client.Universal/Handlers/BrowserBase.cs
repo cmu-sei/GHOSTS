@@ -198,6 +198,9 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
                         }
 
                         break;
+                    case "guacamole":
+                        new GuacamoleHelper(this, Driver, Token).Execute(handler, timelineEvent);
+                        break;
                     case "random":
                         ParseRandomHandlerArgs(handler);
                         DoRandomCommand(handler, timelineEvent);
